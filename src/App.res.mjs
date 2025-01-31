@@ -7,6 +7,7 @@ import * as Caml_module from "rescript/lib/es6/caml_module.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
+import * as ReactDndHtml5Backend from "react-dnd-html5-backend";
 
 var allRanks = [
   "RA",
@@ -354,7 +355,7 @@ function App$DropZone(props) {
 
 var CardComp = Caml_module.init_mod([
       "App.res",
-      241,
+      252,
       32
     ], {
       TAG: "Module",
@@ -373,7 +374,7 @@ function make(param) {
   var hasOnTop = Core__Option.isSome(onTop);
   Curry._2(ReactDnd.useDrag, (function () {
           return {
-                  type_: "CARD",
+                  type: "CARD",
                   item: card,
                   canDrag: (function () {
                       return card.revealed;
@@ -469,76 +470,79 @@ function App(props) {
   var restart = function (param) {
     
   };
-  return JsxRuntime.jsxs("div", {
-              children: [
-                JsxRuntime.jsxs("div", {
-                      children: [
-                        JsxRuntime.jsx("button", {
-                              children: "restart",
-                              onClick: restart
-                            }),
-                        JsxRuntime.jsx("div", {
-                              children: "Moves: " + game.movesCounter.toString()
-                            }),
-                        JsxRuntime.jsx("div", {
-                              children: game.gameEnded ? "You win!" : null
-                            })
-                      ]
-                    }),
-                JsxRuntime.jsxs("div", {
-                      children: [
-                        JsxRuntime.jsx(App$Foundation, {
-                              num: 0,
-                              stack: match$1[0]
-                            }),
-                        JsxRuntime.jsx(App$Foundation, {
-                              num: 1,
-                              stack: match$1[1]
-                            }),
-                        JsxRuntime.jsx(App$Foundation, {
-                              num: 2,
-                              stack: match$1[2]
-                            }),
-                        JsxRuntime.jsx(App$Foundation, {
-                              num: 3,
-                              stack: match$1[3]
-                            })
-                      ]
-                    }),
-                JsxRuntime.jsxs("div", {
-                      children: [
-                        JsxRuntime.jsx(App$Pile, {
-                              num: 0,
-                              stack: match$2[0]
-                            }),
-                        JsxRuntime.jsx(App$Pile, {
-                              num: 1,
-                              stack: match$2[1]
-                            }),
-                        JsxRuntime.jsx(App$Pile, {
-                              num: 2,
-                              stack: match$2[2]
-                            }),
-                        JsxRuntime.jsx(App$Pile, {
-                              num: 3,
-                              stack: match$2[3]
-                            }),
-                        JsxRuntime.jsx(App$Pile, {
-                              num: 4,
-                              stack: match$2[4]
-                            }),
-                        JsxRuntime.jsx(App$Pile, {
-                              num: 5,
-                              stack: match$2[5]
-                            }),
-                        JsxRuntime.jsx(App$Pile, {
-                              num: 6,
-                              stack: match$2[6]
-                            })
-                      ]
-                    })
-              ],
-              className: "p-6"
+  return JsxRuntime.jsx(ReactDnd.DndProvider, {
+              children: JsxRuntime.jsxs("div", {
+                    children: [
+                      JsxRuntime.jsxs("div", {
+                            children: [
+                              JsxRuntime.jsx("button", {
+                                    children: "restart",
+                                    onClick: restart
+                                  }),
+                              JsxRuntime.jsx("div", {
+                                    children: "Moves: " + game.movesCounter.toString()
+                                  }),
+                              JsxRuntime.jsx("div", {
+                                    children: game.gameEnded ? "You win!" : null
+                                  })
+                            ]
+                          }),
+                      JsxRuntime.jsxs("div", {
+                            children: [
+                              JsxRuntime.jsx(App$Foundation, {
+                                    num: 0,
+                                    stack: match$1[0]
+                                  }),
+                              JsxRuntime.jsx(App$Foundation, {
+                                    num: 1,
+                                    stack: match$1[1]
+                                  }),
+                              JsxRuntime.jsx(App$Foundation, {
+                                    num: 2,
+                                    stack: match$1[2]
+                                  }),
+                              JsxRuntime.jsx(App$Foundation, {
+                                    num: 3,
+                                    stack: match$1[3]
+                                  })
+                            ]
+                          }),
+                      JsxRuntime.jsxs("div", {
+                            children: [
+                              JsxRuntime.jsx(App$Pile, {
+                                    num: 0,
+                                    stack: match$2[0]
+                                  }),
+                              JsxRuntime.jsx(App$Pile, {
+                                    num: 1,
+                                    stack: match$2[1]
+                                  }),
+                              JsxRuntime.jsx(App$Pile, {
+                                    num: 2,
+                                    stack: match$2[2]
+                                  }),
+                              JsxRuntime.jsx(App$Pile, {
+                                    num: 3,
+                                    stack: match$2[3]
+                                  }),
+                              JsxRuntime.jsx(App$Pile, {
+                                    num: 4,
+                                    stack: match$2[4]
+                                  }),
+                              JsxRuntime.jsx(App$Pile, {
+                                    num: 5,
+                                    stack: match$2[5]
+                                  }),
+                              JsxRuntime.jsx(App$Pile, {
+                                    num: 6,
+                                    stack: match$2[6]
+                                  })
+                            ]
+                          })
+                    ],
+                    className: "p-6"
+                  }),
+              backend: ReactDndHtml5Backend.HTML5Backend
             });
 }
 

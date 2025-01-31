@@ -173,10 +173,10 @@ type monitor = {
 }
 
 type useDropRecord<'a> = {
-  canDrop: Card.card => bool,
-  drop: Card.card => unit,
-  accept: string,
-  collect: monitor => 'a,
+  "accept": string,
+  "canDrop": Card.card => bool,
+  "drop": Card.card => unit,
+  "collect": monitor => 'a,
 }
 
 type useDrop<'a, 'b, 'c> = (unit => useDropRecord<'a>, ('b, 'c)) => ('a, unit => unit)
@@ -190,10 +190,10 @@ type dropZoneProps = {
 @module("react-dnd") external useDrop: useDrop<dropZoneProps, 'b, 'c> = "useDrop"
 
 type useDragRecord<'a> = {
-  type_: string,
-  item: Card.card,
-  canDrag: unit => bool,
-  collect: monitor => 'a,
+  "type": string,
+  "canDrag": unit => bool,
+  "item": Card.card,
+  "collect": monitor => 'a,
 }
 type useDrag<'a, 'b> = (unit => useDragRecord<'a>, 'b) => ('a, unit => unit)
 
@@ -201,19 +201,30 @@ type cardCompProps = {isDragging: bool}
 
 @module("react-dnd") external useDrag: useDrag<cardCompProps, 'b> = "useDrag"
 
+type dndBackend
+
+@module("react-dnd-html5-backend") external html5Backend: dndBackend = "HTML5Backend"
+
+module DndProvider = {
+  @react.component @module("react-dnd")
+  external make: (~children: Jsx.element, ~backend: dndBackend) => Jsx.element = "DndProvider"
+}
+
 module DropZone = {
   @react.component
   let make = (~onDrop: Card.card => unit, ~canDrop: Card.card => bool) => {
-    let ({canDrop, isOver, beingDragged}, drop) = useDrop(() => {
-      canDrop,
-      drop: onDrop,
-      accept: "CARD",
-      collect: monitor => {
-        beingDragged: monitor.getClientOffset(),
-        isOver: monitor.isOver(),
-        canDrop: monitor.canDrop(),
-      },
-    }, (canDrop, onDrop))
+    let ({canDrop, isOver, beingDragged}, drop) = useDrop(() =>
+      {
+        "canDrop": canDrop,
+        "drop": onDrop,
+        "accept": "CARD",
+        "collect": (monitor: monitor) => {
+          beingDragged: monitor.getClientOffset(),
+          isOver: monitor.isOver(),
+          canDrop: monitor.canDrop(),
+        },
+      }
+    , (canDrop, onDrop))
 
     <div
       className={[
@@ -251,14 +262,16 @@ module rec CardComp: CardComp = {
     let onTop = stack->Array.get(index + 1)
     let hasOnTop = onTop->Option.isSome
 
-    let ({isDragging}, drag) = useDrag(() => {
-      type_: "CARD",
-      item: card,
-      canDrag: () => card.revealed,
-      collect: monitor => {
-        isDragging: monitor.isDragging(),
-      },
-    }, [card])
+    let ({isDragging}, drag) = useDrag(() =>
+      {
+        "type": "CARD",
+        "item": card,
+        "canDrag": () => card.revealed,
+        "collect": (monitor: monitor) => {
+          isDragging: monitor.isDragging(),
+        },
+      }
+    , [card])
     let move = (_, _) => ()
     let reveal = _ => ()
 
@@ -318,26 +331,28 @@ let make = () => {
 
   let restart = _ => ()
 
-  <div className="p-6">
-    <div>
-      <button onClick={restart}> {"restart"->React.string} </button>
-      <div> {("Moves: " ++ movesCounter->Int.toString)->React.string} </div>
-      <div> {gameEnded ? "You win!"->React.string : React.null} </div>
+  <DndProvider backend={html5Backend}>
+    <div className="p-6">
+      <div>
+        <button onClick={restart}> {"restart"->React.string} </button>
+        <div> {("Moves: " ++ movesCounter->Int.toString)->React.string} </div>
+        <div> {gameEnded ? "You win!"->React.string : React.null} </div>
+      </div>
+      <div>
+        <Foundation stack={f0} num={0} />
+        <Foundation stack={f1} num={1} />
+        <Foundation stack={f2} num={2} />
+        <Foundation stack={f3} num={3} />
+      </div>
+      <div>
+        <Pile stack={p0} num={0} />
+        <Pile stack={p1} num={1} />
+        <Pile stack={p2} num={2} />
+        <Pile stack={p3} num={3} />
+        <Pile stack={p4} num={4} />
+        <Pile stack={p5} num={5} />
+        <Pile stack={p6} num={6} />
+      </div>
     </div>
-    <div>
-      <Foundation stack={f0} num={0} />
-      <Foundation stack={f1} num={1} />
-      <Foundation stack={f2} num={2} />
-      <Foundation stack={f3} num={3} />
-    </div>
-    <div>
-      <Pile stack={p0} num={0} />
-      <Pile stack={p1} num={1} />
-      <Pile stack={p2} num={2} />
-      <Pile stack={p3} num={3} />
-      <Pile stack={p4} num={4} />
-      <Pile stack={p5} num={5} />
-      <Pile stack={p6} num={6} />
-    </div>
-  </div>
+  </DndProvider>
 }
