@@ -301,13 +301,13 @@ function initiateGame() {
   var shuffledDeck = getShuffledDeck();
   return {
           piles: [
-            [],
             shuffledDeck.slice(0, 1),
             shuffledDeck.slice(1, 3),
             shuffledDeck.slice(3, 6),
             shuffledDeck.slice(6, 10),
             shuffledDeck.slice(10, 15),
-            shuffledDeck.slice(15, 21)
+            shuffledDeck.slice(15, 21),
+            shuffledDeck.slice(21, 28)
           ],
           foundations: [
             [],
@@ -315,7 +315,7 @@ function initiateGame() {
             [],
             []
           ],
-          stock: shuffledDeck.slice(21),
+          stock: shuffledDeck.slice(28),
           waste: [],
           movesCounter: 0,
           gameEnded: false
@@ -323,8 +323,10 @@ function initiateGame() {
 }
 
 function App$DropZone(props) {
+  var __empty = props.empty;
   var canDrop = props.canDrop;
   var onDrop = props.onDrop;
+  var empty = __empty !== undefined ? __empty : false;
   var match = Curry._2(ReactDnd.useDrop, (function () {
           return {
                   canDrop: canDrop,
@@ -345,17 +347,19 @@ function App$DropZone(props) {
   var match$1 = match[0];
   return JsxRuntime.jsx("div", {
               className: [
-                  "rounded w-12 h-20",
-                  match$1.isOver ? (
-                      match$1.canDrop ? "bg-blue-800" : "bg-red-800"
-                    ) : "bg-green-800"
+                  "rounded h-[80px] w-[57px]",
+                  empty ? "bg-gray-200" : (
+                      match$1.isOver ? (
+                          match$1.canDrop ? "bg-blue-800" : "bg-red-800"
+                        ) : "opacity-0 "
+                    )
                 ].join(" ")
             });
 }
 
 var CardComp = Caml_module.init_mod([
       "App.res",
-      252,
+      254,
       32
     ], {
       TAG: "Module",
@@ -397,8 +401,8 @@ function make(param) {
                 JsxRuntime.jsx("div", {
                       children: string(card),
                       className: [
-                          "border border-gray-300 rounded h-20 w-12 -mb-14 bg-white shadow-sm px-1",
-                          isRed(card) ? "text-red-700" : "text-black"
+                          "border border-gray-300 rounded h-[80px] w-[57px] -mb-[58px] bg-white shadow-sm px-1 leading-none py-0.5",
+                          isRed(card) ? "text-red-600" : "text-black"
                         ].join(" ")
                     }),
                 hasOnTop ? JsxRuntime.jsx(CardComp.make, {
@@ -439,7 +443,8 @@ function App$Pile(props) {
                       onDrop: onDrop,
                       canDrop: (function (card) {
                           return card.rank === "RK";
-                        })
+                        }),
+                      empty: true
                     })
             });
 }
@@ -459,7 +464,8 @@ function App$Foundation(props) {
                       onDrop: onDrop,
                       canDrop: (function (card) {
                           return card.rank === "RA";
-                        })
+                        }),
+                      empty: true
                     })
             });
 }
@@ -510,7 +516,7 @@ function App(props) {
                                     stack: match$1[3]
                                   })
                             ],
-                            className: "flex flex-row gap-4 py-1"
+                            className: "flex flex-row gap-2 py-1"
                           }),
                       JsxRuntime.jsxs("div", {
                             children: [
@@ -543,7 +549,7 @@ function App(props) {
                                     stack: match$2[6]
                                   })
                             ],
-                            className: "flex flex-row gap-1 py-1"
+                            className: "flex flex-row gap-2 py-1"
                           })
                     ],
                     className: "p-6"

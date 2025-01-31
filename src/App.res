@@ -146,16 +146,16 @@ module Klondike = {
 
     {
       piles: (
-        [],
         shuffledDeck->Array.slice(~start=0, ~end=1),
         shuffledDeck->Array.slice(~start=1, ~end=3),
         shuffledDeck->Array.slice(~start=3, ~end=6),
         shuffledDeck->Array.slice(~start=6, ~end=10),
         shuffledDeck->Array.slice(~start=10, ~end=15),
         shuffledDeck->Array.slice(~start=15, ~end=21),
+        shuffledDeck->Array.slice(~start=21, ~end=28),
       ),
       foundations: ([], [], [], []),
-      stock: shuffledDeck->Array.sliceToEnd(~start=21),
+      stock: shuffledDeck->Array.sliceToEnd(~start=28),
       waste: [],
       movesCounter: 0,
       gameEnded: false,
@@ -212,7 +212,7 @@ module DndProvider = {
 
 module DropZone = {
   @react.component
-  let make = (~onDrop: Card.card => unit, ~canDrop: Card.card => bool) => {
+  let make = (~onDrop: Card.card => unit, ~canDrop: Card.card => bool, ~empty: bool=false) => {
     let ({canDrop, isOver, beingDragged}, drop) = useDrop(() =>
       {
         "canDrop": canDrop,
@@ -228,12 +228,14 @@ module DropZone = {
 
     <div
       className={[
-        "rounded w-12 h-20",
-        switch (isOver, canDrop) {
-        | (true, true) => "bg-blue-800"
-        | (true, false) => "bg-red-800"
-        | (false, _) => "bg-green-800"
-        },
+        "rounded h-[80px] w-[57px]",
+        empty
+          ? "bg-gray-200"
+          : switch (isOver, canDrop) {
+            | (true, true) => "bg-blue-800"
+            | (true, false) => "bg-red-800"
+            | (false, _) => "opacity-0 "
+            },
       ]->Array.join(" ")}
     />
   }
@@ -289,8 +291,8 @@ module rec CardComp: CardComp = {
     <div>
       <div
         className={[
-          "border border-gray-300 rounded h-20 w-12 -mb-14 bg-white shadow-sm px-1",
-          card->Card.isRed ? "text-red-700" : "text-black",
+          "border border-gray-300 rounded h-[80px] w-[57px] -mb-[58px] bg-white shadow-sm px-1 leading-none py-0.5",
+          card->Card.isRed ? "text-red-600" : "text-black",
         ]->Array.join(" ")}>
         {card->Card.string->React.string}
       </div>
@@ -308,7 +310,7 @@ module Pile = {
     <div>
       {stack->Array.length != 0
         ? <CardComp aligned={false} index={0} stack canPutCardOnCard={Klondike.canPutOnPile} />
-        : <DropZone onDrop canDrop={card => card.rank == RK} />}
+        : <DropZone onDrop canDrop={card => card.rank == RK} empty={true} />}
     </div>
   }
 }
@@ -320,7 +322,7 @@ module Foundation = {
     <div>
       {stack->Array.length != 0
         ? <CardComp aligned={true} index={0} stack canPutCardOnCard={Klondike.canPutOnFoundation} />
-        : <DropZone onDrop canDrop={card => card.rank == RA} />}
+        : <DropZone onDrop canDrop={card => card.rank == RA} empty={true} />}
     </div>
   }
 }
@@ -345,13 +347,13 @@ let make = () => {
         <div> {("Moves: " ++ movesCounter->Int.toString)->React.string} </div>
         <div> {gameEnded ? "You win!"->React.string : React.null} </div>
       </div>
-      <div className={"flex flex-row gap-4 py-1"}>
+      <div className={"flex flex-row gap-2 py-1"}>
         <Foundation stack={f0} num={0} />
         <Foundation stack={f1} num={1} />
         <Foundation stack={f2} num={2} />
         <Foundation stack={f3} num={3} />
       </div>
-      <div className={"flex flex-row gap-1 py-1"}>
+      <div className={"flex flex-row gap-2 py-1"}>
         <Pile stack={p0} num={0} />
         <Pile stack={p1} num={1} />
         <Pile stack={p2} num={2} />
