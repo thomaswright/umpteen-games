@@ -132,7 +132,7 @@ module Klondike = {
     gameEnded: bool,
   }
 
-  let canPutOnPile = (a: Card.card, b: Card.card) => {
+  let canPutOnPile = (a: Card.card, b: Card.card, _) => {
     a.revealed && b.revealed && Card.rankIsAbove(a, b) && Card.isOppositeColor(a, b)
   }
 
@@ -233,13 +233,20 @@ module type CardComp = {
     stack: array<Card.card>,
     index: int,
     canPutCardOnCard: (Card.card, Card.card, bool) => bool,
+    aligned: bool,
   }
   let make: React.component<props>
 }
 
 module rec CardComp: CardComp = {
-  @react.component
-  let make = (~stack: array<Card.card>, ~index: int, ~canPutCardOnCard) => {
+  type props = {
+    stack: array<Card.card>,
+    index: int,
+    canPutCardOnCard: (Card.card, Card.card, bool) => bool,
+    aligned: bool,
+  }
+
+  let make: React.component<props> = ({stack, index, canPutCardOnCard, aligned}) => {
     let card = stack->Array.getUnsafe(index)
     let onTop = stack->Array.get(index + 1)
     let hasOnTop = onTop->Option.isSome
@@ -268,7 +275,7 @@ module rec CardComp: CardComp = {
     <div>
       <div> {card->Card.string->React.string} </div>
       {hasOnTop
-        ? <CardComp stack index={index + 1} canPutCardOnCard />
+        ? <CardComp aligned stack index={index + 1} canPutCardOnCard />
         : <DropZone onDrop canDrop />}
     </div>
   }
@@ -276,11 +283,11 @@ module rec CardComp: CardComp = {
 
 module Pile = {
   @react.component
-  let make = (~num, ~card: array<Card.card>) => {
-    let onDrop = () => ()
+  let make = (~num, ~stack: array<Card.card>) => {
+    let onDrop = _ => ()
     <div>
       {stack->Array.length == 0
-        ? <CardComp stacked={false} index={0} stack canPutCardOnCard={Klondike.canPutOnPile} />
+        ? <CardComp aligned={false} index={0} stack canPutCardOnCard={Klondike.canPutOnPile} />
         : <DropZone onDrop canDrop={card => card.rank == RK} />}
     </div>
   }
@@ -289,10 +296,10 @@ module Pile = {
 module Foundation = {
   @react.component
   let make = (~num, ~stack: array<Card.card>) => {
-    let onDrop = () => ()
+    let onDrop = _ => ()
     <div>
       {stack->Array.length == 0
-        ? <CardComp stacked={true} index={0} stack canPutCardOnCard={Klondike.canPutOnFoundation} />
+        ? <CardComp aligned={true} index={0} stack canPutCardOnCard={Klondike.canPutOnFoundation} />
         : <DropZone onDrop canDrop={card => card.rank == RA} />}
     </div>
   }
@@ -300,9 +307,14 @@ module Foundation = {
 
 @react.component
 let make = () => {
-  let (game, setGame) = React.useState(() => initiateGame())
+  let (game, setGame) = React.useState(() => Klondike.initiateGame())
 
-  let {piles: (p0, p1, p2, p3, p4, p5, p6), foundations: (f0, f1, f2, f3)} = game
+  let {
+    piles: (p0, p1, p2, p3, p4, p5, p6),
+    foundations: (f0, f1, f2, f3),
+    movesCounter,
+    gameEnded,
+  } = game
 
   let restart = _ => ()
 
@@ -313,19 +325,19 @@ let make = () => {
       <div> {gameEnded ? "You win!"->React.string : React.null} </div>
     </div>
     <div>
-      <Foundation stack={f0} />
-      <Foundation stack={f1} />
-      <Foundation stack={f2} />
-      <Foundation stack={f3} />
+      <Foundation stack={f0} num={0} />
+      <Foundation stack={f1} num={1} />
+      <Foundation stack={f2} num={2} />
+      <Foundation stack={f3} num={3} />
     </div>
     <div>
-      <Pile stack={p0} />
-      <Pile stack={p1} />
-      <Pile stack={p2} />
-      <Pile stack={p3} />
-      <Pile stack={p4} />
-      <Pile stack={p5} />
-      <Pile stack={p6} />
+      <Pile stack={p0} num={0} />
+      <Pile stack={p1} num={1} />
+      <Pile stack={p2} num={2} />
+      <Pile stack={p3} num={3} />
+      <Pile stack={p4} num={4} />
+      <Pile stack={p5} num={5} />
+      <Pile stack={p6} num={6} />
     </div>
   </div>
 }
