@@ -272,6 +272,7 @@ module rec CardComp: CardComp = {
         },
       }
     , [card])
+
     let move = (_, _) => ()
     let reveal = _ => ()
 
@@ -286,7 +287,13 @@ module rec CardComp: CardComp = {
     }
 
     <div>
-      <div> {card->Card.string->React.string} </div>
+      <div
+        className={[
+          "border border-gray-300 rounded h-20 w-12 -mb-14 bg-white shadow-sm px-1",
+          card->Card.isRed ? "text-red-700" : "text-black",
+        ]->Array.join(" ")}>
+        {card->Card.string->React.string}
+      </div>
       {hasOnTop
         ? <CardComp aligned stack index={index + 1} canPutCardOnCard />
         : <DropZone onDrop canDrop />}
@@ -299,7 +306,7 @@ module Pile = {
   let make = (~num, ~stack: array<Card.card>) => {
     let onDrop = _ => ()
     <div>
-      {stack->Array.length == 0
+      {stack->Array.length != 0
         ? <CardComp aligned={false} index={0} stack canPutCardOnCard={Klondike.canPutOnPile} />
         : <DropZone onDrop canDrop={card => card.rank == RK} />}
     </div>
@@ -311,7 +318,7 @@ module Foundation = {
   let make = (~num, ~stack: array<Card.card>) => {
     let onDrop = _ => ()
     <div>
-      {stack->Array.length == 0
+      {stack->Array.length != 0
         ? <CardComp aligned={true} index={0} stack canPutCardOnCard={Klondike.canPutOnFoundation} />
         : <DropZone onDrop canDrop={card => card.rank == RA} />}
     </div>
@@ -338,13 +345,13 @@ let make = () => {
         <div> {("Moves: " ++ movesCounter->Int.toString)->React.string} </div>
         <div> {gameEnded ? "You win!"->React.string : React.null} </div>
       </div>
-      <div>
+      <div className={"flex flex-row gap-4 py-1"}>
         <Foundation stack={f0} num={0} />
         <Foundation stack={f1} num={1} />
         <Foundation stack={f2} num={2} />
         <Foundation stack={f3} num={3} />
       </div>
-      <div>
+      <div className={"flex flex-row gap-1 py-1"}>
         <Pile stack={p0} num={0} />
         <Pile stack={p1} num={1} />
         <Pile stack={p2} num={2} />

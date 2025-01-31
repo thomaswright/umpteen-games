@@ -395,7 +395,11 @@ function make(param) {
   return JsxRuntime.jsxs("div", {
               children: [
                 JsxRuntime.jsx("div", {
-                      children: string(card)
+                      children: string(card),
+                      className: [
+                          "border border-gray-300 rounded h-20 w-12 -mb-14 bg-white shadow-sm px-1",
+                          isRed(card) ? "text-red-700" : "text-black"
+                        ].join(" ")
                     }),
                 hasOnTop ? JsxRuntime.jsx(CardComp.make, {
                         stack: stack,
@@ -426,7 +430,7 @@ function App$Pile(props) {
     
   };
   return JsxRuntime.jsx("div", {
-              children: stack.length === 0 ? JsxRuntime.jsx(CardComp.make, {
+              children: stack.length !== 0 ? JsxRuntime.jsx(CardComp.make, {
                       stack: stack,
                       index: 0,
                       canPutCardOnCard: canPutOnPile,
@@ -446,7 +450,7 @@ function App$Foundation(props) {
     
   };
   return JsxRuntime.jsx("div", {
-              children: stack.length === 0 ? JsxRuntime.jsx(CardComp.make, {
+              children: stack.length !== 0 ? JsxRuntime.jsx(CardComp.make, {
                       stack: stack,
                       index: 0,
                       canPutCardOnCard: canPutOnFoundation,
@@ -505,7 +509,8 @@ function App(props) {
                                     num: 3,
                                     stack: match$1[3]
                                   })
-                            ]
+                            ],
+                            className: "flex flex-row gap-4 py-1"
                           }),
                       JsxRuntime.jsxs("div", {
                             children: [
@@ -537,7 +542,8 @@ function App(props) {
                                     num: 6,
                                     stack: match$2[6]
                                   })
-                            ]
+                            ],
+                            className: "flex flex-row gap-1 py-1"
                           })
                     ],
                     className: "p-6"
