@@ -76,7 +76,7 @@ module Card = {
     | R7 => "7"
     | R8 => "8"
     | R9 => "9"
-    | R10 => "10"
+    | R10 => "X"
     | RJ => "J"
     | RQ => "Q"
     | RK => "K"
@@ -89,7 +89,10 @@ module Card = {
     | Clubs => "♣"
     }
 
-    rankString ++ suitString
+    <span className="flex flex-row">
+      <span className="w-3.5"> {rankString->React.string} </span>
+      <span className="w-3.5 flex flex-row justify-center"> {suitString->React.string} </span>
+    </span>
   }
 
   let isOppositeColor = (a, b) => isRed(a) != isRed(b)
@@ -163,70 +166,109 @@ module Klondike = {
   }
 }
 
-type cardType
+// type cardType
 
-type monitor = {
-  isDragging: unit => bool,
-  isOver: unit => bool,
-  canDrop: unit => bool,
-  getClientOffset: unit => bool,
+// type monitor = {
+//   isDragging: unit => bool,
+//   isOver: unit => bool,
+//   canDrop: unit => bool,
+//   getClientOffset: unit => bool,
+// }
+
+// type useDropRecord<'a> = {
+//   "accept": string,
+//   "canDrop": Card.card => bool,
+//   "drop": Card.card => unit,
+//   "collect": monitor => 'a,
+// }
+
+// type useDrop<'a, 'b, 'c> = (unit => useDropRecord<'a>, ('b, 'c)) => ('a, unit => unit)
+
+// type dropZoneProps = {
+//   canDrop: bool,
+//   isOver: bool,
+//   beingDragged: bool,
+// }
+
+// @module("react-dnd") external useDrop: useDrop<dropZoneProps, 'b, 'c> = "useDrop"
+
+// type useDragRecord<'a> = {
+//   "type": string,
+//   "canDrag": unit => bool,
+//   "item": Card.card,
+//   "collect": monitor => 'a,
+// }
+// type useDrag<'a, 'b> = (unit => useDragRecord<'a>, 'b) => ('a, JsxDOM.domRef)
+
+// type cardCompProps = {isDragging: bool}
+
+// @module("react-dnd") external useDrag: useDrag<cardCompProps, 'b> = "useDrag"
+
+// type dndBackend
+
+// @module("react-dnd-html5-backend") external html5Backend: dndBackend = "HTML5Backend"
+
+// module DndProvider = {
+//   @react.component @module("react-dnd")
+//   external make: (~children: Jsx.element, ~backend: dndBackend) => Jsx.element = "DndProvider"
+// }
+
+type useDroppableOutput = {setNodeRef: JsxDOM.domRef, isOver: bool}
+// type useDroppableInputData = {
+//   accepts: array<string>
+// }
+type useDroppableInput = {id: string}
+
+@module("@dnd-kit/core")
+external useDroppable: useDroppableInput => useDroppableOutput = "useDroppable"
+
+type useDraggableOutput = {
+  isDragging: bool,
+  setNodeRef: JsxDOM.domRef,
 }
 
-type useDropRecord<'a> = {
-  "accept": string,
-  "canDrop": Card.card => bool,
-  "drop": Card.card => unit,
-  "collect": monitor => 'a,
-}
+type useDraggableInput = {id: string}
 
-type useDrop<'a, 'b, 'c> = (unit => useDropRecord<'a>, ('b, 'c)) => ('a, unit => unit)
+@module("@dnd-kit/core")
+external useDraggable: useDraggableInput => useDraggableOutput = "useDraggable"
 
-type dropZoneProps = {
-  canDrop: bool,
-  isOver: bool,
-  beingDragged: bool,
-}
+type dragEndEvent = {"over": {"id": string}}
 
-@module("react-dnd") external useDrop: useDrop<dropZoneProps, 'b, 'c> = "useDrop"
+type dragStartEvent = {"active": {"id": string}}
 
-type useDragRecord<'a> = {
-  "type": string,
-  "canDrag": unit => bool,
-  "item": Card.card,
-  "collect": monitor => 'a,
-}
-type useDrag<'a, 'b> = (unit => useDragRecord<'a>, 'b) => ('a, unit => unit)
+// type dndProps = {
 
-type cardCompProps = {isDragging: bool}
+// }
 
-@module("react-dnd") external useDrag: useDrag<cardCompProps, 'b> = "useDrag"
-
-type dndBackend
-
-@module("react-dnd-html5-backend") external html5Backend: dndBackend = "HTML5Backend"
-
-module DndProvider = {
-  @react.component @module("react-dnd")
-  external make: (~children: Jsx.element, ~backend: dndBackend) => Jsx.element = "DndProvider"
+module DndContext = {
+  @react.component @module("@dnd-kit/core")
+  external make: (
+    ~children: Jsx.element,
+    ~onDragEnd: dragEndEvent => unit,
+    ~onDragStart: dragStartEvent => unit,
+    ~onDragCancel: unit => unit,
+  ) => Jsx.element = "DndContext"
 }
 
 module DropZone = {
   @react.component
-  let make = (~onDrop: Card.card => unit, ~canDrop: Card.card => bool, ~empty: bool=false) => {
-    let ({canDrop, isOver, beingDragged}, drop) = useDrop(() =>
-      {
-        "canDrop": canDrop,
-        "drop": onDrop,
-        "accept": "CARD",
-        "collect": (monitor: monitor) => {
-          beingDragged: monitor.getClientOffset(),
-          isOver: monitor.isOver(),
-          canDrop: monitor.canDrop(),
-        },
-      }
-    , (canDrop, onDrop))
+  let make = (~onDrop: Card.card => unit, ~canDrop: bool, ~empty: bool=false) => {
+    let {setNodeRef, isOver} = useDroppable({
+      id: "",
+    })
+    // {
+    //     "canDrop": canDrop,
+    //     "drop": onDrop,
+    //     "accept": "CARD",
+    //     "collect": (monitor: monitor) => {
+    //       beingDragged: monitor.getClientOffset(),
+    //       isOver: monitor.isOver(),
+    //       canDrop: monitor.canDrop(),
+    //     },
+    //   }
 
     <div
+      ref={setNodeRef}
       className={[
         "rounded h-[80px] w-[57px]",
         empty
@@ -264,16 +306,17 @@ module rec CardComp: CardComp = {
     let onTop = stack->Array.get(index + 1)
     let hasOnTop = onTop->Option.isSome
 
-    let ({isDragging}, drag) = useDrag(() =>
-      {
-        "type": "CARD",
-        "item": card,
-        "canDrag": () => card.revealed,
-        "collect": (monitor: monitor) => {
-          isDragging: monitor.isDragging(),
-        },
-      }
-    , [card])
+    let {isDragging, setNodeRef} = useDraggable({
+      id: "",
+    })
+    // {
+    //   "type": "CARD",
+    //   "item": card,
+    //   "canDrag": () => card.revealed,
+    //   "collect": (monitor: monitor) => {
+    //     isDragging: monitor.isDragging(),
+    //   },
+    // }
 
     let move = (_, _) => ()
     let reveal = _ => ()
@@ -288,17 +331,22 @@ module rec CardComp: CardComp = {
       }
     }
 
-    <div>
+    <div ref={setNodeRef} style={{opacity: isDragging ? "0" : "1"}}>
       <div
         className={[
           "border border-gray-300 rounded h-[80px] w-[57px] -mb-[58px] bg-white shadow-sm px-1 leading-none py-0.5",
-          card->Card.isRed ? "text-red-600" : "text-black",
+          switch card.suit {
+          | Spades => "text-black"
+          | Hearts => "text-red-600"
+          | Diamonds => "text-red-600"
+          | Clubs => "text-black"
+          },
         ]->Array.join(" ")}>
-        {card->Card.string->React.string}
+        {card->Card.string}
       </div>
       {hasOnTop
         ? <CardComp aligned stack index={index + 1} canPutCardOnCard />
-        : <DropZone onDrop canDrop />}
+        : <DropZone onDrop canDrop={true} />}
     </div>
   }
 }
@@ -306,11 +354,12 @@ module rec CardComp: CardComp = {
 module Pile = {
   @react.component
   let make = (~num, ~stack: array<Card.card>) => {
+    // canDrop={card => card.rank == RK}
     let onDrop = _ => ()
     <div>
       {stack->Array.length != 0
         ? <CardComp aligned={false} index={0} stack canPutCardOnCard={Klondike.canPutOnPile} />
-        : <DropZone onDrop canDrop={card => card.rank == RK} empty={true} />}
+        : <DropZone onDrop canDrop={true} empty={true} />}
     </div>
   }
 }
@@ -319,10 +368,11 @@ module Foundation = {
   @react.component
   let make = (~num, ~stack: array<Card.card>) => {
     let onDrop = _ => ()
+    // canDrop={card => card.rank == RA}
     <div>
       {stack->Array.length != 0
         ? <CardComp aligned={true} index={0} stack canPutCardOnCard={Klondike.canPutOnFoundation} />
-        : <DropZone onDrop canDrop={card => card.rank == RA} empty={true} />}
+        : <DropZone onDrop canDrop={true} empty={true} />}
     </div>
   }
 }
@@ -330,6 +380,7 @@ module Foundation = {
 @react.component
 let make = () => {
   let (game, setGame) = React.useState(() => Klondike.initiateGame())
+  let (movingCard, setMovingCard) = React.useState(() => None)
 
   let {
     piles: (p0, p1, p2, p3, p4, p5, p6),
@@ -340,7 +391,15 @@ let make = () => {
 
   let restart = _ => ()
 
-  <DndProvider backend={html5Backend}>
+  let onDragStart = React.useCallback0((dragStartEvent: dragStartEvent) => {
+    setMovingCard(_ => Some(dragStartEvent["active"]["id"]))
+  })
+  let onDragCancel = React.useCallback0(() => {
+    setMovingCard(_ => None)
+  })
+  let onDragEnd = React.useCallback0(event => ())
+
+  <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={onDragCancel}>
     <div className="p-6">
       <div>
         <button onClick={restart}> {"restart"->React.string} </button>
@@ -363,5 +422,5 @@ let make = () => {
         <Pile stack={p6} num={6} />
       </div>
     </div>
-  </DndProvider>
+  </DndContext>
 }
