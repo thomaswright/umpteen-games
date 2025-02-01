@@ -65,8 +65,8 @@ module Card = {
     }
   }
 
-  let string = (card: card) => {
-    let rankString = switch card.rank {
+  let rankString = card =>
+    switch card.rank {
     | RA => "A"
     | R2 => "2"
     | R3 => "3"
@@ -82,18 +82,22 @@ module Card = {
     | RK => "K"
     }
 
-    let suitString = switch card.suit {
+  let suitString = card =>
+    switch card.suit {
     | Spades => "♠"
     | Hearts => "♥"
     | Diamonds => "♦"
     | Clubs => "♣"
     }
 
+  let string = (card: card) => {
     <span className="flex flex-row">
-      <span className="w-3.5"> {rankString->React.string} </span>
-      <span className="w-3.5 flex flex-row justify-center"> {suitString->React.string} </span>
+      <span className="w-3.5"> {card->rankString->React.string} </span>
+      <span className="w-3.5 flex flex-row justify-center"> {card->suitString->React.string} </span>
     </span>
   }
+
+  let id = (card: card) => card->rankString ++ card->suitString
 
   let isOppositeColor = (a, b) => isRed(a) != isRed(b)
 }
@@ -213,7 +217,7 @@ module Klondike = {
 //   external make: (~children: Jsx.element, ~backend: dndBackend) => Jsx.element = "DndProvider"
 // }
 
-type useDroppableOutput = {setNodeRef: JsxDOM.domRef, isOver: bool}
+type useDroppableOutput = {setNodeRef: ReactDOM.Ref.callbackDomRef, isOver: bool}
 // type useDroppableInputData = {
 //   accepts: array<string>
 // }
@@ -224,7 +228,7 @@ external useDroppable: useDroppableInput => useDroppableOutput = "useDroppable"
 
 type useDraggableOutput = {
   isDragging: bool,
-  setNodeRef: JsxDOM.domRef,
+  setNodeRef: ReactDOM.Ref.callbackDomRef,
 }
 
 type useDraggableInput = {id: string}
@@ -268,7 +272,7 @@ module DropZone = {
     //   }
 
     <div
-      ref={setNodeRef}
+      ref={ReactDOM.Ref.callbackDomRef(setNodeRef)}
       className={[
         "rounded h-[80px] w-[57px]",
         empty
@@ -307,7 +311,7 @@ module rec CardComp: CardComp = {
     let hasOnTop = onTop->Option.isSome
 
     let {isDragging, setNodeRef} = useDraggable({
-      id: "",
+      id: card->Card.id,
     })
     // {
     //   "type": "CARD",
@@ -331,7 +335,7 @@ module rec CardComp: CardComp = {
       }
     }
 
-    <div ref={setNodeRef} style={{opacity: isDragging ? "0" : "1"}}>
+    <div ref={ReactDOM.Ref.callbackDomRef(setNodeRef)} style={{opacity: isDragging ? "0" : "1"}}>
       <div
         className={[
           "border border-gray-300 rounded h-[80px] w-[57px] -mb-[58px] bg-white shadow-sm px-1 leading-none py-0.5",
@@ -392,12 +396,13 @@ let make = () => {
   let restart = _ => ()
 
   let onDragStart = React.useCallback0((dragStartEvent: dragStartEvent) => {
+    Js.log2("onDragStart: ", dragStartEvent)
     setMovingCard(_ => Some(dragStartEvent["active"]["id"]))
   })
   let onDragCancel = React.useCallback0(() => {
     setMovingCard(_ => None)
   })
-  let onDragEnd = React.useCallback0(event => ())
+  let onDragEnd = React.useCallback0((_dragEndEvent: dragEndEvent) => ())
 
   <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={onDragCancel}>
     <div className="p-6">

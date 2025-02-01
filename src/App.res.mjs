@@ -203,81 +203,72 @@ function rankIsAbove(a, b) {
   }
 }
 
-function string(card) {
+function rankString(card) {
   var match = card.rank;
-  var rankString;
   switch (match) {
     case "RA" :
-        rankString = "A";
-        break;
+        return "A";
     case "R2" :
-        rankString = "2";
-        break;
+        return "2";
     case "R3" :
-        rankString = "3";
-        break;
+        return "3";
     case "R4" :
-        rankString = "4";
-        break;
+        return "4";
     case "R5" :
-        rankString = "5";
-        break;
+        return "5";
     case "R6" :
-        rankString = "6";
-        break;
+        return "6";
     case "R7" :
-        rankString = "7";
-        break;
+        return "7";
     case "R8" :
-        rankString = "8";
-        break;
+        return "8";
     case "R9" :
-        rankString = "9";
-        break;
+        return "9";
     case "R10" :
-        rankString = "X";
-        break;
+        return "X";
     case "RJ" :
-        rankString = "J";
-        break;
+        return "J";
     case "RQ" :
-        rankString = "Q";
-        break;
+        return "Q";
     case "RK" :
-        rankString = "K";
-        break;
+        return "K";
     
   }
-  var match$1 = card.suit;
-  var suitString;
-  switch (match$1) {
+}
+
+function suitString(card) {
+  var match = card.suit;
+  switch (match) {
     case "Spades" :
-        suitString = "♠";
-        break;
+        return "♠";
     case "Hearts" :
-        suitString = "♥";
-        break;
+        return "♥";
     case "Diamonds" :
-        suitString = "♦";
-        break;
+        return "♦";
     case "Clubs" :
-        suitString = "♣";
-        break;
+        return "♣";
     
   }
+}
+
+function string(card) {
   return JsxRuntime.jsxs("span", {
               children: [
                 JsxRuntime.jsx("span", {
-                      children: rankString,
+                      children: rankString(card),
                       className: "w-3.5"
                     }),
                 JsxRuntime.jsx("span", {
-                      children: suitString,
+                      children: suitString(card),
                       className: "w-3.5 flex flex-row justify-center"
                     })
               ],
               className: "flex flex-row"
             });
+}
+
+function id(card) {
+  return rankString(card) + suitString(card);
 }
 
 function getShuffledDeck() {
@@ -354,7 +345,7 @@ function App$DropZone(props) {
 
 var CardComp = Caml_module.init_mod([
       "App.res",
-      296,
+      300,
       32
     ], {
       TAG: "Module",
@@ -371,7 +362,7 @@ function make(param) {
   var onTop = stack[index + 1 | 0];
   var hasOnTop = Core__Option.isSome(onTop);
   var match = Core.useDraggable({
-        id: ""
+        id: id(card)
       });
   var onDrop = function (item) {
     
@@ -478,6 +469,7 @@ function App(props) {
     
   };
   var onDragStart = React.useCallback((function (dragStartEvent) {
+          console.log("onDragStart: ", dragStartEvent);
           setMovingCard(function (param) {
                 return dragStartEvent.active.id;
               });
@@ -487,7 +479,7 @@ function App(props) {
                 
               });
         }), []);
-  var onDragEnd = React.useCallback((function ($$event) {
+  var onDragEnd = React.useCallback((function (_dragEndEvent) {
           
         }), []);
   return JsxRuntime.jsx(Core.DndContext, {
