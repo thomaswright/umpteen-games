@@ -263,9 +263,9 @@ module DndContext = {
 
 module DropZone = {
   @react.component
-  let make = (~onDrop: Card.card => unit, ~canDrop: bool, ~empty: bool=false) => {
+  let make = (~onDrop: Card.card => unit, ~canDrop: bool, ~empty: bool=false, ~cardId: string) => {
     let {setNodeRef, isOver} = useDroppable({
-      id: "",
+      id: "droppable" ++ cardId,
     })
     // {
     //     "canDrop": canDrop,
@@ -282,15 +282,17 @@ module DropZone = {
       ref={ReactDOM.Ref.callbackDomRef(setNodeRef)}
       className={[
         "rounded h-[80px] w-[57px]",
-        empty
-          ? "bg-gray-200"
-          : switch (isOver, canDrop) {
-            | (true, true) => "bg-blue-800"
-            | (true, false) => "bg-red-800"
-            | (false, _) => "opacity-0 "
-            },
-      ]->Array.join(" ")}
-    />
+        switch (empty, isOver, canDrop) {
+        | (false, true, true) => "bg-blue-200"
+        | (false, true, false) => "bg-red-200"
+        | (false, false, _) => "opacity-0"
+        | (true, true, true) => "bg-blue-200"
+        | (true, true, false) => "bg-red-200"
+        | (true, false, _) => "bg-gray-200 "
+        },
+      ]->Array.join(" ")}>
+      {cardId->React.string}
+    </div>
   }
 }
 
@@ -318,7 +320,7 @@ module rec CardComp: CardComp = {
     let hasOnTop = onTop->Option.isSome
 
     let {isDragging, setNodeRef, listeners, transform} = useDraggable({
-      id: card->Card.id,
+      id: "draggable" ++ card->Card.id,
     })
 
     let style =
@@ -368,7 +370,7 @@ module rec CardComp: CardComp = {
       </div>
       {hasOnTop
         ? <CardComp aligned stack index={index + 1} canPutCardOnCard />
-        : <DropZone onDrop canDrop={true} />}
+        : <DropZone onDrop canDrop={true} cardId={card->Card.id} />}
     </div>
   }
 }
@@ -381,7 +383,7 @@ module Pile = {
     <div>
       {stack->Array.length != 0
         ? <CardComp aligned={false} index={0} stack canPutCardOnCard={Klondike.canPutOnPile} />
-        : <DropZone onDrop canDrop={true} empty={true} />}
+        : <DropZone onDrop canDrop={true} empty={true} cardId={"pile" ++ num->Int.toString} />}
     </div>
   }
 }
@@ -394,7 +396,9 @@ module Foundation = {
     <div>
       {stack->Array.length != 0
         ? <CardComp aligned={true} index={0} stack canPutCardOnCard={Klondike.canPutOnFoundation} />
-        : <DropZone onDrop canDrop={true} empty={true} />}
+        : <DropZone
+            onDrop canDrop={true} empty={true} cardId={"foundation" ++ num->Int.toString}
+          />}
     </div>
   }
 }
@@ -423,10 +427,6 @@ let make = () => {
   })
   let onDragEnd = React.useCallback0((_dragEndEvent: dragEndEvent) => ())
 
-  let {isDragging, setNodeRef} = useDraggable({
-    id: "test",
-  })
-
   <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={onDragCancel}>
     <div className="p-6">
       <div>
@@ -452,6 +452,10 @@ let make = () => {
     </div>
   </DndContext>
 }
+
+// let {isDragging, setNodeRef} = useDraggable({
+//   id: "test",
+// })
 
 //  <div className="bg-gray-300">
 //       <DraggableTest />
