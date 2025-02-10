@@ -331,7 +331,7 @@ function App$DropZone(props) {
   var canDrop = props.canDrop;
   var empty = __empty !== undefined ? __empty : false;
   var match = Core.useDroppable({
-        id: "droppable" + cardId
+        id: cardId
       });
   var isOver = match.isOver;
   return JsxRuntime.jsx("div", {
@@ -352,9 +352,43 @@ function App$DropZone(props) {
             });
 }
 
+function encodeDropId(d) {
+  var tmp;
+  switch (d.TAG) {
+    case "BasePile" :
+        tmp = [
+          "basepile",
+          d._0.toString()
+        ];
+        break;
+    case "BaseFoundation" :
+        tmp = [
+          "basefoundation",
+          d._0.toString()
+        ];
+        break;
+    case "ChildPile" :
+        tmp = [
+          "childpile",
+          d._0.toString(),
+          d._1.toString()
+        ];
+        break;
+    case "ChildFoundation" :
+        tmp = [
+          "childfoundation",
+          d._0.toString(),
+          d._1.toString()
+        ];
+        break;
+    
+  }
+  return tmp.join("-");
+}
+
 var CardComp = Caml_module.init_mod([
       "App.res",
-      309,
+      359,
       32
     ], {
       TAG: "Module",
@@ -365,22 +399,21 @@ var CardComp = Caml_module.init_mod([
     });
 
 function make(param) {
+  var place = param.place;
+  var num = param.num;
   var index = param.index;
   var stack = param.stack;
   var card = stack[index];
   var onTop = stack[index + 1 | 0];
   var hasOnTop = Core__Option.isSome(onTop);
   var match = Core.useDraggable({
-        id: "draggable" + id(card)
+        id: id(card)
       });
   var style = Core__Option.mapOr(Caml_option.nullable_to_opt(match.transform), {}, (function (t) {
           return {
                   transform: "translate3d(" + t.x.toString() + "px, " + t.y.toString() + "px, 0)"
                 };
         }));
-  var onDrop = function (item) {
-    
-  };
   var match$1 = card.suit;
   var tmp;
   switch (match$1) {
@@ -394,6 +427,32 @@ function make(param) {
         break;
     
   }
+  var tmp$1;
+  if (hasOnTop) {
+    tmp$1 = JsxRuntime.jsx(CardComp.make, {
+          stack: stack,
+          index: index + 1 | 0,
+          num: num,
+          place: place,
+          canPutCardOnCard: param.canPutCardOnCard,
+          aligned: param.aligned
+        });
+  } else {
+    var tmp$2;
+    tmp$2 = place === "Pile" ? ({
+          TAG: "ChildPile",
+          _0: num,
+          _1: index
+        }) : ({
+          TAG: "ChildFoundation",
+          _0: num,
+          _1: index
+        });
+    tmp$1 = JsxRuntime.jsx(App$DropZone, {
+          canDrop: true,
+          cardId: encodeDropId(tmp$2)
+        });
+  }
   return JsxRuntime.jsxs("div", {
               children: [
                 JsxRuntime.jsx("div", {
@@ -403,16 +462,7 @@ function make(param) {
                           tmp
                         ].join(" ")
                     }),
-                hasOnTop ? JsxRuntime.jsx(CardComp.make, {
-                        stack: stack,
-                        index: index + 1 | 0,
-                        canPutCardOnCard: param.canPutCardOnCard,
-                        aligned: param.aligned
-                      }) : JsxRuntime.jsx(App$DropZone, {
-                        onDrop: onDrop,
-                        canDrop: true,
-                        cardId: id(card)
-                      })
+                tmp$1
               ],
               ref: Caml_option.some(match.setNodeRef),
               style: style,
@@ -432,40 +482,44 @@ Caml_module.update_mod({
 
 function App$Pile(props) {
   var stack = props.stack;
-  var onDrop = function (param) {
-    
-  };
+  var num = props.num;
   return JsxRuntime.jsx("div", {
               children: stack.length !== 0 ? JsxRuntime.jsx(CardComp.make, {
                       stack: stack,
                       index: 0,
+                      num: num,
+                      place: "Pile",
                       canPutCardOnCard: canPutOnPile,
                       aligned: false
                     }) : JsxRuntime.jsx(App$DropZone, {
-                      onDrop: onDrop,
                       canDrop: true,
                       empty: true,
-                      cardId: "pile" + props.num.toString()
+                      cardId: encodeDropId({
+                            TAG: "BasePile",
+                            _0: num
+                          })
                     })
             });
 }
 
 function App$Foundation(props) {
   var stack = props.stack;
-  var onDrop = function (param) {
-    
-  };
+  var num = props.num;
   return JsxRuntime.jsx("div", {
               children: stack.length !== 0 ? JsxRuntime.jsx(CardComp.make, {
                       stack: stack,
                       index: 0,
+                      num: num,
+                      place: "Foundation",
                       canPutCardOnCard: canPutOnFoundation,
                       aligned: true
                     }) : JsxRuntime.jsx(App$DropZone, {
-                      onDrop: onDrop,
                       canDrop: true,
                       empty: true,
-                      cardId: "foundation" + props.num.toString()
+                      cardId: encodeDropId({
+                            TAG: "BaseFoundation",
+                            _0: num
+                          })
                     })
             });
 }
@@ -481,6 +535,7 @@ function App(props) {
   var match$2 = game.foundations;
   var match$3 = game.piles;
   var setMovingCard = match$1[1];
+  var movingCard = match$1[0];
   var restart = function (param) {
     
   };
@@ -495,8 +550,12 @@ function App(props) {
                 
               });
         }), []);
-  var onDragEnd = React.useCallback((function (_dragEndEvent) {
-          
+  var onDragEnd = React.useCallback((function (dragEndEvent) {
+          console.log(dragEndEvent.over.id);
+          console.log(movingCard);
+          setMovingCard(function (param) {
+                
+              });
         }), []);
   return JsxRuntime.jsx(Core.DndContext, {
               children: JsxRuntime.jsxs("div", {
