@@ -229,6 +229,8 @@ external useDroppable: useDroppableInput => useDroppableOutput = "useDroppable"
 type useDraggableOutput = {
   isDragging: bool,
   setNodeRef: ReactDOM.Ref.callbackDomRef,
+  listeners: {"onPointerDown": ReactEvent.Pointer.t => unit},
+  transform: Nullable.t<{"x": int, "y": int}>,
 }
 
 type useDraggableInput = {id: string}
@@ -243,6 +245,11 @@ type dragStartEvent = {"active": {"id": string}}
 // type dndProps = {
 
 // }
+
+module DraggableTest = {
+  @react.component @module("./Test.jsx")
+  external make: unit => Jsx.element = "default"
+}
 
 module DndContext = {
   @react.component @module("@dnd-kit/core")
@@ -310,9 +317,17 @@ module rec CardComp: CardComp = {
     let onTop = stack->Array.get(index + 1)
     let hasOnTop = onTop->Option.isSome
 
-    let {isDragging, setNodeRef} = useDraggable({
+    let {isDragging, setNodeRef, listeners, transform} = useDraggable({
       id: card->Card.id,
     })
+
+    let style =
+      transform
+      ->Nullable.toOption
+      ->Option.mapOr(({}: JsxDOMStyle.t), t => {
+        transform: `translate3d(${t["x"]->Int.toString}px, ${t["y"]->Int.toString}px, 0)`,
+      })
+
     // {
     //   "type": "CARD",
     //   "item": card,
@@ -335,7 +350,10 @@ module rec CardComp: CardComp = {
       }
     }
 
-    <div ref={ReactDOM.Ref.callbackDomRef(setNodeRef)} style={{opacity: isDragging ? "0" : "1"}}>
+    <div
+      ref={ReactDOM.Ref.callbackDomRef(setNodeRef)}
+      onPointerDown={listeners["onPointerDown"]}
+      style={style}>
       <div
         className={[
           "border border-gray-300 rounded h-[80px] w-[57px] -mb-[58px] bg-white shadow-sm px-1 leading-none py-0.5",
@@ -399,10 +417,15 @@ let make = () => {
     Js.log2("onDragStart: ", dragStartEvent)
     setMovingCard(_ => Some(dragStartEvent["active"]["id"]))
   })
+
   let onDragCancel = React.useCallback0(() => {
     setMovingCard(_ => None)
   })
   let onDragEnd = React.useCallback0((_dragEndEvent: dragEndEvent) => ())
+
+  let {isDragging, setNodeRef} = useDraggable({
+    id: "test",
+  })
 
   <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={onDragCancel}>
     <div className="p-6">
@@ -429,3 +452,10 @@ let make = () => {
     </div>
   </DndContext>
 }
+
+//  <div className="bg-gray-300">
+//       <DraggableTest />
+//       <div ref={ReactDOM.Ref.callbackDomRef(setNodeRef)} className={"bg-blue-300 h-20 w-20"}>
+//         {"Test"->React.string}
+//       </div>
+//     </div>
