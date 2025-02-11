@@ -123,16 +123,8 @@ let getShuffledDeck = () => {
 
 module Klondike = {
   type game = {
-    piles: (
-      array<Card.card>,
-      array<Card.card>,
-      array<Card.card>,
-      array<Card.card>,
-      array<Card.card>,
-      array<Card.card>,
-      array<Card.card>,
-    ),
-    foundations: (array<Card.card>, array<Card.card>, array<Card.card>, array<Card.card>),
+    piles: array<array<Card.card>>,
+    foundations: array<array<Card.card>>,
     stock: array<Card.card>,
     waste: array<Card.card>,
     movesCounter: int,
@@ -152,7 +144,7 @@ module Klondike = {
     let shuffledDeck = getShuffledDeck()
 
     {
-      piles: (
+      piles: [
         shuffledDeck->Array.slice(~start=0, ~end=1),
         shuffledDeck->Array.slice(~start=1, ~end=3),
         shuffledDeck->Array.slice(~start=3, ~end=6),
@@ -160,8 +152,8 @@ module Klondike = {
         shuffledDeck->Array.slice(~start=10, ~end=15),
         shuffledDeck->Array.slice(~start=15, ~end=21),
         shuffledDeck->Array.slice(~start=21, ~end=28),
-      ),
-      foundations: ([], [], [], []),
+      ],
+      foundations: [[], [], [], []],
       stock: shuffledDeck->Array.sliceToEnd(~start=28),
       waste: [],
       movesCounter: 0,
@@ -238,7 +230,7 @@ type useDraggableInput = {id: string}
 @module("@dnd-kit/core")
 external useDraggable: useDraggableInput => useDraggableOutput = "useDraggable"
 
-type dragEndEvent = {"over": {"id": string}}
+type dragEndEvent = {"over": {"id": string}, "active": {"id": string}}
 
 type dragStartEvent = {"active": {"id": string}}
 
@@ -283,16 +275,15 @@ module DropZone = {
       className={[
         "rounded h-[80px] w-[57px]",
         switch (empty, isOver, canDrop) {
-        | (false, true, true) => "bg-blue-200"
-        | (false, true, false) => "bg-red-200"
+        | (false, true, true) => "opacity-0 bg-blue-200"
+        | (false, true, false) => "opacity-0 bg-red-200"
         | (false, false, _) => "opacity-0"
-        | (true, true, true) => "bg-blue-200"
-        | (true, true, false) => "bg-red-200"
+        | (true, true, true) => "opacity-0 bg-blue-200"
+        | (true, true, false) => "opacity-0 bg-red-200"
         | (true, false, _) => "bg-gray-200 "
         },
-      ]->Array.join(" ")}>
-      {cardId->React.string}
-    </div>
+      ]->Array.join(" ")}
+    />
   }
 }
 
@@ -311,17 +302,17 @@ module type CardComp = {
 }
 
 type dropLoc =
-  | BasePile(int)
-  | BaseFoundation(int)
-  | ChildPile(int, int)
-  | ChildFoundation(int, int)
+  | PileBase(int)
+  | FoundationBase(int)
+  | PileChild(int, int)
+  | FoundationChild(int, int)
 
 let encodeDropId = (d: dropLoc) => {
   switch d {
-  | BasePile(num) => ["basepile", num->Int.toString]
-  | BaseFoundation(num) => ["basefoundation", num->Int.toString]
-  | ChildPile(num, index) => ["childpile", num->Int.toString, index->Int.toString]
-  | ChildFoundation(num, index) => ["childfoundation", num->Int.toString, index->Int.toString]
+  | PileBase(num) => ["PileBase", num->Int.toString]
+  | FoundationBase(num) => ["FoundationBase", num->Int.toString]
+  | PileChild(num, index) => ["PileChild", num->Int.toString, index->Int.toString]
+  | FoundationChild(num, index) => ["FoundationChild", num->Int.toString, index->Int.toString]
   }->Array.join("-")
 }
 
@@ -329,27 +320,27 @@ let decodeDropId = d => {
   let split = d->String.split("-")
 
   switch split {
-  | ["basepile", num] =>
+  | ["PileBase", num] =>
     switch num->Int.fromString {
-    | Some(n) => BasePile(n)->Some
+    | Some(n) => PileBase(n)->Some
     | _ => None
     }
 
-  | ["basefoundation", num] =>
+  | ["FoundationBase", num] =>
     switch num->Int.fromString {
-    | Some(n) => BaseFoundation(n)->Some
+    | Some(n) => FoundationBase(n)->Some
     | _ => None
     }
 
-  | ["childpile", num, index] =>
+  | ["PileChild", num, index] =>
     switch (num->Int.fromString, index->Int.fromString) {
-    | (Some(n), Some(i)) => ChildPile(n, i)->Some
+    | (Some(n), Some(i)) => PileChild(n, i)->Some
     | _ => None
     }
 
-  | ["childfoundation", num, index] =>
+  | ["FoundationChild", num, index] =>
     switch (num->Int.fromString, index->Int.fromString) {
-    | (Some(n), Some(i)) => ChildFoundation(n, i)->Some
+    | (Some(n), Some(i)) => FoundationChild(n, i)->Some
     | _ => None
     }
   | _ => None
@@ -371,8 +362,15 @@ module rec CardComp: CardComp = {
     let onTop = stack->Array.get(index + 1)
     let hasOnTop = onTop->Option.isSome
 
-    let {isDragging, setNodeRef, listeners, transform} = useDraggable({
-      id: card->Card.id,
+    let cardId = encodeDropId(
+      switch place {
+      | Pile => PileChild(num, index)
+      | Foundation => FoundationChild(num, index)
+      },
+    )
+
+    let {isDragging: _, setNodeRef, listeners, transform} = useDraggable({
+      id: cardId,
     })
 
     let style =
@@ -382,43 +380,30 @@ module rec CardComp: CardComp = {
         transform: `translate3d(${t["x"]->Int.toString}px, ${t["y"]->Int.toString}px, 0)`,
       })
 
-    let reveal = _ => ()
-
-    let canDrop = item => canPutCardOnCard(item, card, hasOnTop)
-
-    let onClick = () => {
-      if !card.revealed && !hasOnTop {
-        reveal(card)
-      }
-    }
-
     <div
       ref={ReactDOM.Ref.callbackDomRef(setNodeRef)}
       onPointerDown={listeners["onPointerDown"]}
       style={style}>
       <div
+        style={{
+          position: place == Foundation ? "relative" : "static",
+          // zIndex: (index + 1)->Int.toString,
+        }}
         className={[
-          "border border-gray-300 rounded h-[80px] w-[57px] -mb-[58px] bg-white shadow-sm px-1 leading-none py-0.5",
+          "border border-gray-300 rounded h-[80px] w-[57px] bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
           switch card.suit {
           | Spades => "text-black"
           | Hearts => "text-red-600"
           | Diamonds => "text-red-600"
           | Clubs => "text-black"
           },
+          place == Pile ? "-mb-[58px]" : "-mb-[80px]",
         ]->Array.join(" ")}>
         {card->Card.string}
       </div>
       {hasOnTop
         ? <CardComp aligned stack canPutCardOnCard index={index + 1} num place />
-        : <DropZone
-            canDrop={true}
-            cardId={encodeDropId(
-              switch place {
-              | Pile => ChildPile(num, index)
-              | Foundation => ChildFoundation(num, index)
-              },
-            )}
-          />}
+        : <DropZone canDrop={true} cardId={cardId} />}
     </div>
   }
 }
@@ -437,7 +422,7 @@ module Pile = {
             place={Pile}
             canPutCardOnCard={Klondike.canPutOnPile}
           />
-        : <DropZone canDrop={true} empty={true} cardId={encodeDropId(BasePile(num))} />}
+        : <DropZone canDrop={true} empty={true} cardId={encodeDropId(PileBase(num))} />}
     </div>
   }
 }
@@ -456,7 +441,7 @@ module Foundation = {
             canPutCardOnCard={Klondike.canPutOnFoundation}
             place={Foundation}
           />
-        : <DropZone canDrop={true} empty={true} cardId={encodeDropId(BaseFoundation(num))} />}
+        : <DropZone canDrop={true} empty={true} cardId={encodeDropId(FoundationBase(num))} />}
     </div>
   }
 }
@@ -464,31 +449,146 @@ module Foundation = {
 @react.component
 let make = () => {
   let (game, setGame) = React.useState(() => Klondike.initiateGame())
-  let (movingCard, setMovingCard) = React.useState(() => None)
+  // let (movingCard, setMovingCard) = React.useState(() => None)
 
-  let {
-    piles: (p0, p1, p2, p3, p4, p5, p6),
-    foundations: (f0, f1, f2, f3),
-    movesCounter,
-    gameEnded,
-  } = game
+  let {piles, foundations, movesCounter, gameEnded} = game
+
+  let pileGet = (a, b) => piles->Array.getUnsafe(a)->Array.getUnsafe(b)
+  let pileSize = a => piles->Array.getUnsafe(a)->Array.length
+  let pileSlice = (a, b) => piles->Array.getUnsafe(a)->Array.sliceToEnd(~start=b)
+  let foundationGet = (a, b) => foundations->Array.getUnsafe(a)->Array.getUnsafe(b)
+  let _foundationSize = a => foundations->Array.getUnsafe(a)->Array.length
 
   let restart = _ => ()
 
-  let onDragStart = React.useCallback0((dragStartEvent: dragStartEvent) => {
-    Js.log2("onDragStart: ", dragStartEvent)
-    setMovingCard(_ => Some(dragStartEvent["active"]["id"]))
+  let onDragStart = React.useCallback0((_dragStartEvent: dragStartEvent) => {
+    // Js.log2("onDragStart: ", dragStartEvent)
+    // setMovingCard(_ => Some(dragStartEvent["active"]["id"]))
+    ()
   })
 
   let onDragCancel = React.useCallback0(() => {
-    setMovingCard(_ => None)
+    // Console.log("Drag Cancel")
+    // setMovingCard(_ => None)
+    ()
   })
-  let onDragEnd = React.useCallback0((dragEndEvent: dragEndEvent) => {
-    Console.log(dragEndEvent["over"]["id"])
-    Console.log(movingCard)
 
-    setMovingCard(_ => None)
-  })
+  let onDragEnd = (dragEndEvent: dragEndEvent) => {
+    let dropSpace = decodeDropId(dragEndEvent["over"]["id"])
+    let dragSpace = decodeDropId(dragEndEvent["active"]["id"])
+
+    // Console.log3("DragEnd", dropSpace, dragSpace)
+
+    switch dragSpace {
+    | Some(PileChild(dragNum, dragIndex)) =>
+      let dragPileSize = pileSize(dragNum)
+      let dragCard = pileGet(dragNum, dragIndex)
+      let dragHasChildren = dragIndex < dragPileSize - 1
+      let dragSlice = pileSlice(dragNum, dragIndex)
+
+      switch dropSpace {
+      | Some(PileBase(dropNum)) =>
+        // move
+        setGame(game => {
+          ...game,
+          piles: game.piles->Array.mapWithIndex((pile, i) => {
+            if i == dragNum {
+              pile->Array.slice(~start=0, ~end=dragIndex)
+            } else if i == dropNum {
+              Array.concat(pile, dragSlice)
+            } else {
+              pile
+            }
+          }),
+        })
+      | Some(FoundationBase(dropNum)) =>
+        if dragCard.rank == RA && !dragHasChildren {
+          // move
+          setGame(game => {
+            ...game,
+            piles: game.piles->Array.mapWithIndex((pile, i) => {
+              if i == dragNum {
+                pile->Array.slice(~start=0, ~end=dragIndex)
+              } else {
+                pile
+              }
+            }),
+            foundations: game.foundations->Array.mapWithIndex((foundation, i) => {
+              if i == dropNum {
+                Array.concat(foundation, dragSlice)
+              } else {
+                foundation
+              }
+            }),
+          })
+        }
+      | Some(PileChild(dropNum, dropIndex)) => {
+          let dropPileSize = pileSize(dropNum)
+          let dropCard = pileGet(dropNum, dropIndex)
+          let dropHasChildren = dropIndex < dropPileSize - 1
+
+          if (
+            Card.rankIsBelow(dragCard, dropCard) &&
+            Card.isOppositeColor(dragCard, dropCard) &&
+            !dropHasChildren
+          ) {
+            // move
+            setGame(game => {
+              ...game,
+              piles: game.piles->Array.mapWithIndex((pile, i) => {
+                if i == dragNum {
+                  pile->Array.slice(~start=0, ~end=dragIndex)
+                } else if i == dropNum {
+                  Array.concat(pile, dragSlice)
+                } else {
+                  pile
+                }
+              }),
+            })
+          }
+        }
+      | Some(FoundationChild(dropNum, dropIndex)) => {
+          let dropCard = foundationGet(dropNum, dropIndex)
+          Console.log6(
+            dragCard,
+            dropCard,
+            Card.rankIsAbove(dragCard, dropCard),
+            dragCard.suit,
+            dropCard.suit,
+            !dragHasChildren,
+          )
+          if (
+            Card.rankIsAbove(dragCard, dropCard) &&
+            dragCard.suit == dropCard.suit &&
+            !dragHasChildren
+          ) {
+            // move
+            setGame(game => {
+              ...game,
+              piles: game.piles->Array.mapWithIndex((pile, i) => {
+                if i == dragNum {
+                  pile->Array.slice(~start=0, ~end=dragIndex)
+                } else {
+                  pile
+                }
+              }),
+              foundations: game.foundations->Array.mapWithIndex((foundation, i) => {
+                if i == dropNum {
+                  Array.concat(foundation, dragSlice)
+                } else {
+                  foundation
+                }
+              }),
+            })
+          }
+        }
+      | _ => ()
+      }
+    | _ => ()
+    }
+
+    // setMovingCard(_ => None)
+  }
 
   <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={onDragCancel}>
     <div className="p-6">
@@ -498,31 +598,20 @@ let make = () => {
         <div> {gameEnded ? "You win!"->React.string : React.null} </div>
       </div>
       <div className={"flex flex-row gap-2 py-1"}>
-        <Foundation stack={f0} num={0} />
-        <Foundation stack={f1} num={1} />
-        <Foundation stack={f2} num={2} />
-        <Foundation stack={f3} num={3} />
+        <Foundation stack={foundations->Array.getUnsafe(0)} num={0} />
+        <Foundation stack={foundations->Array.getUnsafe(1)} num={1} />
+        <Foundation stack={foundations->Array.getUnsafe(2)} num={2} />
+        <Foundation stack={foundations->Array.getUnsafe(3)} num={3} />
       </div>
       <div className={"flex flex-row gap-2 py-1"}>
-        <Pile stack={p0} num={0} />
-        <Pile stack={p1} num={1} />
-        <Pile stack={p2} num={2} />
-        <Pile stack={p3} num={3} />
-        <Pile stack={p4} num={4} />
-        <Pile stack={p5} num={5} />
-        <Pile stack={p6} num={6} />
+        <Pile stack={piles->Array.getUnsafe(0)} num={0} />
+        <Pile stack={piles->Array.getUnsafe(1)} num={1} />
+        <Pile stack={piles->Array.getUnsafe(2)} num={2} />
+        <Pile stack={piles->Array.getUnsafe(3)} num={3} />
+        <Pile stack={piles->Array.getUnsafe(4)} num={4} />
+        <Pile stack={piles->Array.getUnsafe(5)} num={5} />
+        <Pile stack={piles->Array.getUnsafe(6)} num={6} />
       </div>
     </div>
   </DndContext>
 }
-
-// let {isDragging, setNodeRef} = useDraggable({
-//   id: "test",
-// })
-
-//  <div className="bg-gray-300">
-//       <DraggableTest />
-//       <div ref={ReactDOM.Ref.callbackDomRef(setNodeRef)} className={"bg-blue-300 h-20 w-20"}>
-//         {"Test"->React.string}
-//       </div>
-//     </div>
