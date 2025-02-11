@@ -613,12 +613,6 @@ function App(props) {
   var restart = function (param) {
     
   };
-  var onDragStart = React.useCallback((function (_dragStartEvent) {
-          
-        }), []);
-  var onDragCancel = React.useCallback((function () {
-          
-        }), []);
   var onDragEnd = function (dragEndEvent) {
     var dropSpace = decodeDropId(dragEndEvent.over.id);
     var dragSpace = decodeDropId(dragEndEvent.active.id);
@@ -716,7 +710,6 @@ function App(props) {
       case "FoundationChild" :
           var dropNum$3 = dropSpace._0;
           var dropCard$1 = foundationGet(dropNum$3, dropSpace._1);
-          console.log(dragCard, dropCard$1, rankIsAbove(dragCard, dropCard$1), dragCard.suit, dropCard$1.suit, !dragHasChildren);
           if (rankIsAbove(dragCard, dropCard$1) && dragCard.suit === dropCard$1.suit && !dragHasChildren) {
             return setGame(function (game) {
                         return {
@@ -820,9 +813,7 @@ function App(props) {
                     ],
                     className: "p-6"
                   }),
-              onDragEnd: onDragEnd,
-              onDragStart: onDragStart,
-              onDragCancel: onDragCancel
+              onDragEnd: onDragEnd
             });
 }
 

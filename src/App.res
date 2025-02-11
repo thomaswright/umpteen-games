@@ -248,9 +248,9 @@ module DndContext = {
   external make: (
     ~children: Jsx.element,
     ~onDragEnd: dragEndEvent => unit,
-    ~onDragStart: dragStartEvent => unit,
-    ~onDragCancel: unit => unit,
-  ) => Jsx.element = "DndContext"
+  ) => // ~onDragStart: dragStartEvent => unit,
+  // ~onDragCancel: unit => unit,
+  Jsx.element = "DndContext"
 }
 
 module DropZone = {
@@ -449,7 +449,6 @@ module Foundation = {
 @react.component
 let make = () => {
   let (game, setGame) = React.useState(() => Klondike.initiateGame())
-  // let (movingCard, setMovingCard) = React.useState(() => None)
 
   let {piles, foundations, movesCounter, gameEnded} = game
 
@@ -460,18 +459,6 @@ let make = () => {
   let _foundationSize = a => foundations->Array.getUnsafe(a)->Array.length
 
   let restart = _ => ()
-
-  let onDragStart = React.useCallback0((_dragStartEvent: dragStartEvent) => {
-    // Js.log2("onDragStart: ", dragStartEvent)
-    // setMovingCard(_ => Some(dragStartEvent["active"]["id"]))
-    ()
-  })
-
-  let onDragCancel = React.useCallback0(() => {
-    // Console.log("Drag Cancel")
-    // setMovingCard(_ => None)
-    ()
-  })
 
   let onDragEnd = (dragEndEvent: dragEndEvent) => {
     let dropSpace = decodeDropId(dragEndEvent["over"]["id"])
@@ -549,14 +536,7 @@ let make = () => {
         }
       | Some(FoundationChild(dropNum, dropIndex)) => {
           let dropCard = foundationGet(dropNum, dropIndex)
-          Console.log6(
-            dragCard,
-            dropCard,
-            Card.rankIsAbove(dragCard, dropCard),
-            dragCard.suit,
-            dropCard.suit,
-            !dragHasChildren,
-          )
+
           if (
             Card.rankIsAbove(dragCard, dropCard) &&
             dragCard.suit == dropCard.suit &&
@@ -586,11 +566,9 @@ let make = () => {
       }
     | _ => ()
     }
-
-    // setMovingCard(_ => None)
   }
 
-  <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={onDragCancel}>
+  <DndContext onDragEnd={onDragEnd}>
     <div className="p-6">
       <div>
         <button onClick={restart}> {"restart"->React.string} </button>
