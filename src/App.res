@@ -467,9 +467,56 @@ module Foundation = {
   }
 }
 
+let initialGame = Klondike.initiateGame()
+
+type state = {history: array<Klondike.game>}
+
+type undoStats = {
+  currentUndoDepth: int,
+  undos: array<int>,
+}
+
 @react.component
 let make = () => {
-  let (game, setGame) = React.useState(() => Klondike.initiateGame())
+  let (undoStats, setUndoStats) = React.useState((): undoStats => {
+    currentUndoDepth: 0,
+    undos: [],
+  })
+  let (state, setState) = React.useState(() => {
+    history: [initialGame],
+  })
+
+  let game = state.history->Array.getUnsafe(state.history->Array.length - 1)
+
+  let setGame = f => {
+    if undoStats.currentUndoDepth > 0 {
+      setUndoStats(undoStats => {
+        currentUndoDepth: 0,
+        undos: Array.concat(undoStats.undos, [undoStats.currentUndoDepth]),
+      })
+    }
+
+    setState(state => {
+      let newGame = f(game)
+      {
+        history: Array.concat(state.history, [newGame]),
+      }
+    })
+  }
+
+  let undo = () => {
+    if state.history->Array.length > 1 {
+      setState(state => {
+        {
+          history: state.history->Array.slice(~start=0, ~end=state.history->Array.length - 1),
+        }
+      })
+      setUndoStats(undoStats => {
+        ...undoStats,
+        currentUndoDepth: undoStats.currentUndoDepth + 1,
+      })
+    }
+  }
 
   let {piles, foundations, movesCounter, gameEnded} = game
 
@@ -479,7 +526,10 @@ let make = () => {
   let foundationGet = (a, b) => foundations->Array.getUnsafe(a)->Array.getUnsafe(b)
   let _foundationSize = a => foundations->Array.getUnsafe(a)->Array.length
 
-  let restart = _ => ()
+  let restart = _ => {
+    setUndoStats(_ => {currentUndoDepth: 0, undos: []})
+    setState(s => {history: [s.history->Array.getUnsafe(0)]})
+  }
 
   let onDragEnd = (dragEndEvent: dragEndEvent) => {
     let dropSpace = decodeDropId(dragEndEvent["over"]["id"])
@@ -589,11 +639,39 @@ let make = () => {
     }
   }
 
+  let sum = arr => arr->Array.reduce(0, (a, c) => a + c)
+  let max = arr => arr->Array.reduce(0., (a, c) => Math.max(a, c->Int.toFloat))->Int.fromFloat
+
   <DndContext onDragEnd={onDragEnd}>
     <div className="p-6">
       <div>
-        <button onClick={restart}> {"restart"->React.string} </button>
-        <div> {("Moves: " ++ movesCounter->Int.toString)->React.string} </div>
+        <button className={"bg-gray-900 text-white px-2 rounded text-sm"} onClick={restart}>
+          {"Restart"->React.string}
+        </button>
+        <button
+          className={"bg-gray-900 text-white px-2 rounded text-sm ml-1"} onClick={_ => undo()}>
+          {"Undo"->React.string}
+        </button>
+        <div className={"flex flex-col text-xs bg-gray-200 p-1 py-2 w-40 rounded-lg my-1"}>
+          <div className={" px-2 flex flex-row gap-2"}>
+            {("# Moves: " ++ (state.history->Array.length - 1)->Int.toString)->React.string}
+          </div>
+          <div className={" px-2 flex flex-row gap-2"}>
+            {("# Undos: " ++ (undoStats.currentUndoDepth + undoStats.undos->sum)->Int.toString)
+              ->React.string}
+          </div>
+          <div className={" px-2 flex flex-row gap-2"}>
+            {("# Undo Branches: " ++
+            (undoStats.undos->Array.length + (undoStats.currentUndoDepth > 0 ? 1 : 0))
+              ->Int.toString)->React.string}
+          </div>
+          <div className={" px-2 flex flex-row gap-2"}>
+            {("Max Undo Depth: " ++
+            Array.concat(undoStats.undos, [undoStats.currentUndoDepth])
+            ->max
+            ->Int.toString)->React.string}
+          </div>
+        </div>
         <div> {gameEnded ? "You win!"->React.string : React.null} </div>
       </div>
       <div className={"flex flex-row gap-2 py-1"}>

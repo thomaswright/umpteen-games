@@ -599,14 +599,59 @@ function App$Foundation(props) {
             });
 }
 
+var initialGame = initiateGame();
+
 function App(props) {
   var match = React.useState(function () {
-        return initiateGame();
+        return {
+                currentUndoDepth: 0,
+                undos: []
+              };
       });
-  var game = match[0];
+  var setUndoStats = match[1];
+  var undoStats = match[0];
+  var match$1 = React.useState(function () {
+        return {
+                history: [initialGame]
+              };
+      });
+  var setState = match$1[1];
+  var state = match$1[0];
+  var game = state.history[state.history.length - 1 | 0];
+  var setGame = function (f) {
+    if (undoStats.currentUndoDepth > 0) {
+      setUndoStats(function (undoStats) {
+            return {
+                    currentUndoDepth: 0,
+                    undos: undoStats.undos.concat([undoStats.currentUndoDepth])
+                  };
+          });
+    }
+    setState(function (state) {
+          var newGame = f(game);
+          return {
+                  history: state.history.concat([newGame])
+                };
+        });
+  };
+  var undo = function () {
+    if (state.history.length > 1) {
+      setState(function (state) {
+            return {
+                    history: state.history.slice(0, state.history.length - 1 | 0)
+                  };
+          });
+      return setUndoStats(function (undoStats) {
+                  return {
+                          currentUndoDepth: undoStats.currentUndoDepth + 1 | 0,
+                          undos: undoStats.undos
+                        };
+                });
+    }
+    
+  };
   var foundations = game.foundations;
   var piles = game.piles;
-  var setGame = match[1];
   var pileGet = function (a, b) {
     return piles[a][b];
   };
@@ -617,7 +662,17 @@ function App(props) {
     return foundations[a][b];
   };
   var restart = function (param) {
-    
+    setUndoStats(function (param) {
+          return {
+                  currentUndoDepth: 0,
+                  undos: []
+                };
+        });
+    setState(function (s) {
+          return {
+                  history: [s.history[0]]
+                };
+        });
   };
   var onDragEnd = function (dragEndEvent) {
     var dropSpace = decodeDropId(dragEndEvent.over.id);
@@ -745,17 +800,55 @@ function App(props) {
       
     }
   };
+  var sum = function (arr) {
+    return Core__Array.reduce(arr, 0, (function (a, c) {
+                  return a + c | 0;
+                }));
+  };
+  var max = function (arr) {
+    return Core__Array.reduce(arr, 0, (function (a, c) {
+                  return Math.max(a, c);
+                })) | 0;
+  };
   return JsxRuntime.jsx(Core.DndContext, {
               children: JsxRuntime.jsxs("div", {
                     children: [
                       JsxRuntime.jsxs("div", {
                             children: [
                               JsxRuntime.jsx("button", {
-                                    children: "restart",
+                                    children: "Restart",
+                                    className: "bg-gray-900 text-white px-2 rounded text-sm",
                                     onClick: restart
                                   }),
-                              JsxRuntime.jsx("div", {
-                                    children: "Moves: " + game.movesCounter.toString()
+                              JsxRuntime.jsx("button", {
+                                    children: "Undo",
+                                    className: "bg-gray-900 text-white px-2 rounded text-sm ml-1",
+                                    onClick: (function (param) {
+                                        undo();
+                                      })
+                                  }),
+                              JsxRuntime.jsxs("div", {
+                                    children: [
+                                      JsxRuntime.jsx("div", {
+                                            children: "# Moves: " + (state.history.length - 1 | 0).toString(),
+                                            className: " px-2 flex flex-row gap-2"
+                                          }),
+                                      JsxRuntime.jsx("div", {
+                                            children: "# Undos: " + (undoStats.currentUndoDepth + sum(undoStats.undos) | 0).toString(),
+                                            className: " px-2 flex flex-row gap-2"
+                                          }),
+                                      JsxRuntime.jsx("div", {
+                                            children: "# Undo Branches: " + (undoStats.undos.length + (
+                                                  undoStats.currentUndoDepth > 0 ? 1 : 0
+                                                ) | 0).toString(),
+                                            className: " px-2 flex flex-row gap-2"
+                                          }),
+                                      JsxRuntime.jsx("div", {
+                                            children: "Max Undo Depth: " + max(undoStats.undos.concat([undoStats.currentUndoDepth])).toString(),
+                                            className: " px-2 flex flex-row gap-2"
+                                          })
+                                    ],
+                                    className: "flex flex-col text-xs bg-gray-200 p-1 py-2 w-40 rounded-lg my-1"
                                   }),
                               JsxRuntime.jsx("div", {
                                     children: game.gameEnded ? "You win!" : null
