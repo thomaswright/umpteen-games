@@ -76,7 +76,7 @@ module Card = {
     | R7 => "7"
     | R8 => "8"
     | R9 => "9"
-    | R10 => "X"
+    | R10 => "10"
     | RJ => "J"
     | RQ => "Q"
     | RK => "K"
@@ -92,14 +92,38 @@ module Card = {
 
   let string = (card: card) => {
     <span className="flex flex-row">
-      <span className="w-3.5"> {card->rankString->React.string} </span>
+      <span
+        className={[
+          "text-center font-medium ",
+          switch card.rank {
+          | R10 => "tracking-tighter w-4 -ml-px"
+          | _ => "w-3.5 "
+          },
+        ]->Array.join(" ")}>
+        {card->rankString->React.string}
+      </span>
       <span className="w-3.5 flex flex-row justify-center"> {card->suitString->React.string} </span>
     </span>
   }
 
+  let color = card =>
+    switch card.suit {
+    | Spades => "hsl(0 0% 0%)"
+    | Hearts => "hsl(0 100% 44.31%)"
+    | Diamonds => "hsl(0 100% 44.31%)"
+    | Clubs => "hsl(0 0% 0%)"
+    }
+
   let id = (card: card) => card->rankString ++ card->suitString
 
   let isOppositeColor = (a, b) => isRed(a) != isRed(b)
+
+  let rotation = (card: card) => {
+    let suitJitter = allSuits->Array.findIndex(s => s == card.suit) - 2
+    let rankJitter = mod(allRanks->Array.findIndex(r => r == card.rank), 4) - 2
+
+    `rotate(${(suitJitter + rankJitter)->Int.toString}deg)`
+  }
 }
 
 let getShuffledDeck = () => {
@@ -369,7 +393,7 @@ module rec CardComp: CardComp = {
       },
     )
 
-    let {isDragging: _, setNodeRef, listeners, transform} = useDraggable({
+    let {isDragging, setNodeRef, listeners, transform} = useDraggable({
       id: cardId,
     })
 
@@ -386,19 +410,16 @@ module rec CardComp: CardComp = {
       style={style}>
       <div
         style={{
+          // transform: Card.rotation(card),
           position: place == Foundation ? "relative" : "static",
-          // zIndex: (index + 1)->Int.toString,
+          // zIndex: ((isDragging ? 100 : 0) + index + 1)->Int.toString,
+          color: card->Card.color,
         }}
         className={[
-          "border border-gray-300 rounded h-[80px] w-[57px] bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
-          switch card.suit {
-          | Spades => "text-black"
-          | Hearts => "text-red-600"
-          | Diamonds => "text-red-600"
-          | Clubs => "text-black"
-          },
+          " border border-gray-300 rounded h-[80px] w-[57px] bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
           place == Pile ? "-mb-[58px]" : "-mb-[80px]",
         ]->Array.join(" ")}>
+        // <div className={" bg-blue-500 h-2 w-2 rotate-45"}> {""->React.string} </div>
         {card->Card.string}
       </div>
       {hasOnTop

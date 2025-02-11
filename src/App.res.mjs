@@ -227,7 +227,7 @@ function rankString(card) {
     case "R9" :
         return "9";
     case "R10" :
-        return "X";
+        return "10";
     case "RJ" :
         return "J";
     case "RQ" :
@@ -254,11 +254,17 @@ function suitString(card) {
 }
 
 function string(card) {
+  var match = card.rank;
+  var tmp;
+  tmp = match === "R10" ? "tracking-tighter w-4 -ml-px" : "w-3.5 ";
   return JsxRuntime.jsxs("span", {
               children: [
                 JsxRuntime.jsx("span", {
                       children: rankString(card),
-                      className: "w-3.5"
+                      className: [
+                          "text-center font-medium ",
+                          tmp
+                        ].join(" ")
                     }),
                 JsxRuntime.jsx("span", {
                       children: suitString(card),
@@ -267,6 +273,19 @@ function string(card) {
               ],
               className: "flex flex-row"
             });
+}
+
+function color(card) {
+  var match = card.suit;
+  switch (match) {
+    case "Hearts" :
+    case "Diamonds" :
+        return "hsl(0 100% 44.31%)";
+    case "Spades" :
+    case "Clubs" :
+        return "hsl(0 0% 0%)";
+    
+  }
 }
 
 function isOppositeColor(a, b) {
@@ -458,7 +477,7 @@ function decodeDropId(d) {
 
 var CardComp = Caml_module.init_mod([
       "App.res",
-      350,
+      374,
       32
     ], {
       TAG: "Module",
@@ -495,29 +514,16 @@ function make(param) {
                   transform: "translate3d(" + t.x.toString() + "px, " + t.y.toString() + "px, 0)"
                 };
         }));
-  var match$1 = card.suit;
-  var tmp$1;
-  switch (match$1) {
-    case "Hearts" :
-    case "Diamonds" :
-        tmp$1 = "text-red-600";
-        break;
-    case "Spades" :
-    case "Clubs" :
-        tmp$1 = "text-black";
-        break;
-    
-  }
   return JsxRuntime.jsxs("div", {
               children: [
                 JsxRuntime.jsx("div", {
                       children: string(card),
                       className: [
-                          "border border-gray-300 rounded h-[80px] w-[57px] bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
-                          tmp$1,
+                          " border border-gray-300 rounded h-[80px] w-[57px] bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
                           place === "Pile" ? "-mb-[58px]" : "-mb-[80px]"
                         ].join(" "),
                       style: {
+                        color: color(card),
                         position: place === "Foundation" ? "relative" : "static"
                       }
                     }),
