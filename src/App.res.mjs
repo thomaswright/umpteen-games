@@ -259,19 +259,28 @@ function string(card) {
   tmp = match === "R10" ? "tracking-tighter w-4 -ml-px" : "w-3.5 ";
   return JsxRuntime.jsxs("span", {
               children: [
-                JsxRuntime.jsx("span", {
-                      children: rankString(card),
-                      className: [
-                          "text-center font-medium ",
-                          tmp
-                        ].join(" ")
+                JsxRuntime.jsxs("span", {
+                      children: [
+                        JsxRuntime.jsx("span", {
+                              children: rankString(card),
+                              className: [
+                                  "text-center font-medium ",
+                                  tmp
+                                ].join(" ")
+                            }),
+                        JsxRuntime.jsx("span", {
+                              children: suitString(card),
+                              className: "w-3.5 flex flex-row justify-center"
+                            })
+                      ],
+                      className: "flex flex-row"
                     }),
                 JsxRuntime.jsx("span", {
                       children: suitString(card),
-                      className: "w-3.5 flex flex-row justify-center"
+                      className: "w-3.5 flex flex-row justify-center mt-0.5"
                     })
               ],
-              className: "flex flex-row"
+              className: "flex flex-col"
             });
 }
 
@@ -372,34 +381,38 @@ function App$DropZone(props) {
 
 function encodeDropId(d) {
   var tmp;
-  switch (d.TAG) {
-    case "PileBase" :
-        tmp = [
-          "PileBase",
-          d._0.toString()
-        ];
-        break;
-    case "FoundationBase" :
-        tmp = [
-          "FoundationBase",
-          d._0.toString()
-        ];
-        break;
-    case "PileChild" :
-        tmp = [
-          "PileChild",
-          d._0.toString(),
-          d._1.toString()
-        ];
-        break;
-    case "FoundationChild" :
-        tmp = [
-          "FoundationChild",
-          d._0.toString(),
-          d._1.toString()
-        ];
-        break;
-    
+  if (typeof d !== "object") {
+    tmp = ["Waste"];
+  } else {
+    switch (d.TAG) {
+      case "PileBase" :
+          tmp = [
+            "PileBase",
+            d._0.toString()
+          ];
+          break;
+      case "FoundationBase" :
+          tmp = [
+            "FoundationBase",
+            d._0.toString()
+          ];
+          break;
+      case "PileChild" :
+          tmp = [
+            "PileChild",
+            d._0.toString(),
+            d._1.toString()
+          ];
+          break;
+      case "FoundationChild" :
+          tmp = [
+            "FoundationChild",
+            d._0.toString(),
+            d._1.toString()
+          ];
+          break;
+      
+    }
   }
   return tmp.join("-");
 }
@@ -407,77 +420,88 @@ function encodeDropId(d) {
 function decodeDropId(d) {
   var split = d.split("-");
   var len = split.length;
-  if (len !== 2) {
-    if (len !== 3) {
-      return ;
-    }
-    var match = split[0];
-    switch (match) {
-      case "FoundationChild" :
-          var num = split[1];
-          var index = split[2];
-          var match$1 = Core__Int.fromString(num, undefined);
-          var match$2 = Core__Int.fromString(index, undefined);
-          if (match$1 !== undefined && match$2 !== undefined) {
-            return {
-                    TAG: "FoundationChild",
-                    _0: match$1,
-                    _1: match$2
-                  };
-          } else {
-            return ;
-          }
-      case "PileChild" :
-          var num$1 = split[1];
-          var index$1 = split[2];
-          var match$3 = Core__Int.fromString(num$1, undefined);
-          var match$4 = Core__Int.fromString(index$1, undefined);
-          if (match$3 !== undefined && match$4 !== undefined) {
-            return {
-                    TAG: "PileChild",
-                    _0: match$3,
-                    _1: match$4
-                  };
-          } else {
-            return ;
-          }
-      default:
+  if (len >= 4) {
+    return ;
+  }
+  switch (len) {
+    case 0 :
         return ;
-    }
-  } else {
-    var match$5 = split[0];
-    switch (match$5) {
-      case "FoundationBase" :
-          var num$2 = split[1];
-          var n = Core__Int.fromString(num$2, undefined);
-          if (n !== undefined) {
-            return {
-                    TAG: "FoundationBase",
-                    _0: n
-                  };
-          } else {
+    case 1 :
+        var match = split[0];
+        if (match === "Waste") {
+          return "Waste";
+        } else {
+          return ;
+        }
+    case 2 :
+        var match$1 = split[0];
+        switch (match$1) {
+          case "FoundationBase" :
+              var num = split[1];
+              var n = Core__Int.fromString(num, undefined);
+              if (n !== undefined) {
+                return {
+                        TAG: "FoundationBase",
+                        _0: n
+                      };
+              } else {
+                return ;
+              }
+          case "PileBase" :
+              var num$1 = split[1];
+              var n$1 = Core__Int.fromString(num$1, undefined);
+              if (n$1 !== undefined) {
+                return {
+                        TAG: "PileBase",
+                        _0: n$1
+                      };
+              } else {
+                return ;
+              }
+          default:
             return ;
-          }
-      case "PileBase" :
-          var num$3 = split[1];
-          var n$1 = Core__Int.fromString(num$3, undefined);
-          if (n$1 !== undefined) {
-            return {
-                    TAG: "PileBase",
-                    _0: n$1
-                  };
-          } else {
+        }
+    case 3 :
+        var match$2 = split[0];
+        switch (match$2) {
+          case "FoundationChild" :
+              var num$2 = split[1];
+              var index = split[2];
+              var match$3 = Core__Int.fromString(num$2, undefined);
+              var match$4 = Core__Int.fromString(index, undefined);
+              if (match$3 !== undefined && match$4 !== undefined) {
+                return {
+                        TAG: "FoundationChild",
+                        _0: match$3,
+                        _1: match$4
+                      };
+              } else {
+                return ;
+              }
+          case "PileChild" :
+              var num$3 = split[1];
+              var index$1 = split[2];
+              var match$5 = Core__Int.fromString(num$3, undefined);
+              var match$6 = Core__Int.fromString(index$1, undefined);
+              if (match$5 !== undefined && match$6 !== undefined) {
+                return {
+                        TAG: "PileChild",
+                        _0: match$5,
+                        _1: match$6
+                      };
+              } else {
+                return ;
+              }
+          default:
             return ;
-          }
-      default:
-        return ;
-    }
+        }
+    
   }
 }
 
 var CardComp = Caml_module.init_mod([
       "App.res",
-      374,
+      338,
       32
     ], {
       TAG: "Module",
@@ -488,6 +512,7 @@ var CardComp = Caml_module.init_mod([
     });
 
 function make(param) {
+  var movingPile = param.movingPile;
   var place = param.place;
   var num = param.num;
   var index = param.index;
@@ -509,9 +534,13 @@ function make(param) {
   var match = Core.useDraggable({
         id: cardId
       });
-  var style = Core__Option.mapOr(Caml_option.nullable_to_opt(match.transform), {}, (function (t) {
+  var style = Core__Option.mapOr(Caml_option.nullable_to_opt(match.transform), {
+        zIndex: movingPile ? "2" : "1",
+        transform: "translate3d(0px, 0px, 0px)"
+      }, (function (t) {
           return {
-                  transform: "translate3d(" + t.x.toString() + "px, " + t.y.toString() + "px, 0)"
+                  zIndex: "2",
+                  transform: "translate3d(" + t.x.toString() + "px, " + t.y.toString() + "px, 0px)"
                 };
         }));
   return JsxRuntime.jsxs("div", {
@@ -523,8 +552,7 @@ function make(param) {
                           place === "Pile" ? "-mb-[58px]" : "-mb-[80px]"
                         ].join(" "),
                       style: {
-                        color: color(card),
-                        position: place === "Foundation" ? "relative" : "static"
+                        color: color(card)
                       }
                     }),
                 hasOnTop ? JsxRuntime.jsx(CardComp.make, {
@@ -533,7 +561,8 @@ function make(param) {
                         num: num,
                         place: place,
                         canPutCardOnCard: param.canPutCardOnCard,
-                        aligned: param.aligned
+                        aligned: param.aligned,
+                        movingPile: movingPile
                       }) : JsxRuntime.jsx(App$DropZone, {
                         canDrop: true,
                         cardId: cardId
@@ -555,26 +584,60 @@ Caml_module.update_mod({
       make: make
     });
 
+function App$WasteCard(props) {
+  var card = props.card;
+  var cardId = encodeDropId("Waste");
+  var match = Core.useDraggable({
+        id: cardId
+      });
+  var style = Core__Option.mapOr(Caml_option.nullable_to_opt(match.transform), {}, (function (t) {
+          return {
+                  transform: "translate3d(" + t.x.toString() + "px, " + t.y.toString() + "px, 0)"
+                };
+        }));
+  return JsxRuntime.jsx("div", {
+              children: JsxRuntime.jsx("div", {
+                    children: string(card),
+                    className: [
+                        " border border-gray-300 rounded h-[80px] w-[57px] bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
+                        props.isTop ? "" : "-ml-[37px]"
+                      ].join(" "),
+                    style: {
+                      color: color(card),
+                      position: "relative"
+                    }
+                  }),
+              ref: Caml_option.some(match.setNodeRef),
+              style: style,
+              onPointerDown: match.listeners.onPointerDown
+            });
+}
+
 function App$Pile(props) {
+  var moving = props.moving;
   var stack = props.stack;
   var num = props.num;
-  return JsxRuntime.jsx("div", {
-              children: stack.length !== 0 ? JsxRuntime.jsx(CardComp.make, {
-                      stack: stack,
-                      index: 0,
-                      num: num,
-                      place: "Pile",
-                      canPutCardOnCard: canPutOnPile,
-                      aligned: false
-                    }) : JsxRuntime.jsx(App$DropZone, {
-                      canDrop: true,
-                      empty: true,
-                      cardId: encodeDropId({
-                            TAG: "PileBase",
-                            _0: num
-                          })
+  var movingPile = moving !== undefined && !(typeof moving !== "object" || moving.TAG !== "PileChild") ? moving._0 === num : false;
+  if (stack.length !== 0) {
+    return JsxRuntime.jsx(CardComp.make, {
+                stack: stack,
+                index: 0,
+                num: num,
+                place: "Pile",
+                canPutCardOnCard: canPutOnPile,
+                aligned: false,
+                movingPile: movingPile
+              });
+  } else {
+    return JsxRuntime.jsx(App$DropZone, {
+                canDrop: true,
+                empty: true,
+                cardId: encodeDropId({
+                      TAG: "PileBase",
+                      _0: num
                     })
-            });
+              });
+  }
 }
 
 function App$Foundation(props) {
@@ -587,7 +650,8 @@ function App$Foundation(props) {
                       num: num,
                       place: "Foundation",
                       canPutCardOnCard: canPutOnFoundation,
-                      aligned: true
+                      aligned: true,
+                      movingPile: false
                     }) : JsxRuntime.jsx(App$DropZone, {
                       canDrop: true,
                       empty: true,
@@ -599,24 +663,53 @@ function App$Foundation(props) {
             });
 }
 
+function App$Stock(props) {
+  var onClick = props.onClick;
+  return JsxRuntime.jsx("button", {
+              children: "Stock",
+              onClick: (function (param) {
+                  onClick();
+                })
+            });
+}
+
+function App$Waste(props) {
+  var waste = props.waste;
+  console.log(waste);
+  return JsxRuntime.jsx("div", {
+              children: waste.map(function (wasteCard, i) {
+                    return JsxRuntime.jsx(App$WasteCard, {
+                                card: wasteCard,
+                                isTop: i === 0
+                              });
+                  }),
+              className: "flex flex-row"
+            });
+}
+
 var initialGame = initiateGame();
 
 function App(props) {
   var match = React.useState(function () {
+        
+      });
+  var setMoving = match[1];
+  var moving = match[0];
+  var match$1 = React.useState(function () {
         return {
                 currentUndoDepth: 0,
                 undos: []
               };
       });
-  var setUndoStats = match[1];
-  var undoStats = match[0];
-  var match$1 = React.useState(function () {
+  var setUndoStats = match$1[1];
+  var undoStats = match$1[0];
+  var match$2 = React.useState(function () {
         return {
                 history: [initialGame]
               };
       });
-  var setState = match$1[1];
-  var state = match$1[0];
+  var setState = match$2[1];
+  var state = match$2[0];
   var game = state.history[state.history.length - 1 | 0];
   var setGame = function (f) {
     if (undoStats.currentUndoDepth > 0) {
@@ -677,48 +770,40 @@ function App(props) {
   var onDragEnd = function (dragEndEvent) {
     var dropSpace = decodeDropId(dragEndEvent.over.id);
     var dragSpace = decodeDropId(dragEndEvent.active.id);
-    if (dragSpace === undefined) {
-      return ;
-    }
-    if (dragSpace.TAG !== "PileChild") {
-      return ;
-    }
-    var dragIndex = dragSpace._1;
-    var dragNum = dragSpace._0;
-    var dragPileSize = piles[dragNum].length;
-    var dragCard = pileGet(dragNum, dragIndex);
-    var dragHasChildren = dragIndex < (dragPileSize - 1 | 0);
-    var dragSlice = pileSlice(dragNum, dragIndex);
-    if (dropSpace === undefined) {
-      return ;
-    }
-    switch (dropSpace.TAG) {
-      case "PileBase" :
-          var dropNum = dropSpace._0;
-          return setGame(function (game) {
-                      return {
-                              piles: game.piles.map(function (pile, i) {
-                                    if (i === dragNum) {
-                                      return pile.slice(0, dragIndex);
-                                    } else if (i === dropNum) {
-                                      return pile.concat(dragSlice);
-                                    } else {
-                                      return pile;
-                                    }
-                                  }),
-                              foundations: game.foundations,
-                              stock: game.stock,
-                              waste: game.waste,
-                              movesCounter: game.movesCounter,
-                              gameEnded: game.gameEnded
-                            };
-                    });
-      case "FoundationBase" :
-          if (!(dragCard.rank === "RA" && !dragHasChildren)) {
-            return ;
-          }
-          var dropNum$1 = dropSpace._0;
-          return setGame(function (game) {
+    if (dragSpace !== undefined && typeof dragSpace === "object" && dragSpace.TAG === "PileChild") {
+      var dragIndex = dragSpace._1;
+      var dragNum = dragSpace._0;
+      var dragPileSize = piles[dragNum].length;
+      var dragCard = pileGet(dragNum, dragIndex);
+      var dragHasChildren = dragIndex < (dragPileSize - 1 | 0);
+      var dragSlice = pileSlice(dragNum, dragIndex);
+      if (dropSpace !== undefined && typeof dropSpace === "object") {
+        switch (dropSpace.TAG) {
+          case "PileBase" :
+              var dropNum = dropSpace._0;
+              setGame(function (game) {
+                    return {
+                            piles: game.piles.map(function (pile, i) {
+                                  if (i === dragNum) {
+                                    return pile.slice(0, dragIndex);
+                                  } else if (i === dropNum) {
+                                    return pile.concat(dragSlice);
+                                  } else {
+                                    return pile;
+                                  }
+                                }),
+                            foundations: game.foundations,
+                            stock: game.stock,
+                            waste: game.waste,
+                            movesCounter: game.movesCounter,
+                            gameEnded: game.gameEnded
+                          };
+                  });
+              break;
+          case "FoundationBase" :
+              if (dragCard.rank === "RA" && !dragHasChildren) {
+                var dropNum$1 = dropSpace._0;
+                setGame(function (game) {
                       return {
                               piles: game.piles.map(function (pile, i) {
                                     if (i === dragNum) {
@@ -740,65 +825,71 @@ function App(props) {
                               gameEnded: game.gameEnded
                             };
                     });
-      case "PileChild" :
-          var dropIndex = dropSpace._1;
-          var dropNum$2 = dropSpace._0;
-          var dropPileSize = piles[dropNum$2].length;
-          var dropCard = pileGet(dropNum$2, dropIndex);
-          var dropHasChildren = dropIndex < (dropPileSize - 1 | 0);
-          if (rankIsBelow(dragCard, dropCard) && isOppositeColor(dragCard, dropCard) && !dropHasChildren) {
-            return setGame(function (game) {
-                        return {
-                                piles: game.piles.map(function (pile, i) {
-                                      if (i === dragNum) {
-                                        return pile.slice(0, dragIndex);
-                                      } else if (i === dropNum$2) {
-                                        return pile.concat(dragSlice);
-                                      } else {
-                                        return pile;
-                                      }
-                                    }),
-                                foundations: game.foundations,
-                                stock: game.stock,
-                                waste: game.waste,
-                                movesCounter: game.movesCounter,
-                                gameEnded: game.gameEnded
-                              };
-                      });
-          } else {
-            return ;
-          }
-      case "FoundationChild" :
-          var dropNum$3 = dropSpace._0;
-          var dropCard$1 = foundationGet(dropNum$3, dropSpace._1);
-          if (rankIsAbove(dragCard, dropCard$1) && dragCard.suit === dropCard$1.suit && !dragHasChildren) {
-            return setGame(function (game) {
-                        return {
-                                piles: game.piles.map(function (pile, i) {
-                                      if (i === dragNum) {
-                                        return pile.slice(0, dragIndex);
-                                      } else {
-                                        return pile;
-                                      }
-                                    }),
-                                foundations: game.foundations.map(function (foundation, i) {
-                                      if (i === dropNum$3) {
-                                        return foundation.concat(dragSlice);
-                                      } else {
-                                        return foundation;
-                                      }
-                                    }),
-                                stock: game.stock,
-                                waste: game.waste,
-                                movesCounter: game.movesCounter,
-                                gameEnded: game.gameEnded
-                              };
-                      });
-          } else {
-            return ;
-          }
+              }
+              break;
+          case "PileChild" :
+              var dropIndex = dropSpace._1;
+              var dropNum$2 = dropSpace._0;
+              var dropPileSize = piles[dropNum$2].length;
+              var dropCard = pileGet(dropNum$2, dropIndex);
+              var dropHasChildren = dropIndex < (dropPileSize - 1 | 0);
+              if (rankIsBelow(dragCard, dropCard) && isOppositeColor(dragCard, dropCard) && !dropHasChildren) {
+                setGame(function (game) {
+                      return {
+                              piles: game.piles.map(function (pile, i) {
+                                    if (i === dragNum) {
+                                      return pile.slice(0, dragIndex);
+                                    } else if (i === dropNum$2) {
+                                      return pile.concat(dragSlice);
+                                    } else {
+                                      return pile;
+                                    }
+                                  }),
+                              foundations: game.foundations,
+                              stock: game.stock,
+                              waste: game.waste,
+                              movesCounter: game.movesCounter,
+                              gameEnded: game.gameEnded
+                            };
+                    });
+              }
+              break;
+          case "FoundationChild" :
+              var dropNum$3 = dropSpace._0;
+              var dropCard$1 = foundationGet(dropNum$3, dropSpace._1);
+              if (rankIsAbove(dragCard, dropCard$1) && dragCard.suit === dropCard$1.suit && !dragHasChildren) {
+                setGame(function (game) {
+                      return {
+                              piles: game.piles.map(function (pile, i) {
+                                    if (i === dragNum) {
+                                      return pile.slice(0, dragIndex);
+                                    } else {
+                                      return pile;
+                                    }
+                                  }),
+                              foundations: game.foundations.map(function (foundation, i) {
+                                    if (i === dropNum$3) {
+                                      return foundation.concat(dragSlice);
+                                    } else {
+                                      return foundation;
+                                    }
+                                  }),
+                              stock: game.stock,
+                              waste: game.waste,
+                              movesCounter: game.movesCounter,
+                              gameEnded: game.gameEnded
+                            };
+                    });
+              }
+              break;
+          
+        }
+      }
       
     }
+    setMoving(function (param) {
+          
+        });
   };
   var sum = function (arr) {
     return Core__Array.reduce(arr, 0, (function (a, c) {
@@ -809,6 +900,29 @@ function App(props) {
     return Core__Array.reduce(arr, 0, (function (a, c) {
                   return Math.max(a, c);
                 })) | 0;
+  };
+  var dealFromStock = function () {
+    setGame(function (game) {
+          var numDealt = game.stock.length > 3 ? 3 : game.stock.length;
+          return {
+                  piles: game.piles,
+                  foundations: game.foundations,
+                  stock: game.stock.slice(numDealt),
+                  waste: game.stock.slice(0, numDealt),
+                  movesCounter: game.movesCounter,
+                  gameEnded: game.gameEnded
+                };
+        });
+  };
+  var onDragStart = function ($$event) {
+    setMoving(function (param) {
+          return decodeDropId($$event.active.id);
+        });
+  };
+  var onDragCancel = function () {
+    setMoving(function (param) {
+          
+        });
   };
   return JsxRuntime.jsx(Core.DndContext, {
               children: JsxRuntime.jsxs("div", {
@@ -857,6 +971,17 @@ function App(props) {
                           }),
                       JsxRuntime.jsxs("div", {
                             children: [
+                              JsxRuntime.jsx(App$Stock, {
+                                    onClick: dealFromStock
+                                  }),
+                              JsxRuntime.jsx(App$Waste, {
+                                    waste: game.waste
+                                  })
+                            ],
+                            className: "flex flex-row gap-2 py-1"
+                          }),
+                      JsxRuntime.jsxs("div", {
+                            children: [
                               JsxRuntime.jsx(App$Foundation, {
                                     num: 0,
                                     stack: foundations[0]
@@ -880,31 +1005,38 @@ function App(props) {
                             children: [
                               JsxRuntime.jsx(App$Pile, {
                                     num: 0,
-                                    stack: piles[0]
+                                    stack: piles[0],
+                                    moving: moving
                                   }),
                               JsxRuntime.jsx(App$Pile, {
                                     num: 1,
-                                    stack: piles[1]
+                                    stack: piles[1],
+                                    moving: moving
                                   }),
                               JsxRuntime.jsx(App$Pile, {
                                     num: 2,
-                                    stack: piles[2]
+                                    stack: piles[2],
+                                    moving: moving
                                   }),
                               JsxRuntime.jsx(App$Pile, {
                                     num: 3,
-                                    stack: piles[3]
+                                    stack: piles[3],
+                                    moving: moving
                                   }),
                               JsxRuntime.jsx(App$Pile, {
                                     num: 4,
-                                    stack: piles[4]
+                                    stack: piles[4],
+                                    moving: moving
                                   }),
                               JsxRuntime.jsx(App$Pile, {
                                     num: 5,
-                                    stack: piles[5]
+                                    stack: piles[5],
+                                    moving: moving
                                   }),
                               JsxRuntime.jsx(App$Pile, {
                                     num: 6,
-                                    stack: piles[6]
+                                    stack: piles[6],
+                                    moving: moving
                                   })
                             ],
                             className: "flex flex-row gap-2 py-1"
@@ -912,7 +1044,9 @@ function App(props) {
                     ],
                     className: "p-6"
                   }),
-              onDragEnd: onDragEnd
+              onDragEnd: onDragEnd,
+              onDragStart: onDragStart,
+              onDragCancel: onDragCancel
             });
 }
 
