@@ -595,9 +595,13 @@ function App$WasteCard(props) {
   var match = Core.useDraggable({
         id: cardId
       });
-  var style = Core__Option.mapOr(Caml_option.nullable_to_opt(match.transform), {}, (function (t) {
+  var style = Core__Option.mapOr(Caml_option.nullable_to_opt(match.transform), {
+        zIndex: "1",
+        transform: "translate3d(0px, 0px, 0px)"
+      }, (function (t) {
           return {
-                  transform: "translate3d(" + t.x.toString() + "px, " + t.y.toString() + "px, 0)"
+                  zIndex: "2",
+                  transform: "translate3d(" + t.x.toString() + "px, " + t.y.toString() + "px, 0px)"
                 };
         }));
   return JsxRuntime.jsx("div", {
@@ -748,6 +752,7 @@ function App(props) {
     }
     
   };
+  var waste = game.waste;
   var foundations = game.foundations;
   var piles = game.piles;
   var pileGet = function (a, b) {
@@ -775,120 +780,219 @@ function App(props) {
   var onDragEnd = function (dragEndEvent) {
     var dropSpace = decodeDropId(dragEndEvent.over.id);
     var dragSpace = decodeDropId(dragEndEvent.active.id);
-    if (dragSpace !== undefined && dragSpace.TAG === "PileChild") {
-      var dragIndex = dragSpace._1;
-      var dragNum = dragSpace._0;
-      var dragPileSize = piles[dragNum].length;
-      var dragCard = pileGet(dragNum, dragIndex);
-      var dragHasChildren = dragIndex < (dragPileSize - 1 | 0);
-      var dragSlice = pileSlice(dragNum, dragIndex);
-      if (dropSpace !== undefined) {
-        switch (dropSpace.TAG) {
-          case "PileBase" :
-              var dropNum = dropSpace._0;
-              setGame(function (game) {
-                    return {
-                            piles: game.piles.map(function (pile, i) {
-                                  if (i === dragNum) {
-                                    return pile.slice(0, dragIndex);
-                                  } else if (i === dropNum) {
-                                    return pile.concat(dragSlice);
-                                  } else {
-                                    return pile;
-                                  }
-                                }),
-                            foundations: game.foundations,
-                            stock: game.stock,
-                            waste: game.waste,
-                            gameEnded: game.gameEnded
-                          };
-                  });
-              break;
-          case "FoundationBase" :
-              if (dragCard.rank === "RA" && !dragHasChildren) {
-                var dropNum$1 = dropSpace._0;
-                setGame(function (game) {
-                      return {
-                              piles: game.piles.map(function (pile, i) {
-                                    if (i === dragNum) {
-                                      return pile.slice(0, dragIndex);
-                                    } else {
-                                      return pile;
-                                    }
-                                  }),
-                              foundations: game.foundations.map(function (foundation, i) {
-                                    if (i === dropNum$1) {
-                                      return foundation.concat(dragSlice);
-                                    } else {
-                                      return foundation;
-                                    }
-                                  }),
-                              stock: game.stock,
-                              waste: game.waste,
-                              gameEnded: game.gameEnded
-                            };
-                    });
+    if (dragSpace !== undefined) {
+      switch (dragSpace.TAG) {
+        case "PileChild" :
+            var dragIndex = dragSpace._1;
+            var dragNum = dragSpace._0;
+            var dragPileSize = piles[dragNum].length;
+            var dragCard = pileGet(dragNum, dragIndex);
+            var dragHasChildren = dragIndex < (dragPileSize - 1 | 0);
+            var dragSlice = pileSlice(dragNum, dragIndex);
+            if (dropSpace !== undefined) {
+              switch (dropSpace.TAG) {
+                case "PileBase" :
+                    var dropNum = dropSpace._0;
+                    setGame(function (game) {
+                          return {
+                                  piles: game.piles.map(function (pile, i) {
+                                        if (i === dragNum) {
+                                          return pile.slice(0, dragIndex);
+                                        } else if (i === dropNum) {
+                                          return pile.concat(dragSlice);
+                                        } else {
+                                          return pile;
+                                        }
+                                      }),
+                                  foundations: game.foundations,
+                                  stock: game.stock,
+                                  waste: game.waste,
+                                  gameEnded: game.gameEnded
+                                };
+                        });
+                    break;
+                case "FoundationBase" :
+                    if (dragCard.rank === "RA" && !dragHasChildren) {
+                      var dropNum$1 = dropSpace._0;
+                      setGame(function (game) {
+                            return {
+                                    piles: game.piles.map(function (pile, i) {
+                                          if (i === dragNum) {
+                                            return pile.slice(0, dragIndex);
+                                          } else {
+                                            return pile;
+                                          }
+                                        }),
+                                    foundations: game.foundations.map(function (foundation, i) {
+                                          if (i === dropNum$1) {
+                                            return foundation.concat(dragSlice);
+                                          } else {
+                                            return foundation;
+                                          }
+                                        }),
+                                    stock: game.stock,
+                                    waste: game.waste,
+                                    gameEnded: game.gameEnded
+                                  };
+                          });
+                    }
+                    break;
+                case "PileChild" :
+                    var dropIndex = dropSpace._1;
+                    var dropNum$2 = dropSpace._0;
+                    var dropPileSize = piles[dropNum$2].length;
+                    var dropCard = pileGet(dropNum$2, dropIndex);
+                    var dropHasChildren = dropIndex < (dropPileSize - 1 | 0);
+                    if (rankIsBelow(dragCard, dropCard) && isOppositeColor(dragCard, dropCard) && !dropHasChildren) {
+                      setGame(function (game) {
+                            return {
+                                    piles: game.piles.map(function (pile, i) {
+                                          if (i === dragNum) {
+                                            return pile.slice(0, dragIndex);
+                                          } else if (i === dropNum$2) {
+                                            return pile.concat(dragSlice);
+                                          } else {
+                                            return pile;
+                                          }
+                                        }),
+                                    foundations: game.foundations,
+                                    stock: game.stock,
+                                    waste: game.waste,
+                                    gameEnded: game.gameEnded
+                                  };
+                          });
+                    }
+                    break;
+                case "FoundationChild" :
+                    var dropNum$3 = dropSpace._0;
+                    var dropCard$1 = foundationGet(dropNum$3, dropSpace._1);
+                    if (rankIsAbove(dragCard, dropCard$1) && dragCard.suit === dropCard$1.suit && !dragHasChildren) {
+                      setGame(function (game) {
+                            return {
+                                    piles: game.piles.map(function (pile, i) {
+                                          if (i === dragNum) {
+                                            return pile.slice(0, dragIndex);
+                                          } else {
+                                            return pile;
+                                          }
+                                        }),
+                                    foundations: game.foundations.map(function (foundation, i) {
+                                          if (i === dropNum$3) {
+                                            return foundation.concat(dragSlice);
+                                          } else {
+                                            return foundation;
+                                          }
+                                        }),
+                                    stock: game.stock,
+                                    waste: game.waste,
+                                    gameEnded: game.gameEnded
+                                  };
+                          });
+                    }
+                    break;
+                case "Waste" :
+                    break;
+                
               }
-              break;
-          case "PileChild" :
-              var dropIndex = dropSpace._1;
-              var dropNum$2 = dropSpace._0;
-              var dropPileSize = piles[dropNum$2].length;
-              var dropCard = pileGet(dropNum$2, dropIndex);
-              var dropHasChildren = dropIndex < (dropPileSize - 1 | 0);
-              if (rankIsBelow(dragCard, dropCard) && isOppositeColor(dragCard, dropCard) && !dropHasChildren) {
-                setGame(function (game) {
-                      return {
-                              piles: game.piles.map(function (pile, i) {
-                                    if (i === dragNum) {
-                                      return pile.slice(0, dragIndex);
-                                    } else if (i === dropNum$2) {
-                                      return pile.concat(dragSlice);
-                                    } else {
-                                      return pile;
-                                    }
-                                  }),
-                              foundations: game.foundations,
-                              stock: game.stock,
-                              waste: game.waste,
-                              gameEnded: game.gameEnded
-                            };
-                    });
+            }
+            break;
+        case "Waste" :
+            var dragCard$1 = waste[dragSpace._0];
+            var dragSlice$1 = [dragCard$1];
+            if (dropSpace !== undefined) {
+              switch (dropSpace.TAG) {
+                case "PileBase" :
+                    var dropNum$4 = dropSpace._0;
+                    setGame(function (game) {
+                          return {
+                                  piles: game.piles.map(function (pile, i) {
+                                        if (i === dropNum$4) {
+                                          return dragSlice$1;
+                                        } else {
+                                          return pile;
+                                        }
+                                      }),
+                                  foundations: game.foundations,
+                                  stock: game.stock,
+                                  waste: game.waste.slice(0, game.waste.length - 1 | 0),
+                                  gameEnded: game.gameEnded
+                                };
+                        });
+                    break;
+                case "FoundationBase" :
+                    if (dragCard$1.rank === "RA") {
+                      var dropNum$5 = dropSpace._0;
+                      setGame(function (game) {
+                            return {
+                                    piles: game.piles,
+                                    foundations: game.foundations.map(function (foundation, i) {
+                                          if (i === dropNum$5) {
+                                            return dragSlice$1;
+                                          } else {
+                                            return foundation;
+                                          }
+                                        }),
+                                    stock: game.stock,
+                                    waste: game.waste.slice(0, game.waste.length - 1 | 0),
+                                    gameEnded: game.gameEnded
+                                  };
+                          });
+                    }
+                    break;
+                case "PileChild" :
+                    var dropIndex$1 = dropSpace._1;
+                    var dropNum$6 = dropSpace._0;
+                    var dropPileSize$1 = piles[dropNum$6].length;
+                    var dropCard$2 = pileGet(dropNum$6, dropIndex$1);
+                    var dropHasChildren$1 = dropIndex$1 < (dropPileSize$1 - 1 | 0);
+                    if (rankIsBelow(dragCard$1, dropCard$2) && isOppositeColor(dragCard$1, dropCard$2) && !dropHasChildren$1) {
+                      setGame(function (game) {
+                            return {
+                                    piles: game.piles.map(function (pile, i) {
+                                          if (i === dropNum$6) {
+                                            return pile.concat(dragSlice$1);
+                                          } else {
+                                            return pile;
+                                          }
+                                        }),
+                                    foundations: game.foundations,
+                                    stock: game.stock,
+                                    waste: game.waste.slice(0, game.waste.length - 1 | 0),
+                                    gameEnded: game.gameEnded
+                                  };
+                          });
+                    }
+                    break;
+                case "FoundationChild" :
+                    var dropNum$7 = dropSpace._0;
+                    var dropCard$3 = foundationGet(dropNum$7, dropSpace._1);
+                    if (rankIsAbove(dragCard$1, dropCard$3) && dragCard$1.suit === dropCard$3.suit) {
+                      setGame(function (game) {
+                            return {
+                                    piles: game.piles,
+                                    foundations: game.foundations.map(function (foundation, i) {
+                                          if (i === dropNum$7) {
+                                            return foundation.concat(dragSlice$1);
+                                          } else {
+                                            return foundation;
+                                          }
+                                        }),
+                                    stock: game.stock,
+                                    waste: game.waste.slice(0, game.waste.length - 1 | 0),
+                                    gameEnded: game.gameEnded
+                                  };
+                          });
+                    }
+                    break;
+                case "Waste" :
+                    break;
+                
               }
-              break;
-          case "FoundationChild" :
-              var dropNum$3 = dropSpace._0;
-              var dropCard$1 = foundationGet(dropNum$3, dropSpace._1);
-              if (rankIsAbove(dragCard, dropCard$1) && dragCard.suit === dropCard$1.suit && !dragHasChildren) {
-                setGame(function (game) {
-                      return {
-                              piles: game.piles.map(function (pile, i) {
-                                    if (i === dragNum) {
-                                      return pile.slice(0, dragIndex);
-                                    } else {
-                                      return pile;
-                                    }
-                                  }),
-                              foundations: game.foundations.map(function (foundation, i) {
-                                    if (i === dropNum$3) {
-                                      return foundation.concat(dragSlice);
-                                    } else {
-                                      return foundation;
-                                    }
-                                  }),
-                              stock: game.stock,
-                              waste: game.waste,
-                              gameEnded: game.gameEnded
-                            };
-                    });
-              }
-              break;
-          case "Waste" :
-              break;
+            }
+            break;
+        default:
           
-        }
       }
-      
     }
     setMoving(function (param) {
           

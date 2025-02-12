@@ -426,9 +426,18 @@ module WasteCard = {
     let style =
       transform
       ->Nullable.toOption
-      ->Option.mapOr(({}: JsxDOMStyle.t), t => {
-        transform: `translate3d(${t["x"]->Int.toString}px, ${t["y"]->Int.toString}px, 0)`,
-      })
+      ->Option.mapOr(
+        (
+          {
+            transform: `translate3d(0px, 0px, 0px)`,
+            zIndex: "1",
+          }: JsxDOMStyle.t
+        ),
+        t => {
+          transform: `translate3d(${t["x"]->Int.toString}px, ${t["y"]->Int.toString}px, 0px)`,
+          zIndex: "2",
+        },
+      )
 
     <div
       ref={ReactDOM.Ref.callbackDomRef(setNodeRef)}
@@ -570,8 +579,9 @@ let make = () => {
     }
   }
 
-  let {piles, foundations, gameEnded} = game
+  let {piles, foundations, waste, gameEnded} = game
 
+  let wasteGet = a => waste->Array.getUnsafe(a)
   let pileGet = (a, b) => piles->Array.getUnsafe(a)->Array.getUnsafe(b)
   let pileSize = a => piles->Array.getUnsafe(a)->Array.length
   let pileSlice = (a, b) => piles->Array.getUnsafe(a)->Array.sliceToEnd(~start=b)
@@ -590,6 +600,83 @@ let make = () => {
     // Console.log3("DragEnd", dropSpace, dragSpace)
 
     switch dragSpace {
+    | Some(Waste(dragIndex)) => {
+        let dragCard = wasteGet(dragIndex)
+        let dragSlice = [dragCard]
+        switch dropSpace {
+        | Some(PileBase(dropNum)) =>
+          // move
+          setGame(game => {
+            ...game,
+            waste: game.waste->Array.slice(~start=0, ~end=game.waste->Array.length - 1),
+            piles: game.piles->Array.mapWithIndex((pile, i) => {
+              if i == dropNum {
+                dragSlice
+              } else {
+                pile
+              }
+            }),
+          })
+        | Some(FoundationBase(dropNum)) =>
+          if dragCard.rank == RA {
+            // move
+            setGame(game => {
+              ...game,
+              waste: game.waste->Array.slice(~start=0, ~end=game.waste->Array.length - 1),
+              foundations: game.foundations->Array.mapWithIndex((foundation, i) => {
+                if i == dropNum {
+                  dragSlice
+                } else {
+                  foundation
+                }
+              }),
+            })
+          }
+        | Some(PileChild(dropNum, dropIndex)) => {
+            let dropPileSize = pileSize(dropNum)
+            let dropCard = pileGet(dropNum, dropIndex)
+            let dropHasChildren = dropIndex < dropPileSize - 1
+
+            if (
+              Card.rankIsBelow(dragCard, dropCard) &&
+              Card.isOppositeColor(dragCard, dropCard) &&
+              !dropHasChildren
+            ) {
+              // move
+              setGame(game => {
+                ...game,
+                waste: game.waste->Array.slice(~start=0, ~end=game.waste->Array.length - 1),
+                piles: game.piles->Array.mapWithIndex((pile, i) => {
+                  if i == dropNum {
+                    Array.concat(pile, dragSlice)
+                  } else {
+                    pile
+                  }
+                }),
+              })
+            }
+          }
+        | Some(FoundationChild(dropNum, dropIndex)) => {
+            let dropCard = foundationGet(dropNum, dropIndex)
+
+            if Card.rankIsAbove(dragCard, dropCard) && dragCard.suit == dropCard.suit {
+              // move
+              setGame(game => {
+                ...game,
+                waste: game.waste->Array.slice(~start=0, ~end=game.waste->Array.length - 1),
+                foundations: game.foundations->Array.mapWithIndex((foundation, i) => {
+                  if i == dropNum {
+                    Array.concat(foundation, dragSlice)
+                  } else {
+                    foundation
+                  }
+                }),
+              })
+            }
+          }
+        | _ => ()
+        }
+      }
     | Some(PileChild(dragNum, dragIndex)) =>
       let dragPileSize = pileSize(dragNum)
       let dragCard = pileGet(dragNum, dragIndex)
