@@ -95,10 +95,10 @@ module Card = {
       <span className="flex flex-row">
         <span
           className={[
-            "text-center font-medium ",
+            "font-medium ",
             switch card.rank {
-            | R10 => "tracking-tighter w-4 -ml-px"
-            | _ => "w-3.5 "
+            | R10 => "tracking-[-0.1rem] w-4"
+            | _ => "w-3.5"
             },
           ]->Array.join(" ")}>
           {card->rankString->React.string}
@@ -107,9 +107,7 @@ module Card = {
           {card->suitString->React.string}
         </span>
       </span>
-      <span className="w-3.5 flex flex-row justify-center mt-0.5">
-        {card->suitString->React.string}
-      </span>
+      <span className="w-3.5 flex flex-row mt-0.5 -ml-0.5"> {card->suitString->React.string} </span>
     </span>
   }
 
@@ -333,6 +331,7 @@ module type CardComp = {
     canPutCardOnCard: (Card.card, Card.card, bool) => bool,
     aligned: bool,
     movingPile: bool,
+    movable: bool,
   }
   let make: React.component<props>
 }
@@ -346,6 +345,7 @@ module rec CardComp: CardComp = {
     canPutCardOnCard: (Card.card, Card.card, bool) => bool,
     aligned: bool,
     movingPile: bool,
+    movable: bool,
   }
 
   let make: React.component<props> = ({
@@ -355,6 +355,7 @@ module rec CardComp: CardComp = {
     num,
     index,
     place,
+    movable,
     movingPile,
   }) => {
     let card = stack->Array.getUnsafe(index)
@@ -390,11 +391,11 @@ module rec CardComp: CardComp = {
 
     <div
       ref={ReactDOM.Ref.callbackDomRef(setNodeRef)}
-      onPointerDown={listeners["onPointerDown"]}
+      onPointerDown={movable ? listeners["onPointerDown"] : _ => ()}
       style={style}>
       <div
         style={{
-          // transform: Card.rotation(card),
+          transform: Card.rotation(card),
           // position: "relative",
           // position: place == Foundation ? "relative" : "static",
           // zIndex: (isDragging ? 100 : 0)->Int.toString,
@@ -408,7 +409,7 @@ module rec CardComp: CardComp = {
         {card->Card.string}
       </div>
       {hasOnTop
-        ? <CardComp movingPile aligned stack canPutCardOnCard index={index + 1} num place />
+        ? <CardComp movable movingPile aligned stack canPutCardOnCard index={index + 1} num place />
         : <DropZone canDrop={true} cardId={cardId} />}
     </div>
   }
@@ -416,7 +417,7 @@ module rec CardComp: CardComp = {
 
 module WasteCard = {
   @react.component
-  let make = (~card: Card.card, ~index) => {
+  let make = (~card: Card.card, ~index, ~movable) => {
     let cardId = encodeDropId(Waste(index))
 
     let {isDragging: _, setNodeRef, listeners, transform} = useDraggable({
@@ -441,11 +442,11 @@ module WasteCard = {
 
     <div
       ref={ReactDOM.Ref.callbackDomRef(setNodeRef)}
-      onPointerDown={listeners["onPointerDown"]}
+      onPointerDown={movable ? listeners["onPointerDown"] : _ => ()}
       style={style}>
       <div
         style={{
-          // transform: Card.rotation(card),
+          transform: Card.rotation(card),
           position: "relative",
           // zIndex: ((isDragging ? 100 : 0) + index + 1)->Int.toString,
           color: card->Card.color,
@@ -473,6 +474,7 @@ module Pile = {
     // <div>
     stack->Array.length != 0
       ? <CardComp
+          movable={true}
           movingPile
           aligned={false}
           index={0}
@@ -493,6 +495,7 @@ module Foundation = {
     <div>
       {stack->Array.length != 0
         ? <CardComp
+            movable={false}
             aligned={true}
             index={0}
             stack
@@ -509,7 +512,7 @@ module Foundation = {
 module Stock = {
   @react.component
   let make = (~onClick) => {
-    <button onClick={_ => onClick()}> {"Stock"->React.string} </button>
+    <button className={"h-[80px] w-[57px] bg-sky-900 rounded"} onClick={_ => onClick()} />
   }
 }
 
@@ -520,7 +523,7 @@ module Waste = {
     <div className={"flex flex-row"}>
       {waste
       ->Array.mapWithIndex((wasteCard: Card.card, index) => {
-        <WasteCard card={wasteCard} index={index} />
+        <WasteCard card={wasteCard} index={index} movable={index == waste->Array.length - 1} />
       })
       ->React.array}
     </div>
@@ -788,7 +791,7 @@ let make = () => {
       {
         ...game,
         stock: game.stock->Array.sliceToEnd(~start=numDealt),
-        waste: game.stock->Array.slice(~start=0, ~end=numDealt),
+        waste: Array.concat(game.waste, game.stock->Array.slice(~start=0, ~end=numDealt)),
       }
     })
   }

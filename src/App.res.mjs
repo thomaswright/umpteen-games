@@ -256,7 +256,7 @@ function suitString(card) {
 function string(card) {
   var match = card.rank;
   var tmp;
-  tmp = match === "R10" ? "tracking-tighter w-4 -ml-px" : "w-3.5 ";
+  tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
   return JsxRuntime.jsxs("span", {
               children: [
                 JsxRuntime.jsxs("span", {
@@ -264,7 +264,7 @@ function string(card) {
                         JsxRuntime.jsx("span", {
                               children: rankString(card),
                               className: [
-                                  "text-center font-medium ",
+                                  "font-medium ",
                                   tmp
                                 ].join(" ")
                             }),
@@ -277,7 +277,7 @@ function string(card) {
                     }),
                 JsxRuntime.jsx("span", {
                       children: suitString(card),
-                      className: "w-3.5 flex flex-row justify-center mt-0.5"
+                      className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
                     })
               ],
               className: "flex flex-col"
@@ -299,6 +299,16 @@ function color(card) {
 
 function isOppositeColor(a, b) {
   return isRed(a) !== isRed(b);
+}
+
+function rotation(card) {
+  var suitJitter = allSuits.findIndex(function (s) {
+        return s === card.suit;
+      }) - 2 | 0;
+  var rankJitter = allRanks.findIndex(function (r) {
+        return r === card.rank;
+      }) % 4 - 2 | 0;
+  return "rotate(" + (suitJitter + rankJitter | 0).toString() + "deg)";
 }
 
 function getShuffledDeck() {
@@ -502,7 +512,7 @@ function decodeDropId(d) {
 
 var CardComp = Caml_module.init_mod([
       "App.res",
-      340,
+      339,
       32
     ], {
       TAG: "Module",
@@ -513,6 +523,7 @@ var CardComp = Caml_module.init_mod([
     });
 
 function make(param) {
+  var movable = param.movable;
   var movingPile = param.movingPile;
   var place = param.place;
   var num = param.num;
@@ -553,7 +564,8 @@ function make(param) {
                           place === "Pile" ? "-mb-[58px]" : "-mb-[80px]"
                         ].join(" "),
                       style: {
-                        color: color(card)
+                        color: color(card),
+                        transform: rotation(card)
                       }
                     }),
                 hasOnTop ? JsxRuntime.jsx(CardComp.make, {
@@ -563,7 +575,8 @@ function make(param) {
                         place: place,
                         canPutCardOnCard: param.canPutCardOnCard,
                         aligned: param.aligned,
-                        movingPile: movingPile
+                        movingPile: movingPile,
+                        movable: movable
                       }) : JsxRuntime.jsx(App$DropZone, {
                         canDrop: true,
                         cardId: cardId
@@ -571,7 +584,9 @@ function make(param) {
               ],
               ref: Caml_option.some(match.setNodeRef),
               style: style,
-              onPointerDown: match.listeners.onPointerDown
+              onPointerDown: movable ? match.listeners.onPointerDown : (function (param) {
+                    
+                  })
             });
 }
 
@@ -613,12 +628,15 @@ function App$WasteCard(props) {
                       ].join(" "),
                     style: {
                       color: color(card),
-                      position: "relative"
+                      position: "relative",
+                      transform: rotation(card)
                     }
                   }),
               ref: Caml_option.some(match.setNodeRef),
               style: style,
-              onPointerDown: match.listeners.onPointerDown
+              onPointerDown: props.movable ? match.listeners.onPointerDown : (function (param) {
+                    
+                  })
             });
 }
 
@@ -635,7 +653,8 @@ function App$Pile(props) {
                 place: "Pile",
                 canPutCardOnCard: canPutOnPile,
                 aligned: false,
-                movingPile: movingPile
+                movingPile: movingPile,
+                movable: true
               });
   } else {
     return JsxRuntime.jsx(App$DropZone, {
@@ -660,7 +679,8 @@ function App$Foundation(props) {
                       place: "Foundation",
                       canPutCardOnCard: canPutOnFoundation,
                       aligned: true,
-                      movingPile: false
+                      movingPile: false,
+                      movable: false
                     }) : JsxRuntime.jsx(App$DropZone, {
                       canDrop: true,
                       empty: true,
@@ -675,7 +695,7 @@ function App$Foundation(props) {
 function App$Stock(props) {
   var onClick = props.onClick;
   return JsxRuntime.jsx("button", {
-              children: "Stock",
+              className: "h-[80px] w-[57px] bg-sky-900 rounded",
               onClick: (function (param) {
                   onClick();
                 })
@@ -689,7 +709,8 @@ function App$Waste(props) {
               children: waste.map(function (wasteCard, index) {
                     return JsxRuntime.jsx(App$WasteCard, {
                                 card: wasteCard,
-                                index: index
+                                index: index,
+                                movable: index === (waste.length - 1 | 0)
                               });
                   }),
               className: "flex flex-row"
@@ -1015,7 +1036,7 @@ function App(props) {
                   piles: game.piles,
                   foundations: game.foundations,
                   stock: game.stock.slice(numDealt),
-                  waste: game.stock.slice(0, numDealt),
+                  waste: game.waste.concat(game.stock.slice(0, numDealt)),
                   gameEnded: game.gameEnded
                 };
         });
