@@ -158,7 +158,6 @@ module Klondike = {
     foundations: array<array<Card.card>>,
     stock: array<Card.card>,
     waste: array<Card.card>,
-    movesCounter: int,
     gameEnded: bool,
   }
 
@@ -187,7 +186,6 @@ module Klondike = {
       foundations: [[], [], [], []],
       stock: shuffledDeck->Array.sliceToEnd(~start=28),
       waste: [],
-      movesCounter: 0,
       gameEnded: false,
     }
   }
@@ -278,7 +276,7 @@ type dropLoc =
   | FoundationBase(int)
   | PileChild(int, int)
   | FoundationChild(int, int)
-  | Waste
+  | Waste(int)
 
 let encodeDropId = (d: dropLoc) => {
   switch d {
@@ -286,7 +284,7 @@ let encodeDropId = (d: dropLoc) => {
   | FoundationBase(num) => ["FoundationBase", num->Int.toString]
   | PileChild(num, index) => ["PileChild", num->Int.toString, index->Int.toString]
   | FoundationChild(num, index) => ["FoundationChild", num->Int.toString, index->Int.toString]
-  | Waste => ["Waste"]
+  | Waste(index) => ["Waste", index->Int.toString]
   }->Array.join("-")
 }
 
@@ -317,7 +315,11 @@ let decodeDropId = d => {
     | (Some(n), Some(i)) => FoundationChild(n, i)->Some
     | _ => None
     }
-  | ["Waste"] => Waste->Some
+  | ["Waste", index] =>
+    switch index->Int.fromString {
+    | Some(n) => Waste(n)->Some
+    | _ => None
+    }
   | _ => None
   }
 }
@@ -366,7 +368,7 @@ module rec CardComp: CardComp = {
       },
     )
 
-    let {isDragging, setNodeRef, listeners, transform} = useDraggable({
+    let {isDragging: _, setNodeRef, listeners, transform} = useDraggable({
       id: cardId,
     })
 
@@ -414,10 +416,10 @@ module rec CardComp: CardComp = {
 
 module WasteCard = {
   @react.component
-  let make = (~card: Card.card, ~isTop: bool) => {
-    let cardId = encodeDropId(Waste)
+  let make = (~card: Card.card, ~index) => {
+    let cardId = encodeDropId(Waste(index))
 
-    let {isDragging, setNodeRef, listeners, transform} = useDraggable({
+    let {isDragging: _, setNodeRef, listeners, transform} = useDraggable({
       id: cardId,
     })
 
@@ -441,7 +443,7 @@ module WasteCard = {
         }}
         className={[
           " border border-gray-300 rounded h-[80px] w-[57px] bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
-          isTop ? "" : "-ml-[37px]",
+          index == 0 ? "" : "-ml-[37px]",
         ]->Array.join(" ")}>
         // <div className={" bg-blue-500 h-2 w-2 rotate-45"}> {""->React.string} </div>
         {card->Card.string}
@@ -508,8 +510,8 @@ module Waste = {
     Console.log(waste)
     <div className={"flex flex-row"}>
       {waste
-      ->Array.mapWithIndex((wasteCard: Card.card, i) => {
-        <WasteCard card={wasteCard} isTop={i == 0} />
+      ->Array.mapWithIndex((wasteCard: Card.card, index) => {
+        <WasteCard card={wasteCard} index={index} />
       })
       ->React.array}
     </div>
@@ -568,7 +570,7 @@ let make = () => {
     }
   }
 
-  let {piles, foundations, movesCounter, gameEnded} = game
+  let {piles, foundations, gameEnded} = game
 
   let pileGet = (a, b) => piles->Array.getUnsafe(a)->Array.getUnsafe(b)
   let pileSize = a => piles->Array.getUnsafe(a)->Array.length
@@ -692,7 +694,6 @@ let make = () => {
 
   let sum = arr => arr->Array.reduce(0, (a, c) => a + c)
   let max = arr => arr->Array.reduce(0., (a, c) => Math.max(a, c->Int.toFloat))->Int.fromFloat
-  let min = arr => arr->Array.reduce(0., (a, c) => Math.min(a, c->Int.toFloat))->Int.fromFloat
 
   let dealFromStock = () => {
     setGame(game => {
