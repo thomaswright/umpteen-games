@@ -589,7 +589,7 @@ let make = () => {
     }
   }
 
-  let {piles, foundations, waste, gameEnded} = game
+  let {piles, foundations, waste} = game
 
   let wasteGet = a => waste->Array.getUnsafe(a)
   let pileGet = (a, b) => piles->Array.getUnsafe(a)->Array.getUnsafe(b)
@@ -820,6 +820,8 @@ let make = () => {
   }
 
   let stockEmpty = game.stock->Array.length == 0
+
+  let gameEnded = game.foundations->Array.every(f => f->Array.length == 13)
 
   <DndContext onDragEnd={onDragEnd} onDragStart onDragCancel>
     <div className="p-6">

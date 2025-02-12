@@ -1068,6 +1068,9 @@ function App(props) {
         });
   };
   var stockEmpty = game.stock.length === 0;
+  var gameEnded = game.foundations.every(function (f) {
+        return f.length === 13;
+      });
   return JsxRuntime.jsx(Core.DndContext, {
               children: JsxRuntime.jsxs("div", {
                     children: [
@@ -1109,7 +1112,7 @@ function App(props) {
                                     className: "flex flex-col text-xs bg-gray-200 p-1 py-2 w-40 rounded-lg my-1"
                                   }),
                               JsxRuntime.jsx("div", {
-                                    children: game.gameEnded ? "You win!" : null
+                                    children: gameEnded ? "You win!" : null
                                   })
                             ]
                           }),
