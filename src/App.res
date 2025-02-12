@@ -511,8 +511,15 @@ module Foundation = {
 
 module Stock = {
   @react.component
-  let make = (~onClick) => {
-    <button className={"h-[80px] w-[57px] bg-sky-900 rounded"} onClick={_ => onClick()} />
+  let make = (~onClick, ~empty) => {
+    <button
+      className={[
+        "h-[80px] w-[57px] rounded border",
+        empty ? "bg-gray-100 border-gray-300" : "bg-sky-900 border-transparent",
+      ]->Array.join(" ")}
+      onClick={_ => onClick()}>
+      {(empty ? "↩︎" : "")->React.string}
+    </button>
   }
 }
 
@@ -796,6 +803,14 @@ let make = () => {
     })
   }
 
+  let restock = () => {
+    setGame(game => {
+      ...game,
+      stock: game.waste,
+      waste: [],
+    })
+  }
+
   let onDragStart = event => {
     setMoving(_ => decodeDropId(event["active"]["id"]))
   }
@@ -803,6 +818,8 @@ let make = () => {
   let onDragCancel = () => {
     setMoving(_ => None)
   }
+
+  let stockEmpty = game.stock->Array.length == 0
 
   <DndContext onDragEnd={onDragEnd} onDragStart onDragCancel>
     <div className="p-6">
@@ -837,7 +854,7 @@ let make = () => {
         <div> {gameEnded ? "You win!"->React.string : React.null} </div>
       </div>
       <div className={"flex flex-row gap-2 py-1"}>
-        <Stock onClick={dealFromStock} />
+        <Stock onClick={stockEmpty ? restock : dealFromStock} empty={stockEmpty} />
         <Waste waste={game.waste} />
       </div>
       <div className={"flex flex-row gap-2 py-1"}>

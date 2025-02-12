@@ -693,9 +693,14 @@ function App$Foundation(props) {
 }
 
 function App$Stock(props) {
+  var empty = props.empty;
   var onClick = props.onClick;
   return JsxRuntime.jsx("button", {
-              className: "h-[80px] w-[57px] bg-sky-900 rounded",
+              children: empty ? "↩︎" : "",
+              className: [
+                  "h-[80px] w-[57px] rounded border",
+                  empty ? "bg-gray-100 border-gray-300" : "bg-sky-900 border-transparent"
+                ].join(" "),
               onClick: (function (param) {
                   onClick();
                 })
@@ -1041,6 +1046,17 @@ function App(props) {
                 };
         });
   };
+  var restock = function () {
+    setGame(function (game) {
+          return {
+                  piles: game.piles,
+                  foundations: game.foundations,
+                  stock: game.waste,
+                  waste: [],
+                  gameEnded: game.gameEnded
+                };
+        });
+  };
   var onDragStart = function ($$event) {
     setMoving(function (param) {
           return decodeDropId($$event.active.id);
@@ -1051,6 +1067,7 @@ function App(props) {
           
         });
   };
+  var stockEmpty = game.stock.length === 0;
   return JsxRuntime.jsx(Core.DndContext, {
               children: JsxRuntime.jsxs("div", {
                     children: [
@@ -1099,7 +1116,8 @@ function App(props) {
                       JsxRuntime.jsxs("div", {
                             children: [
                               JsxRuntime.jsx(App$Stock, {
-                                    onClick: dealFromStock
+                                    onClick: stockEmpty ? restock : dealFromStock,
+                                    empty: stockEmpty
                                   }),
                               JsxRuntime.jsx(App$Waste, {
                                     waste: game.waste
