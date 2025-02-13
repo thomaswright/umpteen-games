@@ -33,6 +33,14 @@ var allSuits = [
   "Clubs"
 ];
 
+function equals(a, b) {
+  if (a.suit === b.suit) {
+    return a.rank === b.rank;
+  } else {
+    return false;
+  }
+}
+
 function isRed(card) {
   if (card.suit === "Hearts") {
     return true;
@@ -238,6 +246,50 @@ function rankString(card) {
   }
 }
 
+function stringToRank(s) {
+  switch (s) {
+    case "10" :
+        return "R10";
+    case "2" :
+        return "R2";
+    case "3" :
+        return "R3";
+    case "4" :
+        return "R4";
+    case "5" :
+        return "R5";
+    case "6" :
+        return "R6";
+    case "7" :
+        return "R7";
+    case "8" :
+        return "R8";
+    case "9" :
+        return "R9";
+    case "J" :
+        return "RJ";
+    case "K" :
+        return "RK";
+    case "Q" :
+        return "RQ";
+    default:
+      return "RA";
+  }
+}
+
+function stringToSuit(s) {
+  switch (s) {
+    case "♣" :
+        return "Clubs";
+    case "♥" :
+        return "Hearts";
+    case "♦" :
+        return "Diamonds";
+    default:
+      return "Spades";
+  }
+}
+
 function suitString(card) {
   var match = card.suit;
   switch (match) {
@@ -253,7 +305,7 @@ function suitString(card) {
   }
 }
 
-function string(card) {
+function display(card) {
   var match = card.rank;
   var tmp;
   tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
@@ -297,6 +349,17 @@ function color(card) {
   }
 }
 
+function id(card) {
+  return rankString(card) + "-" + suitString(card);
+}
+
+function fromId(id) {
+  return {
+          suit: stringToSuit(id.split("-")[1]),
+          rank: stringToRank(id.split("-")[0])
+        };
+}
+
 function isOppositeColor(a, b) {
   return isRed(a) !== isRed(b);
 }
@@ -306,8 +369,7 @@ function getShuffledDeck() {
                     return Core__Array.reduce(allSuits, a, (function (a2, suit) {
                                   return a2.concat([{
                                                 suit: suit,
-                                                rank: rank,
-                                                revealed: false
+                                                rank: rank
                                               }]);
                                 }));
                   })));
@@ -357,131 +419,9 @@ function App$DropZone(props) {
             });
 }
 
-function encodeDropId(d) {
-  var tmp;
-  switch (d.TAG) {
-    case "PileBase" :
-        tmp = [
-          "PileBase",
-          d._0.toString()
-        ];
-        break;
-    case "FoundationBase" :
-        tmp = [
-          "FoundationBase",
-          d._0.toString()
-        ];
-        break;
-    case "PileChild" :
-        tmp = [
-          "PileChild",
-          d._0.toString(),
-          d._1.toString()
-        ];
-        break;
-    case "FoundationChild" :
-        tmp = [
-          "FoundationChild",
-          d._0.toString(),
-          d._1.toString()
-        ];
-        break;
-    case "Waste" :
-        tmp = [
-          "Waste",
-          d._0.toString()
-        ];
-        break;
-    
-  }
-  return tmp.join("-");
-}
-
-function decodeDropId(d) {
-  var split = d.split("-");
-  var len = split.length;
-  if (len !== 2) {
-    if (len !== 3) {
-      return ;
-    }
-    var match = split[0];
-    switch (match) {
-      case "FoundationChild" :
-          var num = split[1];
-          var index = split[2];
-          var match$1 = Core__Int.fromString(num, undefined);
-          var match$2 = Core__Int.fromString(index, undefined);
-          if (match$1 !== undefined && match$2 !== undefined) {
-            return {
-                    TAG: "FoundationChild",
-                    _0: match$1,
-                    _1: match$2
-                  };
-          } else {
-            return ;
-          }
-      case "PileChild" :
-          var num$1 = split[1];
-          var index$1 = split[2];
-          var match$3 = Core__Int.fromString(num$1, undefined);
-          var match$4 = Core__Int.fromString(index$1, undefined);
-          if (match$3 !== undefined && match$4 !== undefined) {
-            return {
-                    TAG: "PileChild",
-                    _0: match$3,
-                    _1: match$4
-                  };
-          } else {
-            return ;
-          }
-      default:
-        return ;
-    }
-  } else {
-    var match$5 = split[0];
-    switch (match$5) {
-      case "FoundationBase" :
-          var num$2 = split[1];
-          var n = Core__Int.fromString(num$2, undefined);
-          if (n !== undefined) {
-            return {
-                    TAG: "FoundationBase",
-                    _0: n
-                  };
-          } else {
-            return ;
-          }
-      case "PileBase" :
-          var num$3 = split[1];
-          var n$1 = Core__Int.fromString(num$3, undefined);
-          if (n$1 !== undefined) {
-            return {
-                    TAG: "PileBase",
-                    _0: n$1
-                  };
-          } else {
-            return ;
-          }
-      case "Waste" :
-          var index$2 = split[1];
-          var n$2 = Core__Int.fromString(index$2, undefined);
-          if (n$2 !== undefined) {
-            return {
-                    TAG: "Waste",
-                    _0: n$2
-                  };
-          } else {
-            return ;
-          }
-      default:
-        return ;
-    }
-  }
-}
-
 var CardComp = Caml_module.init_mod([
       "App.res",
-      320,
+      356,
       32
     ], {
       TAG: "Module",
@@ -495,23 +435,12 @@ function make(param) {
   var movable = param.movable;
   var movingPile = param.movingPile;
   var place = param.place;
-  var num = param.num;
   var index = param.index;
   var stack = param.stack;
   var card = stack[index];
   var onTop = stack[index + 1 | 0];
   var hasOnTop = Core__Option.isSome(onTop);
-  var tmp;
-  tmp = place === "Pile" ? ({
-        TAG: "PileChild",
-        _0: num,
-        _1: index
-      }) : ({
-        TAG: "FoundationChild",
-        _0: num,
-        _1: index
-      });
-  var cardId = encodeDropId(tmp);
+  var cardId = id(card);
   var match = Core.useDraggable({
         id: cardId
       });
@@ -527,7 +456,7 @@ function make(param) {
   return JsxRuntime.jsxs("div", {
               children: [
                 JsxRuntime.jsx("div", {
-                      children: string(card),
+                      children: display(card),
                       className: [
                           " border border-gray-300 rounded h-[80px] w-[57px] bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
                           place === "Pile" ? "-mb-[58px]" : "-mb-[80px]"
@@ -539,13 +468,13 @@ function make(param) {
                 hasOnTop ? JsxRuntime.jsx(CardComp.make, {
                         stack: stack,
                         index: index + 1 | 0,
-                        num: num,
+                        num: param.num,
                         place: place,
                         aligned: param.aligned,
                         movingPile: movingPile,
                         movable: movable
                       }) : JsxRuntime.jsx(App$DropZone, {
-                        cardId: cardId
+                        cardId: "card-" + cardId
                       })
               ],
               ref: Caml_option.some(match.setNodeRef),
@@ -567,12 +496,8 @@ Caml_module.update_mod({
     });
 
 function App$WasteCard(props) {
-  var index = props.index;
   var card = props.card;
-  var cardId = encodeDropId({
-        TAG: "Waste",
-        _0: index
-      });
+  var cardId = id(card);
   var match = Core.useDraggable({
         id: cardId
       });
@@ -587,10 +512,10 @@ function App$WasteCard(props) {
         }));
   return JsxRuntime.jsx("div", {
               children: JsxRuntime.jsx("div", {
-                    children: string(card),
+                    children: display(card),
                     className: [
                         " border border-gray-300 rounded h-[80px] w-[57px] bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
-                        index === 0 ? "" : "-ml-[37px]"
+                        props.index === 0 ? "" : "-ml-[37px]"
                       ].join(" "),
                     style: {
                       color: color(card),
@@ -623,10 +548,7 @@ function App$Pile(props) {
   } else {
     return JsxRuntime.jsx(App$DropZone, {
                 empty: true,
-                cardId: encodeDropId({
-                      TAG: "PileBase",
-                      _0: num
-                    })
+                cardId: "pile-" + num.toString()
               });
   }
 }
@@ -647,10 +569,7 @@ function App$Foundation(props) {
   } else {
     return JsxRuntime.jsx(App$DropZone, {
                 empty: true,
-                cardId: encodeDropId({
-                      TAG: "FoundationBase",
-                      _0: num
-                    })
+                cardId: "foundation-" + num.toString()
               });
   }
 }
@@ -765,9 +684,94 @@ function App(props) {
                 };
         });
   };
+  var locateCard = function (card) {
+    var loc = {
+      contents: undefined
+    };
+    foundations.forEach(function (foundation, num) {
+          foundation.forEach(function (c, index) {
+                if (equals(card, c)) {
+                  loc.contents = {
+                    TAG: "FoundationChild",
+                    _0: num,
+                    _1: index
+                  };
+                  return ;
+                }
+                
+              });
+        });
+    piles.forEach(function (pile, num) {
+          pile.forEach(function (c, index) {
+                if (equals(card, c)) {
+                  loc.contents = {
+                    TAG: "PileChild",
+                    _0: num,
+                    _1: index
+                  };
+                  return ;
+                }
+                
+              });
+        });
+    waste.forEach(function (c, index) {
+          if (equals(card, c)) {
+            loc.contents = {
+              TAG: "Waste",
+              _0: index
+            };
+            return ;
+          }
+          
+        });
+    return loc.contents;
+  };
   var onDragEnd = function (dragEndEvent) {
-    var dropSpace = decodeDropId(dragEndEvent.over.id);
-    var dragSpace = decodeDropId(dragEndEvent.active.id);
+    console.log(dragEndEvent);
+    var match = dragEndEvent.over.id.split("-");
+    var len = match.length;
+    var dropSpace;
+    if (len !== 2) {
+      if (len !== 3) {
+        dropSpace = undefined;
+      } else {
+        var match$1 = match[0];
+        if (match$1 === "card") {
+          var rank = match[1];
+          var suit = match[2];
+          var card = fromId(rank + "-" + suit);
+          dropSpace = locateCard(card);
+        } else {
+          dropSpace = undefined;
+        }
+      }
+    } else {
+      var match$2 = match[0];
+      switch (match$2) {
+        case "foundation" :
+            var num = match[1];
+            dropSpace = Core__Option.map(Core__Int.fromString(num, undefined), (function (v) {
+                    return {
+                            TAG: "FoundationBase",
+                            _0: v
+                          };
+                  }));
+            break;
+        case "pile" :
+            var num$1 = match[1];
+            dropSpace = Core__Option.map(Core__Int.fromString(num$1, undefined), (function (v) {
+                    return {
+                            TAG: "PileBase",
+                            _0: v
+                          };
+                  }));
+            break;
+        default:
+          dropSpace = undefined;
+      }
+    }
+    var draggingCard = fromId(dragEndEvent.active.id);
+    var dragSpace = locateCard(draggingCard);
     if (dragSpace !== undefined) {
       switch (dragSpace.TAG) {
         case "PileChild" :
@@ -1022,7 +1026,7 @@ function App(props) {
   };
   var onDragStart = function ($$event) {
     setMoving(function (param) {
-          return decodeDropId($$event.active.id);
+          return locateCard(fromId($$event.active.id));
         });
   };
   var onDragCancel = function () {

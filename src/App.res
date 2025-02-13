@@ -23,10 +23,13 @@ module Card = {
   type rec card = {
     suit: suit,
     rank: rank,
-    revealed: bool,
+    // revealed: bool,
     // cardOnTop: option<card>,
   }
 
+  let equals = (a, b) => {
+    a.suit == b.suit && a.rank == b.rank
+  }
   let isRed = (card: card) => card.suit == Hearts || card.suit == Diamonds
   let isBlack = (card: card) => card.suit == Spades || card.suit == Clubs
 
@@ -82,6 +85,33 @@ module Card = {
     | RK => "K"
     }
 
+  let stringToRank = s =>
+    switch s {
+    | "A" => RA
+    | "2" => R2
+    | "3" => R3
+    | "4" => R4
+    | "5" => R5
+    | "6" => R6
+    | "7" => R7
+    | "8" => R8
+    | "9" => R9
+    | "10" => R10
+    | "J" => RJ
+    | "Q" => RQ
+    | "K" => RK
+    | _ => RA
+    }
+
+  let stringToSuit = s =>
+    switch s {
+    | "♠" => Spades
+    | "♥" => Hearts
+    | "♦" => Diamonds
+    | "♣" => Clubs
+    | _ => Spades
+    }
+
   let suitString = card =>
     switch card.suit {
     | Spades => "♠"
@@ -90,7 +120,7 @@ module Card = {
     | Clubs => "♣"
     }
 
-  let string = (card: card) => {
+  let display = (card: card) => {
     <span className="flex flex-col">
       <span className="flex flex-row">
         <span
@@ -119,7 +149,14 @@ module Card = {
     | Clubs => "hsl(0 0% 0%)"
     }
 
-  let id = (card: card) => card->rankString ++ card->suitString
+  let id = (card: card) => card->rankString ++ "-" ++ card->suitString
+
+  let fromId = (id: string) => {
+    {
+      rank: id->String.split("-")->Array.getUnsafe(0)->stringToRank,
+      suit: id->String.split("-")->Array.getUnsafe(1)->stringToSuit,
+    }
+  }
 
   let isOppositeColor = (a, b) => isRed(a) != isRed(b)
 
@@ -140,7 +177,6 @@ let getShuffledDeck = () => {
           {
             suit,
             rank,
-            revealed: false,
             // cardOnTop: None,
           }: Card.card
         ),
@@ -159,13 +195,13 @@ module Klondike = {
     gameEnded: bool,
   }
 
-  let canPutOnPile = (a: Card.card, b: Card.card, _) => {
-    a.revealed && b.revealed && Card.rankIsAbove(a, b) && Card.isOppositeColor(a, b)
-  }
+  // let canPutOnPile = (a: Card.card, b: Card.card, _) => {
+  //   a.revealed && b.revealed && Card.rankIsAbove(a, b) && Card.isOppositeColor(a, b)
+  // }
 
-  let canPutOnFoundation = (a: Card.card, b: Card.card, hasOnTop) => {
-    !hasOnTop && a.revealed && b.revealed && Card.rankIsBelow(a, b) && a.suit == b.suit
-  }
+  // let canPutOnFoundation = (a: Card.card, b: Card.card, hasOnTop) => {
+  //   !hasOnTop && a.revealed && b.revealed && Card.rankIsBelow(a, b) && a.suit == b.suit
+  // }
 
   let initiateGame = () => {
     let shuffledDeck = getShuffledDeck()
@@ -257,51 +293,51 @@ type dropLoc =
   | FoundationChild(int, int)
   | Waste(int)
 
-let encodeDropId = (d: dropLoc) => {
-  switch d {
-  | PileBase(num) => ["PileBase", num->Int.toString]
-  | FoundationBase(num) => ["FoundationBase", num->Int.toString]
-  | PileChild(num, index) => ["PileChild", num->Int.toString, index->Int.toString]
-  | FoundationChild(num, index) => ["FoundationChild", num->Int.toString, index->Int.toString]
-  | Waste(index) => ["Waste", index->Int.toString]
-  }->Array.join("-")
-}
+// let encodeDropId = (d: dropLoc) => {
+//   switch d {
+//   | PileBase(num) => ["PileBase", num->Int.toString]
+//   | FoundationBase(num) => ["FoundationBase", num->Int.toString]
+//   | PileChild(num, index) => ["PileChild", num->Int.toString, index->Int.toString]
+//   | FoundationChild(num, index) => ["FoundationChild", num->Int.toString, index->Int.toString]
+//   | Waste(index) => ["Waste", index->Int.toString]
+//   }->Array.join("-")
+// }
 
-let decodeDropId = d => {
-  let split = d->String.split("-")
+// let decodeDropId = d => {
+//   let split = d->String.split("-")
 
-  switch split {
-  | ["PileBase", num] =>
-    switch num->Int.fromString {
-    | Some(n) => PileBase(n)->Some
-    | _ => None
-    }
+//   switch split {
+//   | ["PileBase", num] =>
+//     switch num->Int.fromString {
+//     | Some(n) => PileBase(n)->Some
+//     | _ => None
+//     }
 
-  | ["FoundationBase", num] =>
-    switch num->Int.fromString {
-    | Some(n) => FoundationBase(n)->Some
-    | _ => None
-    }
+//   | ["FoundationBase", num] =>
+//     switch num->Int.fromString {
+//     | Some(n) => FoundationBase(n)->Some
+//     | _ => None
+//     }
 
-  | ["PileChild", num, index] =>
-    switch (num->Int.fromString, index->Int.fromString) {
-    | (Some(n), Some(i)) => PileChild(n, i)->Some
-    | _ => None
-    }
+//   | ["PileChild", num, index] =>
+//     switch (num->Int.fromString, index->Int.fromString) {
+//     | (Some(n), Some(i)) => PileChild(n, i)->Some
+//     | _ => None
+//     }
 
-  | ["FoundationChild", num, index] =>
-    switch (num->Int.fromString, index->Int.fromString) {
-    | (Some(n), Some(i)) => FoundationChild(n, i)->Some
-    | _ => None
-    }
-  | ["Waste", index] =>
-    switch index->Int.fromString {
-    | Some(n) => Waste(n)->Some
-    | _ => None
-    }
-  | _ => None
-  }
-}
+//   | ["FoundationChild", num, index] =>
+//     switch (num->Int.fromString, index->Int.fromString) {
+//     | (Some(n), Some(i)) => FoundationChild(n, i)->Some
+//     | _ => None
+//     }
+//   | ["Waste", index] =>
+//     switch index->Int.fromString {
+//     | Some(n) => Waste(n)->Some
+//     | _ => None
+//     }
+//   | _ => None
+//   }
+// }
 
 module type CardComp = {
   type props = {
@@ -334,12 +370,14 @@ module rec CardComp: CardComp = {
     let onTop = stack->Array.get(index + 1)
     let hasOnTop = onTop->Option.isSome
 
-    let cardId = encodeDropId(
-      switch place {
-      | Pile => PileChild(num, index)
-      | Foundation => FoundationChild(num, index)
-      },
-    )
+    let cardId = card->Card.id
+
+    // encodeDropId(
+    //   switch place {
+    //   | Pile => PileChild(num, index)
+    //   | Foundation => FoundationChild(num, index)
+    //   },
+    // )
 
     let {isDragging: _, setNodeRef, listeners, transform} = useDraggable({
       id: cardId,
@@ -378,11 +416,11 @@ module rec CardComp: CardComp = {
           place == Pile ? "-mb-[58px]" : "-mb-[80px]",
         ]->Array.join(" ")}>
         // <div className={" bg-blue-500 h-2 w-2 rotate-45"}> {""->React.string} </div>
-        {card->Card.string}
+        {card->Card.display}
       </div>
       {hasOnTop
         ? <CardComp movable movingPile aligned stack index={index + 1} num place />
-        : <DropZone cardId={cardId} />}
+        : <DropZone cardId={"card-" ++ cardId} />}
     </div>
   }
 }
@@ -390,7 +428,9 @@ module rec CardComp: CardComp = {
 module WasteCard = {
   @react.component
   let make = (~card: Card.card, ~index, ~movable) => {
-    let cardId = encodeDropId(Waste(index))
+    let cardId = card->Card.id
+
+    // encodeDropId(Waste(index))
 
     let {isDragging: _, setNodeRef, listeners, transform} = useDraggable({
       id: cardId,
@@ -428,7 +468,7 @@ module WasteCard = {
           index == 0 ? "" : "-ml-[37px]",
         ]->Array.join(" ")}>
         // <div className={" bg-blue-500 h-2 w-2 rotate-45"}> {""->React.string} </div>
-        {card->Card.string}
+        {card->Card.display}
       </div>
     </div>
   }
@@ -444,7 +484,7 @@ module Pile = {
 
     stack->Array.length != 0
       ? <CardComp movable={true} movingPile aligned={false} index={0} stack num place={Pile} />
-      : <DropZone empty={true} cardId={encodeDropId(PileBase(num))} />
+      : <DropZone empty={true} cardId={"pile-" ++ num->Int.toString} />
   }
 }
 
@@ -455,7 +495,7 @@ module Foundation = {
       ? <CardComp
           movable={false} aligned={true} index={0} stack num place={Foundation} movingPile={false}
         />
-      : <DropZone empty={true} cardId={encodeDropId(FoundationBase(num))} />
+      : <DropZone empty={true} cardId={"foundation-" ++ num->Int.toString} />
   }
 }
 
@@ -552,9 +592,45 @@ let make = () => {
     setState(s => {history: [s.history->Array.getUnsafe(0)]})
   }
 
+  let locateCard = card => {
+    let loc = ref(None)
+    foundations->Array.forEachWithIndex((foundation, num) =>
+      foundation->Array.forEachWithIndex((c, index) => {
+        if Card.equals(card, c) {
+          loc := FoundationChild(num, index)->Some
+        }
+      })
+    )
+    piles->Array.forEachWithIndex((pile, num) =>
+      pile->Array.forEachWithIndex((c, index) => {
+        if Card.equals(card, c) {
+          loc := PileChild(num, index)->Some
+        }
+      })
+    )
+    waste->Array.forEachWithIndex((c, index) =>
+      if Card.equals(card, c) {
+        loc := Waste(index)->Some
+      }
+    )
+
+    loc.contents
+  }
+
   let onDragEnd = (dragEndEvent: dragEndEvent) => {
-    let dropSpace = decodeDropId(dragEndEvent["over"]["id"])
-    let dragSpace = decodeDropId(dragEndEvent["active"]["id"])
+    Console.log(dragEndEvent)
+    let dropSpace = switch dragEndEvent["over"]["id"]->String.split("-") {
+    | ["foundation", num] => num->Int.fromString->Option.map(v => FoundationBase(v))
+    | ["pile", num] => num->Int.fromString->Option.map(v => PileBase(v))
+    | ["card", rank, suit] => {
+        let card = Card.fromId(rank ++ "-" ++ suit)
+
+        locateCard(card)
+      }
+    | _ => None
+    }
+    let draggingCard = Card.fromId(dragEndEvent["active"]["id"])
+    let dragSpace = locateCard(draggingCard)
 
     // Console.log3("DragEnd", dropSpace, dragSpace)
 
@@ -764,7 +840,7 @@ let make = () => {
   }
 
   let onDragStart = event => {
-    setMoving(_ => decodeDropId(event["active"]["id"]))
+    setMoving(_ => locateCard(Card.fromId(event["active"]["id"])))
   }
 
   let onDragCancel = () => {
