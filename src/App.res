@@ -164,7 +164,6 @@ module Klondike = {
   }
 
   let canPutOnFoundation = (a: Card.card, b: Card.card, hasOnTop) => {
-    // a.cardOnTop->Option.isNone &&
     !hasOnTop && a.revealed && b.revealed && Card.rankIsBelow(a, b) && a.suit == b.suit
   }
 
@@ -190,9 +189,7 @@ module Klondike = {
 }
 
 type useDroppableOutput = {setNodeRef: ReactDOM.Ref.callbackDomRef, isOver: bool}
-// type useDroppableInputData = {
-//   accepts: array<string>
-// }
+
 type useDroppableInput = {id: string}
 
 @module("@dnd-kit/core")
@@ -214,10 +211,6 @@ type dragEndEvent = {"over": {"id": string}, "active": {"id": string}}
 
 type dragStartEvent = {"active": {"id": string}}
 
-// type dndProps = {
-
-// }
-
 module DraggableTest = {
   @react.component @module("./Test.jsx")
   external make: unit => Jsx.element = "default"
@@ -235,32 +228,20 @@ module DndContext = {
 
 module DropZone = {
   @react.component
-  let make = (~canDrop: bool, ~empty: bool=false, ~cardId: string) => {
+  let make = (~empty: bool=false, ~cardId: string) => {
     let {setNodeRef, isOver} = useDroppable({
       id: cardId,
     })
-    // {
-    //     "canDrop": canDrop,
-    //     "drop": onDrop,
-    //     "accept": "CARD",
-    //     "collect": (monitor: monitor) => {
-    //       beingDragged: monitor.getClientOffset(),
-    //       isOver: monitor.isOver(),
-    //       canDrop: monitor.canDrop(),
-    //     },
-    //   }
 
     <div
       ref={ReactDOM.Ref.callbackDomRef(setNodeRef)}
       className={[
         "rounded h-[80px] w-[57px]",
-        switch (empty, isOver, canDrop) {
-        | (false, true, true) => "opacity-0 bg-blue-200"
-        | (false, true, false) => "opacity-0 bg-red-200"
-        | (false, false, _) => "opacity-0"
-        | (true, true, true) => "opacity-0 bg-blue-200"
-        | (true, true, false) => "opacity-0 bg-red-200"
-        | (true, false, _) => "bg-gray-200 "
+        switch (empty, isOver) {
+        | (true, true) => "opacity-0 bg-purple-200"
+        | (false, true) => "opacity-0 bg-green-200"
+        | (true, false) => "bg-gray-200"
+        | (false, false) => ""
         },
       ]->Array.join(" ")}
     />
@@ -328,7 +309,7 @@ module type CardComp = {
     index: int,
     num: int,
     place: place,
-    canPutCardOnCard: (Card.card, Card.card, bool) => bool,
+    // canPutCardOnCard: (Card.card, Card.card, bool) => bool,
     aligned: bool,
     movingPile: bool,
     movable: bool,
@@ -342,22 +323,13 @@ module rec CardComp: CardComp = {
     index: int,
     num: int,
     place: place,
-    canPutCardOnCard: (Card.card, Card.card, bool) => bool,
+    // canPutCardOnCard: (Card.card, Card.card, bool) => bool,
     aligned: bool,
     movingPile: bool,
     movable: bool,
   }
 
-  let make: React.component<props> = ({
-    stack,
-    canPutCardOnCard,
-    aligned,
-    num,
-    index,
-    place,
-    movable,
-    movingPile,
-  }) => {
+  let make: React.component<props> = ({stack, aligned, num, index, place, movable, movingPile}) => {
     let card = stack->Array.getUnsafe(index)
     let onTop = stack->Array.get(index + 1)
     let hasOnTop = onTop->Option.isSome
@@ -395,7 +367,7 @@ module rec CardComp: CardComp = {
       style={style}>
       <div
         style={{
-          transform: Card.rotation(card),
+          // transform: Card.rotation(card),
           // position: "relative",
           // position: place == Foundation ? "relative" : "static",
           // zIndex: (isDragging ? 100 : 0)->Int.toString,
@@ -409,8 +381,8 @@ module rec CardComp: CardComp = {
         {card->Card.string}
       </div>
       {hasOnTop
-        ? <CardComp movable movingPile aligned stack canPutCardOnCard index={index + 1} num place />
-        : <DropZone canDrop={true} cardId={cardId} />}
+        ? <CardComp movable movingPile aligned stack index={index + 1} num place />
+        : <DropZone cardId={cardId} />}
     </div>
   }
 }
@@ -446,7 +418,7 @@ module WasteCard = {
       style={style}>
       <div
         style={{
-          transform: Card.rotation(card),
+          // transform: Card.rotation(card),
           position: "relative",
           // zIndex: ((isDragging ? 100 : 0) + index + 1)->Int.toString,
           color: card->Card.color,
@@ -470,42 +442,20 @@ module Pile = {
     | _ => false
     }
 
-    // canDrop={card => card.rank == RK}
-    // <div>
     stack->Array.length != 0
-      ? <CardComp
-          movable={true}
-          movingPile
-          aligned={false}
-          index={0}
-          stack
-          num
-          place={Pile}
-          canPutCardOnCard={Klondike.canPutOnPile}
-        />
-      : <DropZone canDrop={true} empty={true} cardId={encodeDropId(PileBase(num))} />
-    // </div>
+      ? <CardComp movable={true} movingPile aligned={false} index={0} stack num place={Pile} />
+      : <DropZone empty={true} cardId={encodeDropId(PileBase(num))} />
   }
 }
 
 module Foundation = {
   @react.component
   let make = (~num, ~stack: array<Card.card>) => {
-    // canDrop={card => card.rank == RA}
-    <div>
-      {stack->Array.length != 0
-        ? <CardComp
-            movable={false}
-            aligned={true}
-            index={0}
-            stack
-            num
-            canPutCardOnCard={Klondike.canPutOnFoundation}
-            place={Foundation}
-            movingPile={false}
-          />
-        : <DropZone canDrop={true} empty={true} cardId={encodeDropId(FoundationBase(num))} />}
-    </div>
+    stack->Array.length != 0
+      ? <CardComp
+          movable={false} aligned={true} index={0} stack num place={Foundation} movingPile={false}
+        />
+      : <DropZone empty={true} cardId={encodeDropId(FoundationBase(num))} />
   }
 }
 
@@ -526,7 +476,6 @@ module Stock = {
 module Waste = {
   @react.component
   let make = (~waste) => {
-    Console.log(waste)
     <div className={"flex flex-row"}>
       {waste
       ->Array.mapWithIndex((wasteCard: Card.card, index) => {
@@ -693,6 +642,8 @@ let make = () => {
       let dragHasChildren = dragIndex < dragPileSize - 1
       let dragSlice = pileSlice(dragNum, dragIndex)
 
+      // Console.log(dropSpace)
+
       switch dropSpace {
       | Some(PileBase(dropNum)) =>
         // move
@@ -756,6 +707,7 @@ let make = () => {
         }
       | Some(FoundationChild(dropNum, dropIndex)) => {
           let dropCard = foundationGet(dropNum, dropIndex)
+          Console.log2(dragCard, dropCard)
 
           if (
             Card.rankIsAbove(dragCard, dropCard) &&

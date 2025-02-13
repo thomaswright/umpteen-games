@@ -301,16 +301,6 @@ function isOppositeColor(a, b) {
   return isRed(a) !== isRed(b);
 }
 
-function rotation(card) {
-  var suitJitter = allSuits.findIndex(function (s) {
-        return s === card.suit;
-      }) - 2 | 0;
-  var rankJitter = allRanks.findIndex(function (r) {
-        return r === card.rank;
-      }) % 4 - 2 | 0;
-  return "rotate(" + (suitJitter + rankJitter | 0).toString() + "deg)";
-}
-
 function getShuffledDeck() {
   return Core__Array.toShuffled(Core__Array.reduce(allRanks, [], (function (a, rank) {
                     return Core__Array.reduce(allSuits, a, (function (a2, suit) {
@@ -321,22 +311,6 @@ function getShuffledDeck() {
                                               }]);
                                 }));
                   })));
-}
-
-function canPutOnPile(a, b, param) {
-  if (a.revealed && b.revealed && rankIsAbove(a, b)) {
-    return isOppositeColor(a, b);
-  } else {
-    return false;
-  }
-}
-
-function canPutOnFoundation(a, b, hasOnTop) {
-  if (!hasOnTop && a.revealed && b.revealed && rankIsBelow(a, b)) {
-    return a.suit === b.suit;
-  } else {
-    return false;
-  }
 }
 
 function initiateGame() {
@@ -365,7 +339,6 @@ function initiateGame() {
 
 function App$DropZone(props) {
   var __empty = props.empty;
-  var canDrop = props.canDrop;
   var empty = __empty !== undefined ? __empty : false;
   var match = Core.useDroppable({
         id: props.cardId
@@ -376,13 +349,9 @@ function App$DropZone(props) {
               className: [
                   "rounded h-[80px] w-[57px]",
                   empty ? (
-                      isOver ? (
-                          canDrop ? "opacity-0 bg-blue-200" : "opacity-0 bg-red-200"
-                        ) : "bg-gray-200 "
+                      isOver ? "opacity-0 bg-purple-200" : "bg-gray-200"
                     ) : (
-                      isOver ? (
-                          canDrop ? "opacity-0 bg-blue-200" : "opacity-0 bg-red-200"
-                        ) : "opacity-0"
+                      isOver ? "opacity-0 bg-green-200" : ""
                     )
                 ].join(" ")
             });
@@ -512,7 +481,7 @@ function decodeDropId(d) {
 
 var CardComp = Caml_module.init_mod([
       "App.res",
-      339,
+      320,
       32
     ], {
       TAG: "Module",
@@ -564,8 +533,7 @@ function make(param) {
                           place === "Pile" ? "-mb-[58px]" : "-mb-[80px]"
                         ].join(" "),
                       style: {
-                        color: color(card),
-                        transform: rotation(card)
+                        color: color(card)
                       }
                     }),
                 hasOnTop ? JsxRuntime.jsx(CardComp.make, {
@@ -573,12 +541,10 @@ function make(param) {
                         index: index + 1 | 0,
                         num: num,
                         place: place,
-                        canPutCardOnCard: param.canPutCardOnCard,
                         aligned: param.aligned,
                         movingPile: movingPile,
                         movable: movable
                       }) : JsxRuntime.jsx(App$DropZone, {
-                        canDrop: true,
                         cardId: cardId
                       })
               ],
@@ -628,8 +594,7 @@ function App$WasteCard(props) {
                       ].join(" "),
                     style: {
                       color: color(card),
-                      position: "relative",
-                      transform: rotation(card)
+                      position: "relative"
                     }
                   }),
               ref: Caml_option.some(match.setNodeRef),
@@ -651,14 +616,12 @@ function App$Pile(props) {
                 index: 0,
                 num: num,
                 place: "Pile",
-                canPutCardOnCard: canPutOnPile,
                 aligned: false,
                 movingPile: movingPile,
                 movable: true
               });
   } else {
     return JsxRuntime.jsx(App$DropZone, {
-                canDrop: true,
                 empty: true,
                 cardId: encodeDropId({
                       TAG: "PileBase",
@@ -671,25 +634,25 @@ function App$Pile(props) {
 function App$Foundation(props) {
   var stack = props.stack;
   var num = props.num;
-  return JsxRuntime.jsx("div", {
-              children: stack.length !== 0 ? JsxRuntime.jsx(CardComp.make, {
-                      stack: stack,
-                      index: 0,
-                      num: num,
-                      place: "Foundation",
-                      canPutCardOnCard: canPutOnFoundation,
-                      aligned: true,
-                      movingPile: false,
-                      movable: false
-                    }) : JsxRuntime.jsx(App$DropZone, {
-                      canDrop: true,
-                      empty: true,
-                      cardId: encodeDropId({
-                            TAG: "FoundationBase",
-                            _0: num
-                          })
+  if (stack.length !== 0) {
+    return JsxRuntime.jsx(CardComp.make, {
+                stack: stack,
+                index: 0,
+                num: num,
+                place: "Foundation",
+                aligned: true,
+                movingPile: false,
+                movable: false
+              });
+  } else {
+    return JsxRuntime.jsx(App$DropZone, {
+                empty: true,
+                cardId: encodeDropId({
+                      TAG: "FoundationBase",
+                      _0: num
                     })
-            });
+              });
+  }
 }
 
 function App$Stock(props) {
@@ -709,7 +672,6 @@ function App$Stock(props) {
 
 function App$Waste(props) {
   var waste = props.waste;
-  console.log(waste);
   return JsxRuntime.jsx("div", {
               children: waste.map(function (wasteCard, index) {
                     return JsxRuntime.jsx(App$WasteCard, {
@@ -892,6 +854,7 @@ function App(props) {
                 case "FoundationChild" :
                     var dropNum$3 = dropSpace._0;
                     var dropCard$1 = foundationGet(dropNum$3, dropSpace._1);
+                    console.log(dragCard, dropCard$1);
                     if (rankIsAbove(dragCard, dropCard$1) && dragCard.suit === dropCard$1.suit && !dragHasChildren) {
                       setGame(function (game) {
                             return {
