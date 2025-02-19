@@ -19,7 +19,8 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",
-    "rescript": "^11.1.4"
+    "rescript": "^11.1.4",
+    "three": "^0.173.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
