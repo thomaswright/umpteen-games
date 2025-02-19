@@ -1,67 +1,81 @@
-let elements = [];
+let cards = [];
+let piles = [];
+let foundations = [];
 
-function addElement(
-  x,
-  y,
-  width,
-  height,
-  color,
-  elementType,
-  elementParent,
-  elementId
-) {
-  let element = document.createElement("div");
-  element.style.position = "absolute";
-  element.style.top = y + "px";
-  element.style.left = x + "px";
-  element.style.width = "100px";
-  element.style.height = "100px";
-  element.style.backgroundColor = color;
+let cardWidth = 70;
+let cardHeight = 100;
+let xPadding = 10;
+let yPadding = 10;
+let xGroupPadding = 10;
+let yGroupPadding = 10;
 
-  element.originalPosition = { x, y };
-  element.elementType = elementType;
-  element.elementId = elementId;
-  element.elementParent = elementParent;
+for (let i = 0; i < 4; i++) {
+  let x = i * (cardWidth + xPadding) + xGroupPadding;
+  let y = 0 + yGroupPadding;
 
-  document.body.appendChild(element);
+  let foundation = document.createElement("div");
+  foundation.style.position = "absolute";
+  foundation.style.top = y + "px";
+  foundation.style.left = x + "px";
+  foundation.style.width = cardWidth + "px";
+  foundation.style.height = cardHeight + "px";
+  foundation.style.backgroundColor = "#008cff";
+  foundation.style.borderRadius = "5px";
 
-  elements.push(element);
+  foundation.originalPosition = { x, y };
+  foundation.elementType = "FOUNDATION";
+  foundation.elementId = "F-" + i;
+  foundation.elementParent = null;
+
+  document.body.appendChild(foundation);
+
+  foundations.push(foundation);
 }
 
-for (let i = 0; i <= 4; i++) {
-  let width = 1;
-  let height = 1;
-  let x = i * 110 + 10;
-  let y = 0 + 10;
+for (let i = 0; i < 7; i++) {
+  let x = i * (cardWidth + xPadding) + xGroupPadding;
+  let y = cardHeight + yPadding + yGroupPadding;
 
-  addElement(x, y, width, height, "#008cff", "FOUNDATION", null, "F-" + i);
+  let pile = document.createElement("div");
+  pile.style.position = "absolute";
+  pile.style.top = y + "px";
+  pile.style.left = x + "px";
+  pile.style.width = cardWidth + "px";
+  pile.style.height = cardHeight + "px";
+  pile.style.backgroundColor = "#c800ff";
+  pile.style.borderRadius = "5px";
+
+  pile.originalPosition = { x, y };
+  pile.elementType = "PILE";
+  pile.elementId = "P-" + i;
+  pile.elementParent = null;
+
+  document.body.appendChild(pile);
+
+  piles.push(pile);
 }
 
-for (let i = 0; i <= 4; i++) {
-  let width = 1;
-  let height = 1;
-  let x = i * 110 + 10;
-  let y = 110 + 10;
+for (let i = 0; i < 4; i++) {
+  let x = i * (cardWidth + xPadding) + xGroupPadding;
+  let y = 2 * (cardHeight + yPadding) + yGroupPadding;
 
-  addElement(x, y, width, height, "#c800ff", "PILE", null, "P-" + i);
-}
+  let card = document.createElement("div");
+  card.style.position = "absolute";
+  card.style.top = y + "px";
+  card.style.left = x + "px";
+  card.style.width = cardWidth + "px";
+  card.style.height = cardHeight + "px";
+  card.style.backgroundColor = "#ff0051";
+  card.style.borderRadius = "5px";
 
-for (let i = 0; i <= 4; i++) {
-  let width = 1;
-  let height = 1;
-  let x = i * 110 + 10;
-  let y = 220 + 10;
+  card.originalPosition = { x, y };
+  card.elementType = "CARD";
+  card.elementId = "C-" + i;
+  card.elementParent = null;
 
-  addElement(x, y, width, height, "#ff0051", "CARD", null, "C-0" + i);
-}
+  document.body.appendChild(card);
 
-for (let i = 0; i <= 4; i++) {
-  let width = 1;
-  let height = 1;
-  let x = i * 110 + 10;
-  let y = 240 + 10;
-
-  addElement(x, y, width, height, "#FFB700", "CARD", "C-0" + i, "C-1" + i);
+  cards.push(card);
 }
 
 function getOverlapArea(aDiv, bDiv) {
