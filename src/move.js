@@ -9,6 +9,22 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+function updateCameraSize() {
+  const aspect = window.innerWidth / window.innerHeight;
+  const viewSize = 5; // Controls the visible area size
+
+  camera.left = -viewSize * aspect;
+  camera.right = viewSize * aspect;
+  camera.top = viewSize;
+  camera.bottom = -viewSize;
+
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+window.addEventListener("resize", updateCameraSize);
+updateCameraSize();
+
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableRotate = false;
 controls.enableZoom = false;
