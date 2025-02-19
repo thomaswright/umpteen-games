@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 const scene = new THREE.Scene();
-const camera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 10);
+const camera = new THREE.OrthographicCamera(0, 10, 10, 0, 0.1, 10);
 camera.position.set(0, 0, 5);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -11,11 +11,11 @@ document.body.appendChild(renderer.domElement);
 
 function updateCameraSize() {
   const aspect = window.innerWidth / window.innerHeight;
-  const viewSize = 5; // Controls the visible area size
+  const viewSize = 10; // Controls the visible area size
 
-  camera.left = -viewSize * aspect;
+  camera.left = 0; // -viewSize * aspect;
   camera.right = viewSize * aspect;
-  camera.top = viewSize;
+  camera.top = 0; // viewSize;
   camera.bottom = -viewSize;
 
   camera.updateProjectionMatrix();
@@ -29,40 +29,93 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableRotate = false;
 controls.enableZoom = false;
 
-const rectangles = [];
-const colors = [0xff0000, 0x00ff00, 0x0000ff];
-const originalPositions = [];
+// const rectangles = [];
+// const colors = [0xff0000, 0x00ff00, 0x0000ff];
+// const originalPositions = [];
 
-for (let i = 0; i < 3; i++) {
-  const geometry = new THREE.PlaneGeometry(1, 1);
-  const material = new THREE.MeshBasicMaterial({ color: colors[i] });
-  const rect = new THREE.Mesh(geometry, material);
-  rect.position.set(i * 2 - 2, 0, 0);
-  scene.add(rect);
-  rectangles.push(rect);
-  originalPositions.push(rect.position.clone());
+// for (let i = 0; i < 3; i++) {
+//   const geometry = new THREE.PlaneGeometry(1, 1);
+//   const material = new THREE.MeshBasicMaterial({ color: colors[i] });
+//   const rect = new THREE.Mesh(geometry, material);
+//   rect.position.set(i * 2 - 2, 0, 0);
+//   scene.add(rect);
+//   rectangles.push(rect);
+//   originalPositions.push(rect.position.clone());
+// }
+
+// Foundations
+
+let elements = [];
+
+function addElement(x, y, width, height, color, elementType) {
+  const foundationGeometry = new THREE.PlaneGeometry(width, height);
+
+  const foundationMaterial = new THREE.MeshBasicMaterial({
+    color: color,
+    transparent: true,
+    opacity: 1.0,
+  });
+
+  const foundation = new THREE.Mesh(foundationGeometry, foundationMaterial);
+
+  foundation.position.set(x, y, -0.1);
+
+  foundation.elementType = elementType;
+
+  scene.add(foundation);
+
+  elements.push(foundation);
 }
 
-const dropZone = new THREE.Box2(
-  new THREE.Vector2(-1, -1),
-  new THREE.Vector2(1, 1)
-);
+for (let i = 1; i <= 4; i++) {
+  let width = 1;
+  let height = 1;
+  let x = i * 2;
+  let y = -1;
 
-const dropZoneGeometry = new THREE.PlaneGeometry(2, 2);
+  addElement(x, y, width, height, 0x008cff, "FOUNDATION");
+}
 
-const dropZoneMaterial = new THREE.MeshBasicMaterial({
-  color: 0xffa500,
-  transparent: true,
-  opacity: 1.0,
-});
+for (let i = 1; i <= 4; i++) {
+  let width = 1;
+  let height = 1;
+  let x = i * 2;
+  let y = -2;
 
-const dropZoneMesh = new THREE.Mesh(dropZoneGeometry, dropZoneMaterial);
+  addElement(x, y, width, height, 0xc800ff, "PILE");
+}
 
-dropZoneMesh.position.set(0, 0, -0.1);
+for (let i = 1; i <= 4; i++) {
+  let width = 1;
+  let height = 1;
+  let x = i * 2;
+  let y = -3;
 
-scene.add(dropZoneMesh);
+  addElement(x, y, width, height, 0xff0051, "CARD");
+}
 
-let selectedObject = null;
+// Rest
+
+// const dropZone = new THREE.Box2(
+//   new THREE.Vector2(-1, -1),
+//   new THREE.Vector2(1, 1)
+// );
+
+// const dropZoneGeometry = new THREE.PlaneGeometry(2, 2);
+
+// const dropZoneMaterial = new THREE.MeshBasicMaterial({
+//   color: 0xffa500,
+//   transparent: true,
+//   opacity: 1.0,
+// });
+
+// const dropZoneMesh = new THREE.Mesh(dropZoneGeometry, dropZoneMaterial);
+
+// dropZoneMesh.position.set(0, 0, -0.1);
+
+// scene.add(dropZoneMesh);
+
+let dragCard = null;
 let offset = new THREE.Vector3();
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -72,17 +125,21 @@ window.addEventListener("mousedown", (event) => {
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(rectangles);
+  const intersects = raycaster.intersectObjects(elements);
 
   if (intersects.length > 0) {
-    selectedObject = intersects[0].object;
-    const intersectionPoint = intersects[0].point;
-    offset.copy(intersectionPoint).sub(selectedObject.position);
+    intersects.forEach(({ object }) => {
+      if (object.elementType === "CARD") {
+        dragCard = object;
+        const intersectionPoint = intersects[0].point;
+        offset.copy(intersectionPoint).sub(dragCard.position);
+      }
+    })[0].object;
   }
 });
 
 window.addEventListener("mousemove", (event) => {
-  if (selectedObject) {
+  if (dragCard) {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -92,7 +149,7 @@ window.addEventListener("mousemove", (event) => {
       new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
       newPosition
     );
-    selectedObject.position.set(
+    dragCard.position.set(
       newPosition.x - offset.x,
       newPosition.y - offset.y,
       0
@@ -101,20 +158,20 @@ window.addEventListener("mousemove", (event) => {
 });
 
 window.addEventListener("mouseup", () => {
-  if (selectedObject) {
-    if (
-      !dropZone.containsPoint(
-        new THREE.Vector2(selectedObject.position.x, selectedObject.position.y)
-      )
-    ) {
-      moveRectangle(
-        selectedObject,
-        originalPositions[rectangles.indexOf(selectedObject)],
-        100
-      );
-    }
-  }
-  selectedObject = null;
+  // if (dragCard) {
+  //   if (
+  //     !dropZone.containsPoint(
+  //       new THREE.Vector2(dragCard.position.x, dragCard.position.y)
+  //     )
+  //   ) {
+  //     moveRectangle(
+  //       dragCard,
+  //       originalPositions[rectangles.indexOf(dragCard)],
+  //       100
+  //     );
+  //   }
+  // }
+  dragCard = null;
 });
 
 function easeOutQuad(t) {
@@ -138,26 +195,26 @@ function moveRectangle(rect, targetPosition, duration) {
   requestAnimationFrame(animateMove);
 }
 
-const button = document.createElement("button");
-button.innerText = "Move Box Left";
-button.style.position = "absolute";
-button.style.top = "10px";
-button.style.left = "10px";
-document.body.appendChild(button);
+// const button = document.createElement("button");
+// button.innerText = "Move Box Left";
+// button.style.position = "absolute";
+// button.style.top = "10px";
+// button.style.left = "10px";
+// document.body.appendChild(button);
 
-button.addEventListener("click", () => {
-  if (rectangles.length > 0) {
-    moveRectangle(
-      rectangles[0],
-      new THREE.Vector3(
-        rectangles[0].position.x - 2,
-        rectangles[0].position.y,
-        0
-      ),
-      1000
-    );
-  }
-});
+// button.addEventListener("click", () => {
+//   if (rectangles.length > 0) {
+//     moveRectangle(
+//       rectangles[0],
+//       new THREE.Vector3(
+//         rectangles[0].position.x - 2,
+//         rectangles[0].position.y,
+//         0
+//       ),
+//       1000
+//     );
+//   }
+// });
 
 function animate() {
   requestAnimationFrame(animate);
