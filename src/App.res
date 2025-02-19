@@ -587,6 +587,21 @@ let make = () => {
   let foundationGet = (a, b) => foundations->Array.getUnsafe(a)->Array.getUnsafe(b)
   let _foundationSize = a => foundations->Array.getUnsafe(a)->Array.length
 
+  // let findStackable = () => {
+  //   let cardToMove = ref(None)
+  //   piles->Array.forEach(pile => {
+  //     let pCard = pile->Array.getUnsafe(pile->Array.length - 1)
+
+  //     foundations->Array.forEach(foundation => {
+  //       let fCard = foundation->Array.getUnsafe(foundation->Array.length - 1)
+  //       if pCard.suit == fCard.suit && Card.rankIsAbove(pCard, fCard) {
+  //         cardToMove := Some((pCard))
+  //       }
+  //     })
+  //   })
+
+  // }
+
   let restart = _ => {
     setUndoStats(_ => {currentUndoDepth: 0, undos: []})
     setState(s => {history: [s.history->Array.getUnsafe(0)]})
