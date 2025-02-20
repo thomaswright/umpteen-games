@@ -15,11 +15,12 @@
   "suffix": ".res.mjs",
   "bs-dependencies": [
     "@rescript/core",
-    "@rescript/react"
+    "@rescript/react",
+    "@rescript-labs/decco",
+    "rescript-webapi"
   ],
-  "bsc-flags": [
-    "-open RescriptCore"
-  ],
+  "ppx-flags": ["@rescript-labs/decco/ppx"],
+  "bsc-flags": ["-open RescriptCore"],
   "jsx": {
     "version": 4
   }

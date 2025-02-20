@@ -1,31 +1,37 @@
-module Card = {
-  type suit = Spades | Hearts | Diamonds | Clubs
+open Webapi.Dom
 
+module Card = {
+  @decco
+  type suit =
+    | @as("Spades") Spades
+    | @as("Hearts") Hearts
+    | @as("Diamonds") Diamonds
+    | @as("Clubs") Clubs
+
+  @decco
   type rank =
-    | RA
-    | R2
-    | R3
-    | R4
-    | R5
-    | R6
-    | R7
-    | R8
-    | R9
-    | R10
-    | RJ
-    | RQ
-    | RK
+    | @as("RA") RA
+    | @as("R2") R2
+    | @as("R3") R3
+    | @as("R4") R4
+    | @as("R5") R5
+    | @as("R6") R6
+    | @as("R7") R7
+    | @as("R8") R8
+    | @as("R9") R9
+    | @as("R10") R10
+    | @as("RJ") RJ
+    | @as("RQ") RQ
+    | @as("RK") RK
+  @decco
+  type card = {
+    suit: suit,
+    rank: rank,
+  }
 
   let allRanks = [RA, R2, R3, R4, R5, R6, R7, R8, R9, R10, RJ, RQ, RK]
 
   let allSuits = [Spades, Hearts, Diamonds, Clubs]
-
-  type rec card = {
-    suit: suit,
-    rank: rank,
-    // revealed: bool,
-    // cardOnTop: option<card>,
-  }
 
   let equals = (a, b) => {
     a.suit == b.suit && a.rank == b.rank
@@ -120,27 +126,6 @@ module Card = {
     | Clubs => "♣"
     }
 
-  let display = (card: card) => {
-    <span className="flex flex-col">
-      <span className="flex flex-row">
-        <span
-          className={[
-            "font-medium ",
-            switch card.rank {
-            | R10 => "tracking-[-0.1rem] w-4"
-            | _ => "w-3.5"
-            },
-          ]->Array.join(" ")}>
-          {card->rankString->React.string}
-        </span>
-        <span className="w-3.5 flex flex-row justify-center">
-          {card->suitString->React.string}
-        </span>
-      </span>
-      <span className="w-3.5 flex flex-row mt-0.5 -ml-0.5"> {card->suitString->React.string} </span>
-    </span>
-  }
-
   let color = card =>
     switch card.suit {
     | Spades => "hsl(0 0% 0%)"
@@ -149,14 +134,14 @@ module Card = {
     | Clubs => "hsl(0 0% 0%)"
     }
 
-  let id = (card: card) => card->rankString ++ "-" ++ card->suitString
+  // let toString = (card: card) => card->rankString ++ "-" ++ card->suitString
 
-  let fromId = (id: string) => {
-    {
-      rank: id->String.split("-")->Array.getUnsafe(0)->stringToRank,
-      suit: id->String.split("-")->Array.getUnsafe(1)->stringToSuit,
-    }
-  }
+  // let fromString = (id: string) => {
+  //   {
+  //     rank: id->String.split("-")->Array.getUnsafe(0)->stringToRank,
+  //     suit: id->String.split("-")->Array.getUnsafe(1)->stringToSuit,
+  //   }
+  // }
 
   let isOppositeColor = (a, b) => isRed(a) != isRed(b)
 
@@ -198,38 +183,87 @@ let cardsData = [
   shuffledDeck->Array.slice(~start=21, ~end=28),
 ]
 
+@decco
+type element =
+  | Pile(int)
+  | Foundation(int)
+  | Card(Card.card)
+
+// | CardOnFoundation(int, Card.card)
+// | CardOnPile(int, Card.card)
+// | CardOnCard(Card.card, Card.card)
+
+@set external setElementData: (Js.nullable<Dom.element>, Js.Json.t) => unit = "elementData"
+
+@set @scope("style") external setStyleLeft: (Dom.element, string) => unit = "left"
+@set @scope("style") external setStyleTop: (Dom.element, string) => unit = "top"
+
 @react.component
 let make = () => {
   let refs = React.useRef([])
-  let setRef = element => {
+  let setRef = elementType => element => {
+    element->setElementData(elementType->element_encode)
     refs.current->Array.push(element)
   }
 
-  <div className="relative p-5">
+  let dragCard: React.ref<option<Dom.element>> = React.useRef(None)
+  let offset = React.useRef((0, 0))
+
+  let move = (element, left, top, leftOffset, topOffset) => {
+    element->setStyleLeft(left->Int.toString ++ "px")
+    element->setStyleTop(top->Int.toString ++ "px")
+
+    // refs -> Array.forEach((el) => {
+    //   switch el -> Element.getAttribute("parent") -> element_decode {
+    //     | CardParent(Card.card) => {
+
+    //     }
+    //   }
+    //   if (el.elementParent === element.elementId) {
+    //     move(el, left + leftOffset, top + topOffset, leftOffset, topOffset);
+    //   }
+    // });
+  }
+
+  React.useEffect0(() => {
+    window->Window.addMouseMoveEventListener(event => {
+      dragCard.current->Option.mapOr(
+        (),
+        dragCard => {
+          let (offsetX, offsetY) = offset.current
+          let leftMove = event->MouseEvent.clientX - offsetX
+          let topMove = event->MouseEvent.clientY - offsetY
+
+          move(dragCard, leftMove, topMove, 0, 20)
+        },
+      )
+    })
+    None
+  })
+
+  <div className="relative">
     {[[], [], [], []]
     ->Array.mapWithIndex((_, i) => {
       <div
-        ref={ReactDOM.Ref.callbackDomRef(setRef)}
+        ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
         className="absolute bg-purple-500 rounded w-14 h-20"
         style={{
           top: "0px",
           left: (i * 70)->Int.toString ++ "px",
-        }}>
-        {"F"->React.string}
-      </div>
+        }}
+      />
     })
     ->React.array}
     {[[], [], [], []]
     ->Array.mapWithIndex((_, i) => {
       <div
-        ref={ReactDOM.Ref.callbackDomRef(setRef)}
+        ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
         className="absolute bg-red-500 rounded w-14 h-20"
         style={{
           top: "100px",
           left: (i * 70)->Int.toString ++ "px",
-        }}>
-        {"P"->React.string}
-      </div>
+        }}
+      />
     })
     ->React.array}
     {cardsData
@@ -237,7 +271,25 @@ let make = () => {
       cardPile
       ->Array.mapWithIndex((card, j) => {
         <div
-          ref={ReactDOM.Ref.callbackDomRef(setRef)}
+          ref={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
+          onMouseDown={event => {
+            dragCard.current =
+              event
+              ->JsxEvent.Mouse.currentTarget
+              ->Obj.magic
+              ->Some
+
+            let rect =
+              event
+              ->JsxEvent.Mouse.currentTarget
+              ->Obj.magic
+              ->Element.getBoundingClientRect
+
+            offset.current = (
+              event->JsxEvent.Mouse.clientX - rect->DomRect.left->Int.fromFloat,
+              event->JsxEvent.Mouse.clientY - rect->DomRect.top->Int.fromFloat,
+            )
+          }}
           className="absolute bg-blue-500 rounded w-14 h-20 border"
           style={{
             top: (100 + j * 20)->Int.toString ++ "px",
