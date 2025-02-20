@@ -685,7 +685,7 @@ var cardsData = [
   shuffledDeck.slice(21, 28)
 ];
 
-function element_encode(value) {
+function space_encode(value) {
   switch (value.TAG) {
     case "Pile" :
         return [
@@ -706,7 +706,7 @@ function element_encode(value) {
   }
 }
 
-function element_decode(value) {
+function space_decode(value) {
   var jsonArr = Js_json.classify(value);
   if (typeof jsonArr !== "object") {
     return Decco.error(undefined, "Not a variant", value);
@@ -798,11 +798,41 @@ function element_decode(value) {
   return Decco.error(undefined, "Invalid variant constructor", Belt_Array.getExn(jsonArr$1, 0));
 }
 
+function spaceToString(space) {
+  return JSON.stringify(space_encode(space));
+}
+
+function spaceFromElement(element) {
+  return Core__Option.flatMap(element.space, (function (s) {
+                var d = space_decode(JSON.parse(s));
+                if (d.TAG === "Ok") {
+                  return d._0;
+                }
+                
+              }));
+}
+
+function parentFromElement(element) {
+  return Core__Option.flatMap(element.parentSpace, (function (s) {
+                var d = space_decode(JSON.parse(s));
+                if (d.TAG === "Ok") {
+                  return d._0;
+                }
+                
+              }));
+}
+
 function Klondike(props) {
   var refs = React.useRef([]);
-  var setRef = function (elementType) {
+  var setRef = function (space, parent) {
     return function (element) {
-      element.elementData = element_encode(elementType);
+      if (element === null || element === undefined) {
+        return ;
+      }
+      element.space = JSON.stringify(space_encode(space));
+      Core__Option.mapOr(parent, undefined, (function (parent) {
+              element.parentSpace = JSON.stringify(space_encode(parent));
+            }));
       refs.current.push(element);
     };
   };
@@ -811,15 +841,61 @@ function Klondike(props) {
         0,
         0
       ]);
+  var applyToChildren = function (element, f) {
+    var elementSpace = spaceFromElement(element);
+    refs.current.forEach(function (el) {
+          var match = parentFromElement(el);
+          if (elementSpace === undefined) {
+            return ;
+          }
+          switch (elementSpace.TAG) {
+            case "Pile" :
+            case "Foundation" :
+                return ;
+            case "Card" :
+                if (match === undefined) {
+                  return ;
+                }
+                switch (match.TAG) {
+                  case "Pile" :
+                  case "Foundation" :
+                      return ;
+                  case "Card" :
+                      if (equals(match._0, elementSpace._0)) {
+                        return f(el);
+                      } else {
+                        return ;
+                      }
+                  
+                }
+            
+          }
+        });
+  };
+  var move = function (element, left, top, leftOffset, topOffset) {
+    element.style.left = left.toString() + "px";
+    element.style.top = top.toString() + "px";
+    applyToChildren(element, (function (childEl) {
+            move(childEl, left + leftOffset | 0, top + topOffset | 0, leftOffset, topOffset);
+          }));
+  };
+  var liftUp = function (element, zIndex) {
+    element.style["z-index"] = zIndex.toString();
+    applyToChildren(element, (function (childEl) {
+            liftUp(childEl, zIndex + 1 | 0);
+          }));
+  };
   React.useEffect((function () {
           window.addEventListener("mousemove", (function ($$event) {
                   Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
                           var match = offset.current;
                           var leftMove = $$event.clientX - match[0] | 0;
                           var topMove = $$event.clientY - match[1] | 0;
-                          dragCard.style.left = leftMove.toString() + "px";
-                          dragCard.style.top = topMove.toString() + "px";
+                          move(dragCard, leftMove, topMove, 0, 20);
                         }));
+                }));
+          window.addEventListener("mouseup", (function ($$event) {
+                  dragCard.current = undefined;
                 }));
         }), []);
   return JsxRuntime.jsxs("div", {
@@ -834,13 +910,16 @@ function Klondike(props) {
                                   ref: Caml_option.some(setRef({
                                             TAG: "Foundation",
                                             _0: i
-                                          })),
+                                          }, undefined)),
                                   className: "absolute bg-purple-500 rounded w-14 h-20",
                                   style: {
                                     left: Math.imul(i, 70).toString() + "px",
                                     top: "0px"
                                   }
-                                });
+                                }, JSON.stringify(space_encode({
+                                          TAG: "Foundation",
+                                          _0: i
+                                        })));
                     }),
                 [
                     [],
@@ -852,16 +931,26 @@ function Klondike(props) {
                                   ref: Caml_option.some(setRef({
                                             TAG: "Pile",
                                             _0: i
-                                          })),
+                                          }, undefined)),
                                   className: "absolute bg-red-500 rounded w-14 h-20",
                                   style: {
                                     left: Math.imul(i, 70).toString() + "px",
                                     top: "100px"
                                   }
-                                });
+                                }, JSON.stringify(space_encode({
+                                          TAG: "Pile",
+                                          _0: i
+                                        })));
                     }),
                 cardsData.map(function (cardPile, i) {
                       return cardPile.map(function (card, j) {
+                                  var parent = j === 0 ? ({
+                                        TAG: "Pile",
+                                        _0: i
+                                      }) : ({
+                                        TAG: "Card",
+                                        _0: cardsData[i][j - 1 | 0]
+                                      });
                                   var match = card.rank;
                                   var tmp;
                                   tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
@@ -900,21 +989,28 @@ function Klondike(props) {
                                               ref: Caml_option.some(setRef({
                                                         TAG: "Card",
                                                         _0: card
-                                                      })),
+                                                      }, parent)),
                                               className: "absolute bg-blue-500 rounded w-14 h-20 border",
                                               style: {
                                                 left: Math.imul(i, 70).toString() + "px",
-                                                top: (100 + Math.imul(j, 20) | 0).toString() + "px"
+                                                top: (100 + Math.imul(j, 20) | 0).toString() + "px",
+                                                zIndex: (j + 1 | 0).toString()
                                               },
                                               onMouseDown: (function ($$event) {
                                                   dragCard.current = Caml_option.some($$event.currentTarget);
+                                                  Core__Option.mapOr(dragCard.current, undefined, (function (d) {
+                                                          liftUp(d, 1000);
+                                                        }));
                                                   var rect = $$event.currentTarget.getBoundingClientRect();
                                                   offset.current = [
                                                     $$event.clientX - (rect.left | 0) | 0,
                                                     $$event.clientY - (rect.top | 0) | 0
                                                   ];
                                                 })
-                                            });
+                                            }, JSON.stringify(space_encode({
+                                                      TAG: "Card",
+                                                      _0: card
+                                                    })));
                                 });
                     })
               ],
@@ -929,8 +1025,11 @@ export {
   getShuffledDeck ,
   shuffledDeck ,
   cardsData ,
-  element_encode ,
-  element_decode ,
+  space_encode ,
+  space_decode ,
+  spaceToString ,
+  spaceFromElement ,
+  parentFromElement ,
   make ,
 }
 /* shuffledDeck Not a pure module */

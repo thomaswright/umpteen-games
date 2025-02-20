@@ -184,7 +184,7 @@ let cardsData = [
 ]
 
 @decco
-type element =
+type space =
   | Pile(int)
   | Foundation(int)
   | Card(Card.card)
@@ -193,36 +193,87 @@ type element =
 // | CardOnPile(int, Card.card)
 // | CardOnCard(Card.card, Card.card)
 
-@set external setElementData: (Js.nullable<Dom.element>, Js.Json.t) => unit = "elementData"
+@set external setSpace: (Dom.element, string) => unit = "space"
+@set external setParent: (Dom.element, string) => unit = "parentSpace"
 
 @set @scope("style") external setStyleLeft: (Dom.element, string) => unit = "left"
 @set @scope("style") external setStyleTop: (Dom.element, string) => unit = "top"
+@set @scope("style") external setStyleZIndex: (Dom.element, string) => unit = "z-index"
+
+let spaceToString = space => {
+  space->space_encode->Js.Json.stringify
+}
+
+let spaceFromElement = element => {
+  // element
+  // ->Element.getAttribute("space")
+  Obj.magic(element)["space"]->Option.flatMap(s => {
+    switch s->Js.Json.parseExn->space_decode {
+    | Ok(d) => Some(d)
+    | _ => None
+    }
+  })
+}
+let parentFromElement = element => {
+  // element
+  // ->Element.getAttribute("space")
+  Obj.magic(element)["parentSpace"]->Option.flatMap(s => {
+    switch s->Js.Json.parseExn->space_decode {
+    | Ok(d) => Some(d)
+    | _ => None
+    }
+  })
+}
 
 @react.component
 let make = () => {
   let refs = React.useRef([])
-  let setRef = elementType => element => {
-    element->setElementData(elementType->element_encode)
-    refs.current->Array.push(element)
+  let setRef = (space, parent) => (element: Js.Nullable.t<Dom.element>) => {
+    switch element {
+    | Value(a) => {
+        a->setSpace(space->spaceToString)
+        parent->Option.mapOr((), parent => {
+          a->setParent(parent->spaceToString)
+        })
+
+        refs.current->Array.push(a)
+      }
+    | Null => ()
+    | Undefined => ()
+    }
   }
 
   let dragCard: React.ref<option<Dom.element>> = React.useRef(None)
   let offset = React.useRef((0, 0))
 
-  let move = (element, left, top, leftOffset, topOffset) => {
+  let applyToChildren = (element, f) => {
+    let elementSpace = element->spaceFromElement
+
+    refs.current->Array.forEach(el => {
+      switch (elementSpace, el->parentFromElement) {
+      | (Some(Card(elementCard)), Some(Card(parentCard))) =>
+        if Card.equals(parentCard, elementCard) {
+          f(el)
+        }
+      | _ => ()
+      }
+    })
+  }
+
+  let rec move = (element, left, top, leftOffset, topOffset) => {
     element->setStyleLeft(left->Int.toString ++ "px")
     element->setStyleTop(top->Int.toString ++ "px")
 
-    // refs -> Array.forEach((el) => {
-    //   switch el -> Element.getAttribute("parent") -> element_decode {
-    //     | CardParent(Card.card) => {
+    applyToChildren(element, childEl =>
+      move(childEl, left + leftOffset, top + topOffset, leftOffset, topOffset)
+    )
+  }
 
-    //     }
-    //   }
-    //   if (el.elementParent === element.elementId) {
-    //     move(el, left + leftOffset, top + topOffset, leftOffset, topOffset);
-    //   }
-    // });
+  let rec liftUp = (element, zIndex) => {
+    element->setStyleZIndex(zIndex->Int.toString)
+    applyToChildren(element, childEl => {
+      liftUp(childEl, zIndex + 1)
+    })
   }
 
   React.useEffect0(() => {
@@ -238,6 +289,19 @@ let make = () => {
         },
       )
     })
+    window->Window.addMouseUpEventListener(event => {
+      dragCard.current = None
+      // dragCard.current->Option.mapOr(
+      //   (),
+      //   dragCard => {
+      //     let (offsetX, offsetY) = offset.current
+      //     let leftMove = event->MouseEvent.clientX - offsetX
+      //     let topMove = event->MouseEvent.clientY - offsetY
+
+      //     move(dragCard, leftMove, topMove, 0, 20)
+      //   },
+      // )
+    })
     None
   })
 
@@ -245,7 +309,8 @@ let make = () => {
     {[[], [], [], []]
     ->Array.mapWithIndex((_, i) => {
       <div
-        ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
+        key={Foundation(i)->spaceToString}
+        ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i), None))}
         className="absolute bg-purple-500 rounded w-14 h-20"
         style={{
           top: "0px",
@@ -257,7 +322,8 @@ let make = () => {
     {[[], [], [], []]
     ->Array.mapWithIndex((_, i) => {
       <div
-        ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+        key={Pile(i)->spaceToString}
+        ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i), None))}
         className="absolute bg-red-500 rounded w-14 h-20"
         style={{
           top: "100px",
@@ -270,14 +336,23 @@ let make = () => {
     ->Array.mapWithIndex((cardPile, i) => {
       cardPile
       ->Array.mapWithIndex((card, j) => {
+        let parent = j == 0 ? Pile(i) : Card(cardsData->Array.getUnsafe(i)->Array.getUnsafe(j - 1))
+
         <div
-          ref={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
+          key={Card(card)->spaceToString}
+          ref={ReactDOM.Ref.callbackDomRef(setRef(Card(card), Some(parent)))}
           onMouseDown={event => {
             dragCard.current =
               event
               ->JsxEvent.Mouse.currentTarget
               ->Obj.magic
               ->Some
+            dragCard.current->Option.mapOr(
+              (),
+              d => {
+                liftUp(d, 1000)
+              },
+            )
 
             let rect =
               event
@@ -294,6 +369,7 @@ let make = () => {
           style={{
             top: (100 + j * 20)->Int.toString ++ "px",
             left: (i * 70)->Int.toString ++ "px",
+            zIndex: (j + 1)->Int.toString,
           }}>
           <div
             style={{
