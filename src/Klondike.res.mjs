@@ -4,6 +4,7 @@ import * as Decco from "@rescript-labs/decco/src/Decco.res.mjs";
 import * as React from "react";
 import * as Js_dict from "rescript/lib/es6/js_dict.js";
 import * as Js_json from "rescript/lib/es6/js_json.js";
+import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as Js_array from "rescript/lib/es6/js_array.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
@@ -802,6 +803,10 @@ function spaceToString(space) {
   return JSON.stringify(space_encode(space));
 }
 
+function zIndexFromElement(element) {
+  return element.style["z-index"];
+}
+
 function spaceFromElement(element) {
   return Core__Option.flatMap(element.space, (function (s) {
                 var d = space_decode(JSON.parse(s));
@@ -872,11 +877,16 @@ function Klondike(props) {
           }
         });
   };
-  var move = function (element, left, top, leftOffset, topOffset) {
+  var move = function (element, left, top, leftOffset, topOffset, zIndex) {
     element.style.left = left.toString() + "px";
     element.style.top = top.toString() + "px";
+    Core__Option.mapOr(zIndex, undefined, (function (zIndex) {
+            element.style["z-index"] = zIndex.toString();
+          }));
     applyToChildren(element, (function (childEl) {
-            move(childEl, left + leftOffset | 0, top + topOffset | 0, leftOffset, topOffset);
+            move(childEl, left + leftOffset | 0, top + topOffset | 0, leftOffset, topOffset, Core__Option.map(zIndex, (function (zIndex) {
+                        return zIndex + 1 | 0;
+                      })));
           }));
   };
   var liftUp = function (element, zIndex) {
@@ -885,16 +895,70 @@ function Klondike(props) {
             liftUp(childEl, zIndex + 1 | 0);
           }));
   };
+  var getOverlap = function (aEl, bEl) {
+    var a = aEl.getBoundingClientRect();
+    var b = bEl.getBoundingClientRect();
+    var overlapX = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+    var overlapY = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+    return overlapX * overlapY;
+  };
   React.useEffect((function () {
           window.addEventListener("mousemove", (function ($$event) {
                   Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
                           var match = offset.current;
                           var leftMove = $$event.clientX - match[0] | 0;
                           var topMove = $$event.clientY - match[1] | 0;
-                          move(dragCard, leftMove, topMove, 0, 20);
+                          move(dragCard, leftMove, topMove, 0, 20, undefined);
                         }));
                 }));
           window.addEventListener("mouseup", (function ($$event) {
+                  Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
+                          var buildDragPile = function (el, build) {
+                            return Core__Option.mapOr(refs.current.find(function (v) {
+                                            return Caml_obj.equal(parentFromElement(v), spaceFromElement(el));
+                                          }), [el], (function (parentEl) {
+                                          return buildDragPile(parentEl, [el]);
+                                        }));
+                          };
+                          var dragPile = buildDragPile(dragCard, []);
+                          var dropOn = Core__Option.map(Core__Array.reduce(refs.current.filter(function (el) {
+                                        return Core__Option.isNone(dragPile.find(function (pileEl) {
+                                                        return Caml_obj.equal(spaceFromElement(pileEl), spaceFromElement(el));
+                                                      }));
+                                      }), undefined, (function (acc, el) {
+                                      var canDrop = Core__Option.mapOr(spaceFromElement(el), false, (function (x) {
+                                              return !refs.current.some(function (el2) {
+                                                          return Core__Option.mapOr(parentFromElement(el2), false, (function (p) {
+                                                                        return Caml_obj.equal(p, x);
+                                                                      }));
+                                                        });
+                                            }));
+                                      if (!canDrop) {
+                                        return acc;
+                                      }
+                                      var overlap = getOverlap(el, dragCard);
+                                      var $$new = [
+                                        overlap,
+                                        el
+                                      ];
+                                      if (overlap > 0 && !(acc !== undefined && acc[0] > overlap)) {
+                                        return $$new;
+                                      } else {
+                                        return acc;
+                                      }
+                                    })), (function (param) {
+                                  return param[1];
+                                }));
+                          console.log(dropOn);
+                          Core__Option.mapOr(dropOn, undefined, (function (dropOn) {
+                                  var rect = dropOn.getBoundingClientRect();
+                                  Core__Option.mapOr(spaceFromElement(dropOn), undefined, (function (dropOnSpace) {
+                                          dragCard.parentSpace = JSON.stringify(space_encode(dropOnSpace));
+                                        }));
+                                  var dropOnZIndex = dropOn.style["z-index"];
+                                  move(dragCard, rect.left | 0, (rect.top | 0) + 20 | 0, 0, 20, dropOnZIndex + 1 | 0);
+                                }));
+                        }));
                   dragCard.current = undefined;
                 }));
         }), []);
@@ -1028,6 +1092,7 @@ export {
   space_encode ,
   space_decode ,
   spaceToString ,
+  zIndexFromElement ,
   spaceFromElement ,
   parentFromElement ,
   make ,

@@ -204,6 +204,10 @@ let spaceToString = space => {
   space->space_encode->Js.Json.stringify
 }
 
+let zIndexFromElement = element => {
+  Obj.magic(element)["style"]["z-index"]
+}
+
 let spaceFromElement = element => {
   // element
   // ->Element.getAttribute("space")
@@ -260,12 +264,22 @@ let make = () => {
     })
   }
 
-  let rec move = (element, left, top, leftOffset, topOffset) => {
+  let rec move = (element, left, top, leftOffset, topOffset, zIndex) => {
     element->setStyleLeft(left->Int.toString ++ "px")
     element->setStyleTop(top->Int.toString ++ "px")
+    zIndex->Option.mapOr((), zIndex => {
+      element->setStyleZIndex(zIndex->Int.toString)
+    })
 
     applyToChildren(element, childEl =>
-      move(childEl, left + leftOffset, top + topOffset, leftOffset, topOffset)
+      move(
+        childEl,
+        left + leftOffset,
+        top + topOffset,
+        leftOffset,
+        topOffset,
+        zIndex->Option.map(zIndex => zIndex + 1),
+      )
     )
   }
 
@@ -274,6 +288,22 @@ let make = () => {
     applyToChildren(element, childEl => {
       liftUp(childEl, zIndex + 1)
     })
+  }
+
+  let getOverlap = (aEl, bEl) => {
+    let a = aEl->Element.getBoundingClientRect
+    let b = bEl->Element.getBoundingClientRect
+
+    let overlapX = Math.max(
+      0.,
+      Math.min(a->DomRect.right, b->DomRect.right) -. Math.max(a->DomRect.left, b->DomRect.left),
+    )
+    let overlapY = Math.max(
+      0.,
+      Math.min(a->DomRect.bottom, b->DomRect.bottom) -. Math.max(a->DomRect.top, b->DomRect.top),
+    )
+
+    overlapX *. overlapY
   }
 
   React.useEffect0(() => {
@@ -285,12 +315,100 @@ let make = () => {
           let leftMove = event->MouseEvent.clientX - offsetX
           let topMove = event->MouseEvent.clientY - offsetY
 
-          move(dragCard, leftMove, topMove, 0, 20)
+          move(dragCard, leftMove, topMove, 0, 20, None)
         },
       )
     })
     window->Window.addMouseUpEventListener(event => {
+      dragCard.current->Option.mapOr(
+        (),
+        dragCard => {
+          let rec buildDragPile = (el, build) => {
+            refs.current
+            ->Array.find(v => v->parentFromElement == el->spaceFromElement)
+            ->Option.mapOr([el], parentEl => buildDragPile(parentEl, [el]))
+          }
+
+          let dragPile = buildDragPile(dragCard, [])
+
+          let dropOn =
+            refs.current
+            ->Array.filter(
+              el =>
+                dragPile
+                ->Array.find(pileEl => pileEl->spaceFromElement == el->spaceFromElement)
+                ->Option.isNone,
+            )
+            ->Array.reduce(
+              None,
+              (acc, el) => {
+                let canDrop =
+                  el
+                  ->spaceFromElement
+                  ->Option.mapOr(
+                    false,
+                    x => {
+                      !(
+                        refs.current->Array.some(
+                          el2 => {
+                            el2->parentFromElement->Option.mapOr(false, p => p == x)
+                          },
+                        )
+                      )
+                    },
+                  )
+
+                if canDrop {
+                  let overlap = getOverlap(el, dragCard)
+                  let new = Some((overlap, el))
+
+                  if overlap > 0. {
+                    switch acc {
+                    | None => new
+                    | Some((accOverlap, _)) => accOverlap > overlap ? acc : new
+                    }
+                  } else {
+                    acc
+                  }
+                } else {
+                  acc
+                }
+              },
+            )
+            ->Option.map(((_, x)) => x)
+
+          Console.log(dropOn)
+
+          dropOn->Option.mapOr(
+            (),
+            dropOn => {
+              let rect = dropOn->Element.getBoundingClientRect
+              dropOn
+              ->spaceFromElement
+              ->Option.mapOr(
+                (),
+                dropOnSpace => {
+                  dragCard->setParent(dropOnSpace->spaceToString)
+                },
+              )
+
+              let dropOnZIndex = dropOn->zIndexFromElement
+
+              move(
+                dragCard,
+                rect->DomRect.left->Float.toInt,
+                rect->DomRect.top->Float.toInt + 20,
+                0,
+                20,
+                Some(dropOnZIndex + 1),
+              )
+            },
+          )
+        },
+      )
+
       dragCard.current = None
+
       // dragCard.current->Option.mapOr(
       //   (),
       //   dragCard => {
