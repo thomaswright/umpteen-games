@@ -483,7 +483,7 @@ let make = () => {
               event->JsxEvent.Mouse.clientY - rect->DomRect.top->Int.fromFloat,
             )
           }}
-          className="absolute bg-blue-500 rounded w-14 h-20 border"
+          className="absolute w-14 h-20"
           style={{
             top: (100 + j * 20)->Int.toString ++ "px",
             left: (i * 70)->Int.toString ++ "px",

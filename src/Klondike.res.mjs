@@ -1054,7 +1054,7 @@ function Klondike(props) {
                                                         TAG: "Card",
                                                         _0: card
                                                       }, parent)),
-                                              className: "absolute bg-blue-500 rounded w-14 h-20 border",
+                                              className: "absolute w-14 h-20",
                                               style: {
                                                 left: Math.imul(i, 70).toString() + "px",
                                                 top: (100 + Math.imul(j, 20) | 0).toString() + "px",
