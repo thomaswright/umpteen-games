@@ -6,6 +6,7 @@ import * as Js_dict from "rescript/lib/es6/js_dict.js";
 import * as Js_json from "rescript/lib/es6/js_json.js";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as Js_array from "rescript/lib/es6/js_array.js";
+import * as Core__Int from "@rescript/core/src/Core__Int.res.mjs";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
@@ -804,7 +805,7 @@ function spaceToString(space) {
 }
 
 function zIndexFromElement(element) {
-  return element.style["z-index"];
+  return Core__Int.fromString(element.style["z-index"], undefined);
 }
 
 function spaceFromElement(element) {
@@ -995,8 +996,9 @@ function Klondike(props) {
                           Core__Option.mapOr(spaceFromElement(dropOn$1), undefined, (function (dropOnSpace) {
                                   dragCard.parentSpace = JSON.stringify(space_encode(dropOnSpace));
                                 }));
-                          var dropOnZIndex = dropOn$1.style["z-index"];
-                          moveWithTime(dragCard, pos.left, pos.top + 20, 0, 20, dropOnZIndex + 1 | 0, 100);
+                          moveWithTime(dragCard, pos.left, pos.top + 20, 0, 20, Core__Option.map(zIndexFromElement(dropOn$1), (function (v) {
+                                      return v + 1 | 0;
+                                    })), 100);
                         }));
                   dragCard.current = undefined;
                   originalData.current = undefined;
@@ -1104,10 +1106,12 @@ function Klondike(props) {
                                                   dragCard.current = Caml_option.some($$event.currentTarget);
                                                   Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
                                                           var dragCardPos = elementPosition(dragCard);
-                                                          originalData.current = [
-                                                            dragCardPos,
-                                                            dragCard.style["z-index"]
-                                                          ];
+                                                          originalData.current = Core__Option.map(zIndexFromElement(dragCard), (function (v) {
+                                                                  return [
+                                                                          dragCardPos,
+                                                                          v
+                                                                        ];
+                                                                }));
                                                           liftUp(dragCard, 1000);
                                                         }));
                                                   var pos = elementPosition($$event.currentTarget);

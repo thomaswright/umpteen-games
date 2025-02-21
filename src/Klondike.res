@@ -208,7 +208,7 @@ let spaceToString = space => {
 }
 
 let zIndexFromElement = element => {
-  Obj.magic(element)["style"]["z-index"]
+  Obj.magic(element)["style"]["z-index"]->Int.fromString
 }
 
 let spaceFromElement = element => {
@@ -287,18 +287,6 @@ let make = () => {
       }
     })
   }
-
-  // function moveWithTime(element, target, duration = 1000) {
-  //   const startX = parseInt(element.style.left, 10) || 0;
-  //   const startY = parseInt(element.style.top, 10) || 0;
-  //   const startTime = performance.now();
-
-  //   function step(currentTime) {
-
-  //   }
-
-  //   requestAnimationFrame(step);
-  // }
 
   let rec move = (element, left, top, leftOffset, topOffset, zIndex) => {
     element->setStyleLeft(left->Int.toString ++ "px")
@@ -458,9 +446,15 @@ let make = () => {
                 },
               )
 
-              let dropOnZIndex = dropOn->zIndexFromElement
-
-              moveWithTime(dragCard, pos.left, pos.top +. 20., 0, 20, Some(dropOnZIndex + 1), 100.)
+              moveWithTime(
+                dragCard,
+                pos.left,
+                pos.top +. 20.,
+                0,
+                20,
+                dropOn->zIndexFromElement->Option.map(v => v + 1),
+                100.,
+              )
             }
           }
         },
@@ -519,7 +513,8 @@ let make = () => {
               (),
               dragCard => {
                 let dragCardPos = dragCard->elementPosition
-                originalData.current = Some((dragCardPos, dragCard->zIndexFromElement))
+                originalData.current =
+                  dragCard->zIndexFromElement->Option.map(v => (dragCardPos, v))
 
                 liftUp(dragCard, 1000)
               },
