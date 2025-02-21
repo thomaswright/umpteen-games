@@ -446,10 +446,17 @@ let make = () => {
                 },
               )
 
+              let topAdjustment = switch dropOn->spaceFromElement {
+              | Some(Card(_card)) => 20.
+              | Some(Pile(_num)) => 0.
+              | Some(Foundation(_num)) => 0.
+              | _ => 0.
+              }
+
               moveWithTime(
                 dragCard,
                 pos.left,
-                pos.top +. 20.,
+                pos.top +. topAdjustment,
                 0,
                 20,
                 dropOn->zIndexFromElement->Option.map(v => v + 1),

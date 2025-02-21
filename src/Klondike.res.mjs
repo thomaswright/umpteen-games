@@ -996,7 +996,23 @@ function Klondike(props) {
                           Core__Option.mapOr(spaceFromElement(dropOn$1), undefined, (function (dropOnSpace) {
                                   dragCard.parentSpace = JSON.stringify(space_encode(dropOnSpace));
                                 }));
-                          moveWithTime(dragCard, pos.left, pos.top + 20, 0, 20, Core__Option.map(zIndexFromElement(dropOn$1), (function (v) {
+                          var match = spaceFromElement(dropOn$1);
+                          var topAdjustment;
+                          if (match !== undefined) {
+                            switch (match.TAG) {
+                              case "Pile" :
+                              case "Foundation" :
+                                  topAdjustment = 0;
+                                  break;
+                              case "Card" :
+                                  topAdjustment = 20;
+                                  break;
+                              
+                            }
+                          } else {
+                            topAdjustment = 0;
+                          }
+                          moveWithTime(dragCard, pos.left, pos.top + topAdjustment, 0, 20, Core__Option.map(zIndexFromElement(dropOn$1), (function (v) {
                                       return v + 1 | 0;
                                     })), 100);
                         }));
