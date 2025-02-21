@@ -827,6 +827,20 @@ function parentFromElement(element) {
               }));
 }
 
+function elementPosition(element) {
+  var a = element.getBoundingClientRect();
+  return {
+          top: a.top,
+          right: a.right,
+          bottom: a.bottom,
+          left: a.left
+        };
+}
+
+function eventPosition($$event) {
+  return elementPosition($$event.currentTarget);
+}
+
 function Klondike(props) {
   var refs = React.useRef([]);
   var setRef = function (space, parent) {
@@ -846,6 +860,7 @@ function Klondike(props) {
         0,
         0
       ]);
+  var originalData = React.useRef(undefined);
   var applyToChildren = function (element, f) {
     var elementSpace = spaceFromElement(element);
     refs.current.forEach(function (el) {
@@ -889,6 +904,23 @@ function Klondike(props) {
                       })));
           }));
   };
+  var moveWithTime = function (element, targetLeft, targetTop, offsetLeft, offsetTop, zIndex, duration) {
+    var start = elementPosition(element);
+    var startTime = performance.now();
+    var step = function (currentTime) {
+      var elapsedTime = currentTime - startTime;
+      var progress = Math.min(elapsedTime / duration, 1);
+      var leftMove = start.left + (targetLeft - start.left) * progress;
+      var topMove = start.top + (targetTop - start.top) * progress;
+      move(element, leftMove | 0, topMove | 0, offsetLeft, offsetTop, zIndex);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+        return ;
+      }
+      
+    };
+    requestAnimationFrame(step);
+  };
   var liftUp = function (element, zIndex) {
     element.style["z-index"] = zIndex.toString();
     applyToChildren(element, (function (childEl) {
@@ -896,10 +928,10 @@ function Klondike(props) {
           }));
   };
   var getOverlap = function (aEl, bEl) {
-    var a = aEl.getBoundingClientRect();
-    var b = bEl.getBoundingClientRect();
-    var overlapX = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
-    var overlapY = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+    var aPos = elementPosition(aEl);
+    var bPos = elementPosition(bEl);
+    var overlapX = Math.max(0, Math.min(aPos.right, bPos.right) - Math.max(aPos.left, bPos.left));
+    var overlapY = Math.max(0, Math.min(aPos.bottom, bPos.bottom) - Math.max(aPos.top, bPos.top));
     return overlapX * overlapY;
   };
   React.useEffect((function () {
@@ -949,17 +981,25 @@ function Klondike(props) {
                                     })), (function (param) {
                                   return param[1];
                                 }));
-                          console.log(dropOn);
-                          Core__Option.mapOr(dropOn, undefined, (function (dropOn) {
-                                  var rect = dropOn.getBoundingClientRect();
-                                  Core__Option.mapOr(spaceFromElement(dropOn), undefined, (function (dropOnSpace) {
-                                          dragCard.parentSpace = JSON.stringify(space_encode(dropOnSpace));
-                                        }));
-                                  var dropOnZIndex = dropOn.style["z-index"];
-                                  move(dragCard, rect.left | 0, (rect.top | 0) + 20 | 0, 0, 20, dropOnZIndex + 1 | 0);
+                          var revert = function () {
+                            Core__Option.mapOr(originalData.current, undefined, (function (param) {
+                                    var originalPos = param[0];
+                                    moveWithTime(dragCard, originalPos.left, originalPos.top, 0, 20, param[1], 100);
+                                  }));
+                          };
+                          if (dropOn === undefined) {
+                            return revert();
+                          }
+                          var dropOn$1 = Caml_option.valFromOption(dropOn);
+                          var pos = elementPosition(dropOn$1);
+                          Core__Option.mapOr(spaceFromElement(dropOn$1), undefined, (function (dropOnSpace) {
+                                  dragCard.parentSpace = JSON.stringify(space_encode(dropOnSpace));
                                 }));
+                          var dropOnZIndex = dropOn$1.style["z-index"];
+                          moveWithTime(dragCard, pos.left, pos.top + 20, 0, 20, dropOnZIndex + 1 | 0, 100);
                         }));
                   dragCard.current = undefined;
+                  originalData.current = undefined;
                 }));
         }), []);
   return JsxRuntime.jsxs("div", {
@@ -1062,13 +1102,18 @@ function Klondike(props) {
                                               },
                                               onMouseDown: (function ($$event) {
                                                   dragCard.current = Caml_option.some($$event.currentTarget);
-                                                  Core__Option.mapOr(dragCard.current, undefined, (function (d) {
-                                                          liftUp(d, 1000);
+                                                  Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
+                                                          var dragCardPos = elementPosition(dragCard);
+                                                          originalData.current = [
+                                                            dragCardPos,
+                                                            dragCard.style["z-index"]
+                                                          ];
+                                                          liftUp(dragCard, 1000);
                                                         }));
-                                                  var rect = $$event.currentTarget.getBoundingClientRect();
+                                                  var pos = elementPosition($$event.currentTarget);
                                                   offset.current = [
-                                                    $$event.clientX - (rect.left | 0) | 0,
-                                                    $$event.clientY - (rect.top | 0) | 0
+                                                    $$event.clientX - (pos.left | 0) | 0,
+                                                    $$event.clientY - (pos.top | 0) | 0
                                                   ];
                                                 })
                                             }, JSON.stringify(space_encode({
@@ -1095,6 +1140,8 @@ export {
   zIndexFromElement ,
   spaceFromElement ,
   parentFromElement ,
+  elementPosition ,
+  eventPosition ,
   make ,
 }
 /* shuffledDeck Not a pure module */

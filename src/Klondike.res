@@ -200,6 +200,9 @@ type space =
 @set @scope("style") external setStyleTop: (Dom.element, string) => unit = "top"
 @set @scope("style") external setStyleZIndex: (Dom.element, string) => unit = "z-index"
 
+@val @scope("performance") external now: unit => float = "now"
+@val external requestAnimationFrame: (float => unit) => unit = "requestAnimationFrame"
+
 let spaceToString = space => {
   space->space_encode->Js.Json.stringify
 }
@@ -229,6 +232,26 @@ let parentFromElement = element => {
   })
 }
 
+type position = {
+  top: float,
+  right: float,
+  bottom: float,
+  left: float,
+}
+
+let elementPosition = element => {
+  let a = element->Element.getBoundingClientRect
+
+  {top: a->DomRect.top, right: a->DomRect.right, bottom: a->DomRect.bottom, left: a->DomRect.left}
+}
+
+let eventPosition = event => {
+  event
+  ->JsxEvent.Mouse.currentTarget
+  ->Obj.magic
+  ->elementPosition
+}
+
 @react.component
 let make = () => {
   let refs = React.useRef([])
@@ -249,6 +272,7 @@ let make = () => {
 
   let dragCard: React.ref<option<Dom.element>> = React.useRef(None)
   let offset = React.useRef((0, 0))
+  let originalData = React.useRef(None)
 
   let applyToChildren = (element, f) => {
     let elementSpace = element->spaceFromElement
@@ -263,6 +287,18 @@ let make = () => {
       }
     })
   }
+
+  // function moveWithTime(element, target, duration = 1000) {
+  //   const startX = parseInt(element.style.left, 10) || 0;
+  //   const startY = parseInt(element.style.top, 10) || 0;
+  //   const startTime = performance.now();
+
+  //   function step(currentTime) {
+
+  //   }
+
+  //   requestAnimationFrame(step);
+  // }
 
   let rec move = (element, left, top, leftOffset, topOffset, zIndex) => {
     element->setStyleLeft(left->Int.toString ++ "px")
@@ -283,6 +319,27 @@ let make = () => {
     )
   }
 
+  let moveWithTime = (element, targetLeft, targetTop, offsetLeft, offsetTop, zIndex, duration) => {
+    let start = element->elementPosition
+    let startTime = now()
+
+    let rec step: float => unit = currentTime => {
+      let elapsedTime = currentTime -. startTime
+      let progress = Math.min(elapsedTime /. duration, 1.) // Clamp progress between 0 and 1
+      // let easedProgress = easeOutQuad(progress)
+      let easedProgress = progress
+      let leftMove = start.left +. (targetLeft -. start.left) *. easedProgress
+      let topMove = start.top +. (targetTop -. start.top) *. easedProgress
+      move(element, leftMove->Int.fromFloat, topMove->Int.fromFloat, offsetLeft, offsetTop, zIndex)
+
+      if progress < 1. {
+        requestAnimationFrame(step)
+      }
+    }
+
+    requestAnimationFrame(step)
+  }
+
   let rec liftUp = (element, zIndex) => {
     element->setStyleZIndex(zIndex->Int.toString)
     applyToChildren(element, childEl => {
@@ -291,17 +348,11 @@ let make = () => {
   }
 
   let getOverlap = (aEl, bEl) => {
-    let a = aEl->Element.getBoundingClientRect
-    let b = bEl->Element.getBoundingClientRect
+    let aPos = aEl->elementPosition
+    let bPos = bEl->elementPosition
 
-    let overlapX = Math.max(
-      0.,
-      Math.min(a->DomRect.right, b->DomRect.right) -. Math.max(a->DomRect.left, b->DomRect.left),
-    )
-    let overlapY = Math.max(
-      0.,
-      Math.min(a->DomRect.bottom, b->DomRect.bottom) -. Math.max(a->DomRect.top, b->DomRect.top),
-    )
+    let overlapX = Math.max(0., Math.min(aPos.right, bPos.right) -. Math.max(aPos.left, bPos.left))
+    let overlapY = Math.max(0., Math.min(aPos.bottom, bPos.bottom) -. Math.max(aPos.top, bPos.top))
 
     overlapX *. overlapY
   }
@@ -377,12 +428,27 @@ let make = () => {
             )
             ->Option.map(((_, x)) => x)
 
-          Console.log(dropOn)
+          let revert = () => {
+            originalData.current->Option.mapOr(
+              (),
+              ((originalPos, originalZIndex)) => {
+                moveWithTime(
+                  dragCard,
+                  originalPos.left,
+                  originalPos.top,
+                  0,
+                  20,
+                  Some(originalZIndex),
+                  100.,
+                )
+              },
+            )
+          }
 
-          dropOn->Option.mapOr(
-            (),
-            dropOn => {
-              let rect = dropOn->Element.getBoundingClientRect
+          switch dropOn {
+          | None => revert()
+          | Some(dropOn) => {
+              let pos = dropOn->elementPosition
               dropOn
               ->spaceFromElement
               ->Option.mapOr(
@@ -394,31 +460,14 @@ let make = () => {
 
               let dropOnZIndex = dropOn->zIndexFromElement
 
-              move(
-                dragCard,
-                rect->DomRect.left->Float.toInt,
-                rect->DomRect.top->Float.toInt + 20,
-                0,
-                20,
-                Some(dropOnZIndex + 1),
-              )
-            },
-          )
+              moveWithTime(dragCard, pos.left, pos.top +. 20., 0, 20, Some(dropOnZIndex + 1), 100.)
+            }
+          }
         },
       )
 
       dragCard.current = None
-
-      // dragCard.current->Option.mapOr(
-      //   (),
-      //   dragCard => {
-      //     let (offsetX, offsetY) = offset.current
-      //     let leftMove = event->MouseEvent.clientX - offsetX
-      //     let topMove = event->MouseEvent.clientY - offsetY
-
-      //     move(dragCard, leftMove, topMove, 0, 20)
-      //   },
-      // )
+      originalData.current = None
     })
     None
   })
@@ -465,22 +514,22 @@ let make = () => {
               ->JsxEvent.Mouse.currentTarget
               ->Obj.magic
               ->Some
+
             dragCard.current->Option.mapOr(
               (),
-              d => {
-                liftUp(d, 1000)
+              dragCard => {
+                let dragCardPos = dragCard->elementPosition
+                originalData.current = Some((dragCardPos, dragCard->zIndexFromElement))
+
+                liftUp(dragCard, 1000)
               },
             )
 
-            let rect =
-              event
-              ->JsxEvent.Mouse.currentTarget
-              ->Obj.magic
-              ->Element.getBoundingClientRect
+            let pos = event->eventPosition
 
             offset.current = (
-              event->JsxEvent.Mouse.clientX - rect->DomRect.left->Int.fromFloat,
-              event->JsxEvent.Mouse.clientY - rect->DomRect.top->Int.fromFloat,
+              event->JsxEvent.Mouse.clientX - pos.left->Int.fromFloat,
+              event->JsxEvent.Mouse.clientY - pos.top->Int.fromFloat,
             )
           }}
           className="absolute w-14 h-20"
