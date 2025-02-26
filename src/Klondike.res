@@ -29,6 +29,8 @@ module Card = {
     rank: rank,
   }
 
+  type color = Black | Red
+
   let allRanks = [RA, R2, R3, R4, R5, R6, R7, R8, R9, R10, RJ, RQ, RK]
 
   let allSuits = [Spades, Hearts, Diamonds, Clubs]
@@ -125,7 +127,6 @@ module Card = {
     | Diamonds => "♦"
     | Clubs => "♣"
     }
-  type color = Black | Red
 
   let color = card =>
     switch card.suit {
@@ -264,6 +265,10 @@ let eventPosition = event => {
 @react.component
 let make = () => {
   let refs = React.useRef([])
+  let dragCard: React.ref<option<Dom.element>> = React.useRef(None)
+  let offset = React.useRef((0, 0))
+  let originalData = React.useRef(None)
+
   let setRef = (space, parent) => (element: Js.Nullable.t<Dom.element>) => {
     switch element {
     | Value(a) => {
@@ -278,10 +283,6 @@ let make = () => {
     | Undefined => ()
     }
   }
-
-  let dragCard: React.ref<option<Dom.element>> = React.useRef(None)
-  let offset = React.useRef((0, 0))
-  let originalData = React.useRef(None)
 
   let applyToChildren = (element, f) => {
     let elementSpace = element->spaceFromElement
@@ -356,157 +357,201 @@ let make = () => {
 
   let getElement = space => refs.current->Array.find(el => el->spaceFromElement == space)
 
-  React.useEffect0(() => {
-    window->Window.addMouseMoveEventListener(event => {
-      dragCard.current->Option.mapOr(
-        (),
-        dragCard => {
-          let (offsetX, offsetY) = offset.current
-          let leftMove = event->MouseEvent.clientX - offsetX
-          let topMove = event->MouseEvent.clientY - offsetY
+  let onMouseDown = event => {
+    let eventElement =
+      event
+      ->JsxEvent.Mouse.currentTarget
+      ->Obj.magic
 
-          move(dragCard, leftMove, topMove, 0, 20, None)
-        },
-      )
-    })
-    window->Window.addMouseUpEventListener(event => {
-      dragCard.current->Option.mapOr(
-        (),
-        dragCard => {
-          let rec buildDragPile = (el, build) => {
-            refs.current
-            ->Array.find(v => v->parentFromElement == el->spaceFromElement)
-            ->Option.mapOr([el], parentEl => buildDragPile(parentEl, [el]))
-            ->Array.concat(build)
-          }
+    let rec buildDragPile = (el, build) => {
+      refs.current
+      ->Array.find(v => v->parentFromElement == el->spaceFromElement)
+      ->Option.mapOr([el], parentEl => buildDragPile(parentEl, [el]))
+      ->Array.concat(build)
+    }
 
-          let rec baseIsFoundation = el => {
-            switch el->parentFromElement {
-            | Some(Foundation(_)) => true
-            | Some(Card(c)) => baseIsFoundation(getElement(Some(Card(c))))
-            | _ => false
+    let dragPile = buildDragPile(eventElement, [])
+
+    let (dragPileIsValid, _) = dragPile->Array.reduce((true, None), (
+      (isStillValid, onTopElement),
+      onBottom,
+    ) => {
+      !isStillValid
+        ? (isStillValid, None)
+        : switch onTopElement {
+          | None => (true, Some(onBottom))
+          | Some(onTop) =>
+            switch (onTop->spaceFromElement, onBottom->spaceFromElement) {
+            | (Some(Card(onTopCard)), Some(Card(onBottomCard))) => (
+                Card.rankIsBelow(onTopCard, onBottomCard) &&
+                onTopCard->Card.color != onBottomCard->Card.color,
+                Some(onBottom),
+              )
+            | (Some(Card(_onTopCard)), _) => (true, Some(onBottom))
+            | _ => (false, None)
             }
           }
+    })
 
-          let dragPile = buildDragPile(dragCard, [])
+    let canDrag = dragPileIsValid
 
-          let dropOn =
-            refs.current
-            ->Array.filter(
-              el =>
-                dragPile
-                ->Array.find(pileEl => pileEl->spaceFromElement == el->spaceFromElement)
-                ->Option.isNone,
-            )
-            ->Array.reduce(
-              None,
-              (acc, el) => {
-                let dropHasNoChildren =
-                  el
-                  ->spaceFromElement
-                  ->Option.mapOr(
-                    false,
-                    x => {
-                      !(
-                        refs.current->Array.some(
-                          el2 => {
-                            el2->parentFromElement->Option.mapOr(false, p => p == x)
-                          },
-                        )
-                      )
+    if canDrag {
+      dragCard.current = eventElement->Some
+
+      let dragCardPos = eventElement->elementPosition
+
+      originalData.current = eventElement->zIndexFromElement->Option.map(v => (dragCardPos, v))
+
+      liftUp(eventElement, 1000)
+
+      let pos = event->eventPosition
+
+      offset.current = (
+        event->JsxEvent.Mouse.clientX - pos.left->Int.fromFloat,
+        event->JsxEvent.Mouse.clientY - pos.top->Int.fromFloat,
+      )
+    }
+  }
+
+  let onMouseMove = event => {
+    dragCard.current->Option.mapOr((), dragCard => {
+      let (offsetX, offsetY) = offset.current
+      let leftMove = event->MouseEvent.clientX - offsetX
+      let topMove = event->MouseEvent.clientY - offsetY
+
+      move(dragCard, leftMove, topMove, 0, 20, None)
+    })
+  }
+
+  let onMouseUp = _ => {
+    dragCard.current->Option.mapOr((), dragCard => {
+      let rec buildDragPile = (el, build) => {
+        refs.current
+        ->Array.find(v => v->parentFromElement == el->spaceFromElement)
+        ->Option.mapOr([el], parentEl => buildDragPile(parentEl, [el]))
+        ->Array.concat(build)
+      }
+
+      let rec baseIsFoundation = el => {
+        switch el->parentFromElement {
+        | Some(Foundation(_)) => true
+        | Some(Card(c)) => baseIsFoundation(getElement(Some(Card(c))))
+        | _ => false
+        }
+      }
+
+      let dragPile = buildDragPile(dragCard, [])
+
+      let dropOn =
+        refs.current
+        ->Array.filter(el =>
+          dragPile
+          ->Array.find(pileEl => pileEl->spaceFromElement == el->spaceFromElement)
+          ->Option.isNone
+        )
+        ->Array.reduce(None, (acc, el) => {
+          let dropHasNoChildren =
+            el
+            ->spaceFromElement
+            ->Option.mapOr(
+              false,
+              x => {
+                !(
+                  refs.current->Array.some(
+                    el2 => {
+                      el2->parentFromElement->Option.mapOr(false, p => p == x)
                     },
                   )
-
-                let otherConditions = switch dragCard->spaceFromElement {
-                | Some(Card(dragCard)) =>
-                  switch el->spaceFromElement {
-                  | Some(Card(dropCard)) =>
-                    baseIsFoundation(Some(el))
-                      ? Card.rankIsBelow(dropCard, dragCard) && dragCard.suit == dropCard.suit
-                      : Card.rankIsAbove(dropCard, dragCard) &&
-                        dragCard->Card.color != dropCard->Card.color
-                  | Some(Foundation(_)) => dragCard.rank == RA
-                  | Some(Pile(_)) => dragCard.rank == RK
-                  | _ => false
-                  }
-                | _ => false
-                }
-
-                let canDrop = dropHasNoChildren && otherConditions
-
-                if canDrop {
-                  let overlap = getOverlap(el, dragCard)
-                  let new = Some((overlap, el))
-
-                  if overlap > 0. {
-                    switch acc {
-                    | None => new
-                    | Some((accOverlap, _)) => accOverlap > overlap ? acc : new
-                    }
-                  } else {
-                    acc
-                  }
-                } else {
-                  acc
-                }
-              },
-            )
-            ->Option.map(((_, x)) => x)
-
-          let revert = () => {
-            originalData.current->Option.mapOr(
-              (),
-              ((originalPos, originalZIndex)) => {
-                moveWithTime(
-                  dragCard,
-                  originalPos.left,
-                  originalPos.top,
-                  0,
-                  20,
-                  Some(originalZIndex),
-                  100.,
                 )
               },
             )
-          }
 
-          switch dropOn {
-          | None => revert()
-          | Some(dropOn) => {
-              let pos = dropOn->elementPosition
-              dropOn
-              ->spaceFromElement
-              ->Option.mapOr(
-                (),
-                dropOnSpace => {
-                  dragCard->setParent(dropOnSpace->spaceToString)
-                },
-              )
-
-              let (topAdjustment, stackAdjustment) = switch dropOn->spaceFromElement {
-              | Some(Card(_card)) => baseIsFoundation(Some(dropOn)) ? (0., 0) : (20., 20)
-              | Some(Pile(_num)) => (0., 20)
-              | Some(Foundation(_num)) => (0., 0)
-              | _ => (0., 0)
-              }
-
-              moveWithTime(
-                dragCard,
-                pos.left,
-                pos.top +. topAdjustment,
-                0,
-                stackAdjustment,
-                dropOn->zIndexFromElement->Option.map(v => v + 1),
-                100.,
-              )
+          let otherConditions = switch dragCard->spaceFromElement {
+          | Some(Card(dragCard)) =>
+            switch el->spaceFromElement {
+            | Some(Card(dropCard)) =>
+              baseIsFoundation(Some(el))
+                ? Card.rankIsBelow(dropCard, dragCard) && dragCard.suit == dropCard.suit
+                : Card.rankIsAbove(dropCard, dragCard) &&
+                  dragCard->Card.color != dropCard->Card.color
+            | Some(Foundation(_)) => dragCard.rank == RA
+            | Some(Pile(_)) => dragCard.rank == RK
+            | _ => false
             }
+          | _ => false
           }
-        },
-      )
 
-      dragCard.current = None
-      originalData.current = None
+          let canDrop = dropHasNoChildren && otherConditions
+
+          if canDrop {
+            let overlap = getOverlap(el, dragCard)
+            let new = Some((overlap, el))
+
+            if overlap > 0. {
+              switch acc {
+              | None => new
+              | Some((accOverlap, _)) => accOverlap > overlap ? acc : new
+              }
+            } else {
+              acc
+            }
+          } else {
+            acc
+          }
+        })
+        ->Option.map(((_, x)) => x)
+
+      let revert = () => {
+        originalData.current->Option.mapOr((), ((originalPos, originalZIndex)) => {
+          moveWithTime(
+            dragCard,
+            originalPos.left,
+            originalPos.top,
+            0,
+            20,
+            Some(originalZIndex),
+            100.,
+          )
+        })
+      }
+
+      switch dropOn {
+      | None => revert()
+      | Some(dropOn) => {
+          let pos = dropOn->elementPosition
+          dropOn
+          ->spaceFromElement
+          ->Option.mapOr((), dropOnSpace => {
+            dragCard->setParent(dropOnSpace->spaceToString)
+          })
+
+          let (topAdjustment, stackAdjustment) = switch dropOn->spaceFromElement {
+          | Some(Card(_card)) => baseIsFoundation(Some(dropOn)) ? (0., 0) : (20., 20)
+          | Some(Pile(_num)) => (0., 20)
+          | Some(Foundation(_num)) => (0., 0)
+          | _ => (0., 0)
+          }
+
+          moveWithTime(
+            dragCard,
+            pos.left,
+            pos.top +. topAdjustment,
+            0,
+            stackAdjustment,
+            dropOn->zIndexFromElement->Option.map(v => v + 1),
+            100.,
+          )
+        }
+      }
     })
+
+    dragCard.current = None
+    originalData.current = None
+  }
+
+  React.useEffect0(() => {
+    window->Window.addMouseMoveEventListener(onMouseMove)
+    window->Window.addMouseUpEventListener(onMouseUp)
     None
   })
 
@@ -548,62 +593,7 @@ let make = () => {
         <div
           key={Card(card)->spaceToString}
           ref={ReactDOM.Ref.callbackDomRef(setRef(Card(card), Some(parent)))}
-          onMouseDown={event => {
-            let eventElement =
-              event
-              ->JsxEvent.Mouse.currentTarget
-              ->Obj.magic
-
-            let rec buildDragPile = (el, build) => {
-              refs.current
-              ->Array.find(v => v->parentFromElement == el->spaceFromElement)
-              ->Option.mapOr([el], parentEl => buildDragPile(parentEl, [el]))
-              ->Array.concat(build)
-            }
-
-            let dragPile = buildDragPile(eventElement, [])
-
-            let (dragPileIsValid, _) = dragPile->Array.reduce(
-              (true, None),
-              ((isStillValid, onTopElement), onBottom) => {
-                !isStillValid
-                  ? (isStillValid, None)
-                  : switch onTopElement {
-                    | None => (true, Some(onBottom))
-                    | Some(onTop) =>
-                      switch (onTop->spaceFromElement, onBottom->spaceFromElement) {
-                      | (Some(Card(onTopCard)), Some(Card(onBottomCard))) => (
-                          Card.rankIsBelow(onTopCard, onBottomCard) &&
-                          onTopCard->Card.color != onBottomCard->Card.color,
-                          Some(onBottom),
-                        )
-                      | (Some(Card(_onTopCard)), _) => (true, Some(onBottom))
-                      | _ => (false, None)
-                      }
-                    }
-              },
-            )
-
-            let canDrag = dragPileIsValid
-
-            if canDrag {
-              dragCard.current = eventElement->Some
-
-              let dragCardPos = eventElement->elementPosition
-
-              originalData.current =
-                eventElement->zIndexFromElement->Option.map(v => (dragCardPos, v))
-
-              liftUp(eventElement, 1000)
-
-              let pos = event->eventPosition
-
-              offset.current = (
-                event->JsxEvent.Mouse.clientX - pos.left->Int.fromFloat,
-                event->JsxEvent.Mouse.clientY - pos.top->Int.fromFloat,
-              )
-            }
-          }}
+          onMouseDown={onMouseDown}
           className="absolute w-14 h-20 select-none"
           style={{
             top: (100 + j * 20)->Int.toString ++ "px",

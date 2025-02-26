@@ -858,6 +858,12 @@ function eventPosition($$event) {
 
 function Klondike(props) {
   var refs = React.useRef([]);
+  var dragCard = React.useRef(undefined);
+  var offset = React.useRef([
+        0,
+        0
+      ]);
+  var originalData = React.useRef(undefined);
   var setRef = function (space, parent) {
     return function (element) {
       if (element === null || element === undefined) {
@@ -870,12 +876,6 @@ function Klondike(props) {
       refs.current.push(element);
     };
   };
-  var dragCard = React.useRef(undefined);
-  var offset = React.useRef([
-        0,
-        0
-      ]);
-  var originalData = React.useRef(undefined);
   var applyToChildren = function (element, f) {
     var elementSpace = spaceFromElement(element);
     refs.current.forEach(function (el) {
@@ -954,164 +954,253 @@ function Klondike(props) {
                 return Caml_obj.equal(spaceFromElement(el), space);
               });
   };
+  var onMouseDown = function ($$event) {
+    var eventElement = $$event.currentTarget;
+    var buildDragPile = function (el, build) {
+      return Core__Option.mapOr(refs.current.find(function (v) {
+                        return Caml_obj.equal(parentFromElement(v), spaceFromElement(el));
+                      }), [el], (function (parentEl) {
+                      return buildDragPile(parentEl, [el]);
+                    })).concat(build);
+    };
+    var dragPile = buildDragPile(eventElement, []);
+    var match = Core__Array.reduce(dragPile, [
+          true,
+          undefined
+        ], (function (param, onBottom) {
+            var isStillValid = param[0];
+            if (!isStillValid) {
+              return [
+                      isStillValid,
+                      undefined
+                    ];
+            }
+            var onTopElement = param[1];
+            if (onTopElement === undefined) {
+              return [
+                      true,
+                      Caml_option.some(onBottom)
+                    ];
+            }
+            var match = spaceFromElement(Caml_option.valFromOption(onTopElement));
+            var match$1 = spaceFromElement(onBottom);
+            if (match === undefined) {
+              return [
+                      false,
+                      undefined
+                    ];
+            }
+            switch (match.TAG) {
+              case "Pile" :
+              case "Foundation" :
+                  return [
+                          false,
+                          undefined
+                        ];
+              case "Card" :
+                  var onTopCard = match._0;
+                  if (match$1 === undefined) {
+                    return [
+                            true,
+                            Caml_option.some(onBottom)
+                          ];
+                  }
+                  switch (match$1.TAG) {
+                    case "Pile" :
+                    case "Foundation" :
+                        return [
+                                true,
+                                Caml_option.some(onBottom)
+                              ];
+                    case "Card" :
+                        var onBottomCard = match$1._0;
+                        return [
+                                rankIsBelow(onTopCard, onBottomCard) && color(onTopCard) !== color(onBottomCard),
+                                Caml_option.some(onBottom)
+                              ];
+                    
+                  }
+              
+            }
+          }));
+    if (!match[0]) {
+      return ;
+    }
+    dragCard.current = Caml_option.some(eventElement);
+    var dragCardPos = elementPosition(eventElement);
+    originalData.current = Core__Option.map(zIndexFromElement(eventElement), (function (v) {
+            return [
+                    dragCardPos,
+                    v
+                  ];
+          }));
+    liftUp(eventElement, 1000);
+    var pos = elementPosition($$event.currentTarget);
+    offset.current = [
+      $$event.clientX - (pos.left | 0) | 0,
+      $$event.clientY - (pos.top | 0) | 0
+    ];
+  };
+  var onMouseMove = function ($$event) {
+    Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
+            var match = offset.current;
+            var leftMove = $$event.clientX - match[0] | 0;
+            var topMove = $$event.clientY - match[1] | 0;
+            move(dragCard, leftMove, topMove, 0, 20, undefined);
+          }));
+  };
+  var onMouseUp = function (param) {
+    Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
+            var buildDragPile = function (el, build) {
+              return Core__Option.mapOr(refs.current.find(function (v) {
+                                return Caml_obj.equal(parentFromElement(v), spaceFromElement(el));
+                              }), [el], (function (parentEl) {
+                              return buildDragPile(parentEl, [el]);
+                            })).concat(build);
+            };
+            var baseIsFoundation = function (_el) {
+              while(true) {
+                var el = _el;
+                var match = parentFromElement(el);
+                if (match === undefined) {
+                  return false;
+                }
+                switch (match.TAG) {
+                  case "Pile" :
+                      return false;
+                  case "Foundation" :
+                      return true;
+                  case "Card" :
+                      _el = getElement({
+                            TAG: "Card",
+                            _0: match._0
+                          });
+                      continue ;
+                  
+                }
+              };
+            };
+            var dragPile = buildDragPile(dragCard, []);
+            var dropOn = Core__Option.map(Core__Array.reduce(refs.current.filter(function (el) {
+                          return Core__Option.isNone(dragPile.find(function (pileEl) {
+                                          return Caml_obj.equal(spaceFromElement(pileEl), spaceFromElement(el));
+                                        }));
+                        }), undefined, (function (acc, el) {
+                        var dropHasNoChildren = Core__Option.mapOr(spaceFromElement(el), false, (function (x) {
+                                return !refs.current.some(function (el2) {
+                                            return Core__Option.mapOr(parentFromElement(el2), false, (function (p) {
+                                                          return Caml_obj.equal(p, x);
+                                                        }));
+                                          });
+                              }));
+                        var match = spaceFromElement(dragCard);
+                        var otherConditions;
+                        if (match !== undefined) {
+                          switch (match.TAG) {
+                            case "Pile" :
+                            case "Foundation" :
+                                otherConditions = false;
+                                break;
+                            case "Card" :
+                                var dragCard$1 = match._0;
+                                var match$1 = spaceFromElement(el);
+                                if (match$1 !== undefined) {
+                                  switch (match$1.TAG) {
+                                    case "Pile" :
+                                        otherConditions = dragCard$1.rank === "RK";
+                                        break;
+                                    case "Foundation" :
+                                        otherConditions = dragCard$1.rank === "RA";
+                                        break;
+                                    case "Card" :
+                                        var dropCard = match$1._0;
+                                        otherConditions = baseIsFoundation(Caml_option.some(el)) ? rankIsBelow(dropCard, dragCard$1) && dragCard$1.suit === dropCard.suit : rankIsAbove(dropCard, dragCard$1) && color(dragCard$1) !== color(dropCard);
+                                        break;
+                                    
+                                  }
+                                } else {
+                                  otherConditions = false;
+                                }
+                                break;
+                            
+                          }
+                        } else {
+                          otherConditions = false;
+                        }
+                        var canDrop = dropHasNoChildren && otherConditions;
+                        if (!canDrop) {
+                          return acc;
+                        }
+                        var overlap = getOverlap(el, dragCard);
+                        var $$new = [
+                          overlap,
+                          el
+                        ];
+                        if (overlap > 0 && !(acc !== undefined && acc[0] > overlap)) {
+                          return $$new;
+                        } else {
+                          return acc;
+                        }
+                      })), (function (param) {
+                    return param[1];
+                  }));
+            var revert = function () {
+              Core__Option.mapOr(originalData.current, undefined, (function (param) {
+                      var originalPos = param[0];
+                      moveWithTime(dragCard, originalPos.left, originalPos.top, 0, 20, param[1], 100);
+                    }));
+            };
+            if (dropOn === undefined) {
+              return revert();
+            }
+            var dropOn$1 = Caml_option.valFromOption(dropOn);
+            var pos = elementPosition(dropOn$1);
+            Core__Option.mapOr(spaceFromElement(dropOn$1), undefined, (function (dropOnSpace) {
+                    dragCard.parentSpace = JSON.stringify(space_encode(dropOnSpace));
+                  }));
+            var match = spaceFromElement(dropOn$1);
+            var match$1;
+            if (match !== undefined) {
+              switch (match.TAG) {
+                case "Pile" :
+                    match$1 = [
+                      0,
+                      20
+                    ];
+                    break;
+                case "Foundation" :
+                    match$1 = [
+                      0,
+                      0
+                    ];
+                    break;
+                case "Card" :
+                    match$1 = baseIsFoundation(Caml_option.some(dropOn$1)) ? [
+                        0,
+                        0
+                      ] : [
+                        20,
+                        20
+                      ];
+                    break;
+                
+              }
+            } else {
+              match$1 = [
+                0,
+                0
+              ];
+            }
+            moveWithTime(dragCard, pos.left, pos.top + match$1[0], 0, match$1[1], Core__Option.map(zIndexFromElement(dropOn$1), (function (v) {
+                        return v + 1 | 0;
+                      })), 100);
+          }));
+    dragCard.current = undefined;
+    originalData.current = undefined;
+  };
   React.useEffect((function () {
-          window.addEventListener("mousemove", (function ($$event) {
-                  Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
-                          var match = offset.current;
-                          var leftMove = $$event.clientX - match[0] | 0;
-                          var topMove = $$event.clientY - match[1] | 0;
-                          move(dragCard, leftMove, topMove, 0, 20, undefined);
-                        }));
-                }));
-          window.addEventListener("mouseup", (function ($$event) {
-                  Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
-                          var buildDragPile = function (el, build) {
-                            return Core__Option.mapOr(refs.current.find(function (v) {
-                                              return Caml_obj.equal(parentFromElement(v), spaceFromElement(el));
-                                            }), [el], (function (parentEl) {
-                                            return buildDragPile(parentEl, [el]);
-                                          })).concat(build);
-                          };
-                          var baseIsFoundation = function (_el) {
-                            while(true) {
-                              var el = _el;
-                              var match = parentFromElement(el);
-                              if (match === undefined) {
-                                return false;
-                              }
-                              switch (match.TAG) {
-                                case "Pile" :
-                                    return false;
-                                case "Foundation" :
-                                    return true;
-                                case "Card" :
-                                    _el = getElement({
-                                          TAG: "Card",
-                                          _0: match._0
-                                        });
-                                    continue ;
-                                
-                              }
-                            };
-                          };
-                          var dragPile = buildDragPile(dragCard, []);
-                          var dropOn = Core__Option.map(Core__Array.reduce(refs.current.filter(function (el) {
-                                        return Core__Option.isNone(dragPile.find(function (pileEl) {
-                                                        return Caml_obj.equal(spaceFromElement(pileEl), spaceFromElement(el));
-                                                      }));
-                                      }), undefined, (function (acc, el) {
-                                      var dropHasNoChildren = Core__Option.mapOr(spaceFromElement(el), false, (function (x) {
-                                              return !refs.current.some(function (el2) {
-                                                          return Core__Option.mapOr(parentFromElement(el2), false, (function (p) {
-                                                                        return Caml_obj.equal(p, x);
-                                                                      }));
-                                                        });
-                                            }));
-                                      var match = spaceFromElement(dragCard);
-                                      var otherConditions;
-                                      if (match !== undefined) {
-                                        switch (match.TAG) {
-                                          case "Pile" :
-                                          case "Foundation" :
-                                              otherConditions = false;
-                                              break;
-                                          case "Card" :
-                                              var dragCard$1 = match._0;
-                                              var match$1 = spaceFromElement(el);
-                                              if (match$1 !== undefined) {
-                                                switch (match$1.TAG) {
-                                                  case "Pile" :
-                                                      otherConditions = dragCard$1.rank === "RK";
-                                                      break;
-                                                  case "Foundation" :
-                                                      otherConditions = dragCard$1.rank === "RA";
-                                                      break;
-                                                  case "Card" :
-                                                      var dropCard = match$1._0;
-                                                      otherConditions = baseIsFoundation(Caml_option.some(el)) ? rankIsBelow(dropCard, dragCard$1) && dragCard$1.suit === dropCard.suit : rankIsAbove(dropCard, dragCard$1) && color(dragCard$1) !== color(dropCard);
-                                                      break;
-                                                  
-                                                }
-                                              } else {
-                                                otherConditions = false;
-                                              }
-                                              break;
-                                          
-                                        }
-                                      } else {
-                                        otherConditions = false;
-                                      }
-                                      var canDrop = dropHasNoChildren && otherConditions;
-                                      if (!canDrop) {
-                                        return acc;
-                                      }
-                                      var overlap = getOverlap(el, dragCard);
-                                      var $$new = [
-                                        overlap,
-                                        el
-                                      ];
-                                      if (overlap > 0 && !(acc !== undefined && acc[0] > overlap)) {
-                                        return $$new;
-                                      } else {
-                                        return acc;
-                                      }
-                                    })), (function (param) {
-                                  return param[1];
-                                }));
-                          var revert = function () {
-                            Core__Option.mapOr(originalData.current, undefined, (function (param) {
-                                    var originalPos = param[0];
-                                    moveWithTime(dragCard, originalPos.left, originalPos.top, 0, 20, param[1], 100);
-                                  }));
-                          };
-                          if (dropOn === undefined) {
-                            return revert();
-                          }
-                          var dropOn$1 = Caml_option.valFromOption(dropOn);
-                          var pos = elementPosition(dropOn$1);
-                          Core__Option.mapOr(spaceFromElement(dropOn$1), undefined, (function (dropOnSpace) {
-                                  dragCard.parentSpace = JSON.stringify(space_encode(dropOnSpace));
-                                }));
-                          var match = spaceFromElement(dropOn$1);
-                          var match$1;
-                          if (match !== undefined) {
-                            switch (match.TAG) {
-                              case "Pile" :
-                                  match$1 = [
-                                    0,
-                                    20
-                                  ];
-                                  break;
-                              case "Foundation" :
-                                  match$1 = [
-                                    0,
-                                    0
-                                  ];
-                                  break;
-                              case "Card" :
-                                  match$1 = baseIsFoundation(Caml_option.some(dropOn$1)) ? [
-                                      0,
-                                      0
-                                    ] : [
-                                      20,
-                                      20
-                                    ];
-                                  break;
-                              
-                            }
-                          } else {
-                            match$1 = [
-                              0,
-                              0
-                            ];
-                          }
-                          moveWithTime(dragCard, pos.left, pos.top + match$1[0], 0, match$1[1], Core__Option.map(zIndexFromElement(dropOn$1), (function (v) {
-                                      return v + 1 | 0;
-                                    })), 100);
-                        }));
-                  dragCard.current = undefined;
-                  originalData.current = undefined;
-                }));
+          window.addEventListener("mousemove", onMouseMove);
+          window.addEventListener("mouseup", onMouseUp);
         }), []);
   return JsxRuntime.jsxs("div", {
               children: [
@@ -1213,93 +1302,7 @@ function Klondike(props) {
                                                 top: (100 + Math.imul(j, 20) | 0).toString() + "px",
                                                 zIndex: (j + 1 | 0).toString()
                                               },
-                                              onMouseDown: (function ($$event) {
-                                                  var eventElement = $$event.currentTarget;
-                                                  var buildDragPile = function (el, build) {
-                                                    return Core__Option.mapOr(refs.current.find(function (v) {
-                                                                      return Caml_obj.equal(parentFromElement(v), spaceFromElement(el));
-                                                                    }), [el], (function (parentEl) {
-                                                                    return buildDragPile(parentEl, [el]);
-                                                                  })).concat(build);
-                                                  };
-                                                  var dragPile = buildDragPile(eventElement, []);
-                                                  var match = Core__Array.reduce(dragPile, [
-                                                        true,
-                                                        undefined
-                                                      ], (function (param, onBottom) {
-                                                          var isStillValid = param[0];
-                                                          if (!isStillValid) {
-                                                            return [
-                                                                    isStillValid,
-                                                                    undefined
-                                                                  ];
-                                                          }
-                                                          var onTopElement = param[1];
-                                                          if (onTopElement === undefined) {
-                                                            return [
-                                                                    true,
-                                                                    Caml_option.some(onBottom)
-                                                                  ];
-                                                          }
-                                                          var match = spaceFromElement(Caml_option.valFromOption(onTopElement));
-                                                          var match$1 = spaceFromElement(onBottom);
-                                                          if (match === undefined) {
-                                                            return [
-                                                                    false,
-                                                                    undefined
-                                                                  ];
-                                                          }
-                                                          switch (match.TAG) {
-                                                            case "Pile" :
-                                                            case "Foundation" :
-                                                                return [
-                                                                        false,
-                                                                        undefined
-                                                                      ];
-                                                            case "Card" :
-                                                                var onTopCard = match._0;
-                                                                if (match$1 === undefined) {
-                                                                  return [
-                                                                          true,
-                                                                          Caml_option.some(onBottom)
-                                                                        ];
-                                                                }
-                                                                switch (match$1.TAG) {
-                                                                  case "Pile" :
-                                                                  case "Foundation" :
-                                                                      return [
-                                                                              true,
-                                                                              Caml_option.some(onBottom)
-                                                                            ];
-                                                                  case "Card" :
-                                                                      var onBottomCard = match$1._0;
-                                                                      return [
-                                                                              rankIsBelow(onTopCard, onBottomCard) && color(onTopCard) !== color(onBottomCard),
-                                                                              Caml_option.some(onBottom)
-                                                                            ];
-                                                                  
-                                                                }
-                                                            
-                                                          }
-                                                        }));
-                                                  if (!match[0]) {
-                                                    return ;
-                                                  }
-                                                  dragCard.current = Caml_option.some(eventElement);
-                                                  var dragCardPos = elementPosition(eventElement);
-                                                  originalData.current = Core__Option.map(zIndexFromElement(eventElement), (function (v) {
-                                                          return [
-                                                                  dragCardPos,
-                                                                  v
-                                                                ];
-                                                        }));
-                                                  liftUp(eventElement, 1000);
-                                                  var pos = elementPosition($$event.currentTarget);
-                                                  offset.current = [
-                                                    $$event.clientX - (pos.left | 0) | 0,
-                                                    $$event.clientY - (pos.top | 0) | 0
-                                                  ];
-                                                })
+                                              onMouseDown: onMouseDown
                                             }, JSON.stringify(space_encode({
                                                       TAG: "Card",
                                                       _0: card
