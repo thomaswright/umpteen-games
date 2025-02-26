@@ -954,6 +954,127 @@ function Klondike(props) {
                 return Caml_obj.equal(spaceFromElement(el), space);
               });
   };
+  var baseIsFoundation = function (_el) {
+    while(true) {
+      var el = _el;
+      var match = parentFromElement(el);
+      if (match === undefined) {
+        return false;
+      }
+      switch (match.TAG) {
+        case "Pile" :
+            return false;
+        case "Foundation" :
+            return true;
+        case "Card" :
+            _el = getElement({
+                  TAG: "Card",
+                  _0: match._0
+                });
+            continue ;
+        
+      }
+    };
+  };
+  var canDrag = function (dragPile) {
+    return Core__Array.reduce(dragPile, [
+                  true,
+                  undefined
+                ], (function (param, onBottom) {
+                    var isStillValid = param[0];
+                    if (!isStillValid) {
+                      return [
+                              isStillValid,
+                              undefined
+                            ];
+                    }
+                    var onTopElement = param[1];
+                    if (onTopElement === undefined) {
+                      return [
+                              true,
+                              Caml_option.some(onBottom)
+                            ];
+                    }
+                    var match = spaceFromElement(Caml_option.valFromOption(onTopElement));
+                    var match$1 = spaceFromElement(onBottom);
+                    if (match === undefined) {
+                      return [
+                              false,
+                              undefined
+                            ];
+                    }
+                    switch (match.TAG) {
+                      case "Pile" :
+                      case "Foundation" :
+                          return [
+                                  false,
+                                  undefined
+                                ];
+                      case "Card" :
+                          var onTopCard = match._0;
+                          if (match$1 === undefined) {
+                            return [
+                                    true,
+                                    Caml_option.some(onBottom)
+                                  ];
+                          }
+                          switch (match$1.TAG) {
+                            case "Pile" :
+                            case "Foundation" :
+                                return [
+                                        true,
+                                        Caml_option.some(onBottom)
+                                      ];
+                            case "Card" :
+                                var onBottomCard = match$1._0;
+                                return [
+                                        rankIsBelow(onTopCard, onBottomCard) && color(onTopCard) !== color(onBottomCard),
+                                        Caml_option.some(onBottom)
+                                      ];
+                            
+                          }
+                      
+                    }
+                  }))[0];
+  };
+  var canDrop = function (dragCard, el) {
+    var match = spaceFromElement(dragCard);
+    if (match === undefined) {
+      return false;
+    }
+    switch (match.TAG) {
+      case "Pile" :
+      case "Foundation" :
+          return false;
+      case "Card" :
+          var dragCard$1 = match._0;
+          var match$1 = spaceFromElement(el);
+          if (match$1 === undefined) {
+            return false;
+          }
+          switch (match$1.TAG) {
+            case "Pile" :
+                return dragCard$1.rank === "RK";
+            case "Foundation" :
+                return dragCard$1.rank === "RA";
+            case "Card" :
+                var dropCard = match$1._0;
+                if (baseIsFoundation(Caml_option.some(el))) {
+                  if (rankIsBelow(dropCard, dragCard$1)) {
+                    return dragCard$1.suit === dropCard.suit;
+                  } else {
+                    return false;
+                  }
+                } else if (rankIsAbove(dropCard, dragCard$1)) {
+                  return color(dragCard$1) !== color(dropCard);
+                } else {
+                  return false;
+                }
+            
+          }
+      
+    }
+  };
   var onMouseDown = function ($$event) {
     var eventElement = $$event.currentTarget;
     var buildDragPile = function (el, build) {
@@ -964,66 +1085,8 @@ function Klondike(props) {
                     })).concat(build);
     };
     var dragPile = buildDragPile(eventElement, []);
-    var match = Core__Array.reduce(dragPile, [
-          true,
-          undefined
-        ], (function (param, onBottom) {
-            var isStillValid = param[0];
-            if (!isStillValid) {
-              return [
-                      isStillValid,
-                      undefined
-                    ];
-            }
-            var onTopElement = param[1];
-            if (onTopElement === undefined) {
-              return [
-                      true,
-                      Caml_option.some(onBottom)
-                    ];
-            }
-            var match = spaceFromElement(Caml_option.valFromOption(onTopElement));
-            var match$1 = spaceFromElement(onBottom);
-            if (match === undefined) {
-              return [
-                      false,
-                      undefined
-                    ];
-            }
-            switch (match.TAG) {
-              case "Pile" :
-              case "Foundation" :
-                  return [
-                          false,
-                          undefined
-                        ];
-              case "Card" :
-                  var onTopCard = match._0;
-                  if (match$1 === undefined) {
-                    return [
-                            true,
-                            Caml_option.some(onBottom)
-                          ];
-                  }
-                  switch (match$1.TAG) {
-                    case "Pile" :
-                    case "Foundation" :
-                        return [
-                                true,
-                                Caml_option.some(onBottom)
-                              ];
-                    case "Card" :
-                        var onBottomCard = match$1._0;
-                        return [
-                                rankIsBelow(onTopCard, onBottomCard) && color(onTopCard) !== color(onBottomCard),
-                                Caml_option.some(onBottom)
-                              ];
-                    
-                  }
-              
-            }
-          }));
-    if (!match[0]) {
+    var canDrag$1 = canDrag(dragPile);
+    if (!canDrag$1) {
       return ;
     }
     dragCard.current = Caml_option.some(eventElement);
@@ -1058,28 +1121,6 @@ function Klondike(props) {
                               return buildDragPile(parentEl, [el]);
                             })).concat(build);
             };
-            var baseIsFoundation = function (_el) {
-              while(true) {
-                var el = _el;
-                var match = parentFromElement(el);
-                if (match === undefined) {
-                  return false;
-                }
-                switch (match.TAG) {
-                  case "Pile" :
-                      return false;
-                  case "Foundation" :
-                      return true;
-                  case "Card" :
-                      _el = getElement({
-                            TAG: "Card",
-                            _0: match._0
-                          });
-                      continue ;
-                  
-                }
-              };
-            };
             var dragPile = buildDragPile(dragCard, []);
             var dropOn = Core__Option.map(Core__Array.reduce(refs.current.filter(function (el) {
                           return Core__Option.isNone(dragPile.find(function (pileEl) {
@@ -1093,42 +1134,8 @@ function Klondike(props) {
                                                         }));
                                           });
                               }));
-                        var match = spaceFromElement(dragCard);
-                        var otherConditions;
-                        if (match !== undefined) {
-                          switch (match.TAG) {
-                            case "Pile" :
-                            case "Foundation" :
-                                otherConditions = false;
-                                break;
-                            case "Card" :
-                                var dragCard$1 = match._0;
-                                var match$1 = spaceFromElement(el);
-                                if (match$1 !== undefined) {
-                                  switch (match$1.TAG) {
-                                    case "Pile" :
-                                        otherConditions = dragCard$1.rank === "RK";
-                                        break;
-                                    case "Foundation" :
-                                        otherConditions = dragCard$1.rank === "RA";
-                                        break;
-                                    case "Card" :
-                                        var dropCard = match$1._0;
-                                        otherConditions = baseIsFoundation(Caml_option.some(el)) ? rankIsBelow(dropCard, dragCard$1) && dragCard$1.suit === dropCard.suit : rankIsAbove(dropCard, dragCard$1) && color(dragCard$1) !== color(dropCard);
-                                        break;
-                                    
-                                  }
-                                } else {
-                                  otherConditions = false;
-                                }
-                                break;
-                            
-                          }
-                        } else {
-                          otherConditions = false;
-                        }
-                        var canDrop = dropHasNoChildren && otherConditions;
-                        if (!canDrop) {
+                        var canDrop$1 = dropHasNoChildren && canDrop(dragCard, el);
+                        if (!canDrop$1) {
                           return acc;
                         }
                         var overlap = getOverlap(el, dragCard);

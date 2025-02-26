@@ -357,21 +357,15 @@ let make = () => {
 
   let getElement = space => refs.current->Array.find(el => el->spaceFromElement == space)
 
-  let onMouseDown = event => {
-    let eventElement =
-      event
-      ->JsxEvent.Mouse.currentTarget
-      ->Obj.magic
-
-    let rec buildDragPile = (el, build) => {
-      refs.current
-      ->Array.find(v => v->parentFromElement == el->spaceFromElement)
-      ->Option.mapOr([el], parentEl => buildDragPile(parentEl, [el]))
-      ->Array.concat(build)
+  let rec baseIsFoundation = el => {
+    switch el->parentFromElement {
+    | Some(Foundation(_)) => true
+    | Some(Card(c)) => baseIsFoundation(getElement(Some(Card(c))))
+    | _ => false
     }
+  }
 
-    let dragPile = buildDragPile(eventElement, [])
-
+  let canDrag = dragPile => {
     let (dragPileIsValid, _) = dragPile->Array.reduce((true, None), (
       (isStillValid, onTopElement),
       onBottom,
@@ -393,7 +387,41 @@ let make = () => {
           }
     })
 
-    let canDrag = dragPileIsValid
+    dragPileIsValid
+  }
+
+  let canDrop = (dragCard, el) => {
+    switch dragCard->spaceFromElement {
+    | Some(Card(dragCard)) =>
+      switch el->spaceFromElement {
+      | Some(Card(dropCard)) =>
+        baseIsFoundation(Some(el))
+          ? Card.rankIsBelow(dropCard, dragCard) && dragCard.suit == dropCard.suit
+          : Card.rankIsAbove(dropCard, dragCard) && dragCard->Card.color != dropCard->Card.color
+      | Some(Foundation(_)) => dragCard.rank == RA
+      | Some(Pile(_)) => dragCard.rank == RK
+      | _ => false
+      }
+    | _ => false
+    }
+  }
+
+  let onMouseDown = event => {
+    let eventElement =
+      event
+      ->JsxEvent.Mouse.currentTarget
+      ->Obj.magic
+
+    let rec buildDragPile = (el, build) => {
+      refs.current
+      ->Array.find(v => v->parentFromElement == el->spaceFromElement)
+      ->Option.mapOr([el], parentEl => buildDragPile(parentEl, [el]))
+      ->Array.concat(build)
+    }
+
+    let dragPile = buildDragPile(eventElement, [])
+
+    let canDrag = canDrag(dragPile)
 
     if canDrag {
       dragCard.current = eventElement->Some
@@ -432,14 +460,6 @@ let make = () => {
         ->Array.concat(build)
       }
 
-      let rec baseIsFoundation = el => {
-        switch el->parentFromElement {
-        | Some(Foundation(_)) => true
-        | Some(Card(c)) => baseIsFoundation(getElement(Some(Card(c))))
-        | _ => false
-        }
-      }
-
       let dragPile = buildDragPile(dragCard, [])
 
       let dropOn =
@@ -466,22 +486,7 @@ let make = () => {
               },
             )
 
-          let otherConditions = switch dragCard->spaceFromElement {
-          | Some(Card(dragCard)) =>
-            switch el->spaceFromElement {
-            | Some(Card(dropCard)) =>
-              baseIsFoundation(Some(el))
-                ? Card.rankIsBelow(dropCard, dragCard) && dragCard.suit == dropCard.suit
-                : Card.rankIsAbove(dropCard, dragCard) &&
-                  dragCard->Card.color != dropCard->Card.color
-            | Some(Foundation(_)) => dragCard.rank == RA
-            | Some(Pile(_)) => dragCard.rank == RK
-            | _ => false
-            }
-          | _ => false
-          }
-
-          let canDrop = dropHasNoChildren && otherConditions
+          let canDrop = dropHasNoChildren && canDrop(dragCard, el)
 
           if canDrop {
             let overlap = getOverlap(el, dragCard)
