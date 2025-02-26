@@ -125,8 +125,17 @@ module Card = {
     | Diamonds => "♦"
     | Clubs => "♣"
     }
+  type color = Black | Red
 
   let color = card =>
+    switch card.suit {
+    | Spades => Black
+    | Hearts => Red
+    | Diamonds => Red
+    | Clubs => Black
+    }
+
+  let colorHex = card =>
     switch card.suit {
     | Spades => "hsl(0 0% 0%)"
     | Hearts => "hsl(0 100% 44.31%)"
@@ -345,6 +354,8 @@ let make = () => {
     overlapX *. overlapY
   }
 
+  let getElement = space => refs.current->Array.find(el => el->spaceFromElement == space)
+
   React.useEffect0(() => {
     window->Window.addMouseMoveEventListener(event => {
       dragCard.current->Option.mapOr(
@@ -369,6 +380,14 @@ let make = () => {
             ->Array.concat(build)
           }
 
+          let rec baseIsFoundation = el => {
+            switch el->parentFromElement {
+            | Some(Foundation(_)) => true
+            | Some(Card(c)) => baseIsFoundation(getElement(Some(Card(c))))
+            | _ => false
+            }
+          }
+
           let dragPile = buildDragPile(dragCard, [])
 
           let dropOn =
@@ -382,7 +401,7 @@ let make = () => {
             ->Array.reduce(
               None,
               (acc, el) => {
-                let canDrop =
+                let dropHasNoChildren =
                   el
                   ->spaceFromElement
                   ->Option.mapOr(
@@ -397,6 +416,23 @@ let make = () => {
                       )
                     },
                   )
+
+                let otherConditions = switch dragCard->spaceFromElement {
+                | Some(Card(dragCard)) =>
+                  switch el->spaceFromElement {
+                  | Some(Card(dropCard)) =>
+                    baseIsFoundation(Some(el))
+                      ? Card.rankIsBelow(dropCard, dragCard) && dragCard.suit == dropCard.suit
+                      : Card.rankIsAbove(dropCard, dragCard) &&
+                        dragCard->Card.color != dropCard->Card.color
+                  | Some(Foundation(_)) => dragCard.rank == RA
+                  | Some(Pile(_)) => dragCard.rank == RK
+                  | _ => false
+                  }
+                | _ => false
+                }
+
+                let canDrop = dropHasNoChildren && otherConditions
 
                 if canDrop {
                   let overlap = getOverlap(el, dragCard)
@@ -448,7 +484,7 @@ let make = () => {
               )
 
               let (topAdjustment, stackAdjustment) = switch dropOn->spaceFromElement {
-              | Some(Card(_card)) => (20., 20)
+              | Some(Card(_card)) => baseIsFoundation(Some(dropOn)) ? (0., 0) : (20., 20)
               | Some(Pile(_num)) => (0., 20)
               | Some(Foundation(_num)) => (0., 0)
               | _ => (0., 0)
@@ -538,7 +574,7 @@ let make = () => {
                       switch (onTop->spaceFromElement, onBottom->spaceFromElement) {
                       | (Some(Card(onTopCard)), Some(Card(onBottomCard))) => (
                           Card.rankIsBelow(onTopCard, onBottomCard) &&
-                          onTopCard.suit != onBottomCard.suit,
+                          onTopCard->Card.color != onBottomCard->Card.color,
                           Some(onBottom),
                         )
                       | (Some(Card(_onTopCard)), _) => (true, Some(onBottom))
@@ -547,8 +583,6 @@ let make = () => {
                     }
               },
             )
-
-            Console.log(dragPileIsValid)
 
             let canDrag = dragPileIsValid
 
@@ -570,7 +604,7 @@ let make = () => {
               )
             }
           }}
-          className="absolute w-14 h-20"
+          className="absolute w-14 h-20 select-none"
           style={{
             top: (100 + j * 20)->Int.toString ++ "px",
             left: (i * 70)->Int.toString ++ "px",
@@ -581,7 +615,7 @@ let make = () => {
               // transform: Card.rotation(card),
               // position: "relative",
               // zIndex: ((isDragging ? 100 : 0) + index + 1)->Int.toString,
-              color: card->Card.color,
+              color: card->Card.colorHex,
             }}
             className={[
               " border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
