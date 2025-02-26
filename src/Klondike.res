@@ -366,6 +366,7 @@ let make = () => {
             refs.current
             ->Array.find(v => v->parentFromElement == el->spaceFromElement)
             ->Option.mapOr([el], parentEl => buildDragPile(parentEl, [el]))
+            ->Array.concat(build)
           }
 
           let dragPile = buildDragPile(dragCard, [])
@@ -446,11 +447,11 @@ let make = () => {
                 },
               )
 
-              let topAdjustment = switch dropOn->spaceFromElement {
-              | Some(Card(_card)) => 20.
-              | Some(Pile(_num)) => 0.
-              | Some(Foundation(_num)) => 0.
-              | _ => 0.
+              let (topAdjustment, stackAdjustment) = switch dropOn->spaceFromElement {
+              | Some(Card(_card)) => (20., 20)
+              | Some(Pile(_num)) => (0., 20)
+              | Some(Foundation(_num)) => (0., 0)
+              | _ => (0., 0)
               }
 
               moveWithTime(
@@ -458,7 +459,7 @@ let make = () => {
                 pos.left,
                 pos.top +. topAdjustment,
                 0,
-                20,
+                stackAdjustment,
                 dropOn->zIndexFromElement->Option.map(v => v + 1),
                 100.,
               )
@@ -483,6 +484,7 @@ let make = () => {
         style={{
           top: "0px",
           left: (i * 70)->Int.toString ++ "px",
+          zIndex: "0",
         }}
       />
     })
@@ -496,6 +498,7 @@ let make = () => {
         style={{
           top: "100px",
           left: (i * 70)->Int.toString ++ "px",
+          zIndex: "0",
         }}
       />
     })
@@ -510,29 +513,62 @@ let make = () => {
           key={Card(card)->spaceToString}
           ref={ReactDOM.Ref.callbackDomRef(setRef(Card(card), Some(parent)))}
           onMouseDown={event => {
-            dragCard.current =
+            let eventElement =
               event
               ->JsxEvent.Mouse.currentTarget
               ->Obj.magic
-              ->Some
 
-            dragCard.current->Option.mapOr(
-              (),
-              dragCard => {
-                let dragCardPos = dragCard->elementPosition
-                originalData.current =
-                  dragCard->zIndexFromElement->Option.map(v => (dragCardPos, v))
+            let rec buildDragPile = (el, build) => {
+              refs.current
+              ->Array.find(v => v->parentFromElement == el->spaceFromElement)
+              ->Option.mapOr([el], parentEl => buildDragPile(parentEl, [el]))
+              ->Array.concat(build)
+            }
 
-                liftUp(dragCard, 1000)
+            let dragPile = buildDragPile(eventElement, [])
+
+            let (dragPileIsValid, _) = dragPile->Array.reduce(
+              (true, None),
+              ((isStillValid, onTopElement), onBottom) => {
+                !isStillValid
+                  ? (isStillValid, None)
+                  : switch onTopElement {
+                    | None => (true, Some(onBottom))
+                    | Some(onTop) =>
+                      switch (onTop->spaceFromElement, onBottom->spaceFromElement) {
+                      | (Some(Card(onTopCard)), Some(Card(onBottomCard))) => (
+                          Card.rankIsBelow(onTopCard, onBottomCard) &&
+                          onTopCard.suit != onBottomCard.suit,
+                          Some(onBottom),
+                        )
+                      | (Some(Card(_onTopCard)), _) => (true, Some(onBottom))
+                      | _ => (false, None)
+                      }
+                    }
               },
             )
 
-            let pos = event->eventPosition
+            Console.log(dragPileIsValid)
 
-            offset.current = (
-              event->JsxEvent.Mouse.clientX - pos.left->Int.fromFloat,
-              event->JsxEvent.Mouse.clientY - pos.top->Int.fromFloat,
-            )
+            let canDrag = dragPileIsValid
+
+            if canDrag {
+              dragCard.current = eventElement->Some
+
+              let dragCardPos = eventElement->elementPosition
+
+              originalData.current =
+                eventElement->zIndexFromElement->Option.map(v => (dragCardPos, v))
+
+              liftUp(eventElement, 1000)
+
+              let pos = event->eventPosition
+
+              offset.current = (
+                event->JsxEvent.Mouse.clientX - pos.left->Int.fromFloat,
+                event->JsxEvent.Mouse.clientY - pos.top->Int.fromFloat,
+              )
+            }
           }}
           className="absolute w-14 h-20"
           style={{

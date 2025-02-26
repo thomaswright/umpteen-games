@@ -948,10 +948,10 @@ function Klondike(props) {
                   Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
                           var buildDragPile = function (el, build) {
                             return Core__Option.mapOr(refs.current.find(function (v) {
-                                            return Caml_obj.equal(parentFromElement(v), spaceFromElement(el));
-                                          }), [el], (function (parentEl) {
-                                          return buildDragPile(parentEl, [el]);
-                                        }));
+                                              return Caml_obj.equal(parentFromElement(v), spaceFromElement(el));
+                                            }), [el], (function (parentEl) {
+                                            return buildDragPile(parentEl, [el]);
+                                          })).concat(build);
                           };
                           var dragPile = buildDragPile(dragCard, []);
                           var dropOn = Core__Option.map(Core__Array.reduce(refs.current.filter(function (el) {
@@ -997,22 +997,36 @@ function Klondike(props) {
                                   dragCard.parentSpace = JSON.stringify(space_encode(dropOnSpace));
                                 }));
                           var match = spaceFromElement(dropOn$1);
-                          var topAdjustment;
+                          var match$1;
                           if (match !== undefined) {
                             switch (match.TAG) {
                               case "Pile" :
+                                  match$1 = [
+                                    0,
+                                    20
+                                  ];
+                                  break;
                               case "Foundation" :
-                                  topAdjustment = 0;
+                                  match$1 = [
+                                    0,
+                                    0
+                                  ];
                                   break;
                               case "Card" :
-                                  topAdjustment = 20;
+                                  match$1 = [
+                                    20,
+                                    20
+                                  ];
                                   break;
                               
                             }
                           } else {
-                            topAdjustment = 0;
+                            match$1 = [
+                              0,
+                              0
+                            ];
                           }
-                          moveWithTime(dragCard, pos.left, pos.top + topAdjustment, 0, 20, Core__Option.map(zIndexFromElement(dropOn$1), (function (v) {
+                          moveWithTime(dragCard, pos.left, pos.top + match$1[0], 0, match$1[1], Core__Option.map(zIndexFromElement(dropOn$1), (function (v) {
                                       return v + 1 | 0;
                                     })), 100);
                         }));
@@ -1036,7 +1050,8 @@ function Klondike(props) {
                                   className: "absolute bg-purple-500 rounded w-14 h-20",
                                   style: {
                                     left: Math.imul(i, 70).toString() + "px",
-                                    top: "0px"
+                                    top: "0px",
+                                    zIndex: "0"
                                   }
                                 }, JSON.stringify(space_encode({
                                           TAG: "Foundation",
@@ -1057,7 +1072,8 @@ function Klondike(props) {
                                   className: "absolute bg-red-500 rounded w-14 h-20",
                                   style: {
                                     left: Math.imul(i, 70).toString() + "px",
-                                    top: "100px"
+                                    top: "100px",
+                                    zIndex: "0"
                                   }
                                 }, JSON.stringify(space_encode({
                                           TAG: "Pile",
@@ -1119,17 +1135,88 @@ function Klondike(props) {
                                                 zIndex: (j + 1 | 0).toString()
                                               },
                                               onMouseDown: (function ($$event) {
-                                                  dragCard.current = Caml_option.some($$event.currentTarget);
-                                                  Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
-                                                          var dragCardPos = elementPosition(dragCard);
-                                                          originalData.current = Core__Option.map(zIndexFromElement(dragCard), (function (v) {
+                                                  var eventElement = $$event.currentTarget;
+                                                  var buildDragPile = function (el, build) {
+                                                    return Core__Option.mapOr(refs.current.find(function (v) {
+                                                                      return Caml_obj.equal(parentFromElement(v), spaceFromElement(el));
+                                                                    }), [el], (function (parentEl) {
+                                                                    return buildDragPile(parentEl, [el]);
+                                                                  })).concat(build);
+                                                  };
+                                                  var dragPile = buildDragPile(eventElement, []);
+                                                  var match = Core__Array.reduce(dragPile, [
+                                                        true,
+                                                        undefined
+                                                      ], (function (param, onBottom) {
+                                                          var isStillValid = param[0];
+                                                          if (!isStillValid) {
+                                                            return [
+                                                                    isStillValid,
+                                                                    undefined
+                                                                  ];
+                                                          }
+                                                          var onTopElement = param[1];
+                                                          if (onTopElement === undefined) {
+                                                            return [
+                                                                    true,
+                                                                    Caml_option.some(onBottom)
+                                                                  ];
+                                                          }
+                                                          var match = spaceFromElement(Caml_option.valFromOption(onTopElement));
+                                                          var match$1 = spaceFromElement(onBottom);
+                                                          if (match === undefined) {
+                                                            return [
+                                                                    false,
+                                                                    undefined
+                                                                  ];
+                                                          }
+                                                          switch (match.TAG) {
+                                                            case "Pile" :
+                                                            case "Foundation" :
+                                                                return [
+                                                                        false,
+                                                                        undefined
+                                                                      ];
+                                                            case "Card" :
+                                                                var onTopCard = match._0;
+                                                                if (match$1 === undefined) {
                                                                   return [
-                                                                          dragCardPos,
-                                                                          v
+                                                                          true,
+                                                                          Caml_option.some(onBottom)
                                                                         ];
-                                                                }));
-                                                          liftUp(dragCard, 1000);
+                                                                }
+                                                                switch (match$1.TAG) {
+                                                                  case "Pile" :
+                                                                  case "Foundation" :
+                                                                      return [
+                                                                              true,
+                                                                              Caml_option.some(onBottom)
+                                                                            ];
+                                                                  case "Card" :
+                                                                      var onBottomCard = match$1._0;
+                                                                      return [
+                                                                              rankIsBelow(onTopCard, onBottomCard) && onTopCard.suit !== onBottomCard.suit,
+                                                                              Caml_option.some(onBottom)
+                                                                            ];
+                                                                  
+                                                                }
+                                                            
+                                                          }
                                                         }));
+                                                  var dragPileIsValid = match[0];
+                                                  console.log(dragPileIsValid);
+                                                  if (!dragPileIsValid) {
+                                                    return ;
+                                                  }
+                                                  dragCard.current = Caml_option.some(eventElement);
+                                                  var dragCardPos = elementPosition(eventElement);
+                                                  originalData.current = Core__Option.map(zIndexFromElement(eventElement), (function (v) {
+                                                          return [
+                                                                  dragCardPos,
+                                                                  v
+                                                                ];
+                                                        }));
+                                                  liftUp(eventElement, 1000);
                                                   var pos = elementPosition($$event.currentTarget);
                                                   offset.current = [
                                                     $$event.clientX - (pos.left | 0) | 0,
