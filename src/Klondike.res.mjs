@@ -701,7 +701,16 @@ var cardsData = [
   shuffledDeck.slice(21, 28)
 ];
 
+var stockData = shuffledDeck.slice(28);
+
 function space_encode(value) {
+  if (typeof value !== "object") {
+    if (value === "Stock") {
+      return ["Stock"];
+    } else {
+      return ["Waste"];
+    }
+  }
   switch (value.TAG) {
     case "Pile" :
         return [
@@ -807,6 +816,24 @@ function space_decode(value) {
                     value: e$2.value
                   }
                 };
+      case "Stock" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "Stock"
+                  };
+          }
+      case "Waste" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "Waste"
+                  };
+          }
       default:
         
     }
@@ -856,6 +883,58 @@ function eventPosition($$event) {
   return elementPosition($$event.currentTarget);
 }
 
+function Klondike$CardDisplay(props) {
+  var card = props.card;
+  var match = card.rank;
+  var tmp;
+  tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
+  return JsxRuntime.jsx("div", {
+              children: JsxRuntime.jsx("div", {
+                    children: JsxRuntime.jsxs("span", {
+                          children: [
+                            JsxRuntime.jsxs("span", {
+                                  children: [
+                                    JsxRuntime.jsx("span", {
+                                          children: rankString(card),
+                                          className: [
+                                              "font-medium ",
+                                              tmp
+                                            ].join(" ")
+                                        }),
+                                    JsxRuntime.jsx("span", {
+                                          children: suitString(card),
+                                          className: "w-3.5 flex flex-row justify-center"
+                                        })
+                                  ],
+                                  className: "flex flex-row"
+                                }),
+                            JsxRuntime.jsx("span", {
+                                  children: suitString(card),
+                                  className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
+                                })
+                          ],
+                          className: "flex flex-col"
+                        }),
+                    className: [" border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
+                    style: {
+                      color: colorHex(card)
+                    }
+                  }),
+              ref: Caml_option.some(props.cardRef),
+              className: "absolute w-14 h-20 select-none",
+              style: {
+                left: props.left,
+                top: props.top,
+                zIndex: props.zIndex
+              },
+              onMouseDown: props.onMouseDown
+            });
+}
+
+var CardDisplay = {
+  make: Klondike$CardDisplay
+};
+
 function Klondike(props) {
   var refs = React.useRef([]);
   var dragCard = React.useRef(undefined);
@@ -880,31 +959,10 @@ function Klondike(props) {
     var elementSpace = spaceFromElement(element);
     refs.current.forEach(function (el) {
           var match = parentFromElement(el);
-          if (elementSpace === undefined) {
-            return ;
+          if (elementSpace !== undefined && !(typeof elementSpace !== "object" || !(elementSpace.TAG === "Card" && match !== undefined && !(typeof match !== "object" || !(match.TAG === "Card" && equals(match._0, elementSpace._0)))))) {
+            return f(el);
           }
-          switch (elementSpace.TAG) {
-            case "Pile" :
-            case "Foundation" :
-                return ;
-            case "Card" :
-                if (match === undefined) {
-                  return ;
-                }
-                switch (match.TAG) {
-                  case "Pile" :
-                  case "Foundation" :
-                      return ;
-                  case "Card" :
-                      if (equals(match._0, elementSpace._0)) {
-                        return f(el);
-                      } else {
-                        return ;
-                      }
-                  
-                }
-            
-          }
+          
         });
   };
   var move = function (element, left, top, leftOffset, topOffset, zIndex) {
@@ -961,9 +1019,10 @@ function Klondike(props) {
       if (match === undefined) {
         return false;
       }
+      if (typeof match !== "object") {
+        return false;
+      }
       switch (match.TAG) {
-        case "Pile" :
-            return false;
         case "Foundation" :
             return true;
         case "Card" :
@@ -972,7 +1031,8 @@ function Klondike(props) {
                   _0: match._0
                 });
             continue ;
-        
+        default:
+          return false;
       }
     };
   };
@@ -1003,38 +1063,42 @@ function Klondike(props) {
                               undefined
                             ];
                     }
-                    switch (match.TAG) {
-                      case "Pile" :
-                      case "Foundation" :
-                          return [
-                                  false,
-                                  undefined
-                                ];
-                      case "Card" :
-                          var onTopCard = match._0;
-                          if (match$1 === undefined) {
-                            return [
-                                    true,
-                                    Caml_option.some(onBottom)
-                                  ];
-                          }
-                          switch (match$1.TAG) {
-                            case "Pile" :
-                            case "Foundation" :
-                                return [
-                                        true,
-                                        Caml_option.some(onBottom)
-                                      ];
-                            case "Card" :
-                                var onBottomCard = match$1._0;
-                                return [
-                                        rankIsBelow(onTopCard, onBottomCard) && color(onTopCard) !== color(onBottomCard),
-                                        Caml_option.some(onBottom)
-                                      ];
-                            
-                          }
-                      
+                    if (typeof match !== "object") {
+                      return [
+                              false,
+                              undefined
+                            ];
                     }
+                    if (match.TAG !== "Card") {
+                      return [
+                              false,
+                              undefined
+                            ];
+                    }
+                    var onTopCard = match._0;
+                    if (match$1 === undefined) {
+                      return [
+                              true,
+                              Caml_option.some(onBottom)
+                            ];
+                    }
+                    if (typeof match$1 !== "object") {
+                      return [
+                              true,
+                              Caml_option.some(onBottom)
+                            ];
+                    }
+                    if (match$1.TAG !== "Card") {
+                      return [
+                              true,
+                              Caml_option.some(onBottom)
+                            ];
+                    }
+                    var onBottomCard = match$1._0;
+                    return [
+                            rankIsBelow(onTopCard, onBottomCard) && color(onTopCard) !== color(onBottomCard),
+                            Caml_option.some(onBottom)
+                          ];
                   }))[0];
   };
   var canDrop = function (dragCard, el) {
@@ -1042,35 +1106,37 @@ function Klondike(props) {
     if (match === undefined) {
       return false;
     }
-    switch (match.TAG) {
+    if (typeof match !== "object") {
+      return false;
+    }
+    if (match.TAG !== "Card") {
+      return false;
+    }
+    var dragCard$1 = match._0;
+    var match$1 = spaceFromElement(el);
+    if (match$1 === undefined) {
+      return false;
+    }
+    if (typeof match$1 !== "object") {
+      return false;
+    }
+    switch (match$1.TAG) {
       case "Pile" :
+          return dragCard$1.rank === "RK";
       case "Foundation" :
-          return false;
+          return dragCard$1.rank === "RA";
       case "Card" :
-          var dragCard$1 = match._0;
-          var match$1 = spaceFromElement(el);
-          if (match$1 === undefined) {
+          var dropCard = match$1._0;
+          if (baseIsFoundation(Caml_option.some(el))) {
+            if (rankIsBelow(dropCard, dragCard$1)) {
+              return dragCard$1.suit === dropCard.suit;
+            } else {
+              return false;
+            }
+          } else if (rankIsAbove(dropCard, dragCard$1)) {
+            return color(dragCard$1) !== color(dropCard);
+          } else {
             return false;
-          }
-          switch (match$1.TAG) {
-            case "Pile" :
-                return dragCard$1.rank === "RK";
-            case "Foundation" :
-                return dragCard$1.rank === "RA";
-            case "Card" :
-                var dropCard = match$1._0;
-                if (baseIsFoundation(Caml_option.some(el))) {
-                  if (rankIsBelow(dropCard, dragCard$1)) {
-                    return dragCard$1.suit === dropCard.suit;
-                  } else {
-                    return false;
-                  }
-                } else if (rankIsAbove(dropCard, dragCard$1)) {
-                  return color(dragCard$1) !== color(dropCard);
-                } else {
-                  return false;
-                }
-            
           }
       
     }
@@ -1168,29 +1234,39 @@ function Klondike(props) {
             var match = spaceFromElement(dropOn$1);
             var match$1;
             if (match !== undefined) {
-              switch (match.TAG) {
-                case "Pile" :
-                    match$1 = [
-                      0,
-                      20
-                    ];
-                    break;
-                case "Foundation" :
-                    match$1 = [
-                      0,
-                      0
-                    ];
-                    break;
-                case "Card" :
-                    match$1 = baseIsFoundation(Caml_option.some(dropOn$1)) ? [
+              if (typeof match !== "object") {
+                match$1 = match === "Stock" ? [
+                    0,
+                    0
+                  ] : [
+                    0,
+                    0
+                  ];
+              } else {
+                switch (match.TAG) {
+                  case "Pile" :
+                      match$1 = [
                         0,
-                        0
-                      ] : [
-                        20,
                         20
                       ];
-                    break;
-                
+                      break;
+                  case "Foundation" :
+                      match$1 = [
+                        0,
+                        0
+                      ];
+                      break;
+                  case "Card" :
+                      match$1 = baseIsFoundation(Caml_option.some(dropOn$1)) ? [
+                          0,
+                          0
+                        ] : [
+                          20,
+                          20
+                        ];
+                      break;
+                  
+                }
               }
             } else {
               match$1 = [
@@ -1211,6 +1287,24 @@ function Klondike(props) {
         }), []);
   return JsxRuntime.jsxs("div", {
               children: [
+                JsxRuntime.jsx("div", {
+                      ref: Caml_option.some(setRef("Stock", undefined)),
+                      className: "absolute bg-pink-500 rounded w-14 h-20",
+                      style: {
+                        left: "0px",
+                        top: "0px",
+                        zIndex: "0"
+                      }
+                    }, JSON.stringify(space_encode("Stock"))),
+                JsxRuntime.jsx("div", {
+                      ref: Caml_option.some(setRef("Waste", undefined)),
+                      className: "absolute bg-cyan-500 rounded w-14 h-20",
+                      style: {
+                        left: "70px",
+                        top: "0px",
+                        zIndex: "0"
+                      }
+                    }, JSON.stringify(space_encode("Waste"))),
                 [
                     [],
                     [],
@@ -1225,7 +1319,7 @@ function Klondike(props) {
                                   className: "absolute bg-purple-500 rounded w-14 h-20",
                                   style: {
                                     left: Math.imul(i, 70).toString() + "px",
-                                    top: "0px",
+                                    top: "100px",
                                     zIndex: "0"
                                   }
                                 }, JSON.stringify(space_encode({
@@ -1247,7 +1341,7 @@ function Klondike(props) {
                                   className: "absolute bg-red-500 rounded w-14 h-20",
                                   style: {
                                     left: Math.imul(i, 70).toString() + "px",
-                                    top: "100px",
+                                    top: "200px",
                                     zIndex: "0"
                                   }
                                 }, JSON.stringify(space_encode({
@@ -1264,52 +1358,16 @@ function Klondike(props) {
                                         TAG: "Card",
                                         _0: cardsData[i][j - 1 | 0]
                                       });
-                                  var match = card.rank;
-                                  var tmp;
-                                  tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
-                                  return JsxRuntime.jsx("div", {
-                                              children: JsxRuntime.jsx("div", {
-                                                    children: JsxRuntime.jsxs("span", {
-                                                          children: [
-                                                            JsxRuntime.jsxs("span", {
-                                                                  children: [
-                                                                    JsxRuntime.jsx("span", {
-                                                                          children: rankString(card),
-                                                                          className: [
-                                                                              "font-medium ",
-                                                                              tmp
-                                                                            ].join(" ")
-                                                                        }),
-                                                                    JsxRuntime.jsx("span", {
-                                                                          children: suitString(card),
-                                                                          className: "w-3.5 flex flex-row justify-center"
-                                                                        })
-                                                                  ],
-                                                                  className: "flex flex-row"
-                                                                }),
-                                                            JsxRuntime.jsx("span", {
-                                                                  children: suitString(card),
-                                                                  className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
-                                                                })
-                                                          ],
-                                                          className: "flex flex-col"
-                                                        }),
-                                                    className: [" border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
-                                                    style: {
-                                                      color: colorHex(card)
-                                                    }
-                                                  }),
-                                              ref: Caml_option.some(setRef({
-                                                        TAG: "Card",
-                                                        _0: card
-                                                      }, parent)),
-                                              className: "absolute w-14 h-20 select-none",
-                                              style: {
-                                                left: Math.imul(i, 70).toString() + "px",
-                                                top: (100 + Math.imul(j, 20) | 0).toString() + "px",
-                                                zIndex: (j + 1 | 0).toString()
-                                              },
-                                              onMouseDown: onMouseDown
+                                  return JsxRuntime.jsx(Klondike$CardDisplay, {
+                                              card: card,
+                                              top: (200 + Math.imul(j, 20) | 0).toString() + "px",
+                                              left: Math.imul(i, 70).toString() + "px",
+                                              zIndex: (j + 1 | 0).toString(),
+                                              onMouseDown: onMouseDown,
+                                              cardRef: setRef({
+                                                    TAG: "Card",
+                                                    _0: card
+                                                  }, parent)
                                             }, JSON.stringify(space_encode({
                                                       TAG: "Card",
                                                       _0: card
@@ -1328,6 +1386,7 @@ export {
   getShuffledDeck ,
   shuffledDeck ,
   cardsData ,
+  stockData ,
   space_encode ,
   space_decode ,
   spaceToString ,
@@ -1336,6 +1395,7 @@ export {
   parentFromElement ,
   elementPosition ,
   eventPosition ,
+  CardDisplay ,
   make ,
 }
 /* shuffledDeck Not a pure module */

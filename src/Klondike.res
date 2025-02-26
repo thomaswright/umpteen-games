@@ -193,8 +193,12 @@ let cardsData = [
   shuffledDeck->Array.slice(~start=21, ~end=28),
 ]
 
+let stockData = shuffledDeck->Array.sliceToEnd(~start=28)
+
 @decco
 type space =
+  | Stock
+  | Waste
   | Pile(int)
   | Foundation(int)
   | Card(Card.card)
@@ -260,6 +264,55 @@ let eventPosition = event => {
   ->JsxEvent.Mouse.currentTarget
   ->Obj.magic
   ->elementPosition
+}
+
+module CardDisplay = {
+  @react.component
+  let make = (~card, ~top, ~left, ~zIndex, ~onMouseDown, ~cardRef) => {
+    <div
+      ref={cardRef}
+      onMouseDown={onMouseDown}
+      className="absolute w-14 h-20 select-none"
+      style={{
+        top,
+        left,
+        zIndex,
+      }}>
+      <div
+        style={{
+          // transform: Card.rotation(card),
+          // position: "relative",
+          // zIndex: ((isDragging ? 100 : 0) + index + 1)->Int.toString,
+          color: card->Card.colorHex,
+        }}
+        className={[
+          " border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
+          // index == 0 ? "" : "-ml-[37px]",
+        ]->Array.join(" ")}>
+        // <div className={" bg-blue-500 h-2 w-2 rotate-45"}> {""->React.string} </div>
+        <span className="flex flex-col">
+          <span className="flex flex-row">
+            <span
+              className={[
+                "font-medium ",
+                switch card.rank {
+                | R10 => "tracking-[-0.1rem] w-4"
+                | _ => "w-3.5"
+                },
+              ]->Array.join(" ")}>
+              {card->Card.rankString->React.string}
+            </span>
+            <span className="w-3.5 flex flex-row justify-center">
+              {card->Card.suitString->React.string}
+            </span>
+          </span>
+          <span className="w-3.5 flex flex-row mt-0.5 -ml-0.5">
+            {card->Card.suitString->React.string}
+          </span>
+        </span>
+      </div>
+    </div>
+  }
 }
 
 @react.component
@@ -561,6 +614,26 @@ let make = () => {
   })
 
   <div className="relative">
+    <div
+      key={Stock->spaceToString}
+      ref={ReactDOM.Ref.callbackDomRef(setRef(Stock, None))}
+      className="absolute bg-pink-500 rounded w-14 h-20"
+      style={{
+        top: "0px",
+        left: "0px",
+        zIndex: "0",
+      }}
+    />
+    <div
+      key={Waste->spaceToString}
+      ref={ReactDOM.Ref.callbackDomRef(setRef(Waste, None))}
+      className="absolute bg-cyan-500 rounded w-14 h-20"
+      style={{
+        top: "0px",
+        left: "70px",
+        zIndex: "0",
+      }}
+    />
     {[[], [], [], []]
     ->Array.mapWithIndex((_, i) => {
       <div
@@ -568,7 +641,7 @@ let make = () => {
         ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i), None))}
         className="absolute bg-purple-500 rounded w-14 h-20"
         style={{
-          top: "0px",
+          top: "100px",
           left: (i * 70)->Int.toString ++ "px",
           zIndex: "0",
         }}
@@ -582,7 +655,7 @@ let make = () => {
         ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i), None))}
         className="absolute bg-red-500 rounded w-14 h-20"
         style={{
-          top: "100px",
+          top: "200px",
           left: (i * 70)->Int.toString ++ "px",
           zIndex: "0",
         }}
@@ -595,50 +668,15 @@ let make = () => {
       ->Array.mapWithIndex((card, j) => {
         let parent = j == 0 ? Pile(i) : Card(cardsData->Array.getUnsafe(i)->Array.getUnsafe(j - 1))
 
-        <div
+        <CardDisplay
+          card={card}
           key={Card(card)->spaceToString}
-          ref={ReactDOM.Ref.callbackDomRef(setRef(Card(card), Some(parent)))}
+          cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card), Some(parent)))}
+          top={(200 + j * 20)->Int.toString ++ "px"}
+          left={(i * 70)->Int.toString ++ "px"}
+          zIndex={(j + 1)->Int.toString}
           onMouseDown={onMouseDown}
-          className="absolute w-14 h-20 select-none"
-          style={{
-            top: (100 + j * 20)->Int.toString ++ "px",
-            left: (i * 70)->Int.toString ++ "px",
-            zIndex: (j + 1)->Int.toString,
-          }}>
-          <div
-            style={{
-              // transform: Card.rotation(card),
-              // position: "relative",
-              // zIndex: ((isDragging ? 100 : 0) + index + 1)->Int.toString,
-              color: card->Card.colorHex,
-            }}
-            className={[
-              " border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
-              // index == 0 ? "" : "-ml-[37px]",
-            ]->Array.join(" ")}>
-            // <div className={" bg-blue-500 h-2 w-2 rotate-45"}> {""->React.string} </div>
-            <span className="flex flex-col">
-              <span className="flex flex-row">
-                <span
-                  className={[
-                    "font-medium ",
-                    switch card.rank {
-                    | R10 => "tracking-[-0.1rem] w-4"
-                    | _ => "w-3.5"
-                    },
-                  ]->Array.join(" ")}>
-                  {card->Card.rankString->React.string}
-                </span>
-                <span className="w-3.5 flex flex-row justify-center">
-                  {card->Card.suitString->React.string}
-                </span>
-              </span>
-              <span className="w-3.5 flex flex-row mt-0.5 -ml-0.5">
-                {card->Card.suitString->React.string}
-              </span>
-            </span>
-          </div>
-        </div>
+        />
       })
       ->React.array
     })
