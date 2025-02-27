@@ -193,7 +193,7 @@ let cardsData = [
   shuffledDeck->Array.slice(~start=21, ~end=28),
 ]
 
-let stockData = shuffledDeck->Array.sliceToEnd(~start=28)
+let stockData = shuffledDeck->Array.sliceToEnd(~start=50)
 
 @decco
 type space =
@@ -410,12 +410,19 @@ let make = () => {
 
   let getElement = space => refs.current->Array.find(el => el->spaceFromElement == space)
 
-  let rec baseIsFoundation = el => {
+  let rec baseSpace = el => {
     switch el->parentFromElement {
-    | Some(Foundation(_)) => true
-    | Some(Card(c)) => baseIsFoundation(getElement(Some(Card(c))))
-    | _ => false
+    | Some(Card(c)) => baseSpace(getElement(Some(Card(c))))
+    | Some(x) => Some(x)
+    | _ => None
     }
+  }
+
+  let rec buildDragPile = (el, build) => {
+    refs.current
+    ->Array.find(v => v->parentFromElement == el->spaceFromElement)
+    ->Option.mapOr([el], parentEl => buildDragPile(parentEl, [el]))
+    ->Array.concat(build)
   }
 
   let canDrag = dragPile => {
@@ -443,14 +450,19 @@ let make = () => {
     dragPileIsValid
   }
 
-  let canDrop = (dragCard, el) => {
+  let canDrop = (dragCard, dropEl) => {
     switch dragCard->spaceFromElement {
     | Some(Card(dragCard)) =>
-      switch el->spaceFromElement {
+      switch dropEl->spaceFromElement {
       | Some(Card(dropCard)) =>
-        baseIsFoundation(Some(el))
-          ? Card.rankIsBelow(dropCard, dragCard) && dragCard.suit == dropCard.suit
-          : Card.rankIsAbove(dropCard, dragCard) && dragCard->Card.color != dropCard->Card.color
+        Console.log(baseSpace(Some(dropEl)))
+        switch baseSpace(Some(dropEl)) {
+        | Some(Foundation(_)) =>
+          Card.rankIsBelow(dropCard, dragCard) && dragCard.suit == dropCard.suit
+        | Some(Pile(_)) =>
+          Card.rankIsAbove(dropCard, dragCard) && dragCard->Card.color != dropCard->Card.color
+        | _ => false
+        }
       | Some(Foundation(_)) => dragCard.rank == RA
       | Some(Pile(_)) => dragCard.rank == RK
       | _ => false
@@ -464,13 +476,6 @@ let make = () => {
       event
       ->JsxEvent.Mouse.currentTarget
       ->Obj.magic
-
-    let rec buildDragPile = (el, build) => {
-      refs.current
-      ->Array.find(v => v->parentFromElement == el->spaceFromElement)
-      ->Option.mapOr([el], parentEl => buildDragPile(parentEl, [el]))
-      ->Array.concat(build)
-    }
 
     let dragPile = buildDragPile(eventElement, [])
 
@@ -506,13 +511,6 @@ let make = () => {
 
   let onMouseUp = _ => {
     dragCard.current->Option.mapOr((), dragCard => {
-      let rec buildDragPile = (el, build) => {
-        refs.current
-        ->Array.find(v => v->parentFromElement == el->spaceFromElement)
-        ->Option.mapOr([el], parentEl => buildDragPile(parentEl, [el]))
-        ->Array.concat(build)
-      }
-
       let dragPile = buildDragPile(dragCard, [])
 
       let dropOn =
@@ -577,6 +575,7 @@ let make = () => {
       | None => revert()
       | Some(dropOn) => {
           let pos = dropOn->elementPosition
+
           dropOn
           ->spaceFromElement
           ->Option.mapOr((), dropOnSpace => {
@@ -584,7 +583,11 @@ let make = () => {
           })
 
           let (topAdjustment, stackAdjustment) = switch dropOn->spaceFromElement {
-          | Some(Card(_card)) => baseIsFoundation(Some(dropOn)) ? (0., 0) : (20., 20)
+          | Some(Card(_card)) =>
+            switch baseSpace(Some(dropOn)) {
+            | Some(Foundation(_)) => (0., 0)
+            | _ => (20., 20)
+            }
           | Some(Pile(_num)) => (0., 20)
           | Some(Foundation(_num)) => (0., 0)
           | _ => (0., 0)
@@ -613,6 +616,70 @@ let make = () => {
     None
   })
 
+  let dealToWaste = () => {
+    let stock = switch getElement(Some(Stock)) {
+    | Some(el) => buildDragPile(el, [])
+    | _ => []
+    }
+
+    let waste = switch getElement(Some(Waste)) {
+    | Some(el) => buildDragPile(el, [])
+    | _ => []
+    }
+
+    stock
+    ->Array.get(0)
+    ->Option.mapOr((), topStockEl => {
+      switch topStockEl->spaceFromElement {
+      | Some(Stock) =>
+        let wasteCards =
+          waste
+          ->Array.toReversed
+          ->Array.sliceToEnd(~start=1)
+
+        wasteCards->Array.forEachWithIndex((wasteCard, i) => {
+          if i == wasteCards->Array.length - 1 {
+            wasteCard->setParent(Stock->spaceToString)
+            moveWithTime(wasteCard, 0., 0., 0, 0, Some(1), 200.)
+          } else {
+            wasteCards
+            ->Array.get(i + 1)
+            ->Option.flatMap(spaceFromElement)
+            ->Option.mapOr(
+              (),
+              v => {
+                wasteCard->setParent(v->spaceToString)
+              },
+            )
+          }
+        })
+
+      | Some(_) => {
+          let topWasteElement = waste->Array.getUnsafe(0)
+
+          topWasteElement
+          ->spaceFromElement
+          ->Option.mapOr((), v => {
+            topStockEl->setParent(v->spaceToString)
+          })
+
+          let pos = topWasteElement->elementPosition
+
+          moveWithTime(
+            topStockEl,
+            pos.left,
+            pos.top,
+            0,
+            0,
+            topWasteElement->zIndexFromElement->Option.map(v => v + 1),
+            200.,
+          )
+        }
+      | _ => ()
+      }
+    })
+  }
+
   <div className="relative">
     <div
       key={Stock->spaceToString}
@@ -622,6 +689,32 @@ let make = () => {
         top: "0px",
         left: "0px",
         zIndex: "0",
+      }}
+    />
+    {stockData
+    ->Array.mapWithIndex((card, i) => {
+      let parent = i == 0 ? Stock : Card(stockData->Array.getUnsafe(i - 1))
+
+      <CardDisplay
+        card={card}
+        key={Card(card)->spaceToString}
+        cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card), Some(parent)))}
+        top={0->Int.toString ++ "px"}
+        left={0->Int.toString ++ "px"}
+        zIndex={(i + 1)->Int.toString}
+        onMouseDown={onMouseDown}
+      />
+    })
+    ->React.array}
+    <div
+      key={"Stock Cover"}
+      // ref={ReactDOM.Ref.callbackDomRef(setRef(Stock, None))}
+      onClick={_ => dealToWaste()}
+      className="absolute bg-blue-700 rounded w-14 h-20"
+      style={{
+        top: "0px",
+        left: "0px",
+        zIndex: "53",
       }}
     />
     <div

@@ -701,7 +701,7 @@ var cardsData = [
   shuffledDeck.slice(21, 28)
 ];
 
-var stockData = shuffledDeck.slice(28);
+var stockData = shuffledDeck.slice(50);
 
 function space_encode(value) {
   if (typeof value !== "object") {
@@ -1012,29 +1012,32 @@ function Klondike(props) {
                 return Caml_obj.equal(spaceFromElement(el), space);
               });
   };
-  var baseIsFoundation = function (_el) {
+  var baseSpace = function (_el) {
     while(true) {
       var el = _el;
-      var match = parentFromElement(el);
-      if (match === undefined) {
-        return false;
+      var x = parentFromElement(el);
+      if (x === undefined) {
+        return ;
       }
-      if (typeof match !== "object") {
-        return false;
+      if (typeof x !== "object") {
+        return x;
       }
-      switch (match.TAG) {
-        case "Foundation" :
-            return true;
-        case "Card" :
-            _el = getElement({
-                  TAG: "Card",
-                  _0: match._0
-                });
-            continue ;
-        default:
-          return false;
+      if (x.TAG !== "Card") {
+        return x;
       }
+      _el = getElement({
+            TAG: "Card",
+            _0: x._0
+          });
+      continue ;
     };
+  };
+  var buildDragPile = function (el, build) {
+    return Core__Option.mapOr(refs.current.find(function (v) {
+                      return Caml_obj.equal(parentFromElement(v), spaceFromElement(el));
+                    }), [el], (function (parentEl) {
+                    return buildDragPile(parentEl, [el]);
+                  })).concat(build);
   };
   var canDrag = function (dragPile) {
     return Core__Array.reduce(dragPile, [
@@ -1101,7 +1104,7 @@ function Klondike(props) {
                           ];
                   }))[0];
   };
-  var canDrop = function (dragCard, el) {
+  var canDrop = function (dragCard, dropEl) {
     var match = spaceFromElement(dragCard);
     if (match === undefined) {
       return false;
@@ -1113,7 +1116,7 @@ function Klondike(props) {
       return false;
     }
     var dragCard$1 = match._0;
-    var match$1 = spaceFromElement(el);
+    var match$1 = spaceFromElement(dropEl);
     if (match$1 === undefined) {
       return false;
     }
@@ -1127,29 +1130,35 @@ function Klondike(props) {
           return dragCard$1.rank === "RA";
       case "Card" :
           var dropCard = match$1._0;
-          if (baseIsFoundation(Caml_option.some(el))) {
-            if (rankIsBelow(dropCard, dragCard$1)) {
-              return dragCard$1.suit === dropCard.suit;
-            } else {
-              return false;
-            }
-          } else if (rankIsAbove(dropCard, dragCard$1)) {
-            return color(dragCard$1) !== color(dropCard);
-          } else {
+          console.log(baseSpace(Caml_option.some(dropEl)));
+          var match$2 = baseSpace(Caml_option.some(dropEl));
+          if (match$2 === undefined) {
             return false;
+          }
+          if (typeof match$2 !== "object") {
+            return false;
+          }
+          switch (match$2.TAG) {
+            case "Pile" :
+                if (rankIsAbove(dropCard, dragCard$1)) {
+                  return color(dragCard$1) !== color(dropCard);
+                } else {
+                  return false;
+                }
+            case "Foundation" :
+                if (rankIsBelow(dropCard, dragCard$1)) {
+                  return dragCard$1.suit === dropCard.suit;
+                } else {
+                  return false;
+                }
+            default:
+              return false;
           }
       
     }
   };
   var onMouseDown = function ($$event) {
     var eventElement = $$event.currentTarget;
-    var buildDragPile = function (el, build) {
-      return Core__Option.mapOr(refs.current.find(function (v) {
-                        return Caml_obj.equal(parentFromElement(v), spaceFromElement(el));
-                      }), [el], (function (parentEl) {
-                      return buildDragPile(parentEl, [el]);
-                    })).concat(build);
-    };
     var dragPile = buildDragPile(eventElement, []);
     var canDrag$1 = canDrag(dragPile);
     if (!canDrag$1) {
@@ -1180,13 +1189,6 @@ function Klondike(props) {
   };
   var onMouseUp = function (param) {
     Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
-            var buildDragPile = function (el, build) {
-              return Core__Option.mapOr(refs.current.find(function (v) {
-                                return Caml_obj.equal(parentFromElement(v), spaceFromElement(el));
-                              }), [el], (function (parentEl) {
-                              return buildDragPile(parentEl, [el]);
-                            })).concat(build);
-            };
             var dragPile = buildDragPile(dragCard, []);
             var dropOn = Core__Option.map(Core__Array.reduce(refs.current.filter(function (el) {
                           return Core__Option.isNone(dragPile.find(function (pileEl) {
@@ -1257,10 +1259,21 @@ function Klondike(props) {
                       ];
                       break;
                   case "Card" :
-                      match$1 = baseIsFoundation(Caml_option.some(dropOn$1)) ? [
-                          0,
-                          0
-                        ] : [
+                      var match$2 = baseSpace(Caml_option.some(dropOn$1));
+                      match$1 = match$2 !== undefined ? (
+                          typeof match$2 !== "object" ? [
+                              20,
+                              20
+                            ] : (
+                              match$2.TAG === "Foundation" ? [
+                                  0,
+                                  0
+                                ] : [
+                                  20,
+                                  20
+                                ]
+                            )
+                        ) : [
                           20,
                           20
                         ];
@@ -1285,6 +1298,40 @@ function Klondike(props) {
           window.addEventListener("mousemove", onMouseMove);
           window.addEventListener("mouseup", onMouseUp);
         }), []);
+  var dealToWaste = function () {
+    var el = getElement("Stock");
+    var stock = el !== undefined ? buildDragPile(Caml_option.valFromOption(el), []) : [];
+    var el$1 = getElement("Waste");
+    var waste = el$1 !== undefined ? buildDragPile(Caml_option.valFromOption(el$1), []) : [];
+    Core__Option.mapOr(stock[0], undefined, (function (topStockEl) {
+            var match = spaceFromElement(topStockEl);
+            if (match === undefined) {
+              return ;
+            }
+            if (typeof match !== "object" && match === "Stock") {
+              var wasteCards = waste.toReversed().slice(1);
+              wasteCards.forEach(function (wasteCard, i) {
+                    if (i === (wasteCards.length - 1 | 0)) {
+                      wasteCard.parentSpace = JSON.stringify(space_encode("Stock"));
+                      return moveWithTime(wasteCard, 0, 0, 0, 0, 1, 200);
+                    } else {
+                      return Core__Option.mapOr(Core__Option.flatMap(wasteCards[i + 1 | 0], spaceFromElement), undefined, (function (v) {
+                                    wasteCard.parentSpace = JSON.stringify(space_encode(v));
+                                  }));
+                    }
+                  });
+              return ;
+            }
+            var topWasteElement = waste[0];
+            Core__Option.mapOr(spaceFromElement(topWasteElement), undefined, (function (v) {
+                    topStockEl.parentSpace = JSON.stringify(space_encode(v));
+                  }));
+            var pos = elementPosition(topWasteElement);
+            moveWithTime(topStockEl, pos.left, pos.top, 0, 0, Core__Option.map(zIndexFromElement(topWasteElement), (function (v) {
+                        return v + 1 | 0;
+                      })), 200);
+          }));
+  };
   return JsxRuntime.jsxs("div", {
               children: [
                 JsxRuntime.jsx("div", {
@@ -1296,6 +1343,37 @@ function Klondike(props) {
                         zIndex: "0"
                       }
                     }, JSON.stringify(space_encode("Stock"))),
+                stockData.map(function (card, i) {
+                      var parent = i === 0 ? "Stock" : ({
+                            TAG: "Card",
+                            _0: stockData[i - 1 | 0]
+                          });
+                      return JsxRuntime.jsx(Klondike$CardDisplay, {
+                                  card: card,
+                                  top: (0).toString() + "px",
+                                  left: (0).toString() + "px",
+                                  zIndex: (i + 1 | 0).toString(),
+                                  onMouseDown: onMouseDown,
+                                  cardRef: setRef({
+                                        TAG: "Card",
+                                        _0: card
+                                      }, parent)
+                                }, JSON.stringify(space_encode({
+                                          TAG: "Card",
+                                          _0: card
+                                        })));
+                    }),
+                JsxRuntime.jsx("div", {
+                      className: "absolute bg-blue-700 rounded w-14 h-20",
+                      style: {
+                        left: "0px",
+                        top: "0px",
+                        zIndex: "53"
+                      },
+                      onClick: (function (param) {
+                          dealToWaste();
+                        })
+                    }, "Stock Cover"),
                 JsxRuntime.jsx("div", {
                       ref: Caml_option.some(setRef("Waste", undefined)),
                       className: "absolute bg-cyan-500 rounded w-14 h-20",
