@@ -420,12 +420,24 @@ function Klondike2(props) {
             var offset;
             var duration = 100;
             var start = elementPosition(element$1);
+            var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                  left: 0
+                }, (function (board) {
+                    return elementPosition(board);
+                  }));
+            var start_top = start.top - boardPos.top;
+            var start_right = start.right - boardPos.right;
+            var start_bottom = start.bottom - boardPos.bottom;
+            var start_left = start.left - boardPos.left;
             var startTime = performance.now();
             var step = function (currentTime) {
               var elapsedTime = currentTime - startTime;
               var progress = Math.min(elapsedTime / duration, 1);
-              var leftMove = start.left + (targetLeft - start.left) * progress;
-              var topMove = start.top + (targetTop - start.top) * progress;
+              var leftMove = start_left + (targetLeft - start_left) * progress;
+              var topMove = start_top + (targetTop - start_top) * progress;
               move(element$1, leftMove | 0, topMove | 0, zIndex, offset);
               if (progress < 1) {
                 requestAnimationFrame(step);
@@ -587,6 +599,14 @@ function Klondike2(props) {
           }
           dragCard.current = Caml_option.some(eventElement);
           var dragCardPos = elementPosition(eventElement);
+          var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0
+              }, (function (board) {
+                  return elementPosition(board);
+                }));
           originalData.current = Core__Option.map(zIndexFromElement(eventElement), (function (v) {
                   return [
                           dragCardPos,
@@ -596,8 +616,8 @@ function Klondike2(props) {
           liftUp(eventElement, 1000);
           var pos = elementPosition($$event.currentTarget);
           offset.current = [
-            $$event.clientX - (pos.left | 0) | 0,
-            $$event.clientY - (pos.top | 0) | 0
+            ($$event.clientX - (pos.left | 0) | 0) + (boardPos.left | 0) | 0,
+            ($$event.clientY - (pos.top | 0) | 0) + (boardPos.top | 0) | 0
           ];
           return ;
       case "Foundation" :
@@ -890,7 +910,7 @@ function Klondike2(props) {
                                         })));
                     })
               ],
-              className: "relative",
+              className: "relative m-5",
               id: "board"
             });
 }

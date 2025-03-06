@@ -330,16 +330,6 @@ let make = () => {
       }
     | _ => ()
     }
-
-    // refs.current->Array.forEach(el => {
-    //   switch (elementSpace, el->parentFromElement) {
-    //   | (Some(Card(elementCard)), Some(Card(parentCard))) =>
-    //     if Card.equals(parentCard, elementCard) {
-    //       f(el)
-    //     }
-    //   | _ => ()
-    //   }
-    // })
   }
 
   let rec move = (element, left, top, zIndex, offset) => {
@@ -364,6 +354,27 @@ let make = () => {
 
   let moveWithTime = (element, targetLeft, targetTop, zIndex, offset, duration) => {
     let start = element->elementPosition
+
+    let boardPos =
+      document
+      ->Document.getElementById("board")
+      ->Option.mapOr(
+        {
+          top: 0.,
+          left: 0.,
+          bottom: 0.,
+          right: 0.,
+        },
+        board => board->elementPosition,
+      )
+
+    let start = {
+      top: start.top -. boardPos.top,
+      left: start.left -. boardPos.left,
+      bottom: start.bottom -. boardPos.bottom,
+      right: start.right -. boardPos.right,
+    }
+
     let startTime = now()
 
     let rec step: float => unit = currentTime => {
@@ -514,6 +525,19 @@ let make = () => {
 
           let dragCardPos = eventElement->elementPosition
 
+          let boardPos =
+            document
+            ->Document.getElementById("board")
+            ->Option.mapOr(
+              {
+                top: 0.,
+                left: 0.,
+                bottom: 0.,
+                right: 0.,
+              },
+              board => board->elementPosition,
+            )
+
           originalData.current = eventElement->zIndexFromElement->Option.map(v => (dragCardPos, v))
 
           liftUp(eventElement, 1000)
@@ -521,8 +545,8 @@ let make = () => {
           let pos = event->eventPosition
 
           offset.current = (
-            event->JsxEvent.Mouse.clientX - pos.left->Int.fromFloat,
-            event->JsxEvent.Mouse.clientY - pos.top->Int.fromFloat,
+            event->JsxEvent.Mouse.clientX - pos.left->Int.fromFloat + boardPos.left->Int.fromFloat,
+            event->JsxEvent.Mouse.clientY - pos.top->Int.fromFloat + boardPos.top->Int.fromFloat,
           )
         }
       }
@@ -699,7 +723,7 @@ let make = () => {
     moveToState()
   }
 
-  <div id={"board"} className="relative">
+  <div id={"board"} className="relative m-5">
     <div
       // key={Stock->spaceToString}
       // ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
@@ -765,135 +789,3 @@ let make = () => {
     ->React.array}
   </div>
 }
-
-// let stock = switch getElement(Some(Stock)) {
-// | Some(el) => buildDragPile(el, [])
-// | _ => []
-// }
-
-// let waste = switch getElement(Some(Waste)) {
-// | Some(el) => buildDragPile(el, [])
-// | _ => []
-// }
-
-// stock
-// ->Array.get(0)
-// ->Option.mapOr((), topStockEl => {
-//   switch topStockEl->spaceFromElement {
-//   | Some(Stock) =>
-//     let wasteCards =
-//       waste
-//       ->Array.toReversed
-//       ->Array.sliceToEnd(~start=1)
-
-//     wasteCards->Array.forEachWithIndex((wasteCard, i) => {
-//       if i == wasteCards->Array.length - 1 {
-//         wasteCard->setParent(Stock->spaceToString)
-//         moveWithTime(wasteCard, 0., 0., 0, 0, Some(1), 200.)
-//       } else {
-//         wasteCards
-//         ->Array.get(i + 1)
-//         ->Option.flatMap(spaceFromElement)
-//         ->Option.mapOr(
-//           (),
-//           v => {
-//             wasteCard->setParent(v->spaceToString)
-//           },
-//         )
-//       }
-//     })
-
-//   | Some(_) => {
-//       let topWasteElement = waste->Array.getUnsafe(0)
-
-//       topWasteElement
-//       ->spaceFromElement
-//       ->Option.mapOr((), v => {
-//         topStockEl->setParent(v->spaceToString)
-//       })
-
-//       let pos = topWasteElement->elementPosition
-
-//       moveWithTime(
-//         topStockEl,
-//         pos.left,
-//         pos.top,
-//         0,
-//         0,
-//         topWasteElement->zIndexFromElement->Option.map(v => v + 1),
-//         200.,
-//       )
-//     }
-//   | _ => ()
-//   }
-// })
-
-// {stockData
-// ->Array.mapWithIndex((card, i) => {
-//   <CardDisplay
-//     card={card}
-//     key={Card(card)->spaceToString}
-//     cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
-//     top={0->Int.toString ++ "px"}
-//     left={0->Int.toString ++ "px"}
-//     zIndex={(i + 1)->Int.toString}
-//     onMouseDown={onMouseDown}
-//   />
-// })
-// ->React.array}
-// <div
-//   key={Waste->spaceToString}
-//   ref={ReactDOM.Ref.callbackDomRef(setRef(Waste))}
-//   className="absolute bg-cyan-500 rounded w-14 h-20"
-//   style={{
-//     top: "0px",
-//     left: "70px",
-//     zIndex: "0",
-//   }}
-// />
-// {cardsData
-// ->Array.mapWithIndex((cardPile, i) => {
-//   cardPile
-//   ->Array.mapWithIndex((card, j) => {
-//     // let parent = j == 0 ? Pile(i) : Card(cardsData->Array.getUnsafe(i)->Array.getUnsafe(j - 1))
-
-//     <CardDisplay
-//       card={card}
-//       key={Card(card)->spaceToString}
-//       cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
-//       top={(200 + j * 20)->Int.toString ++ "px"}
-//       left={(i * 70)->Int.toString ++ "px"}
-//       zIndex={(j + 1)->Int.toString}
-//       onMouseDown={onMouseDown}
-//     />
-//   })
-//   ->React.array
-// })
-// ->React.array}
-
-// let moveOne = (element, left, top, z) => {
-//   element->setStyleLeft(left->Int.toString ++ "px")
-//   element->setStyleTop(top->Int.toString ++ "px")
-//   element->setStyleZIndex(z->Int.toString)
-// }
-
-// let moveOneWithTime = (element, left, top, z, duration) => {
-//   let start = element->elementPosition
-//   let startTime = now()
-
-//   let rec step: float => unit = currentTime => {
-//     let elapsedTime = currentTime -. startTime
-//     let progress = Math.min(elapsedTime /. duration, 1.) // Clamp progress between 0 and 1
-//     // let easedProgress = easeOutQuad(progress)
-//     let easedProgress = progress
-//     let leftMove = start.left +. (left -. start.left) *. easedProgress
-//     let topMove = start.top +. (top -. start.top) *. easedProgress
-//     moveOne(element, leftMove->Int.fromFloat, topMove->Int.fromFloat, z)
-
-//     if progress < 1. {
-//       requestAnimationFrame(step)
-//     }
-//   }
-
-//   requestAnimationFrame(step)
-// }
