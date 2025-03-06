@@ -141,7 +141,6 @@ function space_decode(value) {
 }
 
 function initiateGame() {
-  var shuffledDeck = getShuffledDeck();
   return {
           piles: [
             shuffledDeck.slice(0, 1),
@@ -313,7 +312,7 @@ function Klondike2(props) {
                 addToCards({
                       card: card,
                       x: Math.imul(i, 70),
-                      y: 100 + Math.imul(j, 20) | 0,
+                      y: 100,
                       z: j + 1 | 0
                     });
               });
@@ -329,7 +328,7 @@ function Klondike2(props) {
     game.waste.forEach(function (card, i) {
           addToCards({
                 card: card,
-                x: 100,
+                x: 70,
                 y: 0,
                 z: i + 1 | 0
               });
@@ -507,6 +506,13 @@ function Klondike2(props) {
                 
               });
         });
+    game.waste.forEach(function (wasteCard) {
+          if (Caml_obj.equal(wasteCard, card)) {
+            dragPile.contents = [card];
+            return ;
+          }
+          
+        });
     return dragPile.contents;
   };
   var canDrag = function (dragPile) {
@@ -575,7 +581,6 @@ function Klondike2(props) {
     switch (match.TAG) {
       case "Card" :
           var dragPile = buildDragPile(match._0);
-          console.log(dragPile);
           var canDrag$1 = canDrag(dragPile);
           if (!canDrag$1) {
             return ;
@@ -777,6 +782,28 @@ function Klondike2(props) {
           window.addEventListener("mouseup", onMouseUp);
           moveToState();
         }), []);
+  var dealToWaste = function () {
+    setGame(function (game) {
+          if (game.stock.length === 0) {
+            return {
+                    piles: game.piles,
+                    foundations: game.foundations,
+                    stock: game.waste,
+                    waste: [],
+                    gameEnded: game.gameEnded
+                  };
+          } else {
+            return {
+                    piles: game.piles,
+                    foundations: game.foundations,
+                    stock: game.stock.slice(1),
+                    waste: game.waste.concat(game.stock.slice(0, 1)),
+                    gameEnded: game.gameEnded
+                  };
+          }
+        });
+    moveToState();
+  };
   return JsxRuntime.jsxs("div", {
               children: [
                 JsxRuntime.jsx("div", {
@@ -795,9 +822,9 @@ function Klondike2(props) {
                         zIndex: "53"
                       },
                       onClick: (function (param) {
-                          
+                          dealToWaste();
                         })
-                    }, "Stock Cover"),
+                    }, "stock-cover"),
                 [
                     [],
                     [],
@@ -845,24 +872,22 @@ function Klondike2(props) {
                                           _0: i
                                         })));
                     }),
-                getGame().piles.map(function (cardPile) {
-                      return cardPile.map(function (card) {
-                                  return JsxRuntime.jsx(Klondike2$CardDisplay, {
-                                              card: card,
-                                              id: JSON.stringify(space_encode({
-                                                        TAG: "Card",
-                                                        _0: card
-                                                      })),
-                                              cardRef: setRef({
-                                                    TAG: "Card",
-                                                    _0: card
-                                                  }),
-                                              onMouseDown: onMouseDown
-                                            }, JSON.stringify(space_encode({
-                                                      TAG: "Card",
-                                                      _0: card
-                                                    })));
-                                });
+                shuffledDeck.map(function (card) {
+                      return JsxRuntime.jsx(Klondike2$CardDisplay, {
+                                  card: card,
+                                  id: JSON.stringify(space_encode({
+                                            TAG: "Card",
+                                            _0: card
+                                          })),
+                                  cardRef: setRef({
+                                        TAG: "Card",
+                                        _0: card
+                                      }),
+                                  onMouseDown: onMouseDown
+                                }, JSON.stringify(space_encode({
+                                          TAG: "Card",
+                                          _0: card
+                                        })));
                     })
               ],
               className: "relative",

@@ -31,7 +31,7 @@ type game = {
 }
 
 let initiateGame = () => {
-  let shuffledDeck = getShuffledDeck()
+  // let shuffledDeck = getShuffledDeck()
 
   {
     piles: [
@@ -244,7 +244,7 @@ let make = () => {
         addToCards({
           card,
           x: i * 70,
-          y: 100 + j * 20,
+          y: 100,
           z: j + 1,
         })
       })
@@ -262,7 +262,7 @@ let make = () => {
     game.waste->Array.forEachWithIndex((card, i) => {
       addToCards({
         card,
-        x: 100,
+        x: 70,
         y: 0,
         z: i + 1,
       })
@@ -363,7 +363,6 @@ let make = () => {
   }
 
   let moveWithTime = (element, targetLeft, targetTop, zIndex, offset, duration) => {
-    // Console.log5(element, targetLeft, targetTop, zIndex, offset)
     let start = element->elementPosition
     let startTime = now()
 
@@ -455,6 +454,12 @@ let make = () => {
       })
     })
 
+    game.waste->Array.forEach(wasteCard => {
+      if wasteCard == card {
+        dragPile := [card]
+      }
+    })
+
     dragPile.contents
   }
 
@@ -501,7 +506,6 @@ let make = () => {
     switch eventElement->getSpace {
     | Some(Card(card)) => {
         let dragPile = buildDragPile(card)
-        Console.log(dragPile)
 
         let canDrag = canDrag(dragPile)
 
@@ -677,7 +681,22 @@ let make = () => {
   }, [])
 
   let dealToWaste = () => {
-    ()
+    setGame(game =>
+      if game.stock->Array.length == 0 {
+        {
+          ...game,
+          stock: game.waste,
+          waste: [],
+        }
+      } else {
+        {
+          ...game,
+          stock: game.stock->Array.sliceToEnd(~start=1),
+          waste: game.waste->Array.concat(game.stock->Array.slice(~start=0, ~end=1)),
+        }
+      }
+    )
+    moveToState()
   }
 
   <div id={"board"} className="relative">
@@ -692,7 +711,7 @@ let make = () => {
       }}
     />
     <div
-      key={"Stock Cover"}
+      key={"stock-cover"}
       // ref={ReactDOM.Ref.callbackDomRef(setRef(Stock, None))}
       onClick={_ => dealToWaste()}
       className="absolute bg-blue-700 rounded w-14 h-20"
@@ -730,22 +749,18 @@ let make = () => {
       />
     })
     ->React.array}
-    {getGame().piles
-    ->Array.map(cardPile => {
-      cardPile
-      ->Array.map(card => {
-        <CardDisplay
-          card={card}
-          key={Card(card)->spaceToString}
-          id={Card(card)->spaceToString}
-          cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
-          // top={(200 + j * 20)->Int.toString ++ "px"}
-          // left={(i * 70)->Int.toString ++ "px"}
-          // zIndex={(j + 1)->Int.toString}
-          onMouseDown={onMouseDown}
-        />
-      })
-      ->React.array
+    {shuffledDeck
+    ->Array.map(card => {
+      <CardDisplay
+        card={card}
+        key={Card(card)->spaceToString}
+        id={Card(card)->spaceToString}
+        cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
+        // top={(200 + j * 20)->Int.toString ++ "px"}
+        // left={(i * 70)->Int.toString ++ "px"}
+        // zIndex={(j + 1)->Int.toString}
+        onMouseDown={onMouseDown}
+      />
     })
     ->React.array}
   </div>
