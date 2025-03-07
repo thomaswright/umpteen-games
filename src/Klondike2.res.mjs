@@ -305,7 +305,6 @@ function canDrag(card, game) {
   if (match !== undefined) {
     if (typeof match !== "object") {
       onTop = match === "Waste" ? Core__Option.mapOr(game.waste.toReversed()[0], false, (function (top) {
-                console.log(top, card);
                 return Caml_obj.equal(top, card);
               })) : false;
     } else {
@@ -533,6 +532,33 @@ function applyToOthers(card, game, f) {
       });
 }
 
+function dealToWaste(setGame, moveToState) {
+  setGame(function (game) {
+        if (game.stock.length === 0) {
+          return {
+                  piles: game.piles,
+                  foundations: game.foundations,
+                  stock: game.waste,
+                  waste: [],
+                  gameEnded: game.gameEnded
+                };
+        } else {
+          return {
+                  piles: game.piles,
+                  foundations: game.foundations,
+                  stock: game.stock.slice(3),
+                  waste: game.waste.concat(game.stock.slice(0, 3)),
+                  gameEnded: game.gameEnded
+                };
+        }
+      });
+  return moveToState();
+}
+
+var Custom = {
+  dealToWaste: dealToWaste
+};
+
 var GameRules = {
   space_encode: space_encode,
   space_decode: space_decode,
@@ -543,7 +569,8 @@ var GameRules = {
   canDrag: canDrag,
   canDrop: canDrop,
   onDrop: onDrop,
-  applyToOthers: applyToOthers
+  applyToOthers: applyToOthers,
+  Custom: Custom
 };
 
 function getShuffledDeck() {
@@ -897,28 +924,6 @@ function Klondike2(props) {
           window.addEventListener("mouseup", onMouseUp);
           moveToState();
         }), []);
-  var dealToWaste = function () {
-    setGame(function (game) {
-          if (game.stock.length === 0) {
-            return {
-                    piles: game.piles,
-                    foundations: game.foundations,
-                    stock: game.waste,
-                    waste: [],
-                    gameEnded: game.gameEnded
-                  };
-          } else {
-            return {
-                    piles: game.piles,
-                    foundations: game.foundations,
-                    stock: game.stock.slice(3),
-                    waste: game.waste.concat(game.stock.slice(0, 3)),
-                    gameEnded: game.gameEnded
-                  };
-          }
-        });
-    moveToState();
-  };
   return JsxRuntime.jsxs("div", {
               children: [
                 JsxRuntime.jsx("div", {
@@ -929,7 +934,7 @@ function Klondike2(props) {
                         zIndex: "53"
                       },
                       onClick: (function (param) {
-                          dealToWaste();
+                          dealToWaste(setGame, moveToState);
                         })
                     }, "stock-cover"),
                 [

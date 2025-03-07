@@ -175,7 +175,6 @@ module GameRules = {
       ->Array.toReversed
       ->Array.get(0)
       ->Option.mapOr(false, top => {
-        Console.log2(top, card)
         top == card
       })
     | Some(Stock) => false
@@ -319,6 +318,27 @@ module GameRules = {
         }
       })
     })
+  }
+
+  module Custom = {
+    let dealToWaste = (setGame, moveToState) => {
+      setGame(game =>
+        if game.stock->Array.length == 0 {
+          {
+            ...game,
+            stock: game.waste,
+            waste: [],
+          }
+        } else {
+          {
+            ...game,
+            stock: game.stock->Array.sliceToEnd(~start=3),
+            waste: game.waste->Array.concat(game.stock->Array.slice(~start=0, ~end=3)),
+          }
+        }
+      )
+      moveToState()
+    }
   }
 }
 
@@ -725,29 +745,10 @@ let make = () => {
     None
   }, [])
 
-  let dealToWaste = () => {
-    setGame(game =>
-      if game.stock->Array.length == 0 {
-        {
-          ...game,
-          stock: game.waste,
-          waste: [],
-        }
-      } else {
-        {
-          ...game,
-          stock: game.stock->Array.sliceToEnd(~start=3),
-          waste: game.waste->Array.concat(game.stock->Array.slice(~start=0, ~end=3)),
-        }
-      }
-    )
-    moveToState()
-  }
-
   <div id={"board"} className="relative m-5">
     <div
       key={"stock-cover"}
-      onClick={_ => dealToWaste()}
+      onClick={_ => GameRules.Custom.dealToWaste(setGame, moveToState)}
       className="absolute bg-blue-700 rounded w-14 h-20"
       style={{
         top: "0px",
