@@ -1,153 +1,5 @@
 open Webapi.Dom
 
-let getShuffledDeck = () => {
-  Card.allRanks
-  ->Array.reduce([], (a, rank) => {
-    Card.allSuits->Array.reduce(a, (a2, suit) => {
-      a2->Array.concat([
-        (
-          {
-            suit,
-            rank,
-          }: Card.card
-        ),
-      ])
-    })
-  })
-  ->Array.toShuffled
-}
-
-let shuffledDeck = getShuffledDeck()
-
-@decco
-type space = Card(Card.card) | Foundation(int) | Pile(int)
-
-type game = {
-  piles: array<array<Card.card>>,
-  foundations: array<array<Card.card>>,
-  stock: array<Card.card>,
-  waste: array<Card.card>,
-  gameEnded: bool,
-}
-
-let initiateGame = () => {
-  // let shuffledDeck = getShuffledDeck()
-
-  {
-    piles: [
-      shuffledDeck->Array.slice(~start=0, ~end=1),
-      shuffledDeck->Array.slice(~start=1, ~end=3),
-      shuffledDeck->Array.slice(~start=3, ~end=6),
-      shuffledDeck->Array.slice(~start=6, ~end=10),
-      shuffledDeck->Array.slice(~start=10, ~end=15),
-      shuffledDeck->Array.slice(~start=15, ~end=21),
-      shuffledDeck->Array.slice(~start=21, ~end=28),
-    ],
-    foundations: [[], [], [], []],
-    stock: shuffledDeck->Array.sliceToEnd(~start=28),
-    waste: [],
-    gameEnded: false,
-  }
-}
-
-// @set external setSpace: (Dom.element, string) => unit = "space"
-
-@set @scope("style") external setStyleLeft: (Dom.element, string) => unit = "left"
-@set @scope("style") external setStyleTop: (Dom.element, string) => unit = "top"
-@set @scope("style") external setStyleZIndex: (Dom.element, string) => unit = "z-index"
-
-@val @scope("performance") external now: unit => float = "now"
-@val external requestAnimationFrame: (float => unit) => unit = "requestAnimationFrame"
-
-@val @module("./other.js")
-external appendReactElement: (React.element, string) => unit = "appendReactElement"
-
-let zIndexFromElement = element => {
-  Obj.magic(element)["style"]["z-index"]->Int.fromString
-}
-
-let getSpace = element => {
-  switch element->Element.id->Js.Json.parseExn->space_decode {
-  | Ok(d) => Some(d)
-  | _ => None
-  }
-}
-
-let spaceToString = space => {
-  space->space_encode->Js.Json.stringify
-}
-
-type position = {
-  top: float,
-  right: float,
-  bottom: float,
-  left: float,
-}
-
-let elementPosition = element => {
-  let a = element->Element.getBoundingClientRect
-
-  {top: a->DomRect.top, right: a->DomRect.right, bottom: a->DomRect.bottom, left: a->DomRect.left}
-}
-
-let eventPosition = event => {
-  event
-  ->JsxEvent.Mouse.currentTarget
-  ->Obj.magic
-  ->elementPosition
-}
-
-module CardDisplay = {
-  @react.component
-  let make = (~card, ~id, ~cardRef, ~onMouseDown) => {
-    <div
-      id={id}
-      ref={cardRef}
-      onMouseDown={onMouseDown}
-      className="absolute w-14 h-20 select-none"
-      // style={{
-      //   top,
-      //   left,
-      //   zIndex,
-      // }}
-    >
-      <div
-        style={{
-          // transform: Card.rotation(card),
-          // position: "relative",
-          // zIndex: ((isDragging ? 100 : 0) + index + 1)->Int.toString,
-          color: card->Card.colorHex,
-        }}
-        className={[
-          " border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
-          // index == 0 ? "" : "-ml-[37px]",
-        ]->Array.join(" ")}>
-        // <div className={" bg-blue-500 h-2 w-2 rotate-45"}> {""->React.string} </div>
-        <span className="flex flex-col">
-          <span className="flex flex-row">
-            <span
-              className={[
-                "font-medium ",
-                switch card.rank {
-                | R10 => "tracking-[-0.1rem] w-4"
-                | _ => "w-3.5"
-                },
-              ]->Array.join(" ")}>
-              {card->Card.rankString->React.string}
-            </span>
-            <span className="w-3.5 flex flex-row justify-center">
-              {card->Card.suitString->React.string}
-            </span>
-          </span>
-          <span className="w-3.5 flex flex-row mt-0.5 -ml-0.5">
-            {card->Card.suitString->React.string}
-          </span>
-        </span>
-      </div>
-    </div>
-  }
-}
-
 type cardLoc = {
   card: Card.card,
   x: int,
@@ -155,16 +7,38 @@ type cardLoc = {
   z: int,
 }
 
-let initialGame = initiateGame()
-
-type state = {history: array<game>}
-
-type undoStats = {
-  currentUndoDepth: int,
-  undos: array<int>,
-}
-
 module GameRules = {
+  @decco
+  type space = Card(Card.card) | Foundation(int) | Pile(int)
+
+  type game = {
+    piles: array<array<Card.card>>,
+    foundations: array<array<Card.card>>,
+    stock: array<Card.card>,
+    waste: array<Card.card>,
+    gameEnded: bool,
+  }
+
+  let initiateGame = shuffledDeck => {
+    // let shuffledDeck = getShuffledDeck()
+
+    {
+      piles: [
+        shuffledDeck->Array.slice(~start=0, ~end=1),
+        shuffledDeck->Array.slice(~start=1, ~end=3),
+        shuffledDeck->Array.slice(~start=3, ~end=6),
+        shuffledDeck->Array.slice(~start=6, ~end=10),
+        shuffledDeck->Array.slice(~start=10, ~end=15),
+        shuffledDeck->Array.slice(~start=15, ~end=21),
+        shuffledDeck->Array.slice(~start=21, ~end=28),
+      ],
+      foundations: [[], [], [], []],
+      stock: shuffledDeck->Array.sliceToEnd(~start=28),
+      waste: [],
+      gameEnded: false,
+    }
+  }
+
   let cardLocs = (game: game) => {
     // Todo: maybe change to a map
     let cards = ref([])
@@ -262,10 +136,39 @@ module GameRules = {
     dragPile.contents
   }
 
+  let canDrag = (card, game) => {
+    let dragPile = buildDragPile(card, game)
+
+    let (dragPileIsValid, _) =
+      dragPile
+      ->Array.toReversed
+      ->Array.reduce((true, None), ((isStillValid, onTop), onBottom) => {
+        !isStillValid
+          ? (false, None)
+          : switch (onTop, onBottom) {
+            | (Some(onTop), onBottom) => (
+                Card.rankIsBelow(onTop, onBottom) && onTop->Card.color != onBottom->Card.color,
+                Some(onBottom),
+              )
+            | _ => (true, Some(onBottom))
+            }
+      })
+
+    dragPileIsValid
+  }
+
   let canDrop = (dragCard: Card.card, dropSpace: space, game: game) => {
+    let dragPile = buildDragPile(dragCard, game)
+
+    let notInDragPile =
+      dragPile
+      ->Array.find(pilePiece => Card(pilePiece) == dropSpace)
+      ->Option.isNone
+
     let dropHasNoChildren = switch dropSpace {
     | Card(card) => buildDragPile(card, game)->Array.length < 2
-    | _ => true
+    | Pile(i) => game.piles->Array.getUnsafe(i)->Array.length == 0
+    | Foundation(i) => game.foundations->Array.getUnsafe(i)->Array.length == 0
     }
 
     let canBeParent = switch dropSpace {
@@ -281,10 +184,12 @@ module GameRules = {
     | Pile(_) => dragCard.rank == RK
     }
 
-    dropHasNoChildren && canBeParent
+    notInDragPile && dropHasNoChildren && canBeParent
   }
 
-  let onDrop = (dropOnSpace, dragPile, setGame) => {
+  let onDrop = (dropOnSpace, dragCard, game, setGame) => {
+    let dragPile = buildDragPile(dragCard, game)
+
     let removeDragPile = x =>
       x->Array.filter(sCard => {
         !(dragPile->Array.some(dCard => sCard == dCard))
@@ -349,11 +254,10 @@ module GameRules = {
           }),
         }
       })
-    | _ => ()
     }
   }
 
-  let applyToChildren = (card, game, f) => {
+  let applyToOthers = (card, game, f) => {
     game.foundations->Array.forEach(stack => {
       stack->Array.forEachWithIndex((sCard, i) => {
         if card == sCard {
@@ -372,6 +276,115 @@ module GameRules = {
   }
 }
 
+let getShuffledDeck = () => {
+  Card.allRanks
+  ->Array.reduce([], (a, rank) => {
+    Card.allSuits->Array.reduce(a, (a2, suit) => {
+      a2->Array.concat([
+        (
+          {
+            suit,
+            rank,
+          }: Card.card
+        ),
+      ])
+    })
+  })
+  ->Array.toShuffled
+}
+
+let shuffledDeck = getShuffledDeck()
+
+@set @scope("style") external setStyleLeft: (Dom.element, string) => unit = "left"
+@set @scope("style") external setStyleTop: (Dom.element, string) => unit = "top"
+@set @scope("style") external setStyleZIndex: (Dom.element, string) => unit = "z-index"
+
+@val @scope("performance") external now: unit => float = "now"
+@val external requestAnimationFrame: (float => unit) => unit = "requestAnimationFrame"
+
+@val @module("./other.js")
+external appendReactElement: (React.element, string) => unit = "appendReactElement"
+
+let zIndexFromElement = element => {
+  Obj.magic(element)["style"]["z-index"]->Int.fromString
+}
+
+let getSpace = element => {
+  switch element->Element.id->Js.Json.parseExn->GameRules.space_decode {
+  | Ok(d) => Some(d)
+  | _ => None
+  }
+}
+
+let spaceToString = space => {
+  space->GameRules.space_encode->Js.Json.stringify
+}
+
+type position = {
+  top: float,
+  right: float,
+  bottom: float,
+  left: float,
+}
+
+let elementPosition = element => {
+  let a = element->Element.getBoundingClientRect
+
+  {top: a->DomRect.top, right: a->DomRect.right, bottom: a->DomRect.bottom, left: a->DomRect.left}
+}
+
+let eventPosition = event => {
+  event
+  ->JsxEvent.Mouse.currentTarget
+  ->Obj.magic
+  ->elementPosition
+}
+
+module CardDisplay = {
+  @react.component
+  let make = (~card, ~id, ~cardRef, ~onMouseDown) => {
+    <div id={id} ref={cardRef} onMouseDown={onMouseDown} className="absolute w-14 h-20 select-none">
+      <div
+        style={{
+          // transform: Card.rotation(card),
+          // position: "relative",
+          color: card->Card.colorHex,
+        }}
+        className={[
+          " border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
+        ]->Array.join(" ")}>
+        <span className="flex flex-col">
+          <span className="flex flex-row">
+            <span
+              className={[
+                "font-medium ",
+                switch card.rank {
+                | R10 => "tracking-[-0.1rem] w-4"
+                | _ => "w-3.5"
+                },
+              ]->Array.join(" ")}>
+              {card->Card.rankString->React.string}
+            </span>
+            <span className="w-3.5 flex flex-row justify-center">
+              {card->Card.suitString->React.string}
+            </span>
+          </span>
+          <span className="w-3.5 flex flex-row mt-0.5 -ml-0.5">
+            {card->Card.suitString->React.string}
+          </span>
+        </span>
+      </div>
+    </div>
+  }
+}
+
+type state = {history: array<GameRules.game>}
+
+type undoStats = {
+  currentUndoDepth: int,
+  undos: array<int>,
+}
+
 @react.component
 let make = () => {
   let undoStats = React.useRef({
@@ -384,7 +397,7 @@ let make = () => {
   }
 
   let state = React.useRef({
-    history: [initialGame],
+    history: [GameRules.initiateGame(shuffledDeck)],
   })
 
   let setState = f => {
@@ -444,7 +457,7 @@ let make = () => {
     }
   }
 
-  let applyToChildren = (element, f) => {
+  let applyToOthers = (element, f) => {
     switch element->getSpace {
     | Some(Card(card)) => {
         let game = getGame()
@@ -457,7 +470,7 @@ let make = () => {
           })
         }
 
-        GameRules.applyToChildren(card, game, appliedF)
+        GameRules.applyToOthers(card, game, appliedF)
       }
     | _ => ()
     }
@@ -471,7 +484,7 @@ let make = () => {
     })
 
     offset->Option.mapOr((), ((leftOffset, topOffset)) => {
-      applyToChildren(element, childEl =>
+      applyToOthers(element, childEl =>
         move(
           childEl,
           left + leftOffset,
@@ -537,7 +550,7 @@ let make = () => {
 
   let rec liftUp = (element, zIndex) => {
     element->setStyleZIndex(zIndex->Int.toString)
-    applyToChildren(element, childEl => {
+    applyToOthers(element, childEl => {
       liftUp(childEl, zIndex + 1)
     })
   }
@@ -552,25 +565,6 @@ let make = () => {
     overlapX *. overlapY
   }
 
-  let canDrag = (dragPile: array<Card.card>) => {
-    let (dragPileIsValid, _) =
-      dragPile
-      ->Array.toReversed
-      ->Array.reduce((true, None), ((isStillValid, onTop), onBottom) => {
-        !isStillValid
-          ? (false, None)
-          : switch onTop {
-            | None => (true, Some(onBottom))
-            | Some(onTop) => (
-                Card.rankIsBelow(onTop, onBottom) && onTop->Card.color != onBottom->Card.color,
-                Some(onBottom),
-              )
-            }
-      })
-
-    dragPileIsValid
-  }
-
   let onMouseDown = event => {
     let eventElement =
       event
@@ -578,40 +572,35 @@ let make = () => {
       ->Obj.magic
 
     switch eventElement->getSpace {
-    | Some(Card(card)) => {
-        let dragPile = GameRules.buildDragPile(card, getGame())
+    | Some(Card(card)) =>
+      if GameRules.canDrag(card, getGame()) {
+        dragCard.current = eventElement->Some
 
-        let canDrag = canDrag(dragPile)
+        let dragCardPos = eventElement->elementPosition
 
-        if canDrag {
-          dragCard.current = eventElement->Some
-
-          let dragCardPos = eventElement->elementPosition
-
-          let boardPos =
-            document
-            ->Document.getElementById("board")
-            ->Option.mapOr(
-              {
-                top: 0.,
-                left: 0.,
-                bottom: 0.,
-                right: 0.,
-              },
-              board => board->elementPosition,
-            )
-
-          originalData.current = eventElement->zIndexFromElement->Option.map(v => (dragCardPos, v))
-
-          liftUp(eventElement, 1000)
-
-          let pos = event->eventPosition
-
-          offset.current = (
-            event->JsxEvent.Mouse.clientX - pos.left->Int.fromFloat + boardPos.left->Int.fromFloat,
-            event->JsxEvent.Mouse.clientY - pos.top->Int.fromFloat + boardPos.top->Int.fromFloat,
+        let boardPos =
+          document
+          ->Document.getElementById("board")
+          ->Option.mapOr(
+            {
+              top: 0.,
+              left: 0.,
+              bottom: 0.,
+              right: 0.,
+            },
+            board => board->elementPosition,
           )
-        }
+
+        originalData.current = eventElement->zIndexFromElement->Option.map(v => (dragCardPos, v))
+
+        liftUp(eventElement, 1000)
+
+        let pos = event->eventPosition
+
+        offset.current = (
+          event->JsxEvent.Mouse.clientX - pos.left->Int.fromFloat + boardPos.left->Int.fromFloat,
+          event->JsxEvent.Mouse.clientY - pos.top->Int.fromFloat + boardPos.top->Int.fromFloat,
+        )
       }
     | _ => ()
     }
@@ -641,20 +630,14 @@ let make = () => {
   let onMouseUp = _ => {
     switch getDragCard() {
     | Some((dragCardEl, dragCard)) => {
-        let dragPile = GameRules.buildDragPile(dragCard, getGame())
-
         let dropOn =
           refs.current
-          ->Array.filter(el =>
-            dragPile
-            ->Array.find(pileEl => Some(Card(pileEl)) == el->getSpace)
-            ->Option.isNone
-          )
           ->Array.reduce(None, (acc: option<(float, Dom.element)>, el) => {
             el
             ->getSpace
             ->Option.mapOr(acc, elSpace => {
               if GameRules.canDrop(dragCard, elSpace, getGame()) {
+                // Console.log3("canDrop", dragCard, elSpace)
                 let overlap = getOverlap(el, dragCardEl)
                 let new = Some((overlap, el))
 
@@ -677,7 +660,7 @@ let make = () => {
         | None => ()
         | Some(dropOnEl) =>
           switch dropOnEl->getSpace {
-          | Some(dropOnSpace) => GameRules.onDrop(dropOnSpace, dragPile, setGame)
+          | Some(dropOnSpace) => GameRules.onDrop(dropOnSpace, dragCard, getGame(), setGame)
           | None => ()
           }
         }
