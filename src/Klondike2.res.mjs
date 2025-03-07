@@ -15,6 +15,13 @@ import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function space_encode(value) {
+  if (typeof value !== "object") {
+    if (value === "Waste") {
+      return ["Waste"];
+    } else {
+      return ["Stock"];
+    }
+  }
   switch (value.TAG) {
     case "Card" :
         return [
@@ -120,6 +127,24 @@ function space_decode(value) {
                     value: e$2.value
                   }
                 };
+      case "Stock" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "Stock"
+                  };
+          }
+      case "Waste" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "Waste"
+                  };
+          }
       default:
         
     }
@@ -188,7 +213,7 @@ function cardLocs(game) {
   game.waste.forEach(function (card, i) {
         addToCards({
               card: card,
-              x: 70,
+              x: 70 + Math.imul(20, i % 3) | 0,
               y: 0,
               z: i + 1 | 0
             });
@@ -223,6 +248,20 @@ function baseSpace(dropCard, game) {
               }
               
             });
+      });
+  game.waste.forEach(function (card) {
+        if (Caml_obj.equal(card, dropCard)) {
+          base.contents = "Waste";
+          return ;
+        }
+        
+      });
+  game.stock.forEach(function (card) {
+        if (Caml_obj.equal(card, dropCard)) {
+          base.contents = "Stock";
+          return ;
+        }
+        
       });
   return base.contents;
 }
@@ -261,29 +300,67 @@ function buildDragPile(card, game) {
 
 function canDrag(card, game) {
   var dragPile = buildDragPile(card, game);
-  return Core__Array.reduce(dragPile.toReversed(), [
-                true,
-                undefined
-              ], (function (param, onBottom) {
-                  if (!param[0]) {
-                    return [
-                            false,
-                            undefined
-                          ];
-                  }
-                  var onTop = param[1];
-                  if (onTop !== undefined) {
-                    return [
-                            Card.rankIsBelow(onTop, onBottom) && Card.color(onTop) !== Card.color(onBottom),
-                            onBottom
-                          ];
-                  } else {
-                    return [
-                            true,
-                            onBottom
-                          ];
-                  }
-                }))[0];
+  var match = baseSpace(card, game);
+  var onTop;
+  if (match !== undefined) {
+    if (typeof match !== "object") {
+      onTop = match === "Waste" ? Core__Option.mapOr(game.waste.toReversed()[0], false, (function (top) {
+                console.log(top, card);
+                return Caml_obj.equal(top, card);
+              })) : false;
+    } else {
+      switch (match.TAG) {
+        case "Card" :
+            onTop = false;
+            break;
+        case "Foundation" :
+            onTop = Core__Option.mapOr(Core__Option.flatMap(game.foundations[match._0], (function (stack) {
+                        return stack.toReversed()[0];
+                      })), false, (function (top) {
+                    return Caml_obj.equal(top, card);
+                  }));
+            break;
+        case "Pile" :
+            onTop = Core__Option.mapOr(Core__Option.flatMap(game.piles[match._0], (function (stack) {
+                        return stack.toReversed()[0];
+                      })), false, (function (top) {
+                    return Caml_obj.equal(top, card);
+                  }));
+            break;
+        
+      }
+    }
+  } else {
+    onTop = false;
+  }
+  var match$1 = Core__Array.reduce(dragPile.toReversed(), [
+        true,
+        undefined
+      ], (function (param, onBottom) {
+          if (!param[0]) {
+            return [
+                    false,
+                    undefined
+                  ];
+          }
+          var onTop = param[1];
+          if (onTop !== undefined) {
+            return [
+                    Card.rankIsBelow(onTop, onBottom) && Card.color(onTop) !== Card.color(onBottom),
+                    onBottom
+                  ];
+          } else {
+            return [
+                    true,
+                    onBottom
+                  ];
+          }
+        }));
+  if (onTop) {
+    return match$1[0];
+  } else {
+    return false;
+  }
 }
 
 function canDrop(dragCard, dropSpace, game) {
@@ -295,47 +372,53 @@ function canDrop(dragCard, dropSpace, game) {
                       }, dropSpace);
           }));
   var dropHasNoChildren;
-  switch (dropSpace.TAG) {
-    case "Card" :
-        dropHasNoChildren = buildDragPile(dropSpace._0, game).length < 2;
-        break;
-    case "Foundation" :
-        dropHasNoChildren = game.foundations[dropSpace._0].length === 0;
-        break;
-    case "Pile" :
-        dropHasNoChildren = game.piles[dropSpace._0].length === 0;
-        break;
-    
+  if (typeof dropSpace !== "object") {
+    dropHasNoChildren = false;
+  } else {
+    switch (dropSpace.TAG) {
+      case "Card" :
+          dropHasNoChildren = buildDragPile(dropSpace._0, game).length < 2;
+          break;
+      case "Foundation" :
+          dropHasNoChildren = game.foundations[dropSpace._0].length === 0;
+          break;
+      case "Pile" :
+          dropHasNoChildren = game.piles[dropSpace._0].length === 0;
+          break;
+      
+    }
   }
   var canBeParent;
-  switch (dropSpace.TAG) {
-    case "Card" :
-        var dropCard = dropSpace._0;
-        var match = baseSpace(dropCard, game);
-        if (match !== undefined) {
-          switch (match.TAG) {
-            case "Card" :
+  if (typeof dropSpace !== "object") {
+    canBeParent = false;
+  } else {
+    switch (dropSpace.TAG) {
+      case "Card" :
+          var dropCard = dropSpace._0;
+          var match = baseSpace(dropCard, game);
+          if (match !== undefined && typeof match === "object") {
+            switch (match.TAG) {
+              case "Foundation" :
+                  canBeParent = Card.rankIsBelow(dropCard, dragCard) && dragCard.suit === dropCard.suit;
+                  break;
+              case "Pile" :
+                  canBeParent = Card.rankIsAbove(dropCard, dragCard) && Card.color(dragCard) !== Card.color(dropCard);
+                  break;
+              default:
                 canBeParent = false;
-                break;
-            case "Foundation" :
-                canBeParent = Card.rankIsBelow(dropCard, dragCard) && dragCard.suit === dropCard.suit;
-                break;
-            case "Pile" :
-                canBeParent = Card.rankIsAbove(dropCard, dragCard) && Card.color(dragCard) !== Card.color(dropCard);
-                break;
-            
+            }
+          } else {
+            canBeParent = false;
           }
-        } else {
-          canBeParent = false;
-        }
-        break;
-    case "Foundation" :
-        canBeParent = dragCard.rank === "RA";
-        break;
-    case "Pile" :
-        canBeParent = dragCard.rank === "RK";
-        break;
-    
+          break;
+      case "Foundation" :
+          canBeParent = dragCard.rank === "RA";
+          break;
+      case "Pile" :
+          canBeParent = dragCard.rank === "RK";
+          break;
+      
+    }
   }
   if (notInDragPile && dropHasNoChildren) {
     return canBeParent;
@@ -362,6 +445,9 @@ function onDrop(dropOnSpace, dragCard, game, setGame) {
                 gameEnded: game.gameEnded
               };
       });
+  if (typeof dropOnSpace !== "object") {
+    return ;
+  }
   switch (dropOnSpace.TAG) {
     case "Card" :
         var card = dropOnSpace._0;
@@ -541,7 +627,8 @@ function Klondike2$CardDisplay(props) {
                         }),
                     className: [" border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
                     style: {
-                      color: Card.colorHex(card)
+                      color: Card.colorHex(card),
+                      transform: Card.rotation(card)
                     }
                   }),
               ref: Caml_option.some(props.cardRef),
@@ -612,25 +699,24 @@ function Klondike2(props) {
     if (match === undefined) {
       return ;
     }
-    switch (match.TAG) {
-      case "Card" :
-          var game = getGame();
-          var appliedF = function (space) {
-            Core__Option.mapOr(Core__Option.flatMap(space, (function (x) {
-                        return getElement({
-                                    TAG: "Card",
-                                    _0: x
-                                  });
-                      })), undefined, (function (childEl) {
-                    f(childEl);
-                  }));
-          };
-          return applyToOthers(match._0, game, appliedF);
-      case "Foundation" :
-      case "Pile" :
-          return ;
-      
+    if (typeof match !== "object") {
+      return ;
     }
+    if (match.TAG !== "Card") {
+      return ;
+    }
+    var game = getGame();
+    var appliedF = function (space) {
+      Core__Option.mapOr(Core__Option.flatMap(space, (function (x) {
+                  return getElement({
+                              TAG: "Card",
+                              _0: x
+                            });
+                })), undefined, (function (childEl) {
+              f(childEl);
+            }));
+    };
+    applyToOthers(match._0, game, appliedF);
   };
   var move = function (element, left, top, zIndex, offset) {
     element.style.left = left.toString() + "px";
@@ -712,39 +798,37 @@ function Klondike2(props) {
     if (match === undefined) {
       return ;
     }
-    switch (match.TAG) {
-      case "Card" :
-          if (!canDrag(match._0, getGame())) {
-            return ;
-          }
-          dragCard.current = Caml_option.some(eventElement);
-          var dragCardPos = elementPosition(eventElement);
-          var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
-                top: 0,
-                right: 0,
-                bottom: 0,
-                left: 0
-              }, (function (board) {
-                  return elementPosition(board);
-                }));
-          originalData.current = Core__Option.map(zIndexFromElement(eventElement), (function (v) {
-                  return [
-                          dragCardPos,
-                          v
-                        ];
-                }));
-          liftUp(eventElement, 1000);
-          var pos = elementPosition($$event.currentTarget);
-          offset.current = [
-            ($$event.clientX - (pos.left | 0) | 0) + (boardPos.left | 0) | 0,
-            ($$event.clientY - (pos.top | 0) | 0) + (boardPos.top | 0) | 0
-          ];
-          return ;
-      case "Foundation" :
-      case "Pile" :
-          return ;
-      
+    if (typeof match !== "object") {
+      return ;
     }
+    if (match.TAG !== "Card") {
+      return ;
+    }
+    if (!canDrag(match._0, getGame())) {
+      return ;
+    }
+    dragCard.current = Caml_option.some(eventElement);
+    var dragCardPos = elementPosition(eventElement);
+    var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0
+        }, (function (board) {
+            return elementPosition(board);
+          }));
+    originalData.current = Core__Option.map(zIndexFromElement(eventElement), (function (v) {
+            return [
+                    dragCardPos,
+                    v
+                  ];
+          }));
+    liftUp(eventElement, 1000);
+    var pos = elementPosition($$event.currentTarget);
+    offset.current = [
+      ($$event.clientX - (pos.left | 0) | 0) + (boardPos.left | 0) | 0,
+      ($$event.clientY - (pos.top | 0) | 0) + (boardPos.top | 0) | 0
+    ];
   };
   var onMouseMove = function ($$event) {
     Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
@@ -764,20 +848,13 @@ function Klondike2(props) {
     }
     var dragCardEl$1 = Caml_option.valFromOption(dragCardEl);
     var match = getSpace(dragCardEl$1);
-    if (match === undefined) {
-      return ;
+    if (match !== undefined && !(typeof match !== "object" || match.TAG !== "Card")) {
+      return [
+              dragCardEl$1,
+              match._0
+            ];
     }
-    switch (match.TAG) {
-      case "Card" :
-          return [
-                  dragCardEl$1,
-                  match._0
-                ];
-      case "Foundation" :
-      case "Pile" :
-          return ;
-      
-    }
+    
   };
   var onMouseUp = function (param) {
     var match = getDragCard();
@@ -834,8 +911,8 @@ function Klondike2(props) {
             return {
                     piles: game.piles,
                     foundations: game.foundations,
-                    stock: game.stock.slice(1),
-                    waste: game.waste.concat(game.stock.slice(0, 1)),
+                    stock: game.stock.slice(3),
+                    waste: game.waste.concat(game.stock.slice(0, 3)),
                     gameEnded: game.gameEnded
                   };
           }
@@ -844,14 +921,6 @@ function Klondike2(props) {
   };
   return JsxRuntime.jsxs("div", {
               children: [
-                JsxRuntime.jsx("div", {
-                      className: "absolute bg-pink-500 rounded w-14 h-20",
-                      style: {
-                        left: "0px",
-                        top: "0px",
-                        zIndex: "0"
-                      }
-                    }),
                 JsxRuntime.jsx("div", {
                       className: "absolute bg-blue-700 rounded w-14 h-20",
                       style: {
@@ -874,7 +943,7 @@ function Klondike2(props) {
                                             TAG: "Foundation",
                                             _0: i
                                           })),
-                                  className: "absolute bg-purple-500 rounded w-14 h-20",
+                                  className: "absolute border border-slate-200 bg-slate-100 rounded w-14 h-20",
                                   style: {
                                     left: Math.imul(i, 70).toString() + "px",
                                     top: "100px",
@@ -899,7 +968,7 @@ function Klondike2(props) {
                                             TAG: "Pile",
                                             _0: i
                                           })),
-                                  className: "absolute bg-red-500 rounded w-14 h-20",
+                                  className: "absolute border border-slate-200 bg-slate-100  rounded w-14 h-20",
                                   style: {
                                     left: Math.imul(i, 70).toString() + "px",
                                     top: "200px",

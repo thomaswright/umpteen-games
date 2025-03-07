@@ -9,7 +9,7 @@ type cardLoc = {
 
 module GameRules = {
   @decco
-  type space = Card(Card.card) | Foundation(int) | Pile(int)
+  type space = Card(Card.card) | Foundation(int) | Pile(int) | Waste | Stock
 
   type game = {
     piles: array<array<Card.card>>,
@@ -77,7 +77,7 @@ module GameRules = {
     game.waste->Array.forEachWithIndex((card, i) => {
       addToCards({
         card,
-        x: 70,
+        x: 70 + 20 * mod(i, 3),
         y: 0,
         z: i + 1,
       })
@@ -103,6 +103,18 @@ module GameRules = {
           base := Some(Foundation(i))
         }
       })
+    })
+
+    game.waste->Array.forEach(card => {
+      if card == dropCard {
+        base := Some(Waste)
+      }
+    })
+
+    game.stock->Array.forEach(card => {
+      if card == dropCard {
+        base := Some(Stock)
+      }
     })
 
     base.contents
@@ -139,6 +151,37 @@ module GameRules = {
   let canDrag = (card, game) => {
     let dragPile = buildDragPile(card, game)
 
+    let onTop = switch baseSpace(card, game) {
+    | Some(Foundation(i)) =>
+      game.foundations
+      ->Array.get(i)
+      ->Option.flatMap(stack => {
+        stack->Array.toReversed->Array.get(0)
+      })
+      ->Option.mapOr(false, top => {
+        top == card
+      })
+    | Some(Pile(i)) =>
+      game.piles
+      ->Array.get(i)
+      ->Option.flatMap(stack => {
+        stack->Array.toReversed->Array.get(0)
+      })
+      ->Option.mapOr(false, top => {
+        top == card
+      })
+    | Some(Waste) =>
+      game.waste
+      ->Array.toReversed
+      ->Array.get(0)
+      ->Option.mapOr(false, top => {
+        Console.log2(top, card)
+        top == card
+      })
+    | Some(Stock) => false
+    | _ => false
+    }
+
     let (dragPileIsValid, _) =
       dragPile
       ->Array.toReversed
@@ -154,7 +197,7 @@ module GameRules = {
             }
       })
 
-    dragPileIsValid
+    onTop && dragPileIsValid
   }
 
   let canDrop = (dragCard: Card.card, dropSpace: space, game: game) => {
@@ -169,6 +212,7 @@ module GameRules = {
     | Card(card) => buildDragPile(card, game)->Array.length < 2
     | Pile(i) => game.piles->Array.getUnsafe(i)->Array.length == 0
     | Foundation(i) => game.foundations->Array.getUnsafe(i)->Array.length == 0
+    | _ => false
     }
 
     let canBeParent = switch dropSpace {
@@ -182,6 +226,7 @@ module GameRules = {
       }
     | Foundation(_) => dragCard.rank == RA
     | Pile(_) => dragCard.rank == RK
+    | _ => false
     }
 
     notInDragPile && dropHasNoChildren && canBeParent
@@ -254,6 +299,7 @@ module GameRules = {
           }),
         }
       })
+    | _ => ()
     }
   }
 
@@ -346,7 +392,7 @@ module CardDisplay = {
     <div id={id} ref={cardRef} onMouseDown={onMouseDown} className="absolute w-14 h-20 select-none">
       <div
         style={{
-          // transform: Card.rotation(card),
+          transform: Card.rotation(card),
           // position: "relative",
           color: card->Card.colorHex,
         }}
@@ -637,7 +683,6 @@ let make = () => {
             ->getSpace
             ->Option.mapOr(acc, elSpace => {
               if GameRules.canDrop(dragCard, elSpace, getGame()) {
-                // Console.log3("canDrop", dragCard, elSpace)
                 let overlap = getOverlap(el, dragCardEl)
                 let new = Some((overlap, el))
 
@@ -691,8 +736,8 @@ let make = () => {
       } else {
         {
           ...game,
-          stock: game.stock->Array.sliceToEnd(~start=1),
-          waste: game.waste->Array.concat(game.stock->Array.slice(~start=0, ~end=1)),
+          stock: game.stock->Array.sliceToEnd(~start=3),
+          waste: game.waste->Array.concat(game.stock->Array.slice(~start=0, ~end=3)),
         }
       }
     )
@@ -700,14 +745,6 @@ let make = () => {
   }
 
   <div id={"board"} className="relative m-5">
-    <div
-      className="absolute bg-pink-500 rounded w-14 h-20"
-      style={{
-        top: "0px",
-        left: "0px",
-        zIndex: "0",
-      }}
-    />
     <div
       key={"stock-cover"}
       onClick={_ => dealToWaste()}
@@ -723,7 +760,7 @@ let make = () => {
       <div
         key={Foundation(i)->spaceToString}
         ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-        className="absolute bg-purple-500 rounded w-14 h-20"
+        className="absolute border border-slate-200 bg-slate-100 rounded w-14 h-20"
         style={{
           top: "100px",
           left: (i * 70)->Int.toString ++ "px",
@@ -737,7 +774,7 @@ let make = () => {
       <div
         key={Pile(i)->spaceToString}
         ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-        className="absolute bg-red-500 rounded w-14 h-20"
+        className="absolute border border-slate-200 bg-slate-100  rounded w-14 h-20"
         style={{
           top: "200px",
           left: (i * 70)->Int.toString ++ "px",
