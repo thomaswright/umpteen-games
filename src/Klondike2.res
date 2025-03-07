@@ -7,6 +7,21 @@ type cardLoc = {
   z: int,
 }
 
+@val @module("./other.js") external runInterval: (unit => unit, int, int) => unit = "runInterval"
+
+module ArrayAux = {
+  let removeLast = a => a->Array.toReversed->Array.sliceToEnd(~start=1)->Array.toReversed
+  let getLast = a => a->Array.toReversed->Array.get(0)
+  let update = (a, i, f) => a->Array.mapWithIndex((el, j) => j == i ? f(el) : el)
+
+  let forEach2 = (a, f) =>
+    a->Array.forEachWithIndex((el1, i) => {
+      el1->Array.forEachWithIndex((el2, j) => {
+        f(el1, el2, i, j)
+      })
+    })
+}
+
 module GameRules = {
   @decco
   type space = Card(Card.card) | Foundation(int) | Pile(int) | Waste | Stock
@@ -43,25 +58,21 @@ module GameRules = {
     // Todo: maybe change to a map
     let cards = ref([])
     let addToCards = card => cards := Array.concat(cards.contents, [card])
-    game.piles->Array.forEachWithIndex((pile, i) => {
-      pile->Array.forEachWithIndex((card, j) => {
-        addToCards({
-          card,
-          x: i * 70,
-          y: 200 + j * 20,
-          z: j + 1,
-        })
+    game.piles->ArrayAux.forEach2((_, card, i, j) => {
+      addToCards({
+        card,
+        x: i * 70,
+        y: 200 + j * 20,
+        z: j + 1,
       })
     })
 
-    game.foundations->Array.forEachWithIndex((pile, i) => {
-      pile->Array.forEachWithIndex((card, j) => {
-        addToCards({
-          card,
-          x: i * 70,
-          y: 100,
-          z: j + 1,
-        })
+    game.foundations->ArrayAux.forEach2((_, card, i, j) => {
+      addToCards({
+        card,
+        x: i * 70,
+        y: 100,
+        z: j + 1,
       })
     })
 
@@ -89,20 +100,16 @@ module GameRules = {
   let baseSpace = (dropCard: Card.card, game: game) => {
     let base = ref(None)
 
-    game.piles->Array.forEachWithIndex((pile, i) => {
-      pile->Array.forEach(card => {
-        if card == dropCard {
-          base := Some(Pile(i))
-        }
-      })
+    game.piles->ArrayAux.forEach2((_, card, i, _) => {
+      if card == dropCard {
+        base := Some(Pile(i))
+      }
     })
 
-    game.foundations->Array.forEachWithIndex((pile, i) => {
-      pile->Array.forEach(card => {
-        if card == dropCard {
-          base := Some(Foundation(i))
-        }
-      })
+    game.foundations->ArrayAux.forEach2((_, card, i, _) => {
+      if card == dropCard {
+        base := Some(Foundation(i))
+      }
     })
 
     game.waste->Array.forEach(card => {
@@ -123,20 +130,16 @@ module GameRules = {
   let buildDragPile = (card, game: game) => {
     let dragPile = ref([])
 
-    game.piles->Array.forEach(pile => {
-      pile->Array.forEachWithIndex((pileCard, j) => {
-        if pileCard == card {
-          dragPile := pile->Array.sliceToEnd(~start=j)
-        }
-      })
+    game.piles->ArrayAux.forEach2((pile, pileCard, _, j) => {
+      if pileCard == card {
+        dragPile := pile->Array.sliceToEnd(~start=j)
+      }
     })
 
-    game.foundations->Array.forEach(pile => {
-      pile->Array.forEachWithIndex((pileCard, j) => {
-        if pileCard == card {
-          dragPile := pile->Array.sliceToEnd(~start=j)
-        }
-      })
+    game.foundations->ArrayAux.forEach2((pile, pileCard, _, j) => {
+      if pileCard == card {
+        dragPile := pile->Array.sliceToEnd(~start=j)
+      }
     })
 
     game.waste->Array.forEach(wasteCard => {
@@ -156,7 +159,7 @@ module GameRules = {
       game.foundations
       ->Array.get(i)
       ->Option.flatMap(stack => {
-        stack->Array.toReversed->Array.get(0)
+        stack->ArrayAux.getLast
       })
       ->Option.mapOr(false, top => {
         top == card
@@ -165,15 +168,14 @@ module GameRules = {
       game.piles
       ->Array.get(i)
       ->Option.flatMap(stack => {
-        stack->Array.toReversed->Array.get(0)
+        stack->ArrayAux.getLast
       })
       ->Option.mapOr(false, top => {
         top == card
       })
     | Some(Waste) =>
       game.waste
-      ->Array.toReversed
-      ->Array.get(0)
+      ->ArrayAux.getLast
       ->Option.mapOr(false, top => {
         top == card
       })
@@ -303,41 +305,78 @@ module GameRules = {
   }
 
   let applyToOthers = (card, game, f) => {
-    game.foundations->Array.forEach(stack => {
-      stack->Array.forEachWithIndex((sCard, i) => {
-        if card == sCard {
-          f(stack->Array.get(i + 1))
-        }
-      })
+    game.foundations->ArrayAux.forEach2((stack, sCard, _, j) => {
+      if card == sCard {
+        f(stack->Array.get(j + 1))
+      }
     })
 
-    game.piles->Array.forEach(stack => {
-      stack->Array.forEachWithIndex((sCard, i) => {
-        if card == sCard {
-          f(stack->Array.get(i + 1))
-        }
+    game.piles->ArrayAux.forEach2((stack, sCard, _, j) => {
+      if card == sCard {
+        f(stack->Array.get(j + 1))
+      }
+    })
+  }
+
+  let autoProgress = setGame => {
+    setGame(game => {
+      let newGame = ref(None)
+
+      game.foundations->Array.forEachWithIndex((foundation, i) => {
+        game.piles->Array.forEachWithIndex(
+          (pile, j) => {
+            pile
+            ->ArrayAux.getLast
+            ->Option.mapOr(
+              (),
+              pileCard => {
+                let canMove = switch foundation->ArrayAux.getLast {
+                | None => pileCard.rank == RA
+                | Some(foundationCard) =>
+                  Card.rankIsAbove(foundationCard, pileCard) && foundationCard.suit == pileCard.suit
+                }
+                if newGame.contents->Option.isNone && canMove {
+                  newGame :=
+                    Some({
+                      ...game,
+                      foundations: game.foundations->ArrayAux.update(
+                        i,
+                        f => f->Array.concat([pileCard]),
+                      ),
+                      piles: game.piles->ArrayAux.update(i, p => p->ArrayAux.removeLast),
+                    })
+                }
+              },
+            )
+          },
+        )
       })
+
+      newGame.contents->Option.getOr(game)
     })
   }
 
   module Custom = {
     let dealToWaste = (setGame, moveToState) => {
-      setGame(game =>
-        if game.stock->Array.length == 0 {
-          {
-            ...game,
-            stock: game.waste,
-            waste: [],
+      let f = () => {
+        setGame(game =>
+          if game.stock->Array.length == 0 {
+            {
+              ...game,
+              stock: game.waste,
+              waste: [],
+            }
+          } else {
+            {
+              ...game,
+              stock: game.stock->Array.sliceToEnd(~start=1),
+              waste: game.waste->Array.concat(game.stock->Array.slice(~start=0, ~end=1)),
+            }
           }
-        } else {
-          {
-            ...game,
-            stock: game.stock->Array.sliceToEnd(~start=3),
-            waste: game.waste->Array.concat(game.stock->Array.slice(~start=0, ~end=3)),
-          }
-        }
-      )
-      moveToState()
+        )
+        moveToState()
+      }
+      runInterval(f, 300, 3)
     }
   }
 }
@@ -739,9 +778,14 @@ let make = () => {
   }
 
   React.useEffect(() => {
+    Console.log("useEffect")
     window->Window.addMouseMoveEventListener(onMouseMove)
     window->Window.addMouseUpEventListener(onMouseUp)
     moveToState()
+    // setTimeout(() => {
+    GameRules.autoProgress(setGame)
+
+    // }, 500)->ignore
     None
   }, [])
 

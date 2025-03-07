@@ -16,3 +16,15 @@ export function appendReactElement(element, targetId) {
     console.error(`Element with id "${targetId}" not found.`);
   }
 }
+
+export function runInterval(callback, interval, n) {
+  let count = 0;
+  const intervalId = setInterval(() => {
+    if (count >= n) {
+      clearInterval(intervalId);
+    } else {
+      callback();
+      count++;
+    }
+  }, interval);
+}

@@ -14,6 +14,43 @@ import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
+function runInterval(prim0, prim1, prim2) {
+  OtherJs.runInterval(prim0, prim1, prim2);
+}
+
+function removeLast(a) {
+  return a.toReversed().slice(1).toReversed();
+}
+
+function getLast(a) {
+  return a.toReversed()[0];
+}
+
+function update(a, i, f) {
+  return a.map(function (el, j) {
+              if (j === i) {
+                return f(el);
+              } else {
+                return el;
+              }
+            });
+}
+
+function forEach2(a, f) {
+  a.forEach(function (el1, i) {
+        el1.forEach(function (el2, j) {
+              f(el1, el2, i, j);
+            });
+      });
+}
+
+var ArrayAux = {
+  removeLast: removeLast,
+  getLast: getLast,
+  update: update,
+  forEach2: forEach2
+};
+
 function space_encode(value) {
   if (typeof value !== "object") {
     if (value === "Waste") {
@@ -182,26 +219,22 @@ function cardLocs(game) {
   var addToCards = function (card) {
     cards.contents = cards.contents.concat([card]);
   };
-  game.piles.forEach(function (pile, i) {
-        pile.forEach(function (card, j) {
-              addToCards({
-                    card: card,
-                    x: Math.imul(i, 70),
-                    y: 200 + Math.imul(j, 20) | 0,
-                    z: j + 1 | 0
-                  });
-            });
-      });
-  game.foundations.forEach(function (pile, i) {
-        pile.forEach(function (card, j) {
-              addToCards({
-                    card: card,
-                    x: Math.imul(i, 70),
-                    y: 100,
-                    z: j + 1 | 0
-                  });
-            });
-      });
+  forEach2(game.piles, (function (param, card, i, j) {
+          addToCards({
+                card: card,
+                x: Math.imul(i, 70),
+                y: 200 + Math.imul(j, 20) | 0,
+                z: j + 1 | 0
+              });
+        }));
+  forEach2(game.foundations, (function (param, card, i, j) {
+          addToCards({
+                card: card,
+                x: Math.imul(i, 70),
+                y: 100,
+                z: j + 1 | 0
+              });
+        }));
   game.stock.forEach(function (card, i) {
         addToCards({
               card: card,
@@ -225,30 +258,26 @@ function baseSpace(dropCard, game) {
   var base = {
     contents: undefined
   };
-  game.piles.forEach(function (pile, i) {
-        pile.forEach(function (card) {
-              if (Caml_obj.equal(card, dropCard)) {
-                base.contents = {
-                  TAG: "Pile",
-                  _0: i
-                };
-                return ;
-              }
-              
-            });
-      });
-  game.foundations.forEach(function (pile, i) {
-        pile.forEach(function (card) {
-              if (Caml_obj.equal(card, dropCard)) {
-                base.contents = {
-                  TAG: "Foundation",
-                  _0: i
-                };
-                return ;
-              }
-              
-            });
-      });
+  forEach2(game.piles, (function (param, card, i, param$1) {
+          if (Caml_obj.equal(card, dropCard)) {
+            base.contents = {
+              TAG: "Pile",
+              _0: i
+            };
+            return ;
+          }
+          
+        }));
+  forEach2(game.foundations, (function (param, card, i, param$1) {
+          if (Caml_obj.equal(card, dropCard)) {
+            base.contents = {
+              TAG: "Foundation",
+              _0: i
+            };
+            return ;
+          }
+          
+        }));
   game.waste.forEach(function (card) {
         if (Caml_obj.equal(card, dropCard)) {
           base.contents = "Waste";
@@ -270,24 +299,20 @@ function buildDragPile(card, game) {
   var dragPile = {
     contents: []
   };
-  game.piles.forEach(function (pile) {
-        pile.forEach(function (pileCard, j) {
-              if (Caml_obj.equal(pileCard, card)) {
-                dragPile.contents = pile.slice(j);
-                return ;
-              }
-              
-            });
-      });
-  game.foundations.forEach(function (pile) {
-        pile.forEach(function (pileCard, j) {
-              if (Caml_obj.equal(pileCard, card)) {
-                dragPile.contents = pile.slice(j);
-                return ;
-              }
-              
-            });
-      });
+  forEach2(game.piles, (function (pile, pileCard, param, j) {
+          if (Caml_obj.equal(pileCard, card)) {
+            dragPile.contents = pile.slice(j);
+            return ;
+          }
+          
+        }));
+  forEach2(game.foundations, (function (pile, pileCard, param, j) {
+          if (Caml_obj.equal(pileCard, card)) {
+            dragPile.contents = pile.slice(j);
+            return ;
+          }
+          
+        }));
   game.waste.forEach(function (wasteCard) {
         if (Caml_obj.equal(wasteCard, card)) {
           dragPile.contents = [card];
@@ -514,45 +539,76 @@ function onDrop(dropOnSpace, dragCard, game, setGame) {
 }
 
 function applyToOthers(card, game, f) {
-  game.foundations.forEach(function (stack) {
-        stack.forEach(function (sCard, i) {
-              if (Caml_obj.equal(card, sCard)) {
-                return f(stack[i + 1 | 0]);
-              }
-              
+  forEach2(game.foundations, (function (stack, sCard, param, j) {
+          if (Caml_obj.equal(card, sCard)) {
+            return f(stack[j + 1 | 0]);
+          }
+          
+        }));
+  forEach2(game.piles, (function (stack, sCard, param, j) {
+          if (Caml_obj.equal(card, sCard)) {
+            return f(stack[j + 1 | 0]);
+          }
+          
+        }));
+}
+
+function autoProgress(setGame) {
+  return setGame(function (game) {
+              var newGame = {
+                contents: undefined
+              };
+              game.foundations.forEach(function (foundation, i) {
+                    game.piles.forEach(function (pile, j) {
+                          Core__Option.mapOr(pile.toReversed()[0], undefined, (function (pileCard) {
+                                  var foundationCard = foundation.toReversed()[0];
+                                  var canMove = foundationCard !== undefined ? Card.rankIsAbove(foundationCard, pileCard) && foundationCard.suit === pileCard.suit : pileCard.rank === "RA";
+                                  if (Core__Option.isNone(newGame.contents) && canMove) {
+                                    newGame.contents = {
+                                      piles: update(game.piles, i, (function (p) {
+                                              return removeLast(p);
+                                            })),
+                                      foundations: update(game.foundations, i, (function (f) {
+                                              return f.concat([pileCard]);
+                                            })),
+                                      stock: game.stock,
+                                      waste: game.waste,
+                                      gameEnded: game.gameEnded
+                                    };
+                                    return ;
+                                  }
+                                  
+                                }));
+                        });
+                  });
+              return Core__Option.getOr(newGame.contents, game);
             });
-      });
-  game.piles.forEach(function (stack) {
-        stack.forEach(function (sCard, i) {
-              if (Caml_obj.equal(card, sCard)) {
-                return f(stack[i + 1 | 0]);
-              }
-              
-            });
-      });
 }
 
 function dealToWaste(setGame, moveToState) {
-  setGame(function (game) {
-        if (game.stock.length === 0) {
-          return {
-                  piles: game.piles,
-                  foundations: game.foundations,
-                  stock: game.waste,
-                  waste: [],
-                  gameEnded: game.gameEnded
-                };
-        } else {
-          return {
-                  piles: game.piles,
-                  foundations: game.foundations,
-                  stock: game.stock.slice(3),
-                  waste: game.waste.concat(game.stock.slice(0, 3)),
-                  gameEnded: game.gameEnded
-                };
-        }
-      });
-  return moveToState();
+  var f = function () {
+    setGame(function (game) {
+          if (game.stock.length === 0) {
+            return {
+                    piles: game.piles,
+                    foundations: game.foundations,
+                    stock: game.waste,
+                    waste: [],
+                    gameEnded: game.gameEnded
+                  };
+          } else {
+            return {
+                    piles: game.piles,
+                    foundations: game.foundations,
+                    stock: game.stock.slice(1),
+                    waste: game.waste.concat(game.stock.slice(0, 1)),
+                    gameEnded: game.gameEnded
+                  };
+          }
+        });
+    moveToState();
+  };
+  runInterval(f, 300, 3);
 }
 
 var Custom = {
@@ -570,6 +626,7 @@ var GameRules = {
   canDrop: canDrop,
   onDrop: onDrop,
   applyToOthers: applyToOthers,
+  autoProgress: autoProgress,
   Custom: Custom
 };
 
@@ -920,9 +977,11 @@ function Klondike2(props) {
     dragCard.current = undefined;
   };
   React.useEffect((function () {
+          console.log("useEffect");
           window.addEventListener("mousemove", onMouseMove);
           window.addEventListener("mouseup", onMouseUp);
           moveToState();
+          autoProgress(setGame);
         }), []);
   return JsxRuntime.jsxs("div", {
               children: [
@@ -1010,6 +1069,8 @@ function Klondike2(props) {
 var make = Klondike2;
 
 export {
+  runInterval ,
+  ArrayAux ,
   GameRules ,
   getShuffledDeck ,
   shuffledDeck ,
