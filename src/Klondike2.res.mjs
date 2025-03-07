@@ -557,7 +557,7 @@ function applyToOthers(card, game, f) {
         }));
 }
 
-function autoProgress(setGame, getGame) {
+function autoProgress(setGame) {
   var newGame = {
     contents: undefined
   };
@@ -566,7 +566,7 @@ function autoProgress(setGame, getGame) {
               game.piles.forEach(function (pile, j) {
                     Core__Option.mapOr(pile.toReversed()[0], undefined, (function (pileCard) {
                             var foundationCard = foundation.toReversed()[0];
-                            var canMove = foundationCard !== undefined ? Card.rankIsAbove(foundationCard, pileCard) && foundationCard.suit === pileCard.suit : pileCard.rank === "RA";
+                            var canMove = foundationCard !== undefined ? Card.rankIsBelow(foundationCard, pileCard) && foundationCard.suit === pileCard.suit : pileCard.rank === "RA";
                             if (Core__Option.isNone(newGame.contents) && canMove) {
                               newGame.contents = {
                                 piles: update(game.piles, j, (function (p) {
@@ -1014,7 +1014,7 @@ function Klondike2(props) {
     condInterval((function () {
             moveToState();
           }), 500, (function () {
-            return autoProgress(setGame, getGame);
+            return autoProgress(setGame);
           }));
   };
   React.useEffect((function () {

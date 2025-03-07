@@ -321,7 +321,7 @@ module GameRules = {
     })
   }
 
-  let autoProgress = (setGame, getGame) => {
+  let autoProgress = setGame => {
     let newGame = ref(None)
 
     setGame(game => {
@@ -336,7 +336,7 @@ module GameRules = {
                 let canMove = switch foundation->ArrayAux.getLast {
                 | None => pileCard.rank == RA
                 | Some(foundationCard) =>
-                  Card.rankIsAbove(foundationCard, pileCard) && foundationCard.suit == pileCard.suit
+                  Card.rankIsBelow(foundationCard, pileCard) && foundationCard.suit == pileCard.suit
                 }
                 if newGame.contents->Option.isNone && canMove {
                   newGame :=
@@ -789,7 +789,7 @@ let make = () => {
       },
       500,
       () => {
-        GameRules.autoProgress(setGame, getGame)
+        GameRules.autoProgress(setGame)
       },
     )
   }
