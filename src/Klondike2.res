@@ -318,13 +318,13 @@ module GameRules = {
     })
   }
 
-  let autoProgress = setGame => {
+  let autoProgress = (setGame, moveToState) => {
     setGame(game => {
       let newGame = ref(None)
 
       game.foundations->Array.forEachWithIndex((foundation, i) => {
-        game.piles->Array.forEachWithIndex(
-          (pile, j) => {
+        game.piles->Array.forEach(
+          pile => {
             pile
             ->ArrayAux.getLast
             ->Option.mapOr(
@@ -354,6 +354,7 @@ module GameRules = {
 
       newGame.contents->Option.getOr(game)
     })
+    moveToState()
   }
 
   module Custom = {
@@ -513,6 +514,7 @@ let make = () => {
     state.current.history->Array.getUnsafe(state.current.history->Array.length - 1)
 
   let setGame = f => {
+    Console.log("setGame")
     if undoStats.current.currentUndoDepth > 0 {
       setUndoStats(undoStats => {
         currentUndoDepth: 0,
@@ -783,7 +785,7 @@ let make = () => {
     window->Window.addMouseUpEventListener(onMouseUp)
     moveToState()
     // setTimeout(() => {
-    GameRules.autoProgress(setGame)
+    GameRules.autoProgress(setGame, moveToState)
 
     // }, 500)->ignore
     None

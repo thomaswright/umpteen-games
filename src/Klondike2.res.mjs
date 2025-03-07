@@ -553,36 +553,37 @@ function applyToOthers(card, game, f) {
         }));
 }
 
-function autoProgress(setGame) {
-  return setGame(function (game) {
-              var newGame = {
-                contents: undefined
-              };
-              game.foundations.forEach(function (foundation, i) {
-                    game.piles.forEach(function (pile, j) {
-                          Core__Option.mapOr(pile.toReversed()[0], undefined, (function (pileCard) {
-                                  var foundationCard = foundation.toReversed()[0];
-                                  var canMove = foundationCard !== undefined ? Card.rankIsAbove(foundationCard, pileCard) && foundationCard.suit === pileCard.suit : pileCard.rank === "RA";
-                                  if (Core__Option.isNone(newGame.contents) && canMove) {
-                                    newGame.contents = {
-                                      piles: update(game.piles, i, (function (p) {
-                                              return removeLast(p);
-                                            })),
-                                      foundations: update(game.foundations, i, (function (f) {
-                                              return f.concat([pileCard]);
-                                            })),
-                                      stock: game.stock,
-                                      waste: game.waste,
-                                      gameEnded: game.gameEnded
-                                    };
-                                    return ;
-                                  }
-                                  
-                                }));
-                        });
+function autoProgress(setGame, moveToState) {
+  setGame(function (game) {
+        var newGame = {
+          contents: undefined
+        };
+        game.foundations.forEach(function (foundation, i) {
+              game.piles.forEach(function (pile) {
+                    Core__Option.mapOr(pile.toReversed()[0], undefined, (function (pileCard) {
+                            var foundationCard = foundation.toReversed()[0];
+                            var canMove = foundationCard !== undefined ? Card.rankIsAbove(foundationCard, pileCard) && foundationCard.suit === pileCard.suit : pileCard.rank === "RA";
+                            if (Core__Option.isNone(newGame.contents) && canMove) {
+                              newGame.contents = {
+                                piles: update(game.piles, i, (function (p) {
+                                        return removeLast(p);
+                                      })),
+                                foundations: update(game.foundations, i, (function (f) {
+                                        return f.concat([pileCard]);
+                                      })),
+                                stock: game.stock,
+                                waste: game.waste,
+                                gameEnded: game.gameEnded
+                              };
+                              return ;
+                            }
+                            
+                          }));
                   });
-              return Core__Option.getOr(newGame.contents, game);
             });
+        return Core__Option.getOr(newGame.contents, game);
+      });
+  return moveToState();
 }
 
 function dealToWaste(setGame, moveToState) {
@@ -741,6 +742,7 @@ function Klondike2(props) {
     return state.current.history[state.current.history.length - 1 | 0];
   };
   var setGame = function (f) {
+    console.log("setGame");
     if (undoStats.current.currentUndoDepth > 0) {
       setUndoStats(function (undoStats) {
             return {
@@ -981,7 +983,7 @@ function Klondike2(props) {
           window.addEventListener("mousemove", onMouseMove);
           window.addEventListener("mouseup", onMouseUp);
           moveToState();
-          autoProgress(setGame);
+          autoProgress(setGame, moveToState);
         }), []);
   return JsxRuntime.jsxs("div", {
               children: [
