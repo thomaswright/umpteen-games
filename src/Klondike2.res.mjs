@@ -14,8 +14,12 @@ import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
-function runInterval(prim0, prim1, prim2) {
-  OtherJs.runInterval(prim0, prim1, prim2);
+function numInterval(prim0, prim1, prim2) {
+  OtherJs.numInterval(prim0, prim1, prim2);
+}
+
+function condInterval(prim0, prim1, prim2) {
+  OtherJs.condInterval(prim0, prim1, prim2);
 }
 
 function removeLast(a) {
@@ -553,19 +557,19 @@ function applyToOthers(card, game, f) {
         }));
 }
 
-function autoProgress(setGame, moveToState) {
+function autoProgress(setGame, getGame) {
+  var newGame = {
+    contents: undefined
+  };
   setGame(function (game) {
-        var newGame = {
-          contents: undefined
-        };
         game.foundations.forEach(function (foundation, i) {
-              game.piles.forEach(function (pile) {
+              game.piles.forEach(function (pile, j) {
                     Core__Option.mapOr(pile.toReversed()[0], undefined, (function (pileCard) {
                             var foundationCard = foundation.toReversed()[0];
                             var canMove = foundationCard !== undefined ? Card.rankIsAbove(foundationCard, pileCard) && foundationCard.suit === pileCard.suit : pileCard.rank === "RA";
                             if (Core__Option.isNone(newGame.contents) && canMove) {
                               newGame.contents = {
-                                piles: update(game.piles, i, (function (p) {
+                                piles: update(game.piles, j, (function (p) {
                                         return removeLast(p);
                                       })),
                                 foundations: update(game.foundations, i, (function (f) {
@@ -583,7 +587,7 @@ function autoProgress(setGame, moveToState) {
             });
         return Core__Option.getOr(newGame.contents, game);
       });
-  return moveToState();
+  return Core__Option.isSome(newGame.contents);
 }
 
 function dealToWaste(setGame, moveToState) {
@@ -609,7 +613,7 @@ function dealToWaste(setGame, moveToState) {
         });
     moveToState();
   };
-  runInterval(f, 300, 3);
+  numInterval(f, 300, 3);
 }
 
 var Custom = {
@@ -727,38 +731,66 @@ var CardDisplay = {
   make: Klondike2$CardDisplay
 };
 
+var undoStats = {
+  contents: {
+    currentUndoDepth: 0,
+    undos: []
+  }
+};
+
+var state = {
+  contents: {
+    history: [initiateGame(shuffledDeck)]
+  }
+};
+
+function setUndoStats(f) {
+  undoStats.contents = f(undoStats.contents);
+}
+
+function setState(f) {
+  state.contents = f(state.contents);
+}
+
+function getGame() {
+  return state.contents.history[state.contents.history.length - 1 | 0];
+}
+
+function setGame(f) {
+  if (undoStats.contents.currentUndoDepth > 0) {
+    setUndoStats(function (undoStats) {
+          return {
+                  currentUndoDepth: 0,
+                  undos: undoStats.undos.concat([undoStats.currentUndoDepth])
+                };
+        });
+  }
+  setState(function (state) {
+        var newGame = f(getGame());
+        return {
+                history: state.history.concat([newGame])
+              };
+      });
+}
+
+function _undo() {
+  if (state.contents.history.length > 1) {
+    setState(function (state) {
+          return {
+                  history: state.history.slice(0, state.history.length - 1 | 0)
+                };
+        });
+    return setUndoStats(function (undoStats) {
+                return {
+                        currentUndoDepth: undoStats.currentUndoDepth + 1 | 0,
+                        undos: undoStats.undos
+                      };
+              });
+  }
+  
+}
+
 function Klondike2(props) {
-  var undoStats = React.useRef({
-        currentUndoDepth: 0,
-        undos: []
-      });
-  var setUndoStats = function (f) {
-    undoStats.current = f(undoStats.current);
-  };
-  var state = React.useRef({
-        history: [initiateGame(shuffledDeck)]
-      });
-  var getGame = function () {
-    return state.current.history[state.current.history.length - 1 | 0];
-  };
-  var setGame = function (f) {
-    console.log("setGame");
-    if (undoStats.current.currentUndoDepth > 0) {
-      setUndoStats(function (undoStats) {
-            return {
-                    currentUndoDepth: 0,
-                    undos: undoStats.undos.concat([undoStats.currentUndoDepth])
-                  };
-          });
-    }
-    var f$1 = function (state) {
-      var newGame = f(getGame());
-      return {
-              history: state.history.concat([newGame])
-            };
-    };
-    state.current = f$1(state.current);
-  };
   var refs = React.useRef([]);
   var dragCard = React.useRef(undefined);
   var offset = React.useRef([
@@ -978,12 +1010,18 @@ function Klondike2(props) {
     moveToState();
     dragCard.current = undefined;
   };
+  var autoProgressWrapper = function () {
+    condInterval((function () {
+            moveToState();
+          }), 500, (function () {
+            return autoProgress(setGame, getGame);
+          }));
+  };
   React.useEffect((function () {
-          console.log("useEffect");
           window.addEventListener("mousemove", onMouseMove);
           window.addEventListener("mouseup", onMouseUp);
           moveToState();
-          autoProgress(setGame, moveToState);
+          autoProgressWrapper();
         }), []);
   return JsxRuntime.jsxs("div", {
               children: [
@@ -1071,7 +1109,8 @@ function Klondike2(props) {
 var make = Klondike2;
 
 export {
-  runInterval ,
+  numInterval ,
+  condInterval ,
   ArrayAux ,
   GameRules ,
   getShuffledDeck ,
@@ -1083,6 +1122,13 @@ export {
   elementPosition ,
   eventPosition ,
   CardDisplay ,
+  undoStats ,
+  state ,
+  setUndoStats ,
+  setState ,
+  getGame ,
+  setGame ,
+  _undo ,
   make ,
 }
 /* shuffledDeck Not a pure module */

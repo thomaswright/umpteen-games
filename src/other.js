@@ -28,3 +28,13 @@ export function runInterval(callback, interval, n) {
     }
   }, interval);
 }
+
+export function condInterval(callback, interval, cond) {
+  const intervalId = setInterval(() => {
+    if (!cond()) {
+      clearInterval(intervalId);
+    } else {
+      callback();
+    }
+  }, interval);
+}

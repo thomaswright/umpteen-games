@@ -7,7 +7,10 @@ type cardLoc = {
   z: int,
 }
 
-@val @module("./other.js") external runInterval: (unit => unit, int, int) => unit = "runInterval"
+@val @module("./other.js") external numInterval: (unit => unit, int, int) => unit = "numInterval"
+
+@val @module("./other.js")
+external condInterval: (unit => unit, int, unit => bool) => unit = "condInterval"
 
 module ArrayAux = {
   let removeLast = a => a->Array.toReversed->Array.sliceToEnd(~start=1)->Array.toReversed
@@ -318,13 +321,13 @@ module GameRules = {
     })
   }
 
-  let autoProgress = (setGame, moveToState) => {
-    setGame(game => {
-      let newGame = ref(None)
+  let autoProgress = (setGame, getGame) => {
+    let newGame = ref(None)
 
+    setGame(game => {
       game.foundations->Array.forEachWithIndex((foundation, i) => {
-        game.piles->Array.forEach(
-          pile => {
+        game.piles->Array.forEachWithIndex(
+          (pile, j) => {
             pile
             ->ArrayAux.getLast
             ->Option.mapOr(
@@ -343,7 +346,7 @@ module GameRules = {
                         i,
                         f => f->Array.concat([pileCard]),
                       ),
-                      piles: game.piles->ArrayAux.update(i, p => p->ArrayAux.removeLast),
+                      piles: game.piles->ArrayAux.update(j, p => p->ArrayAux.removeLast),
                     })
                 }
               },
@@ -354,7 +357,8 @@ module GameRules = {
 
       newGame.contents->Option.getOr(game)
     })
-    moveToState()
+
+    newGame.contents->Option.isSome
   }
 
   module Custom = {
@@ -377,7 +381,7 @@ module GameRules = {
         )
         moveToState()
       }
-      runInterval(f, 300, 3)
+      numInterval(f, 300, 3)
     }
   }
 }
@@ -491,59 +495,58 @@ type undoStats = {
   undos: array<int>,
 }
 
-@react.component
-let make = () => {
-  let undoStats = React.useRef({
-    currentUndoDepth: 0,
-    undos: [],
-  })
+let undoStats = ref({
+  currentUndoDepth: 0,
+  undos: [],
+})
 
-  let setUndoStats = f => {
-    undoStats.current = f(undoStats.current)
-  }
+let state = ref({
+  history: [GameRules.initiateGame(shuffledDeck)],
+})
 
-  let state = React.useRef({
-    history: [GameRules.initiateGame(shuffledDeck)],
-  })
+let setUndoStats = f => {
+  undoStats.contents = f(undoStats.contents)
+}
 
-  let setState = f => {
-    state.current = f(state.current)
-  }
+let setState = f => {
+  state.contents = f(state.contents)
+}
 
-  let getGame = () =>
-    state.current.history->Array.getUnsafe(state.current.history->Array.length - 1)
+let getGame = () =>
+  state.contents.history->Array.getUnsafe(state.contents.history->Array.length - 1)
 
-  let setGame = f => {
-    Console.log("setGame")
-    if undoStats.current.currentUndoDepth > 0 {
-      setUndoStats(undoStats => {
-        currentUndoDepth: 0,
-        undos: Array.concat(undoStats.undos, [undoStats.currentUndoDepth]),
-      })
-    }
-
-    setState(state => {
-      let newGame = f(getGame())
-      {
-        history: Array.concat(state.history, [newGame]),
-      }
+let setGame = f => {
+  if undoStats.contents.currentUndoDepth > 0 {
+    setUndoStats(undoStats => {
+      currentUndoDepth: 0,
+      undos: Array.concat(undoStats.undos, [undoStats.currentUndoDepth]),
     })
   }
 
-  let _undo = () => {
-    if state.current.history->Array.length > 1 {
-      setState(state => {
-        {
-          history: state.history->Array.slice(~start=0, ~end=state.history->Array.length - 1),
-        }
-      })
-      setUndoStats(undoStats => {
-        ...undoStats,
-        currentUndoDepth: undoStats.currentUndoDepth + 1,
-      })
+  setState(state => {
+    let newGame = f(getGame())
+    {
+      history: Array.concat(state.history, [newGame]),
     }
-  }
+  })
+}
 
+let _undo = () => {
+  if state.contents.history->Array.length > 1 {
+    setState(state => {
+      {
+        history: state.history->Array.slice(~start=0, ~end=state.history->Array.length - 1),
+      }
+    })
+    setUndoStats(undoStats => {
+      ...undoStats,
+      currentUndoDepth: undoStats.currentUndoDepth + 1,
+    })
+  }
+}
+
+@react.component
+let make = () => {
   let refs = React.useRef([])
 
   let dragCard: React.ref<option<Dom.element>> = React.useRef(None)
@@ -779,15 +782,24 @@ let make = () => {
     dragCard.current = None
   }
 
+  let autoProgressWrapper = () => {
+    condInterval(
+      () => {
+        moveToState()
+      },
+      500,
+      () => {
+        GameRules.autoProgress(setGame, getGame)
+      },
+    )
+  }
+
   React.useEffect(() => {
-    Console.log("useEffect")
     window->Window.addMouseMoveEventListener(onMouseMove)
     window->Window.addMouseUpEventListener(onMouseUp)
     moveToState()
-    // setTimeout(() => {
-    GameRules.autoProgress(setGame, moveToState)
 
-    // }, 500)->ignore
+    autoProgressWrapper()
     None
   }, [])
 
