@@ -158,7 +158,7 @@ module GameRules = {
   let canDrag = (card, game) => {
     let dragPile = buildDragPile(card, game)
 
-    let onTop = switch baseSpace(card, game) {
+    let onTopIfNeeded = switch baseSpace(card, game) {
     | Some(Foundation(i)) =>
       game.foundations
       ->Array.get(i)
@@ -168,15 +168,15 @@ module GameRules = {
       ->Option.mapOr(false, top => {
         top == card
       })
-    | Some(Pile(i)) =>
-      game.piles
-      ->Array.get(i)
-      ->Option.flatMap(stack => {
-        stack->ArrayAux.getLast
-      })
-      ->Option.mapOr(false, top => {
-        top == card
-      })
+    | Some(Pile(i)) => true
+    // game.piles
+    // ->Array.get(i)
+    // ->Option.flatMap(stack => {
+    //   stack->ArrayAux.getLast
+    // })
+    // ->Option.mapOr(false, top => {
+    //   top == card
+    // })
     | Some(Waste) =>
       game.waste
       ->ArrayAux.getLast
@@ -202,7 +202,7 @@ module GameRules = {
             }
       })
 
-    onTop && dragPileIsValid
+    onTopIfNeeded && dragPileIsValid
   }
 
   let canDrop = (dragCard: Card.card, dropSpace: space, game: game) => {

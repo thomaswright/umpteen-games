@@ -330,36 +330,32 @@ function buildDragPile(card, game) {
 function canDrag(card, game) {
   var dragPile = buildDragPile(card, game);
   var match = baseSpace(card, game);
-  var onTop;
+  var onTopIfNeeded;
   if (match !== undefined) {
     if (typeof match !== "object") {
-      onTop = match === "Waste" ? Core__Option.mapOr(game.waste.toReversed()[0], false, (function (top) {
+      onTopIfNeeded = match === "Waste" ? Core__Option.mapOr(game.waste.toReversed()[0], false, (function (top) {
                 return Caml_obj.equal(top, card);
               })) : false;
     } else {
       switch (match.TAG) {
         case "Card" :
-            onTop = false;
+            onTopIfNeeded = false;
             break;
         case "Foundation" :
-            onTop = Core__Option.mapOr(Core__Option.flatMap(game.foundations[match._0], (function (stack) {
+            onTopIfNeeded = Core__Option.mapOr(Core__Option.flatMap(game.foundations[match._0], (function (stack) {
                         return stack.toReversed()[0];
                       })), false, (function (top) {
                     return Caml_obj.equal(top, card);
                   }));
             break;
         case "Pile" :
-            onTop = Core__Option.mapOr(Core__Option.flatMap(game.piles[match._0], (function (stack) {
-                        return stack.toReversed()[0];
-                      })), false, (function (top) {
-                    return Caml_obj.equal(top, card);
-                  }));
+            onTopIfNeeded = true;
             break;
         
       }
     }
   } else {
-    onTop = false;
+    onTopIfNeeded = false;
   }
   var match$1 = Core__Array.reduce(dragPile.toReversed(), [
         true,
@@ -384,7 +380,7 @@ function canDrag(card, game) {
                   ];
           }
         }));
-  if (onTop) {
+  if (onTopIfNeeded) {
     return match$1[0];
   } else {
     return false;
