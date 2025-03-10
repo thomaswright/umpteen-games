@@ -7,7 +7,8 @@ type cardLoc = {
   z: int,
 }
 
-@val @module("./other.js") external numInterval: (unit => unit, int, int) => unit = "numInterval"
+@val @module("./other.js")
+external numInterval: (int => unit, int, int) => promise<unit> = "numInterval"
 
 @val @module("./other.js")
 external condInterval: (unit => unit, int, unit => bool) => unit = "condInterval"
@@ -91,7 +92,7 @@ module GameRules = {
     game.waste->Array.forEachWithIndex((card, i) => {
       addToCards({
         card,
-        x: 70 + 20 * mod(i, 3),
+        x: 70 + 20 * i,
         y: 0,
         z: i + 1,
       })
@@ -326,6 +327,32 @@ module GameRules = {
 
     setGame(game => {
       game.foundations->Array.forEachWithIndex((foundation, i) => {
+        let canMove = (c: Card.card) => {
+          switch foundation->ArrayAux.getLast {
+          | None => c.rank == RA
+          | Some(foundationCard) =>
+            Card.rankIsBelow(foundationCard, c) && foundationCard.suit == c.suit
+          }
+        }
+        game.waste
+        ->ArrayAux.getLast
+        ->Option.mapOr(
+          (),
+          wasteCard => {
+            if newGame.contents->Option.isNone && canMove(wasteCard) {
+              newGame :=
+                Some({
+                  ...game,
+                  foundations: game.foundations->ArrayAux.update(
+                    i,
+                    f => f->Array.concat([wasteCard]),
+                  ),
+                  waste: game.waste->ArrayAux.removeLast,
+                })
+            }
+          },
+        )
+
         game.piles->Array.forEachWithIndex(
           (pile, j) => {
             pile
@@ -333,12 +360,7 @@ module GameRules = {
             ->Option.mapOr(
               (),
               pileCard => {
-                let canMove = switch foundation->ArrayAux.getLast {
-                | None => pileCard.rank == RA
-                | Some(foundationCard) =>
-                  Card.rankIsBelow(foundationCard, pileCard) && foundationCard.suit == pileCard.suit
-                }
-                if newGame.contents->Option.isNone && canMove {
+                if newGame.contents->Option.isNone && canMove(pileCard) {
                   newGame :=
                     Some({
                       ...game,
@@ -362,28 +384,35 @@ module GameRules = {
   }
 
   module Custom = {
-    let dealToWaste = (setGame, moveToState) => {
-      let f = () => {
-        setGame(game =>
-          if game.stock->Array.length == 0 {
-            {
-              ...game,
-              stock: game.waste,
-              waste: [],
-            }
-          } else {
-            {
-              ...game,
-              stock: game.stock->Array.sliceToEnd(~start=1),
-              waste: game.waste->Array.concat(game.stock->Array.slice(~start=0, ~end=1)),
-            }
-          }
-        )
+    let dealToWaste = async (setGame, moveToState, autoProgress) => {
+      let f = _ => {
+        setGame(game => {
+          ...game,
+          stock: game.stock->Array.sliceToEnd(~start=1),
+          waste: game.waste->Array.concat(game.stock->Array.slice(~start=0, ~end=1)),
+        })
         moveToState()
       }
-      numInterval(f, 300, 3)
+
+      await numInterval(f, 200, 3)
+      autoProgress()
+    }
+
+    let restock = (setGame, moveToState) => {
+      setGame(game => {
+        ...game,
+        stock: game.waste,
+        waste: game.stock,
+      })
+      moveToState()
     }
   }
+
+  // let stateResponse = (game) => {
+  //   if (game.stock -> Array.length ==0 ) {
+  //     g
+  //   }
+  // }
 }
 
 let getShuffledDeck = () => {
@@ -406,6 +435,7 @@ let getShuffledDeck = () => {
 let shuffledDeck = getShuffledDeck()
 
 @set @scope("style") external setStyleLeft: (Dom.element, string) => unit = "left"
+@set @scope("style") external setStyleDisplay: (Dom.element, string) => unit = "display"
 @set @scope("style") external setStyleTop: (Dom.element, string) => unit = "top"
 @set @scope("style") external setStyleZIndex: (Dom.element, string) => unit = "z-index"
 
@@ -504,6 +534,14 @@ let state = ref({
   history: [GameRules.initiateGame(shuffledDeck)],
 })
 
+let listeners = Set.make()
+
+let subscribe = listener => {
+  listeners->Set.add(listener)
+  let unsubscribe = () => listeners->Set.delete(listener)->ignore
+  unsubscribe
+}
+
 let setUndoStats = f => {
   undoStats.contents = f(undoStats.contents)
 }
@@ -525,6 +563,8 @@ let setGame = f => {
 
   setState(state => {
     let newGame = f(getGame())
+    listeners->Set.forEach(listener => listener(_ => newGame))
+
     {
       history: Array.concat(state.history, [newGame]),
     }
@@ -542,6 +582,100 @@ let _undo = () => {
       ...undoStats,
       currentUndoDepth: undoStats.currentUndoDepth + 1,
     })
+  }
+}
+
+module Independent = {
+  @react.component
+  let make = (~setRef, ~onMouseDown) => {
+    <React.Fragment>
+      {[[], [], [], []]
+      ->Array.mapWithIndex((_, i) => {
+        <div
+          key={Foundation(i)->spaceToString}
+          ref={ReactDOM.Ref.callbackDomRef(setRef(GameRules.Foundation(i)))}
+          className="absolute border border-slate-200 bg-slate-100 rounded w-14 h-20"
+          style={{
+            top: "100px",
+            left: (i * 70)->Int.toString ++ "px",
+            zIndex: "0",
+          }}
+        />
+      })
+      ->React.array}
+      {[[], [], [], [], [], [], []]
+      ->Array.mapWithIndex((_, i) => {
+        <div
+          key={Pile(i)->spaceToString}
+          ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+          className="absolute border border-slate-200 bg-slate-100  rounded w-14 h-20"
+          style={{
+            top: "200px",
+            left: (i * 70)->Int.toString ++ "px",
+            zIndex: "0",
+          }}
+        />
+      })
+      ->React.array}
+      {shuffledDeck
+      ->Array.map(card => {
+        <CardDisplay
+          card={card}
+          key={Card(card)->spaceToString}
+          id={Card(card)->spaceToString}
+          cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
+          onMouseDown={onMouseDown}
+        />
+      })
+      ->React.array}
+    </React.Fragment>
+  }
+}
+
+let useGame = () => {
+  let (externalState, setExternalState) = React.useState(() => getGame())
+  React.useEffect0(() => {
+    let unsubscribe = subscribe(setExternalState)
+    Some(() => unsubscribe())
+  })
+  let game = externalState
+
+  game
+}
+
+module Dependent = {
+  @react.component
+  let make = (~setGame, ~moveToState, ~autoProgress) => {
+    let game = useGame()
+    <React.Fragment>
+      {if game.stock->Array.length == 0 {
+        <div
+          key={"stock-base"}
+          onClick={_ => {
+            GameRules.Custom.restock(setGame, moveToState)
+          }}
+          className="absolute bg-blue-200 rounded w-14 h-20"
+          style={{
+            top: "0px",
+            left: "0px",
+            zIndex: "53",
+          }}
+        />
+      } else {
+        <div
+          key={"stock-cover"}
+          onClick={_ => {
+            GameRules.Custom.dealToWaste(setGame, moveToState, autoProgress)->ignore
+          }}
+          className="absolute bg-blue-700 rounded w-14 h-20"
+          style={{
+            top: "0px",
+            left: "0px",
+            zIndex: "53",
+          }}
+        />
+      }}
+    </React.Fragment>
   }
 }
 
@@ -737,6 +871,18 @@ let make = () => {
     }
   }
 
+  let autoProgress = () => {
+    condInterval(
+      () => {
+        moveToState()
+      },
+      500,
+      () => {
+        GameRules.autoProgress(setGame)
+      },
+    )
+  }
+
   let onMouseUp = _ => {
     switch getDragCard() {
     | Some((dragCardEl, dragCard)) => {
@@ -773,85 +919,27 @@ let make = () => {
           | None => ()
           }
         }
+
+        moveToState()
+
+        autoProgress()
       }
     | None => ()
     }
 
-    moveToState()
-
     dragCard.current = None
-  }
-
-  let autoProgressWrapper = () => {
-    condInterval(
-      () => {
-        moveToState()
-      },
-      500,
-      () => {
-        GameRules.autoProgress(setGame)
-      },
-    )
   }
 
   React.useEffect(() => {
     window->Window.addMouseMoveEventListener(onMouseMove)
     window->Window.addMouseUpEventListener(onMouseUp)
     moveToState()
-
-    autoProgressWrapper()
+    autoProgress()
     None
   }, [])
 
   <div id={"board"} className="relative m-5">
-    <div
-      key={"stock-cover"}
-      onClick={_ => GameRules.Custom.dealToWaste(setGame, moveToState)}
-      className="absolute bg-blue-700 rounded w-14 h-20"
-      style={{
-        top: "0px",
-        left: "0px",
-        zIndex: "53",
-      }}
-    />
-    {[[], [], [], []]
-    ->Array.mapWithIndex((_, i) => {
-      <div
-        key={Foundation(i)->spaceToString}
-        ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-        className="absolute border border-slate-200 bg-slate-100 rounded w-14 h-20"
-        style={{
-          top: "100px",
-          left: (i * 70)->Int.toString ++ "px",
-          zIndex: "0",
-        }}
-      />
-    })
-    ->React.array}
-    {[[], [], [], [], [], [], []]
-    ->Array.mapWithIndex((_, i) => {
-      <div
-        key={Pile(i)->spaceToString}
-        ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-        className="absolute border border-slate-200 bg-slate-100  rounded w-14 h-20"
-        style={{
-          top: "200px",
-          left: (i * 70)->Int.toString ++ "px",
-          zIndex: "0",
-        }}
-      />
-    })
-    ->React.array}
-    {shuffledDeck
-    ->Array.map(card => {
-      <CardDisplay
-        card={card}
-        key={Card(card)->spaceToString}
-        id={Card(card)->spaceToString}
-        cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
-        onMouseDown={onMouseDown}
-      />
-    })
-    ->React.array}
+    <Independent onMouseDown setRef />
+    <Dependent setGame moveToState autoProgress />
   </div>
 }

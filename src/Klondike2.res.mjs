@@ -15,7 +15,7 @@ import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function numInterval(prim0, prim1, prim2) {
-  OtherJs.numInterval(prim0, prim1, prim2);
+  return OtherJs.numInterval(prim0, prim1, prim2);
 }
 
 function condInterval(prim0, prim1, prim2) {
@@ -250,7 +250,7 @@ function cardLocs(game) {
   game.waste.forEach(function (card, i) {
         addToCards({
               card: card,
-              x: 70 + Math.imul(20, i % 3) | 0,
+              x: 70 + Math.imul(20, i) | 0,
               y: 0,
               z: i + 1 | 0
             });
@@ -563,11 +563,36 @@ function autoProgress(setGame) {
   };
   setGame(function (game) {
         game.foundations.forEach(function (foundation, i) {
+              var canMove = function (c) {
+                var foundationCard = foundation.toReversed()[0];
+                if (foundationCard !== undefined) {
+                  if (Card.rankIsBelow(foundationCard, c)) {
+                    return foundationCard.suit === c.suit;
+                  } else {
+                    return false;
+                  }
+                } else {
+                  return c.rank === "RA";
+                }
+              };
+              Core__Option.mapOr(game.waste.toReversed()[0], undefined, (function (wasteCard) {
+                      if (Core__Option.isNone(newGame.contents) && canMove(wasteCard)) {
+                        newGame.contents = {
+                          piles: game.piles,
+                          foundations: update(game.foundations, i, (function (f) {
+                                  return f.concat([wasteCard]);
+                                })),
+                          stock: game.stock,
+                          waste: removeLast(game.waste),
+                          gameEnded: game.gameEnded
+                        };
+                        return ;
+                      }
+                      
+                    }));
               game.piles.forEach(function (pile, j) {
                     Core__Option.mapOr(pile.toReversed()[0], undefined, (function (pileCard) {
-                            var foundationCard = foundation.toReversed()[0];
-                            var canMove = foundationCard !== undefined ? Card.rankIsBelow(foundationCard, pileCard) && foundationCard.suit === pileCard.suit : pileCard.rank === "RA";
-                            if (Core__Option.isNone(newGame.contents) && canMove) {
+                            if (Core__Option.isNone(newGame.contents) && canMove(pileCard)) {
                               newGame.contents = {
                                 piles: update(game.piles, j, (function (p) {
                                         return removeLast(p);
@@ -590,34 +615,39 @@ function autoProgress(setGame) {
   return Core__Option.isSome(newGame.contents);
 }
 
-function dealToWaste(setGame, moveToState) {
-  var f = function () {
+async function dealToWaste(setGame, moveToState, autoProgress) {
+  var f = function (param) {
     setGame(function (game) {
-          if (game.stock.length === 0) {
-            return {
-                    piles: game.piles,
-                    foundations: game.foundations,
-                    stock: game.waste,
-                    waste: [],
-                    gameEnded: game.gameEnded
-                  };
-          } else {
-            return {
-                    piles: game.piles,
-                    foundations: game.foundations,
-                    stock: game.stock.slice(1),
-                    waste: game.waste.concat(game.stock.slice(0, 1)),
-                    gameEnded: game.gameEnded
-                  };
-          }
+          return {
+                  piles: game.piles,
+                  foundations: game.foundations,
+                  stock: game.stock.slice(1),
+                  waste: game.waste.concat(game.stock.slice(0, 1)),
+                  gameEnded: game.gameEnded
+                };
         });
     moveToState();
   };
-  numInterval(f, 300, 3);
+  await OtherJs.numInterval(f, 200, 3);
+  return autoProgress();
+}
+
+function restock(setGame, moveToState) {
+  setGame(function (game) {
+        return {
+                piles: game.piles,
+                foundations: game.foundations,
+                stock: game.waste,
+                waste: game.stock,
+                gameEnded: game.gameEnded
+              };
+      });
+  return moveToState();
 }
 
 var Custom = {
-  dealToWaste: dealToWaste
+  dealToWaste: dealToWaste,
+  restock: restock
 };
 
 var GameRules = {
@@ -744,6 +774,15 @@ var state = {
   }
 };
 
+var listeners = new Set();
+
+function subscribe(listener) {
+  listeners.add(listener);
+  return function () {
+    listeners.delete(listener);
+  };
+}
+
 function setUndoStats(f) {
   undoStats.contents = f(undoStats.contents);
 }
@@ -767,6 +806,11 @@ function setGame(f) {
   }
   setState(function (state) {
         var newGame = f(getGame());
+        listeners.forEach(function (listener) {
+              listener(function (param) {
+                    return newGame;
+                  });
+            });
         return {
                 history: state.history.concat([newGame])
               };
@@ -789,6 +833,131 @@ function _undo() {
   }
   
 }
+
+function Klondike2$Independent(props) {
+  var onMouseDown = props.onMouseDown;
+  var setRef = props.setRef;
+  return JsxRuntime.jsxs(React.Fragment, {
+              children: [
+                [
+                    [],
+                    [],
+                    [],
+                    []
+                  ].map(function (param, i) {
+                      return JsxRuntime.jsx("div", {
+                                  ref: Caml_option.some(setRef({
+                                            TAG: "Foundation",
+                                            _0: i
+                                          })),
+                                  className: "absolute border border-slate-200 bg-slate-100 rounded w-14 h-20",
+                                  style: {
+                                    left: Math.imul(i, 70).toString() + "px",
+                                    top: "100px",
+                                    zIndex: "0"
+                                  }
+                                }, spaceToString({
+                                      TAG: "Foundation",
+                                      _0: i
+                                    }));
+                    }),
+                [
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    []
+                  ].map(function (param, i) {
+                      return JsxRuntime.jsx("div", {
+                                  ref: Caml_option.some(setRef({
+                                            TAG: "Pile",
+                                            _0: i
+                                          })),
+                                  className: "absolute border border-slate-200 bg-slate-100  rounded w-14 h-20",
+                                  style: {
+                                    left: Math.imul(i, 70).toString() + "px",
+                                    top: "200px",
+                                    zIndex: "0"
+                                  }
+                                }, spaceToString({
+                                      TAG: "Pile",
+                                      _0: i
+                                    }));
+                    }),
+                shuffledDeck.map(function (card) {
+                      return JsxRuntime.jsx(Klondike2$CardDisplay, {
+                                  card: card,
+                                  id: spaceToString({
+                                        TAG: "Card",
+                                        _0: card
+                                      }),
+                                  cardRef: setRef({
+                                        TAG: "Card",
+                                        _0: card
+                                      }),
+                                  onMouseDown: onMouseDown
+                                }, spaceToString({
+                                      TAG: "Card",
+                                      _0: card
+                                    }));
+                    })
+              ]
+            });
+}
+
+var Independent = {
+  make: Klondike2$Independent
+};
+
+function useGame() {
+  var match = React.useState(function () {
+        return getGame();
+      });
+  var setExternalState = match[1];
+  React.useEffect((function () {
+          var unsubscribe = subscribe(setExternalState);
+          return (function () {
+                    unsubscribe();
+                  });
+        }), []);
+  return match[0];
+}
+
+function Klondike2$Dependent(props) {
+  var autoProgress = props.autoProgress;
+  var moveToState = props.moveToState;
+  var setGame = props.setGame;
+  var game = useGame();
+  return JsxRuntime.jsx(React.Fragment, {
+              children: game.stock.length === 0 ? JsxRuntime.jsx("div", {
+                      className: "absolute bg-blue-200 rounded w-14 h-20",
+                      style: {
+                        left: "0px",
+                        top: "0px",
+                        zIndex: "53"
+                      },
+                      onClick: (function (param) {
+                          restock(setGame, moveToState);
+                        })
+                    }, "stock-base") : JsxRuntime.jsx("div", {
+                      className: "absolute bg-blue-700 rounded w-14 h-20",
+                      style: {
+                        left: "0px",
+                        top: "0px",
+                        zIndex: "53"
+                      },
+                      onClick: (function (param) {
+                          dealToWaste(setGame, moveToState, autoProgress);
+                        })
+                    }, "stock-cover")
+            });
+}
+
+var Dependent = {
+  make: Klondike2$Dependent
+};
 
 function Klondike2(props) {
   var refs = React.useRef([]);
@@ -974,6 +1143,13 @@ function Klondike2(props) {
     }
     
   };
+  var autoProgress$1 = function () {
+    condInterval((function () {
+            moveToState();
+          }), 500, (function () {
+            return autoProgress(setGame);
+          }));
+  };
   var onMouseUp = function (param) {
     var match = getDragCard();
     if (match !== undefined) {
@@ -1005,100 +1181,27 @@ function Klondike2(props) {
         }
         
       }
-      
+      moveToState();
+      autoProgress$1();
     }
-    moveToState();
     dragCard.current = undefined;
-  };
-  var autoProgressWrapper = function () {
-    condInterval((function () {
-            moveToState();
-          }), 500, (function () {
-            return autoProgress(setGame);
-          }));
   };
   React.useEffect((function () {
           window.addEventListener("mousemove", onMouseMove);
           window.addEventListener("mouseup", onMouseUp);
           moveToState();
-          autoProgressWrapper();
+          autoProgress$1();
         }), []);
   return JsxRuntime.jsxs("div", {
               children: [
-                JsxRuntime.jsx("div", {
-                      className: "absolute bg-blue-700 rounded w-14 h-20",
-                      style: {
-                        left: "0px",
-                        top: "0px",
-                        zIndex: "53"
-                      },
-                      onClick: (function (param) {
-                          dealToWaste(setGame, moveToState);
-                        })
-                    }, "stock-cover"),
-                [
-                    [],
-                    [],
-                    [],
-                    []
-                  ].map(function (param, i) {
-                      return JsxRuntime.jsx("div", {
-                                  ref: Caml_option.some(setRef({
-                                            TAG: "Foundation",
-                                            _0: i
-                                          })),
-                                  className: "absolute border border-slate-200 bg-slate-100 rounded w-14 h-20",
-                                  style: {
-                                    left: Math.imul(i, 70).toString() + "px",
-                                    top: "100px",
-                                    zIndex: "0"
-                                  }
-                                }, spaceToString({
-                                      TAG: "Foundation",
-                                      _0: i
-                                    }));
+                JsxRuntime.jsx(Klondike2$Independent, {
+                      setRef: setRef,
+                      onMouseDown: onMouseDown
                     }),
-                [
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    []
-                  ].map(function (param, i) {
-                      return JsxRuntime.jsx("div", {
-                                  ref: Caml_option.some(setRef({
-                                            TAG: "Pile",
-                                            _0: i
-                                          })),
-                                  className: "absolute border border-slate-200 bg-slate-100  rounded w-14 h-20",
-                                  style: {
-                                    left: Math.imul(i, 70).toString() + "px",
-                                    top: "200px",
-                                    zIndex: "0"
-                                  }
-                                }, spaceToString({
-                                      TAG: "Pile",
-                                      _0: i
-                                    }));
-                    }),
-                shuffledDeck.map(function (card) {
-                      return JsxRuntime.jsx(Klondike2$CardDisplay, {
-                                  card: card,
-                                  id: spaceToString({
-                                        TAG: "Card",
-                                        _0: card
-                                      }),
-                                  cardRef: setRef({
-                                        TAG: "Card",
-                                        _0: card
-                                      }),
-                                  onMouseDown: onMouseDown
-                                }, spaceToString({
-                                      TAG: "Card",
-                                      _0: card
-                                    }));
+                JsxRuntime.jsx(Klondike2$Dependent, {
+                      setGame: setGame,
+                      moveToState: moveToState,
+                      autoProgress: autoProgress$1
                     })
               ],
               className: "relative m-5",
@@ -1124,11 +1227,16 @@ export {
   CardDisplay ,
   undoStats ,
   state ,
+  listeners ,
+  subscribe ,
   setUndoStats ,
   setState ,
   getGame ,
   setGame ,
   _undo ,
+  Independent ,
+  useGame ,
+  Dependent ,
   make ,
 }
 /* shuffledDeck Not a pure module */

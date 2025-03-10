@@ -17,17 +17,44 @@ export function appendReactElement(element, targetId) {
   }
 }
 
-export function runInterval(callback, interval, n) {
+export function numInterval(callback, interval, n) {
   let count = 0;
-  const intervalId = setInterval(() => {
-    if (count >= n) {
-      clearInterval(intervalId);
-    } else {
-      callback();
-      count++;
-    }
-  }, interval);
+
+  return new Promise((resolve) => {
+    const intervalId = setInterval(() => {
+      if (count >= n) {
+        clearInterval(intervalId);
+        resolve(); // Resolve the promise when done
+      } else {
+        callback(count);
+        count++;
+      }
+    }, interval);
+  });
 }
+
+// export function numInterval(callback, onEnd, interval, n) {
+//   let count = 0;
+//   const intervalId = setInterval(() => {
+//     if (count >= n) {
+//       clearInterval(intervalId);
+//       onEnd();
+//     } else {
+//       callback(count);
+//       count++;
+//     }
+//   }, interval);
+// }
+
+// export async function condInterval(callback, interval, cond) {
+//   const intervalId = setInterval(async () => {
+//     if (!(await cond())) {
+//       clearInterval(intervalId);
+//     } else {
+//       await callback();
+//     }
+//   }, interval);
+// }
 
 export function condInterval(callback, interval, cond) {
   const intervalId = setInterval(() => {
