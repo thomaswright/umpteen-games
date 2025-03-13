@@ -536,6 +536,7 @@ module GameRules = {
           switch item {
           | Card(card) =>
             <Card.Display
+              multiColor={true}
               card={card}
               key={Item(item)->spaceToString}
               id={Item(item)->spaceToString}

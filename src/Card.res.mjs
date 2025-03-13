@@ -460,6 +460,21 @@ function colorHex(card) {
   }
 }
 
+function multiColorHex(card) {
+  var match = card.suit;
+  switch (match) {
+    case "Spades" :
+        return "hsl(223.96 100% 40.67%)";
+    case "Hearts" :
+        return "hsl(0 100% 42.94%)";
+    case "Diamonds" :
+        return "hsl(39.12 100% 50%)";
+    case "Clubs" :
+        return "hsl(130.15 100% 30.51%)";
+    
+  }
+}
+
 function isOppositeColor(a, b) {
   return isRed(a) !== isRed(b);
 }
@@ -479,7 +494,9 @@ function toString(card) {
 }
 
 function Card$Display(props) {
+  var __multiColor = props.multiColor;
   var card = props.card;
+  var multiColor = __multiColor !== undefined ? __multiColor : false;
   var match = card.rank;
   var tmp;
   tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
@@ -512,7 +529,7 @@ function Card$Display(props) {
                         }),
                     className: [" border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
                     style: {
-                      color: colorHex(card),
+                      color: multiColor ? multiColorHex(card) : colorHex(card),
                       transform: rotation(card)
                     }
                   }),
@@ -560,6 +577,7 @@ export {
   displaySuit ,
   color ,
   colorHex ,
+  multiColorHex ,
   isOppositeColor ,
   rotation ,
   toString ,

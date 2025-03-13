@@ -96,6 +96,14 @@ let colorHex = card =>
   | Clubs => "hsl(0 0% 0%)"
   }
 
+let multiColorHex = card =>
+  switch card.suit {
+  | Spades => "hsl(223.96 100% 40.67%)"
+  | Hearts => "hsl(0 100% 42.94%)"
+  | Diamonds => "hsl(39.12 100% 50%)"
+  | Clubs => "hsl(130.15 100% 30.51%)"
+  }
+
 let isOppositeColor = (a, b) => isRed(a) != isRed(b)
 
 let rotation = (card: card) => {
@@ -111,13 +119,13 @@ let toString = card => {
 
 module Display = {
   @react.component
-  let make = (~card, ~id, ~cardRef, ~onMouseDown) => {
+  let make = (~card, ~id, ~cardRef, ~onMouseDown, ~multiColor=false) => {
     <div id={id} ref={cardRef} onMouseDown={onMouseDown} className="absolute w-14 h-20 select-none">
       <div
         style={{
           transform: rotation(card),
           // position: "relative",
-          color: card->colorHex,
+          color: multiColor ? card->multiColorHex : card->colorHex,
         }}
         className={[
           " border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",

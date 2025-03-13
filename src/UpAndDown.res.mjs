@@ -1037,7 +1037,8 @@ function UpAndDown$GameRules$Independent(props) {
                                           TAG: "Item",
                                           _0: item
                                         }),
-                                    onMouseDown: onMouseDown
+                                    onMouseDown: onMouseDown,
+                                    multiColor: true
                                   }, JSON.stringify(space_encode({
                                             TAG: "Item",
                                             _0: item
