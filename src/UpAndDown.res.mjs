@@ -383,9 +383,9 @@ function getSpaceLocs(game) {
                 }
               },
               {
-                x: Math.imul(20, i),
+                x: Math.imul(10, i),
                 y: 0,
-                z: 1
+                z: i
               }
             ]);
       });
@@ -399,9 +399,9 @@ function getSpaceLocs(game) {
                 }
               },
               {
-                x: 180 - Math.imul(20, i) | 0,
+                x: 180 - Math.imul(10, i) | 0,
                 y: 0,
-                z: 1
+                z: i
               }
             ]);
       });
@@ -535,27 +535,54 @@ function canDrop(dragSpace, dropSpace, game) {
           var match = baseSpace(dropItem, game);
           if (match !== undefined) {
             var exit = 0;
-            if (typeof match !== "object" && match === "Free") {
-              canBeParent = false;
+            if (typeof match !== "object") {
+              if (match === "Free") {
+                canBeParent = false;
+              } else {
+                exit = 1;
+              }
+            } else if (match.TAG === "Pile") {
+              var topItem = Common.ArrayAux.getLast(game.piles[match._0]);
+              if (Caml_obj.equal(topItem, dropItem)) {
+                if (dropItem.TAG === "Card") {
+                  var c1 = dropItem._0;
+                  if (dragItem.TAG === "Card") {
+                    var c2 = dragItem._0;
+                    canBeParent = Card.rankIsBelow(c1, c2) || Card.rankIsAbove(c1, c2);
+                  } else {
+                    canBeParent = false;
+                  }
+                } else {
+                  var c1$1 = dropItem._0;
+                  if (dragItem.TAG === "Card") {
+                    canBeParent = false;
+                  } else {
+                    var c2$1 = dragItem._0;
+                    canBeParent = Tarot.rankIsBelow(c1$1, c2$1) || Tarot.rankIsAbove(c1$1, c2$1);
+                  }
+                }
+              } else {
+                canBeParent = false;
+              }
             } else {
               exit = 1;
             }
             if (exit === 1) {
               if (dropItem.TAG === "Card") {
-                var c1 = dropItem._0;
+                var c1$2 = dropItem._0;
                 if (dragItem.TAG === "Card") {
-                  var c2 = dragItem._0;
-                  canBeParent = Card.rankIsBelow(c1, c2) || Card.rankIsAbove(c1, c2);
+                  var c2$2 = dragItem._0;
+                  canBeParent = Card.rankIsBelow(c1$2, c2$2) || Card.rankIsAbove(c1$2, c2$2);
                 } else {
                   canBeParent = false;
                 }
               } else {
-                var c1$1 = dropItem._0;
+                var c1$3 = dropItem._0;
                 if (dragItem.TAG === "Card") {
                   canBeParent = false;
                 } else {
-                  var c2$1 = dragItem._0;
-                  canBeParent = Tarot.rankIsBelow(c1$1, c2$1) || Tarot.rankIsAbove(c1$1, c2$1);
+                  var c2$3 = dragItem._0;
+                  canBeParent = Tarot.rankIsBelow(c1$3, c2$3) || Tarot.rankIsAbove(c1$3, c2$3);
                 }
               }
             }

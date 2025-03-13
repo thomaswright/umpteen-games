@@ -120,9 +120,9 @@ module GameRules = {
       addToCards((
         Item(Tarot(tarot)),
         {
-          x: 20 * i,
+          x: 10 * i,
           y: 0,
-          z: 1,
+          z: i,
         },
       ))
     })
@@ -131,9 +131,9 @@ module GameRules = {
       addToCards((
         Item(Tarot(tarot)),
         {
-          x: foundationOffset - 70 * 2 - 20 * i,
+          x: foundationOffset - 70 * 2 - 10 * i,
           y: 0,
-          z: 1,
+          z: i,
         },
       ))
     })
@@ -207,6 +207,17 @@ module GameRules = {
         | Item(dropItem) =>
           switch baseSpace(dropItem, game) {
           | Some(Free) => false
+          | Some(Pile(i)) =>
+            let topItem = game.piles->Array.getUnsafe(i)->ArrayAux.getLast
+            if topItem == Some(dropItem) {
+              switch (dropItem, dragItem) {
+              | (Card(c1), Card(c2)) => Card.rankIsBelow(c1, c2) || Card.rankIsAbove(c1, c2)
+              | (Tarot(c1), Tarot(c2)) => Tarot.rankIsBelow(c1, c2) || Tarot.rankIsAbove(c1, c2)
+              | _ => false
+              }
+            } else {
+              false
+            }
           | Some(_) =>
             switch (dropItem, dragItem) {
             | (Card(c1), Card(c2)) => Card.rankIsBelow(c1, c2) || Card.rankIsAbove(c1, c2)
