@@ -99,7 +99,7 @@ module GameRules = {
       addToCards((
         Item(Card(card)),
         {
-          x: foundationOffset + i * 70,
+          x: foundationOffset + 30 + i * 70,
           y: 0,
           z: j + 1,
         },
@@ -131,7 +131,7 @@ module GameRules = {
       addToCards((
         Item(Tarot(tarot)),
         {
-          x: foundationOffset - 70 * 2 - 10 * i,
+          x: foundationOffset - 30 - 70 * 2 - 10 * i,
           y: 0,
           z: i,
         },
@@ -499,7 +499,7 @@ module GameRules = {
           className="absolute border border-slate-200 bg-slate-700 rounded w-14 h-20"
           style={{
             top: "0px",
-            left: (foundationOffset - 70 * 2)->Int.toString ++ "px",
+            left: (foundationOffset - 30 - 70 * 2)->Int.toString ++ "px",
             zIndex: "0",
           }}
         />
@@ -511,6 +511,7 @@ module GameRules = {
             top: "0px",
             left: (foundationOffset - 70)->Int.toString ++ "px",
             zIndex: "0",
+            transform: "rotate(90deg)",
           }}
         />
         {[[], [], [], []]
@@ -521,7 +522,7 @@ module GameRules = {
             className="absolute border border-slate-200 bg-slate-100 rounded w-14 h-20"
             style={{
               top: "0px",
-              left: (foundationOffset + i * 70)->Int.toString ++ "px",
+              left: (foundationOffset + 30 + i * 70)->Int.toString ++ "px",
               zIndex: "0",
             }}
           />

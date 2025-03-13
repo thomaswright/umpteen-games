@@ -354,7 +354,7 @@ function getSpaceLocs(game) {
                   }
                 },
                 {
-                  x: 420 + Math.imul(i, 70) | 0,
+                  x: 450 + Math.imul(i, 70) | 0,
                   y: 0,
                   z: j + 1 | 0
                 }
@@ -399,7 +399,7 @@ function getSpaceLocs(game) {
                 }
               },
               {
-                x: 280 - Math.imul(10, i) | 0,
+                x: 250 - Math.imul(10, i) | 0,
                 y: 0,
                 z: i
               }
@@ -985,7 +985,7 @@ function UpAndDown$GameRules$Independent(props) {
                       ref: Caml_option.some(setRef("TarotDown")),
                       className: "absolute border border-slate-200 bg-slate-700 rounded w-14 h-20",
                       style: {
-                        left: (280).toString() + "px",
+                        left: (250).toString() + "px",
                         top: "0px",
                         zIndex: "0"
                       }
@@ -996,7 +996,8 @@ function UpAndDown$GameRules$Independent(props) {
                       style: {
                         left: (350).toString() + "px",
                         top: "0px",
-                        zIndex: "0"
+                        zIndex: "0",
+                        transform: "rotate(90deg)"
                       }
                     }, JSON.stringify(space_encode("Free"))),
                 [
@@ -1012,7 +1013,7 @@ function UpAndDown$GameRules$Independent(props) {
                                           })),
                                   className: "absolute border border-slate-200 bg-slate-100 rounded w-14 h-20",
                                   style: {
-                                    left: (420 + Math.imul(i, 70) | 0).toString() + "px",
+                                    left: (450 + Math.imul(i, 70) | 0).toString() + "px",
                                     top: "0px",
                                     zIndex: "0"
                                   }
