@@ -1,22 +1,21 @@
 open Webapi.Dom
-
-type cardLoc = {
-  card: Card.card,
-  x: int,
-  y: int,
-  z: int,
-}
+open Types
 
 @val @module("./other.js")
 external numInterval: (int => unit, int, int) => promise<unit> = "numInterval"
-
-@val @module("./other.js")
-external condInterval: (unit => unit, int, unit => bool) => unit = "condInterval"
 
 module ArrayAux = {
   let removeLast = a => a->Array.toReversed->Array.sliceToEnd(~start=1)->Array.toReversed
   let getLast = a => a->Array.toReversed->Array.get(0)
   let update = (a, i, f) => a->Array.mapWithIndex((el, j) => j == i ? f(el) : el)
+  let insertAfter = (arr, match, new) =>
+    arr->Array.reduce([], (acc, c) => {
+      if c == match {
+        Array.concat(acc, Array.concat([c], new))
+      } else {
+        Array.concat(acc, [c])
+      }
+    })
 
   let forEach2 = (a, f) =>
     a->Array.forEachWithIndex((el1, i) => {
@@ -26,9 +25,79 @@ module ArrayAux = {
     })
 }
 
+module CardDisplay = {
+  @react.component
+  let make = (~card, ~id, ~cardRef, ~onMouseDown) => {
+    <div id={id} ref={cardRef} onMouseDown={onMouseDown} className="absolute w-14 h-20 select-none">
+      <div
+        style={{
+          transform: Card.rotation(card),
+          // position: "relative",
+          color: card->Card.colorHex,
+        }}
+        className={[
+          " border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
+        ]->Array.join(" ")}>
+        <span className="flex flex-col">
+          <span className="flex flex-row">
+            <span
+              className={[
+                "font-medium ",
+                switch card.rank {
+                | R10 => "tracking-[-0.1rem] w-4"
+                | _ => "w-3.5"
+                },
+              ]->Array.join(" ")}>
+              {card->Card.rankString->React.string}
+            </span>
+            <span className="w-3.5 flex flex-row justify-center">
+              {card->Card.suitString->React.string}
+            </span>
+          </span>
+          <span className="w-3.5 flex flex-row mt-0.5 -ml-0.5">
+            {card->Card.suitString->React.string}
+          </span>
+        </span>
+      </div>
+    </div>
+  }
+}
+
+let getShuffledDeck = () => {
+  Card.allRanks
+  ->Array.reduce([], (a, rank) => {
+    Card.allSuits->Array.reduce(a, (a2, suit) => {
+      a2->Array.concat([
+        (
+          {
+            suit,
+            rank,
+          }: Card.card
+        ),
+      ])
+    })
+  })
+  ->Array.toShuffled
+}
+
+///
+
 module GameRules = {
+  let shuffledDeck = getShuffledDeck()
+
   @decco
   type space = Card(Card.card) | Foundation(int) | Pile(int) | Waste | Stock
+
+  let getSpace = element => {
+    switch element->Element.id->Js.Json.parseExn->space_decode {
+    | Ok(d) => Some(d)
+    | _ => None
+    }
+  }
+
+  let spaceToString = space => {
+    space->space_encode->Js.Json.stringify
+  }
 
   type game = {
     piles: array<array<Card.card>>,
@@ -38,9 +107,7 @@ module GameRules = {
     gameEnded: bool,
   }
 
-  let initiateGame = shuffledDeck => {
-    // let shuffledDeck = getShuffledDeck()
-
+  let initiateGame = () => {
     {
       piles: [
         shuffledDeck->Array.slice(~start=0, ~end=1),
@@ -58,44 +125,52 @@ module GameRules = {
     }
   }
 
-  let cardLocs = (game: game) => {
+  let getSpaceLocs = (game: game) => {
     // Todo: maybe change to a map
     let cards = ref([])
     let addToCards = card => cards := Array.concat(cards.contents, [card])
     game.piles->ArrayAux.forEach2((_, card, i, j) => {
-      addToCards({
-        card,
-        x: i * 70,
-        y: 200 + j * 20,
-        z: j + 1,
-      })
+      addToCards((
+        Card(card),
+        {
+          x: i * 70,
+          y: 200 + j * 20,
+          z: j + 1,
+        },
+      ))
     })
 
     game.foundations->ArrayAux.forEach2((_, card, i, j) => {
-      addToCards({
-        card,
-        x: i * 70,
-        y: 100,
-        z: j + 1,
-      })
+      addToCards((
+        Card(card),
+        {
+          x: i * 70,
+          y: 100,
+          z: j + 1,
+        },
+      ))
     })
 
     game.stock->Array.forEachWithIndex((card, i) => {
-      addToCards({
-        card,
-        x: 0,
-        y: 0,
-        z: i + 1,
-      })
+      addToCards((
+        Card(card),
+        {
+          x: 0,
+          y: 0,
+          z: i + 1,
+        },
+      ))
     })
 
     game.waste->Array.forEachWithIndex((card, i) => {
-      addToCards({
-        card,
-        x: 70 + 20 * i,
-        y: 0,
-        z: i + 1,
-      })
+      addToCards((
+        Card(card),
+        {
+          x: 70 + 20 * i,
+          y: 0,
+          z: i + 1,
+        },
+      ))
     })
 
     cards.contents
@@ -155,171 +230,169 @@ module GameRules = {
     dragPile.contents
   }
 
-  let canDrag = (card, game) => {
-    let dragPile = buildDragPile(card, game)
+  let canDrag = (space, game) => {
+    switch space {
+    | Card(card) => {
+        let dragPile = buildDragPile(card, game)
 
-    let onTopIfNeeded = switch baseSpace(card, game) {
-    | Some(Foundation(i)) =>
-      game.foundations
-      ->Array.get(i)
-      ->Option.flatMap(stack => {
-        stack->ArrayAux.getLast
-      })
-      ->Option.mapOr(false, top => {
-        top == card
-      })
-    | Some(Pile(i)) => true
-    // game.piles
-    // ->Array.get(i)
-    // ->Option.flatMap(stack => {
-    //   stack->ArrayAux.getLast
-    // })
-    // ->Option.mapOr(false, top => {
-    //   top == card
-    // })
-    | Some(Waste) =>
-      game.waste
-      ->ArrayAux.getLast
-      ->Option.mapOr(false, top => {
-        top == card
-      })
-    | Some(Stock) => false
+        let onTopIfNeeded = switch baseSpace(card, game) {
+        | Some(Foundation(i)) =>
+          game.foundations
+          ->Array.get(i)
+          ->Option.flatMap(stack => {
+            stack->ArrayAux.getLast
+          })
+          ->Option.mapOr(false, top => {
+            top == card
+          })
+        | Some(Pile(i)) => true
+        // game.piles
+        // ->Array.get(i)
+        // ->Option.flatMap(stack => {
+        //   stack->ArrayAux.getLast
+        // })
+        // ->Option.mapOr(false, top => {
+        //   top == card
+        // })
+        | Some(Waste) =>
+          game.waste
+          ->ArrayAux.getLast
+          ->Option.mapOr(false, top => {
+            top == card
+          })
+        | Some(Stock) => false
+        | _ => false
+        }
+
+        let (dragPileIsValid, _) =
+          dragPile
+          ->Array.toReversed
+          ->Array.reduce((true, None), ((isStillValid, onTop), onBottom) => {
+            !isStillValid
+              ? (false, None)
+              : switch (onTop, onBottom) {
+                | (Some(onTop), onBottom) => (
+                    Card.rankIsBelow(onTop, onBottom) && onTop->Card.color != onBottom->Card.color,
+                    Some(onBottom),
+                  )
+                | _ => (true, Some(onBottom))
+                }
+          })
+
+        onTopIfNeeded && dragPileIsValid
+      }
     | _ => false
     }
+  }
 
-    let (dragPileIsValid, _) =
-      dragPile
-      ->Array.toReversed
-      ->Array.reduce((true, None), ((isStillValid, onTop), onBottom) => {
-        !isStillValid
-          ? (false, None)
-          : switch (onTop, onBottom) {
-            | (Some(onTop), onBottom) => (
-                Card.rankIsBelow(onTop, onBottom) && onTop->Card.color != onBottom->Card.color,
-                Some(onBottom),
-              )
-            | _ => (true, Some(onBottom))
+  let canDrop = (dragSpace: space, dropSpace: space, game: game) => {
+    switch dragSpace {
+    | Card(dragCard) => {
+        let dragPile = buildDragPile(dragCard, game)
+
+        let notInDragPile =
+          dragPile
+          ->Array.find(pilePiece => Card(pilePiece) == dropSpace)
+          ->Option.isNone
+
+        let dropHasNoChildren = switch dropSpace {
+        | Card(card) => buildDragPile(card, game)->Array.length < 2
+        | Pile(i) => game.piles->Array.getUnsafe(i)->Array.length == 0
+        | Foundation(i) => game.foundations->Array.getUnsafe(i)->Array.length == 0
+        | _ => false
+        }
+
+        let canBeParent = switch dropSpace {
+        | Card(dropCard) =>
+          switch baseSpace(dropCard, game) {
+          | Some(Foundation(_)) =>
+            Card.rankIsBelow(dropCard, dragCard) && dragCard.suit == dropCard.suit
+          | Some(Pile(_)) =>
+            Card.rankIsAbove(dropCard, dragCard) && dragCard->Card.color != dropCard->Card.color
+          | _ => false
+          }
+        | Foundation(_) => dragCard.rank == RA
+        | Pile(_) => dragCard.rank == RK
+        | _ => false
+        }
+
+        notInDragPile && dropHasNoChildren && canBeParent
+      }
+    | _ => false
+    }
+  }
+
+  let onDrop = (dropOnSpace, dragSpace, game, setGame) => {
+    switch dragSpace {
+    | Card(dragCard) => {
+        let dragPile = buildDragPile(dragCard, game)
+
+        let removeDragPile = x =>
+          x->Array.filter(sCard => {
+            !(dragPile->Array.some(dCard => sCard == dCard))
+          })
+
+        setGame(game => {
+          {
+            ...game,
+            foundations: game.foundations->Array.map(removeDragPile),
+            piles: game.piles->Array.map(removeDragPile),
+            stock: game.stock->removeDragPile,
+            waste: game.waste->removeDragPile,
+          }
+        })
+
+        switch dropOnSpace {
+        | Card(card) =>
+          setGame(game => {
+            {
+              ...game,
+              foundations: game.foundations->Array.map(stack => {
+                stack->ArrayAux.insertAfter(card, dragPile)
+              }),
+              piles: game.piles->Array.map(stack => {
+                stack->ArrayAux.insertAfter(card, dragPile)
+              }),
             }
-      })
-
-    onTopIfNeeded && dragPileIsValid
-  }
-
-  let canDrop = (dragCard: Card.card, dropSpace: space, game: game) => {
-    let dragPile = buildDragPile(dragCard, game)
-
-    let notInDragPile =
-      dragPile
-      ->Array.find(pilePiece => Card(pilePiece) == dropSpace)
-      ->Option.isNone
-
-    let dropHasNoChildren = switch dropSpace {
-    | Card(card) => buildDragPile(card, game)->Array.length < 2
-    | Pile(i) => game.piles->Array.getUnsafe(i)->Array.length == 0
-    | Foundation(i) => game.foundations->Array.getUnsafe(i)->Array.length == 0
-    | _ => false
-    }
-
-    let canBeParent = switch dropSpace {
-    | Card(dropCard) =>
-      switch baseSpace(dropCard, game) {
-      | Some(Foundation(_)) =>
-        Card.rankIsBelow(dropCard, dragCard) && dragCard.suit == dropCard.suit
-      | Some(Pile(_)) =>
-        Card.rankIsAbove(dropCard, dragCard) && dragCard->Card.color != dropCard->Card.color
-      | _ => false
+          })
+        | Foundation(i) =>
+          setGame(game => {
+            {
+              ...game,
+              foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
+            }
+          })
+        | Pile(i) =>
+          setGame(game => {
+            {
+              ...game,
+              piles: game.piles->ArrayAux.update(i, _ => dragPile),
+            }
+          })
+        | _ => ()
+        }
       }
-    | Foundation(_) => dragCard.rank == RA
-    | Pile(_) => dragCard.rank == RK
-    | _ => false
-    }
-
-    notInDragPile && dropHasNoChildren && canBeParent
-  }
-
-  let onDrop = (dropOnSpace, dragCard, game, setGame) => {
-    let dragPile = buildDragPile(dragCard, game)
-
-    let removeDragPile = x =>
-      x->Array.filter(sCard => {
-        !(dragPile->Array.some(dCard => sCard == dCard))
-      })
-
-    setGame(game => {
-      {
-        ...game,
-        foundations: game.foundations->Array.map(removeDragPile),
-        piles: game.piles->Array.map(removeDragPile),
-        stock: game.stock->removeDragPile,
-        waste: game.waste->removeDragPile,
-      }
-    })
-
-    switch dropOnSpace {
-    | Card(card) =>
-      setGame(game => {
-        {
-          ...game,
-          foundations: game.foundations->Array.map(stack => {
-            stack->Array.reduce(
-              [],
-              (acc, sCard) => {
-                if sCard == card {
-                  Array.concat(acc, Array.concat([sCard], dragPile))
-                } else {
-                  Array.concat(acc, [sCard])
-                }
-              },
-            )
-          }),
-          piles: game.piles->Array.map(stack => {
-            stack->Array.reduce(
-              [],
-              (acc, sCard) => {
-                if sCard == card {
-                  Array.concat(acc, Array.concat([sCard], dragPile))
-                } else {
-                  Array.concat(acc, [sCard])
-                }
-              },
-            )
-          }),
-        }
-      })
-    | Foundation(i) =>
-      setGame(game => {
-        {
-          ...game,
-          foundations: game.foundations->Array.mapWithIndex((foundation, fi) => {
-            fi == i ? dragPile : foundation
-          }),
-        }
-      })
-    | Pile(i) =>
-      setGame(game => {
-        {
-          ...game,
-          piles: game.piles->Array.mapWithIndex((pile, pi) => {
-            pi == i ? dragPile : pile
-          }),
-        }
-      })
     | _ => ()
     }
   }
 
-  let applyToOthers = (card, game, f) => {
-    game.foundations->ArrayAux.forEach2((stack, sCard, _, j) => {
-      if card == sCard {
-        f(stack->Array.get(j + 1))
-      }
-    })
+  let applyMoveToOthers = (space: space, game, move) => {
+    switch space {
+    | Card(card) => {
+        game.foundations->ArrayAux.forEach2((stack, sCard, _, j) => {
+          if card == sCard {
+            stack->Array.get(j + 1)->Option.mapOr((), x => move(Card(x)))
+          }
+        })
 
-    game.piles->ArrayAux.forEach2((stack, sCard, _, j) => {
-      if card == sCard {
-        f(stack->Array.get(j + 1))
+        game.piles->ArrayAux.forEach2((stack, sCard, _, j) => {
+          if card == sCard {
+            stack->Array.get(j + 1)->Option.mapOr((), x => move(Card(x)))
+          }
+        })
       }
-    })
+    | _ => ()
+    }
   }
 
   let autoProgress = setGame => {
@@ -407,533 +480,88 @@ module GameRules = {
       moveToState()
     }
   }
-}
 
-let getShuffledDeck = () => {
-  Card.allRanks
-  ->Array.reduce([], (a, rank) => {
-    Card.allSuits->Array.reduce(a, (a2, suit) => {
-      a2->Array.concat([
-        (
-          {
-            suit,
-            rank,
-          }: Card.card
-        ),
-      ])
-    })
-  })
-  ->Array.toShuffled
-}
-
-let shuffledDeck = getShuffledDeck()
-
-@set @scope("style") external setStyleLeft: (Dom.element, string) => unit = "left"
-@set @scope("style") external setStyleDisplay: (Dom.element, string) => unit = "display"
-@set @scope("style") external setStyleTop: (Dom.element, string) => unit = "top"
-@set @scope("style") external setStyleZIndex: (Dom.element, string) => unit = "z-index"
-
-@val @scope("performance") external now: unit => float = "now"
-@val external requestAnimationFrame: (float => unit) => unit = "requestAnimationFrame"
-
-@val @module("./other.js")
-external appendReactElement: (React.element, string) => unit = "appendReactElement"
-
-let zIndexFromElement = element => {
-  Obj.magic(element)["style"]["z-index"]->Int.fromString
-}
-
-let getSpace = element => {
-  switch element->Element.id->Js.Json.parseExn->GameRules.space_decode {
-  | Ok(d) => Some(d)
-  | _ => None
+  module Independent = {
+    @react.component
+    let make = (~setRef, ~onMouseDown) => {
+      <React.Fragment>
+        {[[], [], [], []]
+        ->Array.mapWithIndex((_, i) => {
+          <div
+            key={Foundation(i)->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
+            className="absolute border border-slate-200 bg-slate-100 rounded w-14 h-20"
+            style={{
+              top: "100px",
+              left: (i * 70)->Int.toString ++ "px",
+              zIndex: "0",
+            }}
+          />
+        })
+        ->React.array}
+        {[[], [], [], [], [], [], []]
+        ->Array.mapWithIndex((_, i) => {
+          <div
+            key={Pile(i)->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+            className="absolute border border-slate-200 bg-slate-100  rounded w-14 h-20"
+            style={{
+              top: "200px",
+              left: (i * 70)->Int.toString ++ "px",
+              zIndex: "0",
+            }}
+          />
+        })
+        ->React.array}
+        {shuffledDeck
+        ->Array.map(card => {
+          <CardDisplay
+            card={card}
+            key={Card(card)->spaceToString}
+            id={Card(card)->spaceToString}
+            cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
+            onMouseDown={onMouseDown}
+          />
+        })
+        ->React.array}
+      </React.Fragment>
+    }
   }
-}
 
-let spaceToString = space => {
-  space->GameRules.space_encode->Js.Json.stringify
-}
-
-type position = {
-  top: float,
-  right: float,
-  bottom: float,
-  left: float,
-}
-
-let elementPosition = element => {
-  let a = element->Element.getBoundingClientRect
-
-  {top: a->DomRect.top, right: a->DomRect.right, bottom: a->DomRect.bottom, left: a->DomRect.left}
-}
-
-let eventPosition = event => {
-  event
-  ->JsxEvent.Mouse.currentTarget
-  ->Obj.magic
-  ->elementPosition
-}
-
-module CardDisplay = {
-  @react.component
-  let make = (~card, ~id, ~cardRef, ~onMouseDown) => {
-    <div id={id} ref={cardRef} onMouseDown={onMouseDown} className="absolute w-14 h-20 select-none">
-      <div
-        style={{
-          transform: Card.rotation(card),
-          // position: "relative",
-          color: card->Card.colorHex,
+  module Dependent = {
+    @react.component
+    let make = (~setGame, ~moveToState, ~autoProgress, ~game) => {
+      <React.Fragment>
+        {if game.stock->Array.length == 0 {
+          <div
+            key={"stock-base"}
+            onClick={_ => {
+              Custom.restock(setGame, moveToState)
+            }}
+            className="absolute bg-blue-200 rounded w-14 h-20"
+            style={{
+              top: "0px",
+              left: "0px",
+              zIndex: "53",
+            }}
+          />
+        } else {
+          <div
+            key={"stock-cover"}
+            onClick={_ => {
+              Custom.dealToWaste(setGame, moveToState, autoProgress)->ignore
+            }}
+            className="absolute bg-blue-700 rounded w-14 h-20"
+            style={{
+              top: "0px",
+              left: "0px",
+              zIndex: "53",
+            }}
+          />
         }}
-        className={[
-          " border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
-        ]->Array.join(" ")}>
-        <span className="flex flex-col">
-          <span className="flex flex-row">
-            <span
-              className={[
-                "font-medium ",
-                switch card.rank {
-                | R10 => "tracking-[-0.1rem] w-4"
-                | _ => "w-3.5"
-                },
-              ]->Array.join(" ")}>
-              {card->Card.rankString->React.string}
-            </span>
-            <span className="w-3.5 flex flex-row justify-center">
-              {card->Card.suitString->React.string}
-            </span>
-          </span>
-          <span className="w-3.5 flex flex-row mt-0.5 -ml-0.5">
-            {card->Card.suitString->React.string}
-          </span>
-        </span>
-      </div>
-    </div>
-  }
-}
-
-type state = {history: array<GameRules.game>}
-
-type undoStats = {
-  currentUndoDepth: int,
-  undos: array<int>,
-}
-
-let undoStats = ref({
-  currentUndoDepth: 0,
-  undos: [],
-})
-
-let state = ref({
-  history: [GameRules.initiateGame(shuffledDeck)],
-})
-
-let listeners = Set.make()
-
-let subscribe = listener => {
-  listeners->Set.add(listener)
-  let unsubscribe = () => listeners->Set.delete(listener)->ignore
-  unsubscribe
-}
-
-let setUndoStats = f => {
-  undoStats.contents = f(undoStats.contents)
-}
-
-let setState = f => {
-  state.contents = f(state.contents)
-}
-
-let getGame = () =>
-  state.contents.history->Array.getUnsafe(state.contents.history->Array.length - 1)
-
-let setGame = f => {
-  if undoStats.contents.currentUndoDepth > 0 {
-    setUndoStats(undoStats => {
-      currentUndoDepth: 0,
-      undos: Array.concat(undoStats.undos, [undoStats.currentUndoDepth]),
-    })
-  }
-
-  setState(state => {
-    let newGame = f(getGame())
-    listeners->Set.forEach(listener => listener(_ => newGame))
-
-    {
-      history: Array.concat(state.history, [newGame]),
-    }
-  })
-}
-
-let _undo = () => {
-  if state.contents.history->Array.length > 1 {
-    setState(state => {
-      {
-        history: state.history->Array.slice(~start=0, ~end=state.history->Array.length - 1),
-      }
-    })
-    setUndoStats(undoStats => {
-      ...undoStats,
-      currentUndoDepth: undoStats.currentUndoDepth + 1,
-    })
-  }
-}
-
-module Independent = {
-  @react.component
-  let make = (~setRef, ~onMouseDown) => {
-    <React.Fragment>
-      {[[], [], [], []]
-      ->Array.mapWithIndex((_, i) => {
-        <div
-          key={Foundation(i)->spaceToString}
-          ref={ReactDOM.Ref.callbackDomRef(setRef(GameRules.Foundation(i)))}
-          className="absolute border border-slate-200 bg-slate-100 rounded w-14 h-20"
-          style={{
-            top: "100px",
-            left: (i * 70)->Int.toString ++ "px",
-            zIndex: "0",
-          }}
-        />
-      })
-      ->React.array}
-      {[[], [], [], [], [], [], []]
-      ->Array.mapWithIndex((_, i) => {
-        <div
-          key={Pile(i)->spaceToString}
-          ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-          className="absolute border border-slate-200 bg-slate-100  rounded w-14 h-20"
-          style={{
-            top: "200px",
-            left: (i * 70)->Int.toString ++ "px",
-            zIndex: "0",
-          }}
-        />
-      })
-      ->React.array}
-      {shuffledDeck
-      ->Array.map(card => {
-        <CardDisplay
-          card={card}
-          key={Card(card)->spaceToString}
-          id={Card(card)->spaceToString}
-          cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
-          onMouseDown={onMouseDown}
-        />
-      })
-      ->React.array}
-    </React.Fragment>
-  }
-}
-
-let useGame = () => {
-  let (externalState, setExternalState) = React.useState(() => getGame())
-  React.useEffect0(() => {
-    let unsubscribe = subscribe(setExternalState)
-    Some(() => unsubscribe())
-  })
-  let game = externalState
-
-  game
-}
-
-module Dependent = {
-  @react.component
-  let make = (~setGame, ~moveToState, ~autoProgress) => {
-    let game = useGame()
-    <React.Fragment>
-      {if game.stock->Array.length == 0 {
-        <div
-          key={"stock-base"}
-          onClick={_ => {
-            GameRules.Custom.restock(setGame, moveToState)
-          }}
-          className="absolute bg-blue-200 rounded w-14 h-20"
-          style={{
-            top: "0px",
-            left: "0px",
-            zIndex: "53",
-          }}
-        />
-      } else {
-        <div
-          key={"stock-cover"}
-          onClick={_ => {
-            GameRules.Custom.dealToWaste(setGame, moveToState, autoProgress)->ignore
-          }}
-          className="absolute bg-blue-700 rounded w-14 h-20"
-          style={{
-            top: "0px",
-            left: "0px",
-            zIndex: "53",
-          }}
-        />
-      }}
-    </React.Fragment>
-  }
-}
-
-@react.component
-let make = () => {
-  let refs = React.useRef([])
-
-  let dragCard: React.ref<option<Dom.element>> = React.useRef(None)
-  let offset = React.useRef((0, 0))
-  let originalData = React.useRef(None)
-
-  let getElement = a => refs.current->Array.find(el => el->getSpace == Some(a))
-
-  let setRef = card => (element: Js.Nullable.t<Dom.element>) => {
-    switch element {
-    | Value(a) => {
-        a->Element.setId(card->spaceToString)
-
-        refs.current->Array.push(a)
-      }
-    | Null => ()
-    | Undefined => ()
+      </React.Fragment>
     }
   }
-
-  let applyToOthers = (element, f) => {
-    switch element->getSpace {
-    | Some(Card(card)) => {
-        let game = getGame()
-
-        let appliedF = space => {
-          space
-          ->Option.flatMap(x => Card(x)->getElement)
-          ->Option.mapOr((), childEl => {
-            f(childEl)
-          })
-        }
-
-        GameRules.applyToOthers(card, game, appliedF)
-      }
-    | _ => ()
-    }
-  }
-
-  let rec move = (element, left, top, zIndex, offset) => {
-    element->setStyleLeft(left->Int.toString ++ "px")
-    element->setStyleTop(top->Int.toString ++ "px")
-    zIndex->Option.mapOr((), zIndex => {
-      element->setStyleZIndex(zIndex->Int.toString)
-    })
-
-    offset->Option.mapOr((), ((leftOffset, topOffset)) => {
-      applyToOthers(element, childEl =>
-        move(
-          childEl,
-          left + leftOffset,
-          top + topOffset,
-          zIndex->Option.map(zIndex => zIndex + 1),
-          offset,
-        )
-      )
-    })
-  }
-
-  let moveWithTime = (element, targetLeft, targetTop, zIndex, offset, duration) => {
-    let start = element->elementPosition
-
-    let boardPos =
-      document
-      ->Document.getElementById("board")
-      ->Option.mapOr(
-        {
-          top: 0.,
-          left: 0.,
-          bottom: 0.,
-          right: 0.,
-        },
-        board => board->elementPosition,
-      )
-
-    let start = {
-      top: start.top -. boardPos.top,
-      left: start.left -. boardPos.left,
-      bottom: start.bottom -. boardPos.bottom,
-      right: start.right -. boardPos.right,
-    }
-
-    let startTime = now()
-
-    let rec step: float => unit = currentTime => {
-      let elapsedTime = currentTime -. startTime
-      let progress = Math.min(elapsedTime /. duration, 1.) // Clamp progress between 0 and 1
-      // let easedProgress = easeOutQuad(progress)
-      let easedProgress = progress
-      let leftMove = start.left +. (targetLeft -. start.left) *. easedProgress
-      let topMove = start.top +. (targetTop -. start.top) *. easedProgress
-      move(element, leftMove->Int.fromFloat, topMove->Int.fromFloat, zIndex, offset)
-
-      if progress < 1. {
-        requestAnimationFrame(step)
-      }
-    }
-
-    requestAnimationFrame(step)
-  }
-
-  let moveToState = () => {
-    GameRules.cardLocs(getGame())->Array.forEach(a => {
-      switch getElement(Card(a.card)) {
-      | None => ()
-      | Some(element) =>
-        moveWithTime(element, a.x->Int.toFloat, a.y->Int.toFloat, Some(a.z), None, 100.)
-      }
-    })
-  }
-
-  let rec liftUp = (element, zIndex) => {
-    element->setStyleZIndex(zIndex->Int.toString)
-    applyToOthers(element, childEl => {
-      liftUp(childEl, zIndex + 1)
-    })
-  }
-
-  let getOverlap = (aEl, bEl) => {
-    let aPos = aEl->elementPosition
-    let bPos = bEl->elementPosition
-
-    let overlapX = Math.max(0., Math.min(aPos.right, bPos.right) -. Math.max(aPos.left, bPos.left))
-    let overlapY = Math.max(0., Math.min(aPos.bottom, bPos.bottom) -. Math.max(aPos.top, bPos.top))
-
-    overlapX *. overlapY
-  }
-
-  let onMouseDown = event => {
-    let eventElement =
-      event
-      ->JsxEvent.Mouse.currentTarget
-      ->Obj.magic
-
-    switch eventElement->getSpace {
-    | Some(Card(card)) =>
-      if GameRules.canDrag(card, getGame()) {
-        dragCard.current = eventElement->Some
-
-        let dragCardPos = eventElement->elementPosition
-
-        let boardPos =
-          document
-          ->Document.getElementById("board")
-          ->Option.mapOr(
-            {
-              top: 0.,
-              left: 0.,
-              bottom: 0.,
-              right: 0.,
-            },
-            board => board->elementPosition,
-          )
-
-        originalData.current = eventElement->zIndexFromElement->Option.map(v => (dragCardPos, v))
-
-        liftUp(eventElement, 1000)
-
-        let pos = event->eventPosition
-
-        offset.current = (
-          event->JsxEvent.Mouse.clientX - pos.left->Int.fromFloat + boardPos.left->Int.fromFloat,
-          event->JsxEvent.Mouse.clientY - pos.top->Int.fromFloat + boardPos.top->Int.fromFloat,
-        )
-      }
-    | _ => ()
-    }
-  }
-
-  let onMouseMove = event => {
-    dragCard.current->Option.mapOr((), dragCard => {
-      let (offsetX, offsetY) = offset.current
-      let leftMove = event->MouseEvent.clientX - offsetX
-      let topMove = event->MouseEvent.clientY - offsetY
-
-      move(dragCard, leftMove, topMove, None, Some(0, 20))
-    })
-  }
-
-  let getDragCard = () => {
-    switch dragCard.current {
-    | Some(dragCardEl) =>
-      switch dragCardEl->getSpace {
-      | Some(Card(dragCard)) => Some(dragCardEl, dragCard)
-      | _ => None
-      }
-    | _ => None
-    }
-  }
-
-  let autoProgress = () => {
-    condInterval(
-      () => {
-        moveToState()
-      },
-      500,
-      () => {
-        GameRules.autoProgress(setGame)
-      },
-    )
-  }
-
-  let onMouseUp = _ => {
-    switch getDragCard() {
-    | Some((dragCardEl, dragCard)) => {
-        let dropOn =
-          refs.current
-          ->Array.reduce(None, (acc: option<(float, Dom.element)>, el) => {
-            el
-            ->getSpace
-            ->Option.mapOr(acc, elSpace => {
-              if GameRules.canDrop(dragCard, elSpace, getGame()) {
-                let overlap = getOverlap(el, dragCardEl)
-                let new = Some((overlap, el))
-
-                if overlap > 0. {
-                  switch acc {
-                  | None => new
-                  | Some((accOverlap, _)) => accOverlap > overlap ? acc : new
-                  }
-                } else {
-                  acc
-                }
-              } else {
-                acc
-              }
-            })
-          })
-          ->Option.map(((_, x)) => x)
-
-        switch dropOn {
-        | None => ()
-        | Some(dropOnEl) =>
-          switch dropOnEl->getSpace {
-          | Some(dropOnSpace) => GameRules.onDrop(dropOnSpace, dragCard, getGame(), setGame)
-          | None => ()
-          }
-        }
-
-        moveToState()
-
-        autoProgress()
-      }
-    | None => ()
-    }
-
-    dragCard.current = None
-  }
-
-  React.useEffect(() => {
-    window->Window.addMouseMoveEventListener(onMouseMove)
-    window->Window.addMouseUpEventListener(onMouseUp)
-    moveToState()
-    autoProgress()
-    None
-  }, [])
-
-  <div id={"board"} className="relative m-5">
-    <Independent onMouseDown setRef />
-    <Dependent setGame moveToState autoProgress />
-  </div>
 }
+
+module Game = GameBase.GameBase(GameRules)

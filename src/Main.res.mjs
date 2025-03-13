@@ -10,7 +10,7 @@ import './index.css'
 var domElement = document.querySelector("#root");
 
 if (!(domElement == null)) {
-  Client.createRoot(domElement).render(JsxRuntime.jsx(Klondike2.make, {}));
+  Client.createRoot(domElement).render(JsxRuntime.jsx(Klondike2.Game.make, {}));
 }
 
 export {

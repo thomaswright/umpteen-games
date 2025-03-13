@@ -5,8 +5,8 @@ import * as Decco from "@rescript-labs/decco/src/Decco.res.mjs";
 import * as React from "react";
 import * as Js_json from "rescript/lib/es6/js_json.js";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
+import * as GameBase from "./GameBase.res.mjs";
 import * as Js_array from "rescript/lib/es6/js_array.js";
-import * as Core__Int from "@rescript/core/src/Core__Int.res.mjs";
 import * as OtherJs from "./other.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
@@ -16,10 +16,6 @@ import * as JsxRuntime from "react/jsx-runtime";
 
 function numInterval(prim0, prim1, prim2) {
   return OtherJs.numInterval(prim0, prim1, prim2);
-}
-
-function condInterval(prim0, prim1, prim2) {
-  OtherJs.condInterval(prim0, prim1, prim2);
 }
 
 function removeLast(a) {
@@ -40,6 +36,16 @@ function update(a, i, f) {
             });
 }
 
+function insertAfter(arr, match, $$new) {
+  return Core__Array.reduce(arr, [], (function (acc, c) {
+                if (Caml_obj.equal(c, match)) {
+                  return acc.concat([c].concat($$new));
+                } else {
+                  return acc.concat([c]);
+                }
+              }));
+}
+
 function forEach2(a, f) {
   a.forEach(function (el1, i) {
         el1.forEach(function (el2, j) {
@@ -52,8 +58,71 @@ var ArrayAux = {
   removeLast: removeLast,
   getLast: getLast,
   update: update,
+  insertAfter: insertAfter,
   forEach2: forEach2
 };
+
+function Klondike2$CardDisplay(props) {
+  var card = props.card;
+  var match = card.rank;
+  var tmp;
+  tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
+  return JsxRuntime.jsx("div", {
+              children: JsxRuntime.jsx("div", {
+                    children: JsxRuntime.jsxs("span", {
+                          children: [
+                            JsxRuntime.jsxs("span", {
+                                  children: [
+                                    JsxRuntime.jsx("span", {
+                                          children: Card.rankString(card),
+                                          className: [
+                                              "font-medium ",
+                                              tmp
+                                            ].join(" ")
+                                        }),
+                                    JsxRuntime.jsx("span", {
+                                          children: Card.suitString(card),
+                                          className: "w-3.5 flex flex-row justify-center"
+                                        })
+                                  ],
+                                  className: "flex flex-row"
+                                }),
+                            JsxRuntime.jsx("span", {
+                                  children: Card.suitString(card),
+                                  className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
+                                })
+                          ],
+                          className: "flex flex-col"
+                        }),
+                    className: [" border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
+                    style: {
+                      color: Card.colorHex(card),
+                      transform: Card.rotation(card)
+                    }
+                  }),
+              ref: Caml_option.some(props.cardRef),
+              className: "absolute w-14 h-20 select-none",
+              id: props.id,
+              onMouseDown: props.onMouseDown
+            });
+}
+
+var CardDisplay = {
+  make: Klondike2$CardDisplay
+};
+
+function getShuffledDeck() {
+  return Core__Array.toShuffled(Core__Array.reduce(Card.allRanks, [], (function (a, rank) {
+                    return Core__Array.reduce(Card.allSuits, a, (function (a2, suit) {
+                                  return a2.concat([{
+                                                suit: suit,
+                                                rank: rank
+                                              }]);
+                                }));
+                  })));
+}
+
+var shuffledDeck = getShuffledDeck();
 
 function space_encode(value) {
   if (typeof value !== "object") {
@@ -193,7 +262,19 @@ function space_decode(value) {
   return Decco.error(undefined, "Invalid variant constructor", Belt_Array.getExn(jsonArr$1, 0));
 }
 
-function initiateGame(shuffledDeck) {
+function getSpace(element) {
+  var d = space_decode(JSON.parse(element.id));
+  if (d.TAG === "Ok") {
+    return d._0;
+  }
+  
+}
+
+function spaceToString(space) {
+  return JSON.stringify(space_encode(space));
+}
+
+function initiateGame() {
   return {
           piles: [
             shuffledDeck.slice(0, 1),
@@ -216,7 +297,7 @@ function initiateGame(shuffledDeck) {
         };
 }
 
-function cardLocs(game) {
+function getSpaceLocs(game) {
   var cards = {
     contents: []
   };
@@ -224,36 +305,56 @@ function cardLocs(game) {
     cards.contents = cards.contents.concat([card]);
   };
   forEach2(game.piles, (function (param, card, i, j) {
-          addToCards({
-                card: card,
-                x: Math.imul(i, 70),
-                y: 200 + Math.imul(j, 20) | 0,
-                z: j + 1 | 0
-              });
+          addToCards([
+                {
+                  TAG: "Card",
+                  _0: card
+                },
+                {
+                  x: Math.imul(i, 70),
+                  y: 200 + Math.imul(j, 20) | 0,
+                  z: j + 1 | 0
+                }
+              ]);
         }));
   forEach2(game.foundations, (function (param, card, i, j) {
-          addToCards({
-                card: card,
-                x: Math.imul(i, 70),
-                y: 100,
-                z: j + 1 | 0
-              });
+          addToCards([
+                {
+                  TAG: "Card",
+                  _0: card
+                },
+                {
+                  x: Math.imul(i, 70),
+                  y: 100,
+                  z: j + 1 | 0
+                }
+              ]);
         }));
   game.stock.forEach(function (card, i) {
-        addToCards({
-              card: card,
-              x: 0,
-              y: 0,
-              z: i + 1 | 0
-            });
+        addToCards([
+              {
+                TAG: "Card",
+                _0: card
+              },
+              {
+                x: 0,
+                y: 0,
+                z: i + 1 | 0
+              }
+            ]);
       });
   game.waste.forEach(function (card, i) {
-        addToCards({
-              card: card,
-              x: 70 + Math.imul(20, i) | 0,
-              y: 0,
-              z: i + 1 | 0
-            });
+        addToCards([
+              {
+                TAG: "Card",
+                _0: card
+              },
+              {
+                x: 70 + Math.imul(20, i) | 0,
+                y: 0,
+                z: i + 1 | 0
+              }
+            ]);
       });
   return cards.contents;
 }
@@ -327,7 +428,14 @@ function buildDragPile(card, game) {
   return dragPile.contents;
 }
 
-function canDrag(card, game) {
+function canDrag(space, game) {
+  if (typeof space !== "object") {
+    return false;
+  }
+  if (space.TAG !== "Card") {
+    return false;
+  }
+  var card = space._0;
   var dragPile = buildDragPile(card, game);
   var match = baseSpace(card, game);
   var onTopIfNeeded;
@@ -387,7 +495,14 @@ function canDrag(card, game) {
   }
 }
 
-function canDrop(dragCard, dropSpace, game) {
+function canDrop(dragSpace, dropSpace, game) {
+  if (typeof dragSpace !== "object") {
+    return false;
+  }
+  if (dragSpace.TAG !== "Card") {
+    return false;
+  }
+  var dragCard = dragSpace._0;
   var dragPile = buildDragPile(dragCard, game);
   var notInDragPile = Core__Option.isNone(dragPile.find(function (pilePiece) {
             return Caml_obj.equal({
@@ -451,8 +566,14 @@ function canDrop(dragCard, dropSpace, game) {
   }
 }
 
-function onDrop(dropOnSpace, dragCard, game, setGame) {
-  var dragPile = buildDragPile(dragCard, game);
+function onDrop(dropOnSpace, dragSpace, game, setGame) {
+  if (typeof dragSpace !== "object") {
+    return ;
+  }
+  if (dragSpace.TAG !== "Card") {
+    return ;
+  }
+  var dragPile = buildDragPile(dragSpace._0, game);
   var removeDragPile = function (x) {
     return x.filter(function (sCard) {
                 return !dragPile.some(function (dCard) {
@@ -478,22 +599,10 @@ function onDrop(dropOnSpace, dragCard, game, setGame) {
         return setGame(function (game) {
                     return {
                             piles: game.piles.map(function (stack) {
-                                  return Core__Array.reduce(stack, [], (function (acc, sCard) {
-                                                if (Caml_obj.equal(sCard, card)) {
-                                                  return acc.concat([sCard].concat(dragPile));
-                                                } else {
-                                                  return acc.concat([sCard]);
-                                                }
-                                              }));
+                                  return insertAfter(stack, card, dragPile);
                                 }),
                             foundations: game.foundations.map(function (stack) {
-                                  return Core__Array.reduce(stack, [], (function (acc, sCard) {
-                                                if (Caml_obj.equal(sCard, card)) {
-                                                  return acc.concat([sCard].concat(dragPile));
-                                                } else {
-                                                  return acc.concat([sCard]);
-                                                }
-                                              }));
+                                  return insertAfter(stack, card, dragPile);
                                 }),
                             stock: game.stock,
                             waste: game.waste,
@@ -505,13 +614,9 @@ function onDrop(dropOnSpace, dragCard, game, setGame) {
         return setGame(function (game) {
                     return {
                             piles: game.piles,
-                            foundations: game.foundations.map(function (foundation, fi) {
-                                  if (fi === i) {
+                            foundations: update(game.foundations, i, (function (param) {
                                     return dragPile;
-                                  } else {
-                                    return foundation;
-                                  }
-                                }),
+                                  })),
                             stock: game.stock,
                             waste: game.waste,
                             gameEnded: game.gameEnded
@@ -521,13 +626,9 @@ function onDrop(dropOnSpace, dragCard, game, setGame) {
         var i$1 = dropOnSpace._0;
         return setGame(function (game) {
                     return {
-                            piles: game.piles.map(function (pile, pi) {
-                                  if (pi === i$1) {
+                            piles: update(game.piles, i$1, (function (param) {
                                     return dragPile;
-                                  } else {
-                                    return pile;
-                                  }
-                                }),
+                                  })),
                             foundations: game.foundations,
                             stock: game.stock,
                             waste: game.waste,
@@ -538,16 +639,33 @@ function onDrop(dropOnSpace, dragCard, game, setGame) {
   }
 }
 
-function applyToOthers(card, game, f) {
+function applyMoveToOthers(space, game, move) {
+  if (typeof space !== "object") {
+    return ;
+  }
+  if (space.TAG !== "Card") {
+    return ;
+  }
+  var card = space._0;
   forEach2(game.foundations, (function (stack, sCard, param, j) {
           if (Caml_obj.equal(card, sCard)) {
-            return f(stack[j + 1 | 0]);
+            return Core__Option.mapOr(stack[j + 1 | 0], undefined, (function (x) {
+                          move({
+                                TAG: "Card",
+                                _0: x
+                              });
+                        }));
           }
           
         }));
   forEach2(game.piles, (function (stack, sCard, param, j) {
           if (Caml_obj.equal(card, sCard)) {
-            return f(stack[j + 1 | 0]);
+            return Core__Option.mapOr(stack[j + 1 | 0], undefined, (function (x) {
+                          move({
+                                TAG: "Card",
+                                _0: x
+                              });
+                        }));
           }
           
         }));
@@ -646,191 +764,7 @@ var Custom = {
   restock: restock
 };
 
-var GameRules = {
-  space_encode: space_encode,
-  space_decode: space_decode,
-  initiateGame: initiateGame,
-  cardLocs: cardLocs,
-  baseSpace: baseSpace,
-  buildDragPile: buildDragPile,
-  canDrag: canDrag,
-  canDrop: canDrop,
-  onDrop: onDrop,
-  applyToOthers: applyToOthers,
-  autoProgress: autoProgress,
-  Custom: Custom
-};
-
-function getShuffledDeck() {
-  return Core__Array.toShuffled(Core__Array.reduce(Card.allRanks, [], (function (a, rank) {
-                    return Core__Array.reduce(Card.allSuits, a, (function (a2, suit) {
-                                  return a2.concat([{
-                                                suit: suit,
-                                                rank: rank
-                                              }]);
-                                }));
-                  })));
-}
-
-var shuffledDeck = getShuffledDeck();
-
-function appendReactElement(prim0, prim1) {
-  OtherJs.appendReactElement(prim0, prim1);
-}
-
-function zIndexFromElement(element) {
-  return Core__Int.fromString(element.style["z-index"], undefined);
-}
-
-function getSpace(element) {
-  var d = space_decode(JSON.parse(element.id));
-  if (d.TAG === "Ok") {
-    return d._0;
-  }
-  
-}
-
-function spaceToString(space) {
-  return JSON.stringify(space_encode(space));
-}
-
-function elementPosition(element) {
-  var a = element.getBoundingClientRect();
-  return {
-          top: a.top,
-          right: a.right,
-          bottom: a.bottom,
-          left: a.left
-        };
-}
-
-function eventPosition($$event) {
-  return elementPosition($$event.currentTarget);
-}
-
-function Klondike2$CardDisplay(props) {
-  var card = props.card;
-  var match = card.rank;
-  var tmp;
-  tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
-  return JsxRuntime.jsx("div", {
-              children: JsxRuntime.jsx("div", {
-                    children: JsxRuntime.jsxs("span", {
-                          children: [
-                            JsxRuntime.jsxs("span", {
-                                  children: [
-                                    JsxRuntime.jsx("span", {
-                                          children: Card.rankString(card),
-                                          className: [
-                                              "font-medium ",
-                                              tmp
-                                            ].join(" ")
-                                        }),
-                                    JsxRuntime.jsx("span", {
-                                          children: Card.suitString(card),
-                                          className: "w-3.5 flex flex-row justify-center"
-                                        })
-                                  ],
-                                  className: "flex flex-row"
-                                }),
-                            JsxRuntime.jsx("span", {
-                                  children: Card.suitString(card),
-                                  className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
-                                })
-                          ],
-                          className: "flex flex-col"
-                        }),
-                    className: [" border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
-                    style: {
-                      color: Card.colorHex(card),
-                      transform: Card.rotation(card)
-                    }
-                  }),
-              ref: Caml_option.some(props.cardRef),
-              className: "absolute w-14 h-20 select-none",
-              id: props.id,
-              onMouseDown: props.onMouseDown
-            });
-}
-
-var CardDisplay = {
-  make: Klondike2$CardDisplay
-};
-
-var undoStats = {
-  contents: {
-    currentUndoDepth: 0,
-    undos: []
-  }
-};
-
-var state = {
-  contents: {
-    history: [initiateGame(shuffledDeck)]
-  }
-};
-
-var listeners = new Set();
-
-function subscribe(listener) {
-  listeners.add(listener);
-  return function () {
-    listeners.delete(listener);
-  };
-}
-
-function setUndoStats(f) {
-  undoStats.contents = f(undoStats.contents);
-}
-
-function setState(f) {
-  state.contents = f(state.contents);
-}
-
-function getGame() {
-  return state.contents.history[state.contents.history.length - 1 | 0];
-}
-
-function setGame(f) {
-  if (undoStats.contents.currentUndoDepth > 0) {
-    setUndoStats(function (undoStats) {
-          return {
-                  currentUndoDepth: 0,
-                  undos: undoStats.undos.concat([undoStats.currentUndoDepth])
-                };
-        });
-  }
-  setState(function (state) {
-        var newGame = f(getGame());
-        listeners.forEach(function (listener) {
-              listener(function (param) {
-                    return newGame;
-                  });
-            });
-        return {
-                history: state.history.concat([newGame])
-              };
-      });
-}
-
-function _undo() {
-  if (state.contents.history.length > 1) {
-    setState(function (state) {
-          return {
-                  history: state.history.slice(0, state.history.length - 1 | 0)
-                };
-        });
-    return setUndoStats(function (undoStats) {
-                return {
-                        currentUndoDepth: undoStats.currentUndoDepth + 1 | 0,
-                        undos: undoStats.undos
-                      };
-              });
-  }
-  
-}
-
-function Klondike2$Independent(props) {
+function Klondike2$GameRules$Independent(props) {
   var onMouseDown = props.onMouseDown;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
@@ -852,10 +786,10 @@ function Klondike2$Independent(props) {
                                     top: "100px",
                                     zIndex: "0"
                                   }
-                                }, spaceToString({
-                                      TAG: "Foundation",
-                                      _0: i
-                                    }));
+                                }, JSON.stringify(space_encode({
+                                          TAG: "Foundation",
+                                          _0: i
+                                        })));
                     }),
                 [
                     [],
@@ -877,57 +811,42 @@ function Klondike2$Independent(props) {
                                     top: "200px",
                                     zIndex: "0"
                                   }
-                                }, spaceToString({
-                                      TAG: "Pile",
-                                      _0: i
-                                    }));
+                                }, JSON.stringify(space_encode({
+                                          TAG: "Pile",
+                                          _0: i
+                                        })));
                     }),
                 shuffledDeck.map(function (card) {
                       return JsxRuntime.jsx(Klondike2$CardDisplay, {
                                   card: card,
-                                  id: spaceToString({
-                                        TAG: "Card",
-                                        _0: card
-                                      }),
+                                  id: JSON.stringify(space_encode({
+                                            TAG: "Card",
+                                            _0: card
+                                          })),
                                   cardRef: setRef({
                                         TAG: "Card",
                                         _0: card
                                       }),
                                   onMouseDown: onMouseDown
-                                }, spaceToString({
-                                      TAG: "Card",
-                                      _0: card
-                                    }));
+                                }, JSON.stringify(space_encode({
+                                          TAG: "Card",
+                                          _0: card
+                                        })));
                     })
               ]
             });
 }
 
 var Independent = {
-  make: Klondike2$Independent
+  make: Klondike2$GameRules$Independent
 };
 
-function useGame() {
-  var match = React.useState(function () {
-        return getGame();
-      });
-  var setExternalState = match[1];
-  React.useEffect((function () {
-          var unsubscribe = subscribe(setExternalState);
-          return (function () {
-                    unsubscribe();
-                  });
-        }), []);
-  return match[0];
-}
-
-function Klondike2$Dependent(props) {
+function Klondike2$GameRules$Dependent(props) {
   var autoProgress = props.autoProgress;
   var moveToState = props.moveToState;
   var setGame = props.setGame;
-  var game = useGame();
   return JsxRuntime.jsx(React.Fragment, {
-              children: game.stock.length === 0 ? JsxRuntime.jsx("div", {
+              children: props.game.stock.length === 0 ? JsxRuntime.jsx("div", {
                       className: "absolute bg-blue-200 rounded w-14 h-20",
                       style: {
                         left: "0px",
@@ -952,287 +871,49 @@ function Klondike2$Dependent(props) {
 }
 
 var Dependent = {
-  make: Klondike2$Dependent
+  make: Klondike2$GameRules$Dependent
 };
 
-function Klondike2(props) {
-  var refs = React.useRef([]);
-  var dragCard = React.useRef(undefined);
-  var offset = React.useRef([
-        0,
-        0
-      ]);
-  var originalData = React.useRef(undefined);
-  var getElement = function (a) {
-    return refs.current.find(function (el) {
-                return Caml_obj.equal(getSpace(el), a);
-              });
-  };
-  var setRef = function (card) {
-    return function (element) {
-      if (element === null || element === undefined) {
-        return ;
-      }
-      element.id = spaceToString(card);
-      refs.current.push(element);
-    };
-  };
-  var applyToOthers$1 = function (element, f) {
-    var match = getSpace(element);
-    if (match === undefined) {
-      return ;
-    }
-    if (typeof match !== "object") {
-      return ;
-    }
-    if (match.TAG !== "Card") {
-      return ;
-    }
-    var game = getGame();
-    var appliedF = function (space) {
-      Core__Option.mapOr(Core__Option.flatMap(space, (function (x) {
-                  return getElement({
-                              TAG: "Card",
-                              _0: x
-                            });
-                })), undefined, (function (childEl) {
-              f(childEl);
-            }));
-    };
-    applyToOthers(match._0, game, appliedF);
-  };
-  var move = function (element, left, top, zIndex, offset) {
-    element.style.left = left.toString() + "px";
-    element.style.top = top.toString() + "px";
-    Core__Option.mapOr(zIndex, undefined, (function (zIndex) {
-            element.style["z-index"] = zIndex.toString();
-          }));
-    Core__Option.mapOr(offset, undefined, (function (param) {
-            var topOffset = param[1];
-            var leftOffset = param[0];
-            applyToOthers$1(element, (function (childEl) {
-                    move(childEl, left + leftOffset | 0, top + topOffset | 0, Core__Option.map(zIndex, (function (zIndex) {
-                                return zIndex + 1 | 0;
-                              })), offset);
-                  }));
-          }));
-  };
-  var moveToState = function () {
-    cardLocs(getGame()).forEach(function (a) {
-          var element = getElement({
-                TAG: "Card",
-                _0: a.card
-              });
-          if (element !== undefined) {
-            var element$1 = Caml_option.valFromOption(element);
-            var targetLeft = a.x;
-            var targetTop = a.y;
-            var zIndex = a.z;
-            var offset;
-            var duration = 100;
-            var start = elementPosition(element$1);
-            var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
-                  top: 0,
-                  right: 0,
-                  bottom: 0,
-                  left: 0
-                }, (function (board) {
-                    return elementPosition(board);
-                  }));
-            var start_top = start.top - boardPos.top;
-            var start_right = start.right - boardPos.right;
-            var start_bottom = start.bottom - boardPos.bottom;
-            var start_left = start.left - boardPos.left;
-            var startTime = performance.now();
-            var step = function (currentTime) {
-              var elapsedTime = currentTime - startTime;
-              var progress = Math.min(elapsedTime / duration, 1);
-              var leftMove = start_left + (targetLeft - start_left) * progress;
-              var topMove = start_top + (targetTop - start_top) * progress;
-              move(element$1, leftMove | 0, topMove | 0, zIndex, offset);
-              if (progress < 1) {
-                requestAnimationFrame(step);
-                return ;
-              }
-              
-            };
-            requestAnimationFrame(step);
-            return ;
-          }
-          
-        });
-  };
-  var liftUp = function (element, zIndex) {
-    element.style["z-index"] = zIndex.toString();
-    applyToOthers$1(element, (function (childEl) {
-            liftUp(childEl, zIndex + 1 | 0);
-          }));
-  };
-  var getOverlap = function (aEl, bEl) {
-    var aPos = elementPosition(aEl);
-    var bPos = elementPosition(bEl);
-    var overlapX = Math.max(0, Math.min(aPos.right, bPos.right) - Math.max(aPos.left, bPos.left));
-    var overlapY = Math.max(0, Math.min(aPos.bottom, bPos.bottom) - Math.max(aPos.top, bPos.top));
-    return overlapX * overlapY;
-  };
-  var onMouseDown = function ($$event) {
-    var eventElement = $$event.currentTarget;
-    var match = getSpace(eventElement);
-    if (match === undefined) {
-      return ;
-    }
-    if (typeof match !== "object") {
-      return ;
-    }
-    if (match.TAG !== "Card") {
-      return ;
-    }
-    if (!canDrag(match._0, getGame())) {
-      return ;
-    }
-    dragCard.current = Caml_option.some(eventElement);
-    var dragCardPos = elementPosition(eventElement);
-    var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0
-        }, (function (board) {
-            return elementPosition(board);
-          }));
-    originalData.current = Core__Option.map(zIndexFromElement(eventElement), (function (v) {
-            return [
-                    dragCardPos,
-                    v
-                  ];
-          }));
-    liftUp(eventElement, 1000);
-    var pos = elementPosition($$event.currentTarget);
-    offset.current = [
-      ($$event.clientX - (pos.left | 0) | 0) + (boardPos.left | 0) | 0,
-      ($$event.clientY - (pos.top | 0) | 0) + (boardPos.top | 0) | 0
-    ];
-  };
-  var onMouseMove = function ($$event) {
-    Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
-            var match = offset.current;
-            var leftMove = $$event.clientX - match[0] | 0;
-            var topMove = $$event.clientY - match[1] | 0;
-            move(dragCard, leftMove, topMove, undefined, [
-                  0,
-                  20
-                ]);
-          }));
-  };
-  var getDragCard = function () {
-    var dragCardEl = dragCard.current;
-    if (dragCardEl === undefined) {
-      return ;
-    }
-    var dragCardEl$1 = Caml_option.valFromOption(dragCardEl);
-    var match = getSpace(dragCardEl$1);
-    if (match !== undefined && !(typeof match !== "object" || match.TAG !== "Card")) {
-      return [
-              dragCardEl$1,
-              match._0
-            ];
-    }
-    
-  };
-  var autoProgress$1 = function () {
-    condInterval((function () {
-            moveToState();
-          }), 500, (function () {
-            return autoProgress(setGame);
-          }));
-  };
-  var onMouseUp = function (param) {
-    var match = getDragCard();
-    if (match !== undefined) {
-      var dragCard$1 = match[1];
-      var dragCardEl = match[0];
-      var dropOn = Core__Option.map(Core__Array.reduce(refs.current, undefined, (function (acc, el) {
-                  return Core__Option.mapOr(getSpace(el), acc, (function (elSpace) {
-                                if (!canDrop(dragCard$1, elSpace, getGame())) {
-                                  return acc;
-                                }
-                                var overlap = getOverlap(el, dragCardEl);
-                                var $$new = [
-                                  overlap,
-                                  el
-                                ];
-                                if (overlap > 0 && !(acc !== undefined && acc[0] > overlap)) {
-                                  return $$new;
-                                } else {
-                                  return acc;
-                                }
-                              }));
-                })), (function (param) {
-              return param[1];
-            }));
-      if (dropOn !== undefined) {
-        var dropOnSpace = getSpace(Caml_option.valFromOption(dropOn));
-        if (dropOnSpace !== undefined) {
-          onDrop(dropOnSpace, dragCard$1, getGame(), setGame);
-        }
-        
-      }
-      moveToState();
-      autoProgress$1();
-    }
-    dragCard.current = undefined;
-  };
-  React.useEffect((function () {
-          window.addEventListener("mousemove", onMouseMove);
-          window.addEventListener("mouseup", onMouseUp);
-          moveToState();
-          autoProgress$1();
-        }), []);
-  return JsxRuntime.jsxs("div", {
-              children: [
-                JsxRuntime.jsx(Klondike2$Independent, {
-                      setRef: setRef,
-                      onMouseDown: onMouseDown
-                    }),
-                JsxRuntime.jsx(Klondike2$Dependent, {
-                      setGame: setGame,
-                      moveToState: moveToState,
-                      autoProgress: autoProgress$1
-                    })
-              ],
-              className: "relative m-5",
-              id: "board"
-            });
-}
+var GameRules = {
+  shuffledDeck: shuffledDeck,
+  space_encode: space_encode,
+  space_decode: space_decode,
+  getSpace: getSpace,
+  spaceToString: spaceToString,
+  initiateGame: initiateGame,
+  getSpaceLocs: getSpaceLocs,
+  baseSpace: baseSpace,
+  buildDragPile: buildDragPile,
+  canDrag: canDrag,
+  canDrop: canDrop,
+  onDrop: onDrop,
+  applyMoveToOthers: applyMoveToOthers,
+  autoProgress: autoProgress,
+  Custom: Custom,
+  Independent: Independent,
+  Dependent: Dependent
+};
 
-var make = Klondike2;
+var Game = GameBase.GameBase({
+      getSpace: getSpace,
+      spaceToString: spaceToString,
+      initiateGame: initiateGame,
+      getSpaceLocs: getSpaceLocs,
+      applyMoveToOthers: applyMoveToOthers,
+      canDrag: canDrag,
+      canDrop: canDrop,
+      onDrop: onDrop,
+      autoProgress: autoProgress,
+      Independent: Independent,
+      Dependent: Dependent
+    });
 
 export {
   numInterval ,
-  condInterval ,
   ArrayAux ,
-  GameRules ,
-  getShuffledDeck ,
-  shuffledDeck ,
-  appendReactElement ,
-  zIndexFromElement ,
-  getSpace ,
-  spaceToString ,
-  elementPosition ,
-  eventPosition ,
   CardDisplay ,
-  undoStats ,
-  state ,
-  listeners ,
-  subscribe ,
-  setUndoStats ,
-  setState ,
-  getGame ,
-  setGame ,
-  _undo ,
-  Independent ,
-  useGame ,
-  Dependent ,
-  make ,
+  getShuffledDeck ,
+  GameRules ,
+  Game ,
 }
 /* shuffledDeck Not a pure module */

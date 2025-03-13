@@ -4,7 +4,7 @@ switch ReactDOM.querySelector("#root") {
 | Some(domElement) =>
   ReactDOM.Client.createRoot(domElement)->ReactDOM.Client.Root.render(
     // <React.StrictMode>
-    <Klondike2 />,
+    <Klondike2.Game />,
     // </React.StrictMode>,
   )
 | None => ()
