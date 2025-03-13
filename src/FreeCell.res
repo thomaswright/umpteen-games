@@ -72,7 +72,7 @@ module GameRules = {
       ))
     })
 
-    game.free->ArrayAux.forEach2((_, card, i, j) => {
+    game.free->ArrayAux.forEach2((_, card, i, _) => {
       addToCards((
         Card(card),
         {
@@ -125,7 +125,7 @@ module GameRules = {
       }
     })
 
-    game.free->ArrayAux.forEach2((free, freeCard, _, _) => {
+    game.free->ArrayAux.forEach2((_, freeCard, _, _) => {
       if freeCard == card {
         dragPile := [card]
       }
@@ -149,7 +149,7 @@ module GameRules = {
           ->Option.mapOr(false, top => {
             top == card
           })
-        | Some(Pile(i)) => true
+        | Some(Pile(_)) => true
         // game.piles
         // ->Array.get(i)
         // ->Option.flatMap(stack => {
@@ -204,7 +204,6 @@ module GameRules = {
         | Pile(i) => game.piles->Array.getUnsafe(i)->Array.length == 0
         | Foundation(i) => game.foundations->Array.getUnsafe(i)->Array.length == 0
         | Free(i) => game.free->Array.getUnsafe(i)->Array.length == 0
-        | _ => false
         }
 
         let canBeParent = switch dropSpace {
@@ -219,7 +218,6 @@ module GameRules = {
         | Foundation(_) => dragCard.rank == RA
         | Pile(_) => dragCard.rank == RK
         | Free(_) => dragPile->Array.length == 1
-        | _ => false
         }
 
         notInDragPile && dropHasNoChildren && canBeParent
@@ -281,7 +279,6 @@ module GameRules = {
               free: game.free->ArrayAux.update(i, _ => dragPile),
             }
           })
-        | _ => ()
         }
       }
     | _ => ()
@@ -428,7 +425,7 @@ module GameRules = {
 
   module Dependent = {
     @react.component
-    let make = (~setGame, ~moveToState, ~autoProgress, ~game) => {
+    let make = (~setGame as _, ~moveToState as _, ~autoProgress as _, ~game as _) => {
       React.null
     }
   }

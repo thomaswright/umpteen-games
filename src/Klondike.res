@@ -165,7 +165,7 @@ module GameRules = {
           ->Option.mapOr(false, top => {
             top == card
           })
-        | Some(Pile(i)) => true
+        | Some(Pile(_)) => true
         // game.piles
         // ->Array.get(i)
         // ->Option.flatMap(stack => {

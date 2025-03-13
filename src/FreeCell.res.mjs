@@ -230,7 +230,7 @@ function getSpaceLocs(game) {
                 }
               ]);
         }));
-  Common.ArrayAux.forEach2(game.free, (function (param, card, i, j) {
+  Common.ArrayAux.forEach2(game.free, (function (param, card, i, param$1) {
           addToCards([
                 {
                   TAG: "Card",
@@ -301,7 +301,7 @@ function buildDragPile(card, game) {
           }
           
         }));
-  Common.ArrayAux.forEach2(game.free, (function (free, freeCard, param, param$1) {
+  Common.ArrayAux.forEach2(game.free, (function (param, freeCard, param$1, param$2) {
           if (Caml_obj.equal(freeCard, card)) {
             dragPile.contents = [card];
             return ;
