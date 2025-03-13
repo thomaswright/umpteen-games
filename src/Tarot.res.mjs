@@ -10,83 +10,12 @@ import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
-function suit_encode(value) {
-  switch (value) {
-    case "Spades" :
-        return ["Spades"];
-    case "Hearts" :
-        return ["Hearts"];
-    case "Diamonds" :
-        return ["Diamonds"];
-    case "Clubs" :
-        return ["Clubs"];
-    
-  }
-}
-
-function suit_decode(value) {
-  var jsonArr = Js_json.classify(value);
-  if (typeof jsonArr !== "object") {
-    return Decco.error(undefined, "Not a variant", value);
-  }
-  if (jsonArr.TAG !== "JSONArray") {
-    return Decco.error(undefined, "Not a variant", value);
-  }
-  var jsonArr$1 = jsonArr._0;
-  if (jsonArr$1.length === 0) {
-    return Decco.error(undefined, "Expected variant, found empty array", value);
-  }
-  var tagged = Js_array.map(Js_json.classify, jsonArr$1);
-  var match = Belt_Array.getExn(tagged, 0);
-  if (typeof match === "object" && match.TAG === "JSONString") {
-    switch (match._0) {
-      case "Clubs" :
-          if (tagged.length !== 1) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          } else {
-            return {
-                    TAG: "Ok",
-                    _0: "Clubs"
-                  };
-          }
-      case "Diamonds" :
-          if (tagged.length !== 1) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          } else {
-            return {
-                    TAG: "Ok",
-                    _0: "Diamonds"
-                  };
-          }
-      case "Hearts" :
-          if (tagged.length !== 1) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          } else {
-            return {
-                    TAG: "Ok",
-                    _0: "Hearts"
-                  };
-          }
-      case "Spades" :
-          if (tagged.length !== 1) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          } else {
-            return {
-                    TAG: "Ok",
-                    _0: "Spades"
-                  };
-          }
-      default:
-        
-    }
-  }
-  return Decco.error(undefined, "Invalid variant constructor", Belt_Array.getExn(jsonArr$1, 0));
-}
-
 function rank_encode(value) {
   switch (value) {
-    case "RA" :
-        return ["RA"];
+    case "R0" :
+        return ["R0"];
+    case "R1" :
+        return ["R1"];
     case "R2" :
         return ["R2"];
     case "R3" :
@@ -105,12 +34,28 @@ function rank_encode(value) {
         return ["R9"];
     case "R10" :
         return ["R10"];
-    case "RJ" :
-        return ["RJ"];
-    case "RQ" :
-        return ["RQ"];
-    case "RK" :
-        return ["RK"];
+    case "R11" :
+        return ["R11"];
+    case "R12" :
+        return ["R12"];
+    case "R13" :
+        return ["R13"];
+    case "R14" :
+        return ["R14"];
+    case "R15" :
+        return ["R15"];
+    case "R16" :
+        return ["R16"];
+    case "R17" :
+        return ["R17"];
+    case "R18" :
+        return ["R18"];
+    case "R19" :
+        return ["R19"];
+    case "R20" :
+        return ["R20"];
+    case "R21" :
+        return ["R21"];
     
   }
 }
@@ -131,6 +76,24 @@ function rank_decode(value) {
   var match = Belt_Array.getExn(tagged, 0);
   if (typeof match === "object" && match.TAG === "JSONString") {
     switch (match._0) {
+      case "R0" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "R0"
+                  };
+          }
+      case "R1" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "R1"
+                  };
+          }
       case "R10" :
           if (tagged.length !== 1) {
             return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
@@ -140,6 +103,87 @@ function rank_decode(value) {
                     _0: "R10"
                   };
           }
+      case "R11" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "R11"
+                  };
+          }
+      case "R12" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "R12"
+                  };
+          }
+      case "R13" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "R13"
+                  };
+          }
+      case "R14" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "R14"
+                  };
+          }
+      case "R15" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "R15"
+                  };
+          }
+      case "R16" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "R16"
+                  };
+          }
+      case "R17" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "R17"
+                  };
+          }
+      case "R18" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "R18"
+                  };
+          }
+      case "R19" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "R19"
+                  };
+          }
       case "R2" :
           if (tagged.length !== 1) {
             return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
@@ -147,6 +191,24 @@ function rank_decode(value) {
             return {
                     TAG: "Ok",
                     _0: "R2"
+                  };
+          }
+      case "R20" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "R20"
+                  };
+          }
+      case "R21" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "R21"
                   };
           }
       case "R3" :
@@ -212,42 +274,6 @@ function rank_decode(value) {
                     _0: "R9"
                   };
           }
-      case "RA" :
-          if (tagged.length !== 1) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          } else {
-            return {
-                    TAG: "Ok",
-                    _0: "RA"
-                  };
-          }
-      case "RJ" :
-          if (tagged.length !== 1) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          } else {
-            return {
-                    TAG: "Ok",
-                    _0: "RJ"
-                  };
-          }
-      case "RK" :
-          if (tagged.length !== 1) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          } else {
-            return {
-                    TAG: "Ok",
-                    _0: "RK"
-                  };
-          }
-      case "RQ" :
-          if (tagged.length !== 1) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          } else {
-            return {
-                    TAG: "Ok",
-                    _0: "RQ"
-                  };
-          }
       default:
         
     }
@@ -256,16 +282,10 @@ function rank_decode(value) {
 }
 
 function card_encode(value) {
-  return Js_dict.fromArray([
-              [
-                "suit",
-                suit_encode(value.suit)
-              ],
-              [
+  return Js_dict.fromArray([[
                 "rank",
                 rank_encode(value.rank)
-              ]
-            ]);
+              ]]);
 }
 
 function card_decode(value) {
@@ -276,39 +296,27 @@ function card_decode(value) {
   if (dict.TAG !== "JSONObject") {
     return Decco.error(undefined, "Not an object", value);
   }
-  var dict$1 = dict._0;
-  var suit = suit_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "suit"), null));
-  if (suit.TAG === "Ok") {
-    var rank = rank_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "rank"), null));
-    if (rank.TAG === "Ok") {
-      return {
-              TAG: "Ok",
-              _0: Decco.unsafeAddFieldToObject("suit", suit._0, Decco.unsafeAddFieldToObject("rank", rank._0, {}))
-            };
-    }
-    var e = rank._0;
+  var rank = rank_decode(Belt_Option.getWithDefault(Js_dict.get(dict._0, "rank"), null));
+  if (rank.TAG === "Ok") {
     return {
-            TAG: "Error",
-            _0: {
-              path: ".rank" + e.path,
-              message: e.message,
-              value: e.value
-            }
+            TAG: "Ok",
+            _0: Decco.unsafeAddFieldToObject("rank", rank._0, {})
           };
   }
-  var e$1 = suit._0;
+  var e = rank._0;
   return {
           TAG: "Error",
           _0: {
-            path: ".suit" + e$1.path,
-            message: e$1.message,
-            value: e$1.value
+            path: ".rank" + e.path,
+            message: e.message,
+            value: e.value
           }
         };
 }
 
 var allRanks = [
-  "RA",
+  "R0",
+  "R1",
   "R2",
   "R3",
   "R4",
@@ -318,40 +326,21 @@ var allRanks = [
   "R8",
   "R9",
   "R10",
-  "RJ",
-  "RQ",
-  "RK"
-];
-
-var allSuits = [
-  "Spades",
-  "Hearts",
-  "Diamonds",
-  "Clubs"
+  "R11",
+  "R12",
+  "R13",
+  "R14",
+  "R15",
+  "R16",
+  "R17",
+  "R18",
+  "R19",
+  "R20",
+  "R21"
 ];
 
 function equals(a, b) {
-  if (a.suit === b.suit) {
-    return a.rank === b.rank;
-  } else {
-    return false;
-  }
-}
-
-function isRed(card) {
-  if (card.suit === "Hearts") {
-    return true;
-  } else {
-    return card.suit === "Diamonds";
-  }
-}
-
-function isBlack(card) {
-  if (card.suit === "Spades") {
-    return true;
-  } else {
-    return card.suit === "Clubs";
-  }
+  return a.rank === b.rank;
 }
 
 function rankIsBelow(a, b) {
@@ -378,19 +367,17 @@ function stringToRank(s) {
   return s;
 }
 
-function suitString(card) {
-  return card.suit;
-}
-
-function stringToSuit(s) {
-  return s;
+function toString(card) {
+  return JSON.stringify(card_encode(card));
 }
 
 function displayRank(card) {
   var match = card.rank;
   switch (match) {
-    case "RA" :
-        return "A";
+    case "R0" :
+        return "0";
+    case "R1" :
+        return "1";
     case "R2" :
         return "2";
     case "R3" :
@@ -409,110 +396,62 @@ function displayRank(card) {
         return "9";
     case "R10" :
         return "10";
-    case "RJ" :
-        return "J";
-    case "RQ" :
-        return "Q";
-    case "RK" :
-        return "K";
+    case "R11" :
+        return "11";
+    case "R12" :
+        return "12";
+    case "R13" :
+        return "13";
+    case "R14" :
+        return "14";
+    case "R15" :
+        return "15";
+    case "R16" :
+        return "16";
+    case "R17" :
+        return "17";
+    case "R18" :
+        return "18";
+    case "R19" :
+        return "19";
+    case "R20" :
+        return "20";
+    case "R21" :
+        return "21";
     
   }
-}
-
-function displaySuit(card) {
-  var match = card.suit;
-  switch (match) {
-    case "Spades" :
-        return "♠";
-    case "Hearts" :
-        return "♥";
-    case "Diamonds" :
-        return "♦";
-    case "Clubs" :
-        return "♣";
-    
-  }
-}
-
-function color(card) {
-  var match = card.suit;
-  switch (match) {
-    case "Hearts" :
-    case "Diamonds" :
-        return "Red";
-    case "Spades" :
-    case "Clubs" :
-        return "Black";
-    
-  }
-}
-
-function colorHex(card) {
-  var match = card.suit;
-  switch (match) {
-    case "Hearts" :
-    case "Diamonds" :
-        return "hsl(0 100% 44.31%)";
-    case "Spades" :
-    case "Clubs" :
-        return "hsl(0 0% 0%)";
-    
-  }
-}
-
-function isOppositeColor(a, b) {
-  return isRed(a) !== isRed(b);
 }
 
 function rotation(card) {
-  var suitJitter = allSuits.findIndex(function (s) {
-        return s === card.suit;
-      }) - 2 | 0;
   var rankJitter = allRanks.findIndex(function (r) {
         return r === card.rank;
       }) % 4 - 2 | 0;
-  return "rotate(" + (suitJitter + rankJitter | 0).toString() + "deg)";
+  return "rotate(" + rankJitter.toString() + "deg)";
 }
 
-function toString(card) {
-  return JSON.stringify(card_encode(card));
-}
-
-function Card$Display(props) {
+function Tarot$Display(props) {
   var card = props.card;
   var match = card.rank;
   var tmp;
   tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
   return JsxRuntime.jsx("div", {
               children: JsxRuntime.jsx("div", {
-                    children: JsxRuntime.jsxs("span", {
-                          children: [
-                            JsxRuntime.jsxs("span", {
-                                  children: [
-                                    JsxRuntime.jsx("span", {
-                                          children: displayRank(card),
-                                          className: [
-                                              "font-medium ",
-                                              tmp
-                                            ].join(" ")
-                                        }),
-                                    JsxRuntime.jsx("span", {
-                                          children: displaySuit(card),
-                                          className: "w-3.5 flex flex-row justify-center"
-                                        })
-                                  ],
-                                  className: "flex flex-row"
-                                }),
-                            JsxRuntime.jsx("span", {
-                                  children: displaySuit(card),
-                                  className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
-                                })
-                          ],
+                    children: JsxRuntime.jsx("span", {
+                          children: JsxRuntime.jsx("span", {
+                                children: JsxRuntime.jsx("span", {
+                                      children: displayRank(card),
+                                      className: [
+                                          "font-medium ",
+                                          tmp
+                                        ].join(" ")
+                                    }),
+                                className: "flex flex-row"
+                              }),
                           className: "flex flex-col"
                         }),
-                    className: [" border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
+                    className: [" border border-gray-300 rounded w-14 h-20 bg-black shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
                     style: {
-                      color: colorHex(card),
+                      color: "white",
                       transform: rotation(card)
                     }
                   }),
@@ -524,45 +463,31 @@ function Card$Display(props) {
 }
 
 var Display = {
-  make: Card$Display
+  make: Tarot$Display
 };
 
 function getShuffledDeck() {
   return Core__Array.toShuffled(Core__Array.reduce(allRanks, [], (function (a, rank) {
-                    return Core__Array.reduce(allSuits, a, (function (a2, suit) {
-                                  return a2.concat([{
-                                                suit: suit,
-                                                rank: rank
-                                              }]);
-                                }));
+                    return a.concat([{
+                                  rank: rank
+                                }]);
                   })));
 }
 
 export {
-  suit_encode ,
-  suit_decode ,
   rank_encode ,
   rank_decode ,
   card_encode ,
   card_decode ,
   allRanks ,
-  allSuits ,
   equals ,
-  isRed ,
-  isBlack ,
   rankIsBelow ,
   rankIsAbove ,
   rankString ,
   stringToRank ,
-  suitString ,
-  stringToSuit ,
-  displayRank ,
-  displaySuit ,
-  color ,
-  colorHex ,
-  isOppositeColor ,
-  rotation ,
   toString ,
+  displayRank ,
+  rotation ,
   Display ,
   getShuffledDeck ,
 }
