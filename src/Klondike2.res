@@ -407,12 +407,6 @@ module GameRules = {
       moveToState()
     }
   }
-
-  // let stateResponse = (game) => {
-  //   if (game.stock -> Array.length ==0 ) {
-  //     g
-  //   }
-  // }
 }
 
 let getShuffledDeck = () => {
