@@ -3,126 +3,18 @@
 import * as Card from "./Card.res.mjs";
 import * as Decco from "@rescript-labs/decco/src/Decco.res.mjs";
 import * as React from "react";
+import * as Common from "./Common.res.mjs";
 import * as Js_json from "rescript/lib/es6/js_json.js";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as GameBase from "./GameBase.res.mjs";
 import * as Js_array from "rescript/lib/es6/js_array.js";
-import * as OtherJs from "./other.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
-function numInterval(prim0, prim1, prim2) {
-  return OtherJs.numInterval(prim0, prim1, prim2);
-}
-
-function removeLast(a) {
-  return a.toReversed().slice(1).toReversed();
-}
-
-function getLast(a) {
-  return a.toReversed()[0];
-}
-
-function update(a, i, f) {
-  return a.map(function (el, j) {
-              if (j === i) {
-                return f(el);
-              } else {
-                return el;
-              }
-            });
-}
-
-function insertAfter(arr, match, $$new) {
-  return Core__Array.reduce(arr, [], (function (acc, c) {
-                if (Caml_obj.equal(c, match)) {
-                  return acc.concat([c].concat($$new));
-                } else {
-                  return acc.concat([c]);
-                }
-              }));
-}
-
-function forEach2(a, f) {
-  a.forEach(function (el1, i) {
-        el1.forEach(function (el2, j) {
-              f(el1, el2, i, j);
-            });
-      });
-}
-
-var ArrayAux = {
-  removeLast: removeLast,
-  getLast: getLast,
-  update: update,
-  insertAfter: insertAfter,
-  forEach2: forEach2
-};
-
-function Klondike2$CardDisplay(props) {
-  var card = props.card;
-  var match = card.rank;
-  var tmp;
-  tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
-  return JsxRuntime.jsx("div", {
-              children: JsxRuntime.jsx("div", {
-                    children: JsxRuntime.jsxs("span", {
-                          children: [
-                            JsxRuntime.jsxs("span", {
-                                  children: [
-                                    JsxRuntime.jsx("span", {
-                                          children: Card.rankString(card),
-                                          className: [
-                                              "font-medium ",
-                                              tmp
-                                            ].join(" ")
-                                        }),
-                                    JsxRuntime.jsx("span", {
-                                          children: Card.suitString(card),
-                                          className: "w-3.5 flex flex-row justify-center"
-                                        })
-                                  ],
-                                  className: "flex flex-row"
-                                }),
-                            JsxRuntime.jsx("span", {
-                                  children: Card.suitString(card),
-                                  className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
-                                })
-                          ],
-                          className: "flex flex-col"
-                        }),
-                    className: [" border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
-                    style: {
-                      color: Card.colorHex(card),
-                      transform: Card.rotation(card)
-                    }
-                  }),
-              ref: Caml_option.some(props.cardRef),
-              className: "absolute w-14 h-20 select-none",
-              id: props.id,
-              onMouseDown: props.onMouseDown
-            });
-}
-
-var CardDisplay = {
-  make: Klondike2$CardDisplay
-};
-
-function getShuffledDeck() {
-  return Core__Array.toShuffled(Core__Array.reduce(Card.allRanks, [], (function (a, rank) {
-                    return Core__Array.reduce(Card.allSuits, a, (function (a2, suit) {
-                                  return a2.concat([{
-                                                suit: suit,
-                                                rank: rank
-                                              }]);
-                                }));
-                  })));
-}
-
-var shuffledDeck = getShuffledDeck();
+var shuffledDeck = Card.getShuffledDeck();
 
 function space_encode(value) {
   if (typeof value !== "object") {
@@ -304,7 +196,7 @@ function getSpaceLocs(game) {
   var addToCards = function (card) {
     cards.contents = cards.contents.concat([card]);
   };
-  forEach2(game.piles, (function (param, card, i, j) {
+  Common.ArrayAux.forEach2(game.piles, (function (param, card, i, j) {
           addToCards([
                 {
                   TAG: "Card",
@@ -317,7 +209,7 @@ function getSpaceLocs(game) {
                 }
               ]);
         }));
-  forEach2(game.foundations, (function (param, card, i, j) {
+  Common.ArrayAux.forEach2(game.foundations, (function (param, card, i, j) {
           addToCards([
                 {
                   TAG: "Card",
@@ -363,7 +255,7 @@ function baseSpace(dropCard, game) {
   var base = {
     contents: undefined
   };
-  forEach2(game.piles, (function (param, card, i, param$1) {
+  Common.ArrayAux.forEach2(game.piles, (function (param, card, i, param$1) {
           if (Caml_obj.equal(card, dropCard)) {
             base.contents = {
               TAG: "Pile",
@@ -373,7 +265,7 @@ function baseSpace(dropCard, game) {
           }
           
         }));
-  forEach2(game.foundations, (function (param, card, i, param$1) {
+  Common.ArrayAux.forEach2(game.foundations, (function (param, card, i, param$1) {
           if (Caml_obj.equal(card, dropCard)) {
             base.contents = {
               TAG: "Foundation",
@@ -404,14 +296,14 @@ function buildDragPile(card, game) {
   var dragPile = {
     contents: []
   };
-  forEach2(game.piles, (function (pile, pileCard, param, j) {
+  Common.ArrayAux.forEach2(game.piles, (function (pile, pileCard, param, j) {
           if (Caml_obj.equal(pileCard, card)) {
             dragPile.contents = pile.slice(j);
             return ;
           }
           
         }));
-  forEach2(game.foundations, (function (pile, pileCard, param, j) {
+  Common.ArrayAux.forEach2(game.foundations, (function (pile, pileCard, param, j) {
           if (Caml_obj.equal(pileCard, card)) {
             dragPile.contents = pile.slice(j);
             return ;
@@ -441,7 +333,7 @@ function canDrag(space, game) {
   var onTopIfNeeded;
   if (match !== undefined) {
     if (typeof match !== "object") {
-      onTopIfNeeded = match === "Waste" ? Core__Option.mapOr(game.waste.toReversed()[0], false, (function (top) {
+      onTopIfNeeded = match === "Waste" ? Core__Option.mapOr(Common.ArrayAux.getLast(game.waste), false, (function (top) {
                 return Caml_obj.equal(top, card);
               })) : false;
     } else {
@@ -451,7 +343,7 @@ function canDrag(space, game) {
             break;
         case "Foundation" :
             onTopIfNeeded = Core__Option.mapOr(Core__Option.flatMap(game.foundations[match._0], (function (stack) {
-                        return stack.toReversed()[0];
+                        return Common.ArrayAux.getLast(stack);
                       })), false, (function (top) {
                     return Caml_obj.equal(top, card);
                   }));
@@ -599,10 +491,10 @@ function onDrop(dropOnSpace, dragSpace, game, setGame) {
         return setGame(function (game) {
                     return {
                             piles: game.piles.map(function (stack) {
-                                  return insertAfter(stack, card, dragPile);
+                                  return Common.ArrayAux.insertAfter(stack, card, dragPile);
                                 }),
                             foundations: game.foundations.map(function (stack) {
-                                  return insertAfter(stack, card, dragPile);
+                                  return Common.ArrayAux.insertAfter(stack, card, dragPile);
                                 }),
                             stock: game.stock,
                             waste: game.waste,
@@ -614,7 +506,7 @@ function onDrop(dropOnSpace, dragSpace, game, setGame) {
         return setGame(function (game) {
                     return {
                             piles: game.piles,
-                            foundations: update(game.foundations, i, (function (param) {
+                            foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                     return dragPile;
                                   })),
                             stock: game.stock,
@@ -626,7 +518,7 @@ function onDrop(dropOnSpace, dragSpace, game, setGame) {
         var i$1 = dropOnSpace._0;
         return setGame(function (game) {
                     return {
-                            piles: update(game.piles, i$1, (function (param) {
+                            piles: Common.ArrayAux.update(game.piles, i$1, (function (param) {
                                     return dragPile;
                                   })),
                             foundations: game.foundations,
@@ -647,7 +539,7 @@ function applyMoveToOthers(space, game, move) {
     return ;
   }
   var card = space._0;
-  forEach2(game.foundations, (function (stack, sCard, param, j) {
+  Common.ArrayAux.forEach2(game.foundations, (function (stack, sCard, param, j) {
           if (Caml_obj.equal(card, sCard)) {
             return Core__Option.mapOr(stack[j + 1 | 0], undefined, (function (x) {
                           move({
@@ -658,7 +550,7 @@ function applyMoveToOthers(space, game, move) {
           }
           
         }));
-  forEach2(game.piles, (function (stack, sCard, param, j) {
+  Common.ArrayAux.forEach2(game.piles, (function (stack, sCard, param, j) {
           if (Caml_obj.equal(card, sCard)) {
             return Core__Option.mapOr(stack[j + 1 | 0], undefined, (function (x) {
                           move({
@@ -678,7 +570,7 @@ function autoProgress(setGame) {
   setGame(function (game) {
         game.foundations.forEach(function (foundation, i) {
               var canMove = function (c) {
-                var foundationCard = foundation.toReversed()[0];
+                var foundationCard = Common.ArrayAux.getLast(foundation);
                 if (foundationCard !== undefined) {
                   if (Card.rankIsBelow(foundationCard, c)) {
                     return foundationCard.suit === c.suit;
@@ -689,15 +581,15 @@ function autoProgress(setGame) {
                   return c.rank === "RA";
                 }
               };
-              Core__Option.mapOr(game.waste.toReversed()[0], undefined, (function (wasteCard) {
+              Core__Option.mapOr(Common.ArrayAux.getLast(game.waste), undefined, (function (wasteCard) {
                       if (Core__Option.isNone(newGame.contents) && canMove(wasteCard)) {
                         newGame.contents = {
                           piles: game.piles,
-                          foundations: update(game.foundations, i, (function (f) {
+                          foundations: Common.ArrayAux.update(game.foundations, i, (function (f) {
                                   return f.concat([wasteCard]);
                                 })),
                           stock: game.stock,
-                          waste: removeLast(game.waste),
+                          waste: Common.ArrayAux.removeLast(game.waste),
                           gameEnded: game.gameEnded
                         };
                         return ;
@@ -705,13 +597,13 @@ function autoProgress(setGame) {
                       
                     }));
               game.piles.forEach(function (pile, j) {
-                    Core__Option.mapOr(pile.toReversed()[0], undefined, (function (pileCard) {
+                    Core__Option.mapOr(Common.ArrayAux.getLast(pile), undefined, (function (pileCard) {
                             if (Core__Option.isNone(newGame.contents) && canMove(pileCard)) {
                               newGame.contents = {
-                                piles: update(game.piles, j, (function (p) {
-                                        return removeLast(p);
+                                piles: Common.ArrayAux.update(game.piles, j, (function (p) {
+                                        return Common.ArrayAux.removeLast(p);
                                       })),
-                                foundations: update(game.foundations, i, (function (f) {
+                                foundations: Common.ArrayAux.update(game.foundations, i, (function (f) {
                                         return f.concat([pileCard]);
                                       })),
                                 stock: game.stock,
@@ -742,7 +634,7 @@ async function dealToWaste(setGame, moveToState, autoProgress) {
         });
     moveToState();
   };
-  await OtherJs.numInterval(f, 200, 3);
+  await Common.numInterval(f, 200, 3);
   return autoProgress();
 }
 
@@ -817,7 +709,7 @@ function Klondike2$GameRules$Independent(props) {
                                         })));
                     }),
                 shuffledDeck.map(function (card) {
-                      return JsxRuntime.jsx(Klondike2$CardDisplay, {
+                      return JsxRuntime.jsx(Card.Display.make, {
                                   card: card,
                                   id: JSON.stringify(space_encode({
                                             TAG: "Card",
@@ -909,10 +801,6 @@ var Game = GameBase.GameBase({
     });
 
 export {
-  numInterval ,
-  ArrayAux ,
-  CardDisplay ,
-  getShuffledDeck ,
   GameRules ,
   Game ,
 }

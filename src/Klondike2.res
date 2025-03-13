@@ -1,89 +1,9 @@
 open Webapi.Dom
 open Types
-
-@val @module("./other.js")
-external numInterval: (int => unit, int, int) => promise<unit> = "numInterval"
-
-module ArrayAux = {
-  let removeLast = a => a->Array.toReversed->Array.sliceToEnd(~start=1)->Array.toReversed
-  let getLast = a => a->Array.toReversed->Array.get(0)
-  let update = (a, i, f) => a->Array.mapWithIndex((el, j) => j == i ? f(el) : el)
-  let insertAfter = (arr, match, new) =>
-    arr->Array.reduce([], (acc, c) => {
-      if c == match {
-        Array.concat(acc, Array.concat([c], new))
-      } else {
-        Array.concat(acc, [c])
-      }
-    })
-
-  let forEach2 = (a, f) =>
-    a->Array.forEachWithIndex((el1, i) => {
-      el1->Array.forEachWithIndex((el2, j) => {
-        f(el1, el2, i, j)
-      })
-    })
-}
-
-module CardDisplay = {
-  @react.component
-  let make = (~card, ~id, ~cardRef, ~onMouseDown) => {
-    <div id={id} ref={cardRef} onMouseDown={onMouseDown} className="absolute w-14 h-20 select-none">
-      <div
-        style={{
-          transform: Card.rotation(card),
-          // position: "relative",
-          color: card->Card.colorHex,
-        }}
-        className={[
-          " border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
-        ]->Array.join(" ")}>
-        <span className="flex flex-col">
-          <span className="flex flex-row">
-            <span
-              className={[
-                "font-medium ",
-                switch card.rank {
-                | R10 => "tracking-[-0.1rem] w-4"
-                | _ => "w-3.5"
-                },
-              ]->Array.join(" ")}>
-              {card->Card.rankString->React.string}
-            </span>
-            <span className="w-3.5 flex flex-row justify-center">
-              {card->Card.suitString->React.string}
-            </span>
-          </span>
-          <span className="w-3.5 flex flex-row mt-0.5 -ml-0.5">
-            {card->Card.suitString->React.string}
-          </span>
-        </span>
-      </div>
-    </div>
-  }
-}
-
-let getShuffledDeck = () => {
-  Card.allRanks
-  ->Array.reduce([], (a, rank) => {
-    Card.allSuits->Array.reduce(a, (a2, suit) => {
-      a2->Array.concat([
-        (
-          {
-            suit,
-            rank,
-          }: Card.card
-        ),
-      ])
-    })
-  })
-  ->Array.toShuffled
-}
-
-///
+open Common
 
 module GameRules = {
-  let shuffledDeck = getShuffledDeck()
+  let shuffledDeck = Card.getShuffledDeck()
 
   @decco
   type space = Card(Card.card) | Foundation(int) | Pile(int) | Waste | Stock
@@ -515,7 +435,7 @@ module GameRules = {
         ->React.array}
         {shuffledDeck
         ->Array.map(card => {
-          <CardDisplay
+          <Card.Display
             card={card}
             key={Card(card)->spaceToString}
             id={Card(card)->spaceToString}

@@ -162,3 +162,58 @@ let rotation = (card: card) => {
 let toString = card => {
   card->card_encode->Js.Json.stringify
 }
+
+module Display = {
+  @react.component
+  let make = (~card, ~id, ~cardRef, ~onMouseDown) => {
+    <div id={id} ref={cardRef} onMouseDown={onMouseDown} className="absolute w-14 h-20 select-none">
+      <div
+        style={{
+          transform: rotation(card),
+          // position: "relative",
+          color: card->colorHex,
+        }}
+        className={[
+          " border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
+        ]->Array.join(" ")}>
+        <span className="flex flex-col">
+          <span className="flex flex-row">
+            <span
+              className={[
+                "font-medium ",
+                switch card.rank {
+                | R10 => "tracking-[-0.1rem] w-4"
+                | _ => "w-3.5"
+                },
+              ]->Array.join(" ")}>
+              {card->rankString->React.string}
+            </span>
+            <span className="w-3.5 flex flex-row justify-center">
+              {card->suitString->React.string}
+            </span>
+          </span>
+          <span className="w-3.5 flex flex-row mt-0.5 -ml-0.5">
+            {card->suitString->React.string}
+          </span>
+        </span>
+      </div>
+    </div>
+  }
+}
+
+let getShuffledDeck = () => {
+  allRanks
+  ->Array.reduce([], (a, rank) => {
+    allSuits->Array.reduce(a, (a2, suit) => {
+      a2->Array.concat([
+        (
+          {
+            suit,
+            rank,
+          }: card
+        ),
+      ])
+    })
+  })
+  ->Array.toShuffled
+}

@@ -6,6 +6,9 @@ import * as Js_json from "rescript/lib/es6/js_json.js";
 import * as Js_array from "rescript/lib/es6/js_array.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
+import * as Caml_option from "rescript/lib/es6/caml_option.js";
+import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
+import * as JsxRuntime from "react/jsx-runtime";
 
 function suit_encode(value) {
   switch (value) {
@@ -651,6 +654,66 @@ function toString(card) {
   return JSON.stringify(card_encode(card));
 }
 
+function Card$Display(props) {
+  var card = props.card;
+  var match = card.rank;
+  var tmp;
+  tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
+  return JsxRuntime.jsx("div", {
+              children: JsxRuntime.jsx("div", {
+                    children: JsxRuntime.jsxs("span", {
+                          children: [
+                            JsxRuntime.jsxs("span", {
+                                  children: [
+                                    JsxRuntime.jsx("span", {
+                                          children: rankString(card),
+                                          className: [
+                                              "font-medium ",
+                                              tmp
+                                            ].join(" ")
+                                        }),
+                                    JsxRuntime.jsx("span", {
+                                          children: suitString(card),
+                                          className: "w-3.5 flex flex-row justify-center"
+                                        })
+                                  ],
+                                  className: "flex flex-row"
+                                }),
+                            JsxRuntime.jsx("span", {
+                                  children: suitString(card),
+                                  className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
+                                })
+                          ],
+                          className: "flex flex-col"
+                        }),
+                    className: [" border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
+                    style: {
+                      color: colorHex(card),
+                      transform: rotation(card)
+                    }
+                  }),
+              ref: Caml_option.some(props.cardRef),
+              className: "absolute w-14 h-20 select-none",
+              id: props.id,
+              onMouseDown: props.onMouseDown
+            });
+}
+
+var Display = {
+  make: Card$Display
+};
+
+function getShuffledDeck() {
+  return Core__Array.toShuffled(Core__Array.reduce(allRanks, [], (function (a, rank) {
+                    return Core__Array.reduce(allSuits, a, (function (a2, suit) {
+                                  return a2.concat([{
+                                                suit: suit,
+                                                rank: rank
+                                              }]);
+                                }));
+                  })));
+}
+
 export {
   suit_encode ,
   suit_decode ,
@@ -674,5 +737,7 @@ export {
   isOppositeColor ,
   rotation ,
   toString ,
+  Display ,
+  getShuffledDeck ,
 }
-/* No side effect */
+/* react/jsx-runtime Not a pure module */
