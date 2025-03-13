@@ -153,19 +153,30 @@ function GameBase(GameRules) {
               GameRules.applyMoveToOthers(space, getGame(), appliedF);
             }));
     };
-    var move = function (element, left, top, zIndex, offset) {
-      element.style.left = left.toString() + "px";
-      element.style.top = top.toString() + "px";
+    var liftUp = function (element, zIndex) {
+      element.style["z-index"] = zIndex.toString();
+      applyMoveToOthers(element, (function (childEl) {
+              liftUp(childEl, zIndex + 1 | 0);
+            }));
+    };
+    var setDown = function (element, zIndex) {
       Core__Option.mapOr(zIndex, undefined, (function (zIndex) {
               element.style["z-index"] = zIndex.toString();
             }));
+      applyMoveToOthers(element, (function (childEl) {
+              setDown(childEl, Core__Option.map(zIndex, (function (zIndex) {
+                          return zIndex + 1 | 0;
+                        })));
+            }));
+    };
+    var move = function (element, left, top, offset) {
+      element.style.left = left.toString() + "px";
+      element.style.top = top.toString() + "px";
       Core__Option.mapOr(offset, undefined, (function (param) {
               var topOffset = param[1];
               var leftOffset = param[0];
               applyMoveToOthers(element, (function (childEl) {
-                      move(childEl, left + leftOffset | 0, top + topOffset | 0, Core__Option.map(zIndex, (function (zIndex) {
-                                  return zIndex + 1 | 0;
-                                })), offset);
+                      move(childEl, left + leftOffset | 0, top + topOffset | 0, offset);
                     }));
             }));
     };
@@ -177,10 +188,11 @@ function GameBase(GameRules) {
               var element$1 = Caml_option.valFromOption(element);
               var targetLeft = pos.x;
               var targetTop = pos.y;
-              var zIndex = pos.z;
+              var targetZIndex = pos.z;
               var offset;
               var duration = 100;
               var start = elementPosition(element$1);
+              var startZIndex = zIndexFromElement(element$1);
               var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
                     top: 0,
                     right: 0,
@@ -199,24 +211,24 @@ function GameBase(GameRules) {
                 var progress = Math.min(elapsedTime / duration, 1);
                 var leftMove = start_left + (targetLeft - start_left) * progress;
                 var topMove = start_top + (targetTop - start_top) * progress;
-                move(element$1, leftMove | 0, topMove | 0, zIndex, offset);
+                move(element$1, leftMove | 0, topMove | 0, offset);
                 if (progress < 1) {
                   requestAnimationFrame(step);
                   return ;
+                } else {
+                  return setDown(element$1, targetZIndex);
                 }
-                
               };
-              requestAnimationFrame(step);
-              return ;
+              if (start_left !== targetLeft || start_top !== targetTop || Caml_obj.notequal(startZIndex, targetZIndex)) {
+                liftUp(element$1, 1000);
+                requestAnimationFrame(step);
+                return ;
+              } else {
+                return ;
+              }
             }
             
           });
-    };
-    var liftUp = function (element, zIndex) {
-      element.style["z-index"] = zIndex.toString();
-      applyMoveToOthers(element, (function (childEl) {
-              liftUp(childEl, zIndex + 1 | 0);
-            }));
     };
     var getOverlap = function (aEl, bEl) {
       var aPos = elementPosition(aEl);
@@ -262,7 +274,7 @@ function GameBase(GameRules) {
               var match = offset.current;
               var leftMove = $$event.clientX - match[0] | 0;
               var topMove = $$event.clientY - match[1] | 0;
-              move(dragCard, leftMove, topMove, undefined, [
+              move(dragCard, leftMove, topMove, [
                     0,
                     20
                   ]);
@@ -286,7 +298,7 @@ function GameBase(GameRules) {
     var autoProgress = function () {
       condInterval((function () {
               moveToState();
-            }), 500, (function () {
+            }), 300, (function () {
               return GameRules.autoProgress(setGame);
             }));
     };

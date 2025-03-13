@@ -354,7 +354,7 @@ function getSpaceLocs(game) {
                   }
                 },
                 {
-                  x: 320 + Math.imul(i, 70) | 0,
+                  x: 420 + Math.imul(i, 70) | 0,
                   y: 0,
                   z: j + 1 | 0
                 }
@@ -367,7 +367,7 @@ function getSpaceLocs(game) {
                   _0: item
                 },
                 {
-                  x: 250,
+                  x: 350,
                   y: 0,
                   z: 1
                 }
@@ -399,7 +399,7 @@ function getSpaceLocs(game) {
                 }
               },
               {
-                x: 180 - Math.imul(10, i) | 0,
+                x: 280 - Math.imul(10, i) | 0,
                 y: 0,
                 z: i
               }
@@ -882,88 +882,86 @@ function autoProgress(setGame) {
                     
                   });
             });
-        if (Core__Option.isNone(newGame.contents)) {
-          var canMoveTarotUp = function (tarotCard) {
-            var tarotUpCard = Common.ArrayAux.getLast(game.tarotUp);
-            if (tarotUpCard !== undefined) {
-              return Tarot.rankIsAbove(tarotCard, tarotUpCard);
-            } else {
-              return tarotCard.rank === "R0";
-            }
-          };
-          var canMoveTarotDown = function (tarotCard) {
-            var tarotUpCard = Common.ArrayAux.getLast(game.tarotUp);
-            if (tarotUpCard !== undefined) {
-              return Tarot.rankIsBelow(tarotCard, tarotUpCard);
-            } else {
-              return tarotCard.rank === "R21";
-            }
-          };
-          Core__Option.mapOr(game.free, undefined, (function (freeItem) {
-                  if (freeItem.TAG === "Card") {
-                    return ;
-                  }
-                  var freeTarot = freeItem._0;
-                  if (Core__Option.isNone(newGame.contents) && canMoveTarotUp(freeTarot)) {
-                    newGame.contents = {
-                      piles: game.piles,
-                      foundations: game.foundations,
-                      tarotUp: game.tarotUp.concat([freeTarot]),
-                      tarotDown: game.tarotDown,
-                      free: undefined,
-                      gameEnded: game.gameEnded
-                    };
-                  }
-                  if (Core__Option.isNone(newGame.contents) && canMoveTarotDown(freeTarot)) {
-                    newGame.contents = {
-                      piles: game.piles,
-                      foundations: game.foundations,
-                      tarotUp: game.tarotUp,
-                      tarotDown: game.tarotDown.concat([freeTarot]),
-                      free: undefined,
-                      gameEnded: game.gameEnded
-                    };
-                    return ;
-                  }
-                  
-                }));
-          game.piles.forEach(function (pile, j) {
-                var match = Common.ArrayAux.getLast(pile);
-                if (match === undefined) {
+        var canMoveTarotUp = function (tarotCard) {
+          var tarotUpCard = Common.ArrayAux.getLast(game.tarotUp);
+          if (tarotUpCard !== undefined) {
+            return Tarot.rankIsAbove(tarotCard, tarotUpCard);
+          } else {
+            return tarotCard.rank === "R0";
+          }
+        };
+        var canMoveTarotDown = function (tarotCard) {
+          var tarotUpCard = Common.ArrayAux.getLast(game.tarotUp);
+          if (tarotUpCard !== undefined) {
+            return Tarot.rankIsBelow(tarotCard, tarotUpCard);
+          } else {
+            return tarotCard.rank === "R21";
+          }
+        };
+        Core__Option.mapOr(game.free, undefined, (function (freeItem) {
+                if (freeItem.TAG === "Card") {
                   return ;
                 }
-                if (match.TAG === "Card") {
-                  return ;
-                }
-                var pileTarot = match._0;
-                if (Core__Option.isNone(newGame.contents) && canMoveTarotUp(pileTarot)) {
+                var freeTarot = freeItem._0;
+                if (Core__Option.isNone(newGame.contents) && canMoveTarotUp(freeTarot)) {
                   newGame.contents = {
-                    piles: Common.ArrayAux.update(game.piles, j, (function (p) {
-                            return Common.ArrayAux.removeLast(p);
-                          })),
+                    piles: game.piles,
                     foundations: game.foundations,
-                    tarotUp: game.tarotUp.concat([pileTarot]),
+                    tarotUp: game.tarotUp.concat([freeTarot]),
                     tarotDown: game.tarotDown,
-                    free: game.free,
+                    free: undefined,
                     gameEnded: game.gameEnded
                   };
                 }
-                if (Core__Option.isNone(newGame.contents) && canMoveTarotDown(pileTarot)) {
+                if (Core__Option.isNone(newGame.contents) && canMoveTarotDown(freeTarot)) {
                   newGame.contents = {
-                    piles: Common.ArrayAux.update(game.piles, j, (function (p) {
-                            return Common.ArrayAux.removeLast(p);
-                          })),
+                    piles: game.piles,
                     foundations: game.foundations,
                     tarotUp: game.tarotUp,
-                    tarotDown: game.tarotUp.concat([pileTarot]),
-                    free: game.free,
+                    tarotDown: game.tarotDown.concat([freeTarot]),
+                    free: undefined,
                     gameEnded: game.gameEnded
                   };
                   return ;
                 }
                 
-              });
-        }
+              }));
+        game.piles.forEach(function (pile, j) {
+              var match = Common.ArrayAux.getLast(pile);
+              if (match === undefined) {
+                return ;
+              }
+              if (match.TAG === "Card") {
+                return ;
+              }
+              var pileTarot = match._0;
+              if (Core__Option.isNone(newGame.contents) && canMoveTarotUp(pileTarot)) {
+                newGame.contents = {
+                  piles: Common.ArrayAux.update(game.piles, j, (function (p) {
+                          return Common.ArrayAux.removeLast(p);
+                        })),
+                  foundations: game.foundations,
+                  tarotUp: game.tarotUp.concat([pileTarot]),
+                  tarotDown: game.tarotDown,
+                  free: game.free,
+                  gameEnded: game.gameEnded
+                };
+              }
+              if (Core__Option.isNone(newGame.contents) && canMoveTarotDown(pileTarot)) {
+                newGame.contents = {
+                  piles: Common.ArrayAux.update(game.piles, j, (function (p) {
+                          return Common.ArrayAux.removeLast(p);
+                        })),
+                  foundations: game.foundations,
+                  tarotUp: game.tarotUp,
+                  tarotDown: game.tarotUp.concat([pileTarot]),
+                  free: game.free,
+                  gameEnded: game.gameEnded
+                };
+                return ;
+              }
+              
+            });
         return Core__Option.getOr(newGame.contents, game);
       });
   return Core__Option.isSome(newGame.contents);
@@ -987,7 +985,7 @@ function UpAndDown$GameRules$Independent(props) {
                       ref: Caml_option.some(setRef("TarotDown")),
                       className: "absolute border border-slate-200 bg-slate-700 rounded w-14 h-20",
                       style: {
-                        left: (180).toString() + "px",
+                        left: (280).toString() + "px",
                         top: "0px",
                         zIndex: "0"
                       }
@@ -996,7 +994,7 @@ function UpAndDown$GameRules$Independent(props) {
                       ref: Caml_option.some(setRef("Free")),
                       className: "absolute border border-purple-200 bg-purple-100 rounded w-14 h-20",
                       style: {
-                        left: (250).toString() + "px",
+                        left: (350).toString() + "px",
                         top: "0px",
                         zIndex: "0"
                       }
@@ -1014,7 +1012,7 @@ function UpAndDown$GameRules$Independent(props) {
                                           })),
                                   className: "absolute border border-slate-200 bg-slate-100 rounded w-14 h-20",
                                   style: {
-                                    left: (320 + Math.imul(i, 70) | 0).toString() + "px",
+                                    left: (420 + Math.imul(i, 70) | 0).toString() + "px",
                                     top: "0px",
                                     zIndex: "0"
                                   }
@@ -1105,7 +1103,7 @@ var Dependent = {
 };
 
 var GameRules = {
-  foundationOffset: 320,
+  foundationOffset: 420,
   Item: Item,
   item_encode: item_encode,
   item_decode: item_decode,

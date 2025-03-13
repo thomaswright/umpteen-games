@@ -3,7 +3,7 @@ open Types
 open Common
 
 module GameRules = {
-  let foundationOffset = 40 + 70 * 4
+  let foundationOffset = 70 * 6
 
   module Item = {}
 
@@ -411,69 +411,68 @@ module GameRules = {
 
       // Tarot Check
 
-      if newGame.contents->Option.isNone {
-        let canMoveTarotUp = (tarotCard: Tarot.card) => {
-          switch game.tarotUp->ArrayAux.getLast {
-          | None => tarotCard.rank == R0
-          | Some(tarotUpCard) => Tarot.rankIsAbove(tarotCard, tarotUpCard)
-          }
+      let canMoveTarotUp = (tarotCard: Tarot.card) => {
+        switch game.tarotUp->ArrayAux.getLast {
+        | None => tarotCard.rank == R0
+        | Some(tarotUpCard) => Tarot.rankIsAbove(tarotCard, tarotUpCard)
         }
-        let canMoveTarotDown = (tarotCard: Tarot.card) => {
-          switch game.tarotUp->ArrayAux.getLast {
-          | None => tarotCard.rank == R21
-          | Some(tarotUpCard) => Tarot.rankIsBelow(tarotCard, tarotUpCard)
-          }
-        }
-
-        game.free->Option.mapOr((), freeItem => {
-          switch freeItem {
-          | Tarot(freeTarot) =>
-            if newGame.contents->Option.isNone && canMoveTarotUp(freeTarot) {
-              newGame :=
-                Some({
-                  ...game,
-                  tarotUp: game.tarotUp->Array.concat([freeTarot]),
-                  free: None,
-                })
-            }
-
-            if newGame.contents->Option.isNone && canMoveTarotDown(freeTarot) {
-              newGame :=
-                Some({
-                  ...game,
-                  tarotDown: game.tarotDown->Array.concat([freeTarot]),
-                  free: None,
-                })
-            }
-
-          | _ => ()
-          }
-        })
-
-        game.piles->Array.forEachWithIndex((pile, j) => {
-          switch pile->ArrayAux.getLast {
-          | Some(Tarot(pileTarot)) =>
-            if newGame.contents->Option.isNone && canMoveTarotUp(pileTarot) {
-              newGame :=
-                Some({
-                  ...game,
-                  tarotUp: game.tarotUp->Array.concat([pileTarot]),
-                  piles: game.piles->ArrayAux.update(j, p => p->ArrayAux.removeLast),
-                })
-            }
-
-            if newGame.contents->Option.isNone && canMoveTarotDown(pileTarot) {
-              newGame :=
-                Some({
-                  ...game,
-                  tarotDown: game.tarotUp->Array.concat([pileTarot]),
-                  piles: game.piles->ArrayAux.update(j, p => p->ArrayAux.removeLast),
-                })
-            }
-          | _ => ()
-          }
-        })
       }
+      let canMoveTarotDown = (tarotCard: Tarot.card) => {
+        switch game.tarotUp->ArrayAux.getLast {
+        | None => tarotCard.rank == R21
+        | Some(tarotUpCard) => Tarot.rankIsBelow(tarotCard, tarotUpCard)
+        }
+      }
+
+      game.free->Option.mapOr((), freeItem => {
+        switch freeItem {
+        | Tarot(freeTarot) =>
+          if newGame.contents->Option.isNone && canMoveTarotUp(freeTarot) {
+            newGame :=
+              Some({
+                ...game,
+                tarotUp: game.tarotUp->Array.concat([freeTarot]),
+                free: None,
+              })
+          }
+
+          if newGame.contents->Option.isNone && canMoveTarotDown(freeTarot) {
+            newGame :=
+              Some({
+                ...game,
+                tarotDown: game.tarotDown->Array.concat([freeTarot]),
+                free: None,
+              })
+          }
+
+        | _ => ()
+        }
+      })
+
+      game.piles->Array.forEachWithIndex((pile, j) => {
+        switch pile->ArrayAux.getLast {
+        | Some(Tarot(pileTarot)) =>
+          if newGame.contents->Option.isNone && canMoveTarotUp(pileTarot) {
+            newGame :=
+              Some({
+                ...game,
+                tarotUp: game.tarotUp->Array.concat([pileTarot]),
+                piles: game.piles->ArrayAux.update(j, p => p->ArrayAux.removeLast),
+              })
+          }
+
+          if newGame.contents->Option.isNone && canMoveTarotDown(pileTarot) {
+            newGame :=
+              Some({
+                ...game,
+                tarotDown: game.tarotUp->Array.concat([pileTarot]),
+                piles: game.piles->ArrayAux.update(j, p => p->ArrayAux.removeLast),
+              })
+          }
+        | _ => ()
+        }
+      })
+
       newGame.contents->Option.getOr(game)
     })
 

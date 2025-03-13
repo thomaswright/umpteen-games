@@ -201,28 +201,38 @@ module GameBase = (GameRules: GameRules) => {
       })
     }
 
-    let rec move = (element, left, top, zIndex, offset) => {
-      element->setStyleLeft(left->Int.toString ++ "px")
-      element->setStyleTop(top->Int.toString ++ "px")
+    let rec liftUp = (element, zIndex) => {
+      element->setStyleZIndex(zIndex->Int.toString)
+      applyMoveToOthers(element, childEl => {
+        liftUp(childEl, zIndex + 1)
+      })
+    }
+
+    let rec setDown = (element, zIndex) => {
       zIndex->Option.mapOr((), zIndex => {
         element->setStyleZIndex(zIndex->Int.toString)
       })
 
+      applyMoveToOthers(element, childEl =>
+        setDown(childEl, zIndex->Option.map(zIndex => zIndex + 1))
+      )
+    }
+
+    let rec move = (element, left, top, offset) => {
+      element->setStyleLeft(left->Int.toString ++ "px")
+      element->setStyleTop(top->Int.toString ++ "px")
+
       offset->Option.mapOr((), ((leftOffset, topOffset)) => {
         applyMoveToOthers(element, childEl =>
-          move(
-            childEl,
-            left + leftOffset,
-            top + topOffset,
-            zIndex->Option.map(zIndex => zIndex + 1),
-            offset,
-          )
+          move(childEl, left + leftOffset, top + topOffset, offset)
         )
       })
     }
 
-    let moveWithTime = (element, targetLeft, targetTop, zIndex, offset, duration) => {
+    let moveWithTime = (element, targetLeft, targetTop, targetZIndex, offset, duration) => {
       let start = element->elementPosition
+
+      let startZIndex = element->zIndexFromElement
 
       let boardPos =
         document
@@ -253,14 +263,20 @@ module GameBase = (GameRules: GameRules) => {
         let easedProgress = progress
         let leftMove = start.left +. (targetLeft -. start.left) *. easedProgress
         let topMove = start.top +. (targetTop -. start.top) *. easedProgress
-        move(element, leftMove->Int.fromFloat, topMove->Int.fromFloat, zIndex, offset)
+        move(element, leftMove->Int.fromFloat, topMove->Int.fromFloat, offset)
 
         if progress < 1. {
           requestAnimationFrame(step)
+        } else {
+          // set down
+          setDown(element, targetZIndex)
         }
       }
 
-      requestAnimationFrame(step)
+      if start.left != targetLeft || start.top != targetTop || startZIndex != targetZIndex {
+        liftUp(element, 1000)
+        requestAnimationFrame(step)
+      }
     }
 
     let moveToState = () => {
@@ -270,13 +286,6 @@ module GameBase = (GameRules: GameRules) => {
         | Some(element) =>
           moveWithTime(element, pos.x->Int.toFloat, pos.y->Int.toFloat, Some(pos.z), None, 100.)
         }
-      })
-    }
-
-    let rec liftUp = (element, zIndex) => {
-      element->setStyleZIndex(zIndex->Int.toString)
-      applyMoveToOthers(element, childEl => {
-        liftUp(childEl, zIndex + 1)
       })
     }
 
@@ -343,7 +352,7 @@ module GameBase = (GameRules: GameRules) => {
         let leftMove = event->MouseEvent.clientX - offsetX
         let topMove = event->MouseEvent.clientY - offsetY
 
-        move(dragCard, leftMove, topMove, None, Some(0, 20))
+        move(dragCard, leftMove, topMove, Some(0, 20))
       })
     }
 
@@ -363,7 +372,7 @@ module GameBase = (GameRules: GameRules) => {
         () => {
           moveToState()
         },
-        500,
+        300,
         () => {
           GameRules.autoProgress(setGame)
         },
