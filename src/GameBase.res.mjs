@@ -13,6 +13,10 @@ function condInterval(prim0, prim1, prim2) {
   OtherJs.condInterval(prim0, prim1, prim2);
 }
 
+function easeOutQuad(t) {
+  return 1 - (1 - t) * (1 - t);
+}
+
 function GameBase(GameRules) {
   var appendReactElement = function (prim0, prim1) {
     OtherJs.appendReactElement(prim0, prim1);
@@ -220,8 +224,9 @@ function GameBase(GameRules) {
             var step = function (currentTime) {
               var elapsedTime = currentTime - startTime;
               var progress = Math.min(elapsedTime / duration, 1);
-              var leftMove = start_left + (adjustedTargetLeft - start_left) * progress;
-              var topMove = start_top + (adjustedTargetTop - start_top) * progress;
+              var easedProgress = easeOutQuad(progress);
+              var leftMove = start_left + (adjustedTargetLeft - start_left) * easedProgress;
+              var topMove = start_top + (adjustedTargetTop - start_top) * easedProgress;
               move(element, leftMove | 0, topMove | 0, offset);
               if (progress < 1) {
                 requestAnimationFrame(step);
@@ -392,6 +397,7 @@ function GameBase(GameRules) {
 
 export {
   condInterval ,
+  easeOutQuad ,
   GameBase ,
 }
 /* react Not a pure module */

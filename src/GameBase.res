@@ -4,6 +4,8 @@ open Types
 @val @module("./other.js")
 external condInterval: (unit => unit, int, unit => bool) => unit = "condInterval"
 
+let easeOutQuad = (t: float) => 1. -. (1. -. t) *. (1. -. t)
+
 module type GameRules = {
   type game
   type space
@@ -271,8 +273,8 @@ module GameBase = (GameRules: GameRules) => {
       let rec step: float => unit = currentTime => {
         let elapsedTime = currentTime -. startTime
         let progress = Math.min(elapsedTime /. duration, 1.) // Clamp progress between 0 and 1
-        // let easedProgress = easeOutQuad(progress)
-        let easedProgress = progress
+        let easedProgress = easeOutQuad(progress)
+        // let easedProgress = progress
         let leftMove = start.left +. (adjustedTargetLeft -. start.left) *. easedProgress
         let topMove = start.top +. (adjustedTargetTop -. start.top) *. easedProgress
 
