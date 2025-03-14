@@ -6,6 +6,7 @@ import * as React from "react";
 import * as Common from "./Common.res.mjs";
 import * as Js_json from "rescript/lib/es6/js_json.js";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
+import * as GameBase from "./GameBase.res.mjs";
 import * as Js_array from "rescript/lib/es6/js_array.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
@@ -618,8 +619,7 @@ function autoProgress(setGame) {
   return Core__Option.isSome(newGame.contents);
 }
 
-function FreeCell$GameRules$Independent(props) {
-  var onMouseDown = props.onMouseDown;
+function FreeCell$GameRules$Board(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
@@ -692,38 +692,41 @@ function FreeCell$GameRules$Independent(props) {
                                               })));
                           }),
                       className: "flex flex-row gap-3 mt-5"
-                    }),
-                shuffledDeck.map(function (card) {
-                      return JsxRuntime.jsx(Card.Display.make, {
-                                  card: card,
-                                  id: JSON.stringify(space_encode({
-                                            TAG: "Card",
-                                            _0: card
-                                          })),
-                                  cardRef: setRef({
-                                        TAG: "Card",
-                                        _0: card
-                                      }),
-                                  onMouseDown: onMouseDown
-                                }, JSON.stringify(space_encode({
-                                          TAG: "Card",
-                                          _0: card
-                                        })));
                     })
               ]
             });
 }
 
-var Independent = {
-  make: FreeCell$GameRules$Independent
+var Board = {
+  make: FreeCell$GameRules$Board
 };
 
-function FreeCell$GameRules$Dependent(props) {
-  return null;
+function FreeCell$GameRules$AllCards(props) {
+  var onMouseDown = props.onMouseDown;
+  var setRef = props.setRef;
+  return JsxRuntime.jsx(React.Fragment, {
+              children: shuffledDeck.map(function (card) {
+                    return JsxRuntime.jsx(Card.Display.make, {
+                                card: card,
+                                id: JSON.stringify(space_encode({
+                                          TAG: "Card",
+                                          _0: card
+                                        })),
+                                cardRef: setRef({
+                                      TAG: "Card",
+                                      _0: card
+                                    }),
+                                onMouseDown: onMouseDown
+                              }, JSON.stringify(space_encode({
+                                        TAG: "Card",
+                                        _0: card
+                                      })));
+                  })
+            });
 }
 
-var Dependent = {
-  make: FreeCell$GameRules$Dependent
+var AllCards = {
+  make: FreeCell$GameRules$AllCards
 };
 
 var GameRules = {
@@ -742,11 +745,26 @@ var GameRules = {
   onDrop: onDrop,
   applyMoveToOthers: applyMoveToOthers,
   autoProgress: autoProgress,
-  Independent: Independent,
-  Dependent: Dependent
+  Board: Board,
+  AllCards: AllCards
 };
+
+var Game = GameBase.GameBase({
+      getSpace: getSpace,
+      spaceToString: spaceToString,
+      initiateGame: initiateGame,
+      getSpaceLocs: getSpaceLocs,
+      applyMoveToOthers: applyMoveToOthers,
+      canDrag: canDrag,
+      canDrop: canDrop,
+      onDrop: onDrop,
+      autoProgress: autoProgress,
+      Board: Board,
+      AllCards: AllCards
+    });
 
 export {
   GameRules ,
+  Game ,
 }
 /* shuffledDeck Not a pure module */

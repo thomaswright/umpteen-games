@@ -87,9 +87,10 @@ module GameRules = {
     game.piles->ArrayAux.forEach2((_, item, i, j) => {
       addToCards((
         Item(item),
+        Pile(i),
         {
-          x: i * 70,
-          y: 100 + j * 20,
+          x: 0,
+          y: j * 20,
           z: j + 1,
         },
       ))
@@ -98,8 +99,9 @@ module GameRules = {
     game.foundations->ArrayAux.forEach2((_, card, i, j) => {
       addToCards((
         Item(Card(card)),
+        Foundation(i),
         {
-          x: foundationOffset + 30 + i * 70,
+          x: 0,
           y: 0,
           z: j + 1,
         },
@@ -109,8 +111,9 @@ module GameRules = {
     game.free->Option.mapOr((), item => {
       addToCards((
         Item(item),
+        Free,
         {
-          x: foundationOffset - 70,
+          x: 0,
           y: 0,
           z: 1,
         },
@@ -119,6 +122,7 @@ module GameRules = {
     game.tarotUp->Array.forEachWithIndex((tarot, i) => {
       addToCards((
         Item(Tarot(tarot)),
+        TarotUp,
         {
           x: 10 * i,
           y: 0,
@@ -130,8 +134,9 @@ module GameRules = {
     game.tarotDown->Array.forEachWithIndex((tarot, i) => {
       addToCards((
         Item(Tarot(tarot)),
+        TarotDown,
         {
-          x: foundationOffset - 30 - 70 * 2 - 10 * i,
+          x: -10 * i,
           y: 0,
           z: i,
         },
@@ -479,69 +484,76 @@ module GameRules = {
     newGame.contents->Option.isSome
   }
 
-  module Independent = {
+  module Board = {
+    @react.component
+    let make = (~setRef, ~onMouseDown, ~setGame, ~moveToState, ~autoProgress, ~game) => {
+      <React.Fragment>
+        <div className="flex flex-row  ">
+          <div
+            className="flex flex-row justify-between"
+            style={{
+              width: "290px",
+            }}>
+            <div
+              key={Free->spaceToString}
+              ref={ReactDOM.Ref.callbackDomRef(setRef(TarotUp))}
+              className=" border border-slate-200 bg-slate-700 rounded w-14 h-20"
+            />
+            <div
+              key={Free->spaceToString}
+              ref={ReactDOM.Ref.callbackDomRef(setRef(TarotDown))}
+              className=" border border-slate-200 bg-slate-700 rounded w-14 h-20"
+            />
+          </div>
+          <div
+            key={Free->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Free))}
+            className=" border border-purple-200 bg-purple-100 rounded w-14 h-20 mx-10"
+            style={{
+              transform: "rotate(90deg)",
+            }}
+          />
+          <div className="flex flex-row gap-3">
+            {[[], [], [], []]
+            ->Array.mapWithIndex((_, i) => {
+              <div
+                key={Foundation(i)->spaceToString}
+                ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
+                className=" border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                style={{
+                  top: "0px",
+                  left: (foundationOffset + 30 + i * 70)->Int.toString ++ "px",
+                  zIndex: "0",
+                }}
+              />
+            })
+            ->React.array}
+          </div>
+        </div>
+        <div className="flex flex-row gap-3 mt-5">
+          {[[], [], [], [], [], [], [], [], [], [], []]
+          ->Array.mapWithIndex((_, i) => {
+            <div
+              key={Pile(i)->spaceToString}
+              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+              className=" border border-slate-200 bg-slate-100  rounded w-14 h-20"
+              style={{
+                top: "100px",
+                left: (i * 70)->Int.toString ++ "px",
+                zIndex: "0",
+              }}
+            />
+          })
+          ->React.array}
+        </div>
+      </React.Fragment>
+    }
+  }
+
+  module AllCards = {
     @react.component
     let make = (~setRef, ~onMouseDown) => {
       <React.Fragment>
-        <div
-          key={Free->spaceToString}
-          ref={ReactDOM.Ref.callbackDomRef(setRef(TarotUp))}
-          className="absolute border border-slate-200 bg-slate-700 rounded w-14 h-20"
-          style={{
-            top: "0px",
-            left: "0px",
-            zIndex: "0",
-          }}
-        />
-        <div
-          key={Free->spaceToString}
-          ref={ReactDOM.Ref.callbackDomRef(setRef(TarotDown))}
-          className="absolute border border-slate-200 bg-slate-700 rounded w-14 h-20"
-          style={{
-            top: "0px",
-            left: (foundationOffset - 30 - 70 * 2)->Int.toString ++ "px",
-            zIndex: "0",
-          }}
-        />
-        <div
-          key={Free->spaceToString}
-          ref={ReactDOM.Ref.callbackDomRef(setRef(Free))}
-          className="absolute border border-purple-200 bg-purple-100 rounded w-14 h-20"
-          style={{
-            top: "0px",
-            left: (foundationOffset - 70)->Int.toString ++ "px",
-            zIndex: "0",
-            transform: "rotate(90deg)",
-          }}
-        />
-        {[[], [], [], []]
-        ->Array.mapWithIndex((_, i) => {
-          <div
-            key={Foundation(i)->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-            className="absolute border border-slate-200 bg-slate-100 rounded w-14 h-20"
-            style={{
-              top: "0px",
-              left: (foundationOffset + 30 + i * 70)->Int.toString ++ "px",
-              zIndex: "0",
-            }}
-          />
-        })
-        ->React.array}
-        {[[], [], [], [], [], [], [], [], [], [], []]
-        ->Array.mapWithIndex((_, i) => {
-          <div
-            key={Pile(i)->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-            className="absolute border border-slate-200 bg-slate-100  rounded w-14 h-20"
-            style={{
-              top: "100px",
-              left: (i * 70)->Int.toString ++ "px",
-              zIndex: "0",
-            }}
-          />
-        })
-        ->React.array}
         {fullDeck
         ->Array.map(item => {
           switch item {
@@ -568,13 +580,6 @@ module GameRules = {
       </React.Fragment>
     }
   }
-
-  module Dependent = {
-    @react.component
-    let make = (~setGame as _, ~moveToState as _, ~autoProgress as _, ~game as _) => {
-      React.null
-    }
-  }
 }
 
-// module Game = GameBase.GameBase(GameRules)
+module Game = GameBase.GameBase(GameRules)

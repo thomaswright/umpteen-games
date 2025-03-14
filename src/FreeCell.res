@@ -365,9 +365,9 @@ module GameRules = {
     newGame.contents->Option.isSome
   }
 
-  module Independent = {
+  module Board = {
     @react.component
-    let make = (~setRef, ~onMouseDown) => {
+    let make = (~setRef, ~onMouseDown, ~setGame, ~moveToState, ~autoProgress, ~game) => {
       <React.Fragment>
         <div className="flex flex-row">
           <div className="flex flex-row gap-3">
@@ -405,6 +405,14 @@ module GameRules = {
           })
           ->React.array}
         </div>
+      </React.Fragment>
+    }
+  }
+
+  module AllCards = {
+    @react.component
+    let make = (~setRef, ~onMouseDown) => {
+      <React.Fragment>
         {shuffledDeck
         ->Array.map(card => {
           <Card.Display
@@ -419,13 +427,6 @@ module GameRules = {
       </React.Fragment>
     }
   }
-
-  module Dependent = {
-    @react.component
-    let make = (~setGame as _, ~moveToState as _, ~autoProgress as _, ~game as _) => {
-      React.null
-    }
-  }
 }
 
-// module Game = GameBase.GameBase(GameRules)
+module Game = GameBase.GameBase(GameRules)

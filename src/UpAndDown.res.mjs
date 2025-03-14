@@ -7,6 +7,7 @@ import * as React from "react";
 import * as Common from "./Common.res.mjs";
 import * as Js_json from "rescript/lib/es6/js_json.js";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
+import * as GameBase from "./GameBase.res.mjs";
 import * as Js_array from "rescript/lib/es6/js_array.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
@@ -337,8 +338,12 @@ function getSpaceLocs(game) {
                   _0: item
                 },
                 {
-                  x: Math.imul(i, 70),
-                  y: 100 + Math.imul(j, 20) | 0,
+                  TAG: "Pile",
+                  _0: i
+                },
+                {
+                  x: 0,
+                  y: Math.imul(j, 20),
                   z: j + 1 | 0
                 }
               ]);
@@ -353,7 +358,11 @@ function getSpaceLocs(game) {
                   }
                 },
                 {
-                  x: 450 + Math.imul(i, 70) | 0,
+                  TAG: "Foundation",
+                  _0: i
+                },
+                {
+                  x: 0,
                   y: 0,
                   z: j + 1 | 0
                 }
@@ -365,8 +374,9 @@ function getSpaceLocs(game) {
                   TAG: "Item",
                   _0: item
                 },
+                "Free",
                 {
-                  x: 350,
+                  x: 0,
                   y: 0,
                   z: 1
                 }
@@ -381,6 +391,7 @@ function getSpaceLocs(game) {
                   _0: tarot
                 }
               },
+              "TarotUp",
               {
                 x: Math.imul(10, i),
                 y: 0,
@@ -397,8 +408,9 @@ function getSpaceLocs(game) {
                   _0: tarot
                 }
               },
+              "TarotDown",
               {
-                x: 250 - Math.imul(10, i) | 0,
+                x: Math.imul(-10, i),
                 y: 0,
                 z: i
               }
@@ -966,140 +978,148 @@ function autoProgress(setGame) {
   return Core__Option.isSome(newGame.contents);
 }
 
-function UpAndDown$GameRules$Independent(props) {
-  var onMouseDown = props.onMouseDown;
+function UpAndDown$GameRules$Board(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
-                JsxRuntime.jsx("div", {
-                      ref: Caml_option.some(setRef("TarotUp")),
-                      className: "absolute border border-slate-200 bg-slate-700 rounded w-14 h-20",
-                      style: {
-                        left: "0px",
-                        top: "0px",
-                        zIndex: "0"
-                      }
-                    }, JSON.stringify(space_encode("Free"))),
-                JsxRuntime.jsx("div", {
-                      ref: Caml_option.some(setRef("TarotDown")),
-                      className: "absolute border border-slate-200 bg-slate-700 rounded w-14 h-20",
-                      style: {
-                        left: (250).toString() + "px",
-                        top: "0px",
-                        zIndex: "0"
-                      }
-                    }, JSON.stringify(space_encode("Free"))),
-                JsxRuntime.jsx("div", {
-                      ref: Caml_option.some(setRef("Free")),
-                      className: "absolute border border-purple-200 bg-purple-100 rounded w-14 h-20",
-                      style: {
-                        left: (350).toString() + "px",
-                        top: "0px",
-                        zIndex: "0",
-                        transform: "rotate(90deg)"
-                      }
-                    }, JSON.stringify(space_encode("Free"))),
-                [
-                    [],
-                    [],
-                    [],
-                    []
-                  ].map(function (param, i) {
-                      return JsxRuntime.jsx("div", {
-                                  ref: Caml_option.some(setRef({
-                                            TAG: "Foundation",
-                                            _0: i
-                                          })),
-                                  className: "absolute border border-slate-200 bg-slate-100 rounded w-14 h-20",
-                                  style: {
-                                    left: (450 + Math.imul(i, 70) | 0).toString() + "px",
-                                    top: "0px",
-                                    zIndex: "0"
-                                  }
-                                }, JSON.stringify(space_encode({
-                                          TAG: "Foundation",
-                                          _0: i
-                                        })));
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsxs("div", {
+                              children: [
+                                JsxRuntime.jsx("div", {
+                                      ref: Caml_option.some(setRef("TarotUp")),
+                                      className: " border border-slate-200 bg-slate-700 rounded w-14 h-20"
+                                    }, JSON.stringify(space_encode("Free"))),
+                                JsxRuntime.jsx("div", {
+                                      ref: Caml_option.some(setRef("TarotDown")),
+                                      className: " border border-slate-200 bg-slate-700 rounded w-14 h-20"
+                                    }, JSON.stringify(space_encode("Free")))
+                              ],
+                              className: "flex flex-row justify-between",
+                              style: {
+                                width: "290px"
+                              }
+                            }),
+                        JsxRuntime.jsx("div", {
+                              ref: Caml_option.some(setRef("Free")),
+                              className: " border border-purple-200 bg-purple-100 rounded w-14 h-20 mx-10",
+                              style: {
+                                transform: "rotate(90deg)"
+                              }
+                            }, JSON.stringify(space_encode("Free"))),
+                        JsxRuntime.jsx("div", {
+                              children: [
+                                  [],
+                                  [],
+                                  [],
+                                  []
+                                ].map(function (param, i) {
+                                    return JsxRuntime.jsx("div", {
+                                                ref: Caml_option.some(setRef({
+                                                          TAG: "Foundation",
+                                                          _0: i
+                                                        })),
+                                                className: " border border-slate-200 bg-slate-100 rounded w-14 h-20",
+                                                style: {
+                                                  left: (450 + Math.imul(i, 70) | 0).toString() + "px",
+                                                  top: "0px",
+                                                  zIndex: "0"
+                                                }
+                                              }, JSON.stringify(space_encode({
+                                                        TAG: "Foundation",
+                                                        _0: i
+                                                      })));
+                                  }),
+                              className: "flex flex-row gap-3"
+                            })
+                      ],
+                      className: "flex flex-row  "
                     }),
-                [
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    []
-                  ].map(function (param, i) {
-                      return JsxRuntime.jsx("div", {
-                                  ref: Caml_option.some(setRef({
-                                            TAG: "Pile",
-                                            _0: i
-                                          })),
-                                  className: "absolute border border-slate-200 bg-slate-100  rounded w-14 h-20",
-                                  style: {
-                                    left: Math.imul(i, 70).toString() + "px",
-                                    top: "100px",
-                                    zIndex: "0"
-                                  }
-                                }, JSON.stringify(space_encode({
-                                          TAG: "Pile",
-                                          _0: i
-                                        })));
-                    }),
-                fullDeck.map(function (item) {
-                      if (item.TAG === "Card") {
-                        return JsxRuntime.jsx(Card.Display.make, {
-                                    card: item._0,
-                                    id: JSON.stringify(space_encode({
-                                              TAG: "Item",
-                                              _0: item
-                                            })),
-                                    cardRef: setRef({
-                                          TAG: "Item",
-                                          _0: item
-                                        }),
-                                    onMouseDown: onMouseDown,
-                                    multiColor: true
-                                  }, JSON.stringify(space_encode({
-                                            TAG: "Item",
-                                            _0: item
-                                          })));
-                      } else {
-                        return JsxRuntime.jsx(Tarot.Display.make, {
-                                    card: item._0,
-                                    id: JSON.stringify(space_encode({
-                                              TAG: "Item",
-                                              _0: item
-                                            })),
-                                    cardRef: setRef({
-                                          TAG: "Item",
-                                          _0: item
-                                        }),
-                                    onMouseDown: onMouseDown
-                                  }, JSON.stringify(space_encode({
-                                            TAG: "Item",
-                                            _0: item
-                                          })));
-                      }
+                JsxRuntime.jsx("div", {
+                      children: [
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          []
+                        ].map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                })),
+                                        className: " border border-slate-200 bg-slate-100  rounded w-14 h-20",
+                                        style: {
+                                          left: Math.imul(i, 70).toString() + "px",
+                                          top: "100px",
+                                          zIndex: "0"
+                                        }
+                                      }, JSON.stringify(space_encode({
+                                                TAG: "Pile",
+                                                _0: i
+                                              })));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
                     })
               ]
             });
 }
 
-var Independent = {
-  make: UpAndDown$GameRules$Independent
+var Board = {
+  make: UpAndDown$GameRules$Board
 };
 
-function UpAndDown$GameRules$Dependent(props) {
-  return null;
+function UpAndDown$GameRules$AllCards(props) {
+  var onMouseDown = props.onMouseDown;
+  var setRef = props.setRef;
+  return JsxRuntime.jsx(React.Fragment, {
+              children: fullDeck.map(function (item) {
+                    if (item.TAG === "Card") {
+                      return JsxRuntime.jsx(Card.Display.make, {
+                                  card: item._0,
+                                  id: JSON.stringify(space_encode({
+                                            TAG: "Item",
+                                            _0: item
+                                          })),
+                                  cardRef: setRef({
+                                        TAG: "Item",
+                                        _0: item
+                                      }),
+                                  onMouseDown: onMouseDown,
+                                  multiColor: true
+                                }, JSON.stringify(space_encode({
+                                          TAG: "Item",
+                                          _0: item
+                                        })));
+                    } else {
+                      return JsxRuntime.jsx(Tarot.Display.make, {
+                                  card: item._0,
+                                  id: JSON.stringify(space_encode({
+                                            TAG: "Item",
+                                            _0: item
+                                          })),
+                                  cardRef: setRef({
+                                        TAG: "Item",
+                                        _0: item
+                                      }),
+                                  onMouseDown: onMouseDown
+                                }, JSON.stringify(space_encode({
+                                          TAG: "Item",
+                                          _0: item
+                                        })));
+                    }
+                  })
+            });
 }
 
-var Dependent = {
-  make: UpAndDown$GameRules$Dependent
+var AllCards = {
+  make: UpAndDown$GameRules$AllCards
 };
 
 var GameRules = {
@@ -1121,11 +1141,26 @@ var GameRules = {
   onDrop: onDrop,
   applyMoveToOthers: applyMoveToOthers,
   autoProgress: autoProgress,
-  Independent: Independent,
-  Dependent: Dependent
+  Board: Board,
+  AllCards: AllCards
 };
+
+var Game = GameBase.GameBase({
+      getSpace: getSpace,
+      spaceToString: spaceToString,
+      initiateGame: initiateGame,
+      getSpaceLocs: getSpaceLocs,
+      applyMoveToOthers: applyMoveToOthers,
+      canDrag: canDrag,
+      canDrop: canDrop,
+      onDrop: onDrop,
+      autoProgress: autoProgress,
+      Board: Board,
+      AllCards: AllCards
+    });
 
 export {
   GameRules ,
+  Game ,
 }
 /* fullDeck Not a pure module */
