@@ -400,8 +400,8 @@ module GameRules = {
     let restock = (setGame, moveToState) => {
       setGame(game => {
         ...game,
-        stock: game.waste,
-        waste: game.stock,
+        stock: game.waste->Array.toReversed,
+        waste: [],
       })
       moveToState()
     }

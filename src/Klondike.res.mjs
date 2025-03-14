@@ -653,8 +653,8 @@ function restock(setGame, moveToState) {
         return {
                 piles: game.piles,
                 foundations: game.foundations,
-                stock: game.waste,
-                waste: game.stock,
+                stock: game.waste.toReversed(),
+                waste: [],
                 gameEnded: game.gameEnded
               };
       });
