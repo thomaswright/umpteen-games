@@ -644,7 +644,7 @@ async function dealToWaste(setGame, moveToState, autoProgress) {
         });
     moveToState();
   };
-  await Common.numInterval(f, 200, 3);
+  await Common.numInterval(f, 400, 3);
   return autoProgress();
 }
 
@@ -681,7 +681,7 @@ function Klondike$GameRules$Board(props) {
                               className: " bg-blue-200 rounded w-14 h-20",
                               id: JSON.stringify(space_encode("Stock")),
                               style: {
-                                zIndex: "1001"
+                                zIndex: "1053"
                               },
                               onClick: (function (param) {
                                   if (game.stock.length === 0) {
@@ -694,11 +694,8 @@ function Klondike$GameRules$Board(props) {
                             }, JSON.stringify(space_encode("Stock"))),
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Waste")),
-                              className: "  rounded w-14 h-20",
-                              id: JSON.stringify(space_encode("Waste")),
-                              style: {
-                                zIndex: "53"
-                              }
+                              className: " w-14 h-20",
+                              id: JSON.stringify(space_encode("Waste"))
                             }, JSON.stringify(space_encode("Waste")))
                       ],
                       className: "flex flex-row gap-3"

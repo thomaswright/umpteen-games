@@ -495,12 +495,12 @@ module GameRules = {
               width: "290px",
             }}>
             <div
-              key={Free->spaceToString}
+              key={TarotUp->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(TarotUp))}
               className=" border border-slate-200 bg-slate-700 rounded w-14 h-20"
             />
             <div
-              key={Free->spaceToString}
+              key={TarotDown->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(TarotDown))}
               className=" border border-slate-200 bg-slate-700 rounded w-14 h-20"
             />

@@ -185,10 +185,8 @@ function GameBase(GameRules) {
     var moveToState = function () {
       GameRules.getSpaceLocs(getGame()).forEach(function (param) {
             var pos = param[2];
-            var refSpace = param[1];
-            console.log(refSpace, getElement(refSpace));
             var match = getElement(param[0]);
-            var match$1 = getElement(refSpace);
+            var match$1 = getElement(param[1]);
             if (match === undefined) {
               return ;
             }
@@ -201,7 +199,7 @@ function GameBase(GameRules) {
             var targetTop = pos.y;
             var targetZIndex = pos.z;
             var offset;
-            var duration = 100;
+            var duration = 300;
             var start = elementPosition(element);
             var startZIndex = zIndexFromElement(element);
             var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
@@ -232,8 +230,8 @@ function GameBase(GameRules) {
                 return setDown(element, targetZIndex);
               }
             };
-            if (start_left !== adjustedTargetLeft || start_top !== adjustedTargetTop || Caml_obj.notequal(startZIndex, targetZIndex)) {
-              liftUp(element, 1000);
+            if (start_left !== Math.floor(adjustedTargetLeft) || start_top !== Math.floor(adjustedTargetTop) || Caml_obj.notequal(startZIndex, targetZIndex)) {
+              liftUp(element, 1000 + Core__Option.getOr(targetZIndex, 0) | 0);
               requestAnimationFrame(step);
               return ;
             }
@@ -278,7 +276,6 @@ function GameBase(GameRules) {
         ($$event.clientX - (pos.left | 0) | 0) + (boardPos.left | 0) | 0,
         ($$event.clientY - (pos.top | 0) | 0) + (boardPos.top | 0) | 0
       ];
-      console.log(offset.current);
     };
     var onMouseMove = function ($$event) {
       Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {

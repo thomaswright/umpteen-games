@@ -109,7 +109,7 @@ module Display = {
     <div id={id} ref={cardRef} onMouseDown={onMouseDown} className="absolute w-14 h-20 select-none">
       <div
         style={{
-          transform: rotation(card),
+          // transform: rotation(card),
           // position: "relative",
           color: "white",
         }}

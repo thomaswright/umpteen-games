@@ -989,11 +989,11 @@ function UpAndDown$GameRules$Board(props) {
                                 JsxRuntime.jsx("div", {
                                       ref: Caml_option.some(setRef("TarotUp")),
                                       className: " border border-slate-200 bg-slate-700 rounded w-14 h-20"
-                                    }, JSON.stringify(space_encode("Free"))),
+                                    }, JSON.stringify(space_encode("TarotUp"))),
                                 JsxRuntime.jsx("div", {
                                       ref: Caml_option.some(setRef("TarotDown")),
                                       className: " border border-slate-200 bg-slate-700 rounded w-14 h-20"
-                                    }, JSON.stringify(space_encode("Free")))
+                                    }, JSON.stringify(space_encode("TarotDown")))
                               ],
                               className: "flex flex-row justify-between",
                               style: {

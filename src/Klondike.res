@@ -391,7 +391,7 @@ module GameRules = {
         moveToState()
       }
 
-      await numInterval(f, 200, 3)
+      await numInterval(f, 400, 3)
       autoProgress()
     }
 
@@ -423,17 +423,14 @@ module GameRules = {
             }}
             className=" bg-blue-200 rounded w-14 h-20"
             style={{
-              zIndex: "1001",
+              zIndex: "1053",
             }}
           />
           <div
             key={Waste->spaceToString}
             id={Waste->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Waste))}
-            className="  rounded w-14 h-20"
-            style={{
-              zIndex: "53",
-            }}
+            className=" w-14 h-20"
           />
         </div>
         <div className="flex flex-row gap-3 mt-5">

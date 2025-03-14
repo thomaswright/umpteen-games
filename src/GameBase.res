@@ -228,7 +228,6 @@ module GameBase = (GameRules: GameRules) => {
     }
 
     let rec move = (element, left, top, offset) => {
-      // Console.log2(left, top)
       element->setStyleLeft(left->Int.toString ++ "px")
       element->setStyleTop(top->Int.toString ++ "px")
 
@@ -288,18 +287,17 @@ module GameBase = (GameRules: GameRules) => {
       }
 
       if (
-        start.left != adjustedTargetLeft ||
-        start.top != adjustedTargetTop ||
+        start.left != Math.floor(adjustedTargetLeft) ||
+        start.top != Math.floor(adjustedTargetTop) ||
         startZIndex != targetZIndex
       ) {
-        liftUp(element, 1000)
+        liftUp(element, 1000 + targetZIndex->Option.getOr(0))
         requestAnimationFrame(step)
       }
     }
 
     let moveToState = () => {
       GameRules.getSpaceLocs(getGame())->Array.forEach(((space, refSpace, pos)) => {
-        Console.log2(refSpace, getElement(refSpace))
         switch (getElement(space), getElement(refSpace)) {
         | (Some(element), Some(refElement)) =>
           let refPos = refElement->elementPosition
@@ -310,7 +308,7 @@ module GameBase = (GameRules: GameRules) => {
             pos.y->Int.toFloat,
             Some(pos.z),
             None,
-            100.,
+            300.,
           )
         | _ => ()
         }
@@ -369,8 +367,6 @@ module GameBase = (GameRules: GameRules) => {
             event->JsxEvent.Mouse.clientX - pos.left->Int.fromFloat + boardPos.left->Int.fromFloat,
             event->JsxEvent.Mouse.clientY - pos.top->Int.fromFloat + boardPos.top->Int.fromFloat,
           )
-
-          Console.log(offset.current)
         }
       | _ => ()
       }
