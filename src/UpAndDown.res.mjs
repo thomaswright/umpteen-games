@@ -559,7 +559,7 @@ function canDrop(dragSpace, dropSpace, game) {
                   var c1 = dropItem._0;
                   if (dragItem.TAG === "Card") {
                     var c2 = dragItem._0;
-                    canBeParent = Card.rankIsBelow(c1, c2) || Card.rankIsAbove(c1, c2);
+                    canBeParent = (Card.rankIsBelow(c1, c2) || Card.rankIsAbove(c1, c2)) && c1.suit === c2.suit;
                   } else {
                     canBeParent = false;
                   }
@@ -583,7 +583,7 @@ function canDrop(dragSpace, dropSpace, game) {
                 var c1$2 = dropItem._0;
                 if (dragItem.TAG === "Card") {
                   var c2$2 = dragItem._0;
-                  canBeParent = Card.rankIsBelow(c1$2, c2$2) || Card.rankIsAbove(c1$2, c2$2);
+                  canBeParent = (Card.rankIsBelow(c1$2, c2$2) || Card.rankIsAbove(c1$2, c2$2)) && c1$2.suit === c2$2.suit;
                 } else {
                   canBeParent = false;
                 }
@@ -987,12 +987,14 @@ function UpAndDown$GameRules$Board(props) {
                         JsxRuntime.jsxs("div", {
                               children: [
                                 JsxRuntime.jsx("div", {
+                                      children: "0",
                                       ref: Caml_option.some(setRef("TarotUp")),
-                                      className: " border border-slate-200 bg-slate-700 rounded w-14 h-20"
+                                      className: " border border-slate-300 bg-slate-200 rounded w-14 h-20 flex \n              flex-row items-center justify-center text-xl font-bold text-slate-400"
                                     }, JSON.stringify(space_encode("TarotUp"))),
                                 JsxRuntime.jsx("div", {
+                                      children: "21",
                                       ref: Caml_option.some(setRef("TarotDown")),
-                                      className: " border border-slate-200 bg-slate-700 rounded w-14 h-20"
+                                      className: " border border-slate-300 bg-slate-200 rounded w-14 h-20 flex \n              flex-row items-center justify-center text-xl font-bold text-slate-400"
                                     }, JSON.stringify(space_encode("TarotDown")))
                               ],
                               className: "flex flex-row justify-between",
@@ -1002,10 +1004,7 @@ function UpAndDown$GameRules$Board(props) {
                             }),
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Free")),
-                              className: " border border-purple-200 bg-purple-100 rounded w-14 h-20 mx-10",
-                              style: {
-                                transform: "rotate(90deg)"
-                              }
+                              className: "outline outline-2 outline-purple-300 bg-purple-100 rounded w-14 h-20 mx-10"
                             }, JSON.stringify(space_encode("Free"))),
                         JsxRuntime.jsx("div", {
                               children: [
@@ -1019,12 +1018,7 @@ function UpAndDown$GameRules$Board(props) {
                                                           TAG: "Foundation",
                                                           _0: i
                                                         })),
-                                                className: " border border-slate-200 bg-slate-100 rounded w-14 h-20",
-                                                style: {
-                                                  left: (450 + Math.imul(i, 70) | 0).toString() + "px",
-                                                  top: "0px",
-                                                  zIndex: "0"
-                                                }
+                                                className: " border  border-slate-200 bg-slate-100 rounded w-14 h-20"
                                               }, JSON.stringify(space_encode({
                                                         TAG: "Foundation",
                                                         _0: i
@@ -1054,12 +1048,7 @@ function UpAndDown$GameRules$Board(props) {
                                                   TAG: "Pile",
                                                   _0: i
                                                 })),
-                                        className: " border border-slate-200 bg-slate-100  rounded w-14 h-20",
-                                        style: {
-                                          left: Math.imul(i, 70).toString() + "px",
-                                          top: "100px",
-                                          zIndex: "0"
-                                        }
+                                        className: " border border-slate-200 bg-slate-100  rounded w-14 h-20"
                                       }, JSON.stringify(space_encode({
                                                 TAG: "Pile",
                                                 _0: i

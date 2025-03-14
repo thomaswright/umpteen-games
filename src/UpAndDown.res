@@ -216,7 +216,8 @@ module GameRules = {
             let topItem = game.piles->Array.getUnsafe(i)->ArrayAux.getLast
             if topItem == Some(dropItem) {
               switch (dropItem, dragItem) {
-              | (Card(c1), Card(c2)) => Card.rankIsBelow(c1, c2) || Card.rankIsAbove(c1, c2)
+              | (Card(c1), Card(c2)) =>
+                (Card.rankIsBelow(c1, c2) || Card.rankIsAbove(c1, c2)) && c1.suit == c2.suit
               | (Tarot(c1), Tarot(c2)) => Tarot.rankIsBelow(c1, c2) || Tarot.rankIsAbove(c1, c2)
               | _ => false
               }
@@ -225,7 +226,8 @@ module GameRules = {
             }
           | Some(_) =>
             switch (dropItem, dragItem) {
-            | (Card(c1), Card(c2)) => Card.rankIsBelow(c1, c2) || Card.rankIsAbove(c1, c2)
+            | (Card(c1), Card(c2)) =>
+              (Card.rankIsBelow(c1, c2) || Card.rankIsAbove(c1, c2)) && c1.suit == c2.suit
             | (Tarot(c1), Tarot(c2)) => Tarot.rankIsBelow(c1, c2) || Tarot.rankIsAbove(c1, c2)
             | _ => false
             }
@@ -497,21 +499,22 @@ module GameRules = {
             <div
               key={TarotUp->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(TarotUp))}
-              className=" border border-slate-200 bg-slate-700 rounded w-14 h-20"
-            />
+              className=" border border-slate-300 bg-slate-200 rounded w-14 h-20 flex 
+              flex-row items-center justify-center text-xl font-bold text-slate-400">
+              {"0"->React.string}
+            </div>
             <div
               key={TarotDown->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(TarotDown))}
-              className=" border border-slate-200 bg-slate-700 rounded w-14 h-20"
-            />
+              className=" border border-slate-300 bg-slate-200 rounded w-14 h-20 flex 
+              flex-row items-center justify-center text-xl font-bold text-slate-400">
+              {"21"->React.string}
+            </div>
           </div>
           <div
             key={Free->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Free))}
-            className=" border border-purple-200 bg-purple-100 rounded w-14 h-20 mx-10"
-            style={{
-              transform: "rotate(90deg)",
-            }}
+            className="outline outline-2 outline-purple-300 bg-purple-100 rounded w-14 h-20 mx-10"
           />
           <div className="flex flex-row gap-3">
             {[[], [], [], []]
@@ -519,12 +522,7 @@ module GameRules = {
               <div
                 key={Foundation(i)->spaceToString}
                 ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-                className=" border border-slate-200 bg-slate-100 rounded w-14 h-20"
-                style={{
-                  top: "0px",
-                  left: (foundationOffset + 30 + i * 70)->Int.toString ++ "px",
-                  zIndex: "0",
-                }}
+                className=" border  border-slate-200 bg-slate-100 rounded w-14 h-20"
               />
             })
             ->React.array}
@@ -537,11 +535,6 @@ module GameRules = {
               key={Pile(i)->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
               className=" border border-slate-200 bg-slate-100  rounded w-14 h-20"
-              style={{
-                top: "100px",
-                left: (i * 70)->Int.toString ++ "px",
-                zIndex: "0",
-              }}
             />
           })
           ->React.array}
