@@ -577,4 +577,4 @@ module GameRules = {
   }
 }
 
-module Game = GameBase.GameBase(GameRules)
+// module Game = GameBase.GameBase(GameRules)

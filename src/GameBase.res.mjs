@@ -109,17 +109,19 @@ function GameBase(GameRules) {
           }), []);
     return match[0];
   };
-  var GameBase$GameBase$DependentWrapper = function (props) {
+  var GameBase$GameBase$BoardWrapper = function (props) {
     var game = useGame();
-    return JsxRuntime.jsx(GameRules.Dependent.make, {
+    return JsxRuntime.jsx(GameRules.Board.make, {
+                setRef: props.setRef,
+                onMouseDown: props.onMouseDown,
                 setGame: props.setGame,
                 moveToState: props.moveToState,
                 autoProgress: props.autoProgress,
                 game: game
               });
   };
-  var DependentWrapper = {
-    make: GameBase$GameBase$DependentWrapper
+  var BoardWrapper = {
+    make: GameBase$GameBase$BoardWrapper
   };
   var GameBase$GameBase = function (props) {
     var refs = React.useRef([]);
@@ -182,50 +184,58 @@ function GameBase(GameRules) {
     };
     var moveToState = function () {
       GameRules.getSpaceLocs(getGame()).forEach(function (param) {
-            var pos = param[1];
-            var element = getElement(param[0]);
-            if (element !== undefined) {
-              var element$1 = Caml_option.valFromOption(element);
-              var targetLeft = pos.x;
-              var targetTop = pos.y;
-              var targetZIndex = pos.z;
-              var offset;
-              var duration = 100;
-              var start = elementPosition(element$1);
-              var startZIndex = zIndexFromElement(element$1);
-              var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    left: 0
-                  }, (function (board) {
-                      return elementPosition(board);
-                    }));
-              var start_top = start.top - boardPos.top;
-              var start_right = start.right - boardPos.right;
-              var start_bottom = start.bottom - boardPos.bottom;
-              var start_left = start.left - boardPos.left;
-              var startTime = performance.now();
-              var step = function (currentTime) {
-                var elapsedTime = currentTime - startTime;
-                var progress = Math.min(elapsedTime / duration, 1);
-                var leftMove = start_left + (targetLeft - start_left) * progress;
-                var topMove = start_top + (targetTop - start_top) * progress;
-                move(element$1, leftMove | 0, topMove | 0, offset);
-                if (progress < 1) {
-                  requestAnimationFrame(step);
-                  return ;
-                } else {
-                  return setDown(element$1, targetZIndex);
-                }
-              };
-              if (start_left !== targetLeft || start_top !== targetTop || Caml_obj.notequal(startZIndex, targetZIndex)) {
-                liftUp(element$1, 1000);
+            var pos = param[2];
+            var refSpace = param[1];
+            console.log(refSpace, getElement(refSpace));
+            var match = getElement(param[0]);
+            var match$1 = getElement(refSpace);
+            if (match === undefined) {
+              return ;
+            }
+            if (match$1 === undefined) {
+              return ;
+            }
+            var refPos = elementPosition(Caml_option.valFromOption(match$1));
+            var element = Caml_option.valFromOption(match);
+            var targetLeft = pos.x;
+            var targetTop = pos.y;
+            var targetZIndex = pos.z;
+            var offset;
+            var duration = 100;
+            var start = elementPosition(element);
+            var startZIndex = zIndexFromElement(element);
+            var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                  left: 0
+                }, (function (board) {
+                    return elementPosition(board);
+                  }));
+            var start_top = start.top - boardPos.top;
+            var start_right = start.right - boardPos.right;
+            var start_bottom = start.bottom - boardPos.bottom;
+            var start_left = start.left - boardPos.left;
+            var adjustedTargetLeft = targetLeft + refPos.left - boardPos.left;
+            var adjustedTargetTop = targetTop + refPos.top - boardPos.top;
+            var startTime = performance.now();
+            var step = function (currentTime) {
+              var elapsedTime = currentTime - startTime;
+              var progress = Math.min(elapsedTime / duration, 1);
+              var leftMove = start_left + (adjustedTargetLeft - start_left) * progress;
+              var topMove = start_top + (adjustedTargetTop - start_top) * progress;
+              move(element, leftMove | 0, topMove | 0, offset);
+              if (progress < 1) {
                 requestAnimationFrame(step);
                 return ;
               } else {
-                return ;
+                return setDown(element, targetZIndex);
               }
+            };
+            if (start_left !== adjustedTargetLeft || start_top !== adjustedTargetTop || Caml_obj.notequal(startZIndex, targetZIndex)) {
+              liftUp(element, 1000);
+              requestAnimationFrame(step);
+              return ;
             }
             
           });
@@ -268,6 +278,7 @@ function GameBase(GameRules) {
         ($$event.clientX - (pos.left | 0) | 0) + (boardPos.left | 0) | 0,
         ($$event.clientY - (pos.top | 0) | 0) + (boardPos.top | 0) | 0
       ];
+      console.log(offset.current);
     };
     var onMouseMove = function ($$event) {
       Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
@@ -346,14 +357,16 @@ function GameBase(GameRules) {
           }), []);
     return JsxRuntime.jsxs("div", {
                 children: [
-                  JsxRuntime.jsx(GameRules.Independent.make, {
+                  JsxRuntime.jsx(GameBase$GameBase$BoardWrapper, {
                         setRef: setRef,
-                        onMouseDown: onMouseDown
-                      }),
-                  JsxRuntime.jsx(GameBase$GameBase$DependentWrapper, {
+                        onMouseDown: onMouseDown,
                         setGame: setGame,
                         moveToState: moveToState,
                         autoProgress: autoProgress
+                      }),
+                  JsxRuntime.jsx(GameRules.AllCards.make, {
+                        setRef: setRef,
+                        onMouseDown: onMouseDown
                       })
                 ],
                 className: "relative m-5",
@@ -375,7 +388,7 @@ function GameBase(GameRules) {
           setGame: setGame,
           _undo: _undo,
           useGame: useGame,
-          DependentWrapper: DependentWrapper,
+          BoardWrapper: BoardWrapper,
           make: GameBase$GameBase
         };
 }

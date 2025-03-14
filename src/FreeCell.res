@@ -49,13 +49,14 @@ module GameRules = {
   let getSpaceLocs = (game: game) => {
     // Todo: maybe change to a map
     let cards = ref([])
-    let addToCards = card => cards := Array.concat(cards.contents, [card])
+    let addToCards = x => cards := Array.concat(cards.contents, [x])
     game.piles->ArrayAux.forEach2((_, card, i, j) => {
       addToCards((
         Card(card),
+        Pile(i),
         {
-          x: i * 70,
-          y: 200 + j * 20,
+          x: 0,
+          y: j * 20,
           z: j + 1,
         },
       ))
@@ -64,9 +65,10 @@ module GameRules = {
     game.foundations->ArrayAux.forEach2((_, card, i, j) => {
       addToCards((
         Card(card),
+        Foundation(i),
         {
-          x: foundationOffset + i * 70,
-          y: 100,
+          x: 0,
+          y: 0,
           z: j + 1,
         },
       ))
@@ -75,9 +77,10 @@ module GameRules = {
     game.free->ArrayAux.forEach2((_, card, i, _) => {
       addToCards((
         Card(card),
+        Free(i),
         {
-          x: i * 70,
-          y: 100,
+          x: 0,
+          y: 0,
           z: 1,
         },
       ))
@@ -366,48 +369,42 @@ module GameRules = {
     @react.component
     let make = (~setRef, ~onMouseDown) => {
       <React.Fragment>
-        {[[], [], [], []]
-        ->Array.mapWithIndex((_, i) => {
-          <div
-            key={Free(i)->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
-            className="absolute border border-slate-200 bg-slate-100 rounded w-14 h-20"
-            style={{
-              top: "100px",
-              left: (i * 70)->Int.toString ++ "px",
-              zIndex: "0",
-            }}
-          />
-        })
-        ->React.array}
-        {[[], [], [], []]
-        ->Array.mapWithIndex((_, i) => {
-          <div
-            key={Foundation(i)->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-            className="absolute border border-slate-200 bg-slate-100 rounded w-14 h-20"
-            style={{
-              top: "100px",
-              left: (foundationOffset + i * 70)->Int.toString ++ "px",
-              zIndex: "0",
-            }}
-          />
-        })
-        ->React.array}
-        {[[], [], [], [], [], [], []]
-        ->Array.mapWithIndex((_, i) => {
-          <div
-            key={Pile(i)->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-            className="absolute border border-slate-200 bg-slate-100  rounded w-14 h-20"
-            style={{
-              top: "200px",
-              left: (i * 70)->Int.toString ++ "px",
-              zIndex: "0",
-            }}
-          />
-        })
-        ->React.array}
+        <div className="flex flex-row">
+          <div className="flex flex-row gap-3">
+            {[[], [], [], []]
+            ->Array.mapWithIndex((_, i) => {
+              <div
+                key={Free(i)->spaceToString}
+                ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
+                className=" border border-slate-200 bg-slate-100 rounded w-14 h-20"
+              />
+            })
+            ->React.array}
+          </div>
+          <div className="flex flex-row gap-3 ml-10">
+            {[[], [], [], []]
+            ->Array.mapWithIndex((_, i) => {
+              <div
+                key={Free(i)->spaceToString}
+                ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
+                className=" border border-slate-200 bg-slate-100 rounded w-14 h-20"
+              />
+            })
+            ->React.array}
+          </div>
+        </div>
+        <div />
+        <div className="flex flex-row gap-3 mt-5">
+          {[[], [], [], [], [], [], [], []]
+          ->Array.mapWithIndex((_, i) => {
+            <div
+              key={Pile(i)->spaceToString}
+              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+              className=" border border-slate-200 bg-slate-100  rounded w-14 h-20"
+            />
+          })
+          ->React.array}
+        </div>
         {shuffledDeck
         ->Array.map(card => {
           <Card.Display
@@ -431,4 +428,4 @@ module GameRules = {
   }
 }
 
-module Game = GameBase.GameBase(GameRules)
+// module Game = GameBase.GameBase(GameRules)

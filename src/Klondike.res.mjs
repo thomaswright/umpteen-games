@@ -203,8 +203,12 @@ function getSpaceLocs(game) {
                   _0: card
                 },
                 {
-                  x: Math.imul(i, 70),
-                  y: 200 + Math.imul(j, 20) | 0,
+                  TAG: "Pile",
+                  _0: i
+                },
+                {
+                  x: 0,
+                  y: Math.imul(j, 20),
                   z: j + 1 | 0
                 }
               ]);
@@ -216,8 +220,12 @@ function getSpaceLocs(game) {
                   _0: card
                 },
                 {
-                  x: Math.imul(i, 70),
-                  y: 100,
+                  TAG: "Foundation",
+                  _0: i
+                },
+                {
+                  x: 0,
+                  y: 0,
                   z: j + 1 | 0
                 }
               ]);
@@ -228,6 +236,7 @@ function getSpaceLocs(game) {
                 TAG: "Card",
                 _0: card
               },
+              "Stock",
               {
                 x: 0,
                 y: 0,
@@ -241,8 +250,9 @@ function getSpaceLocs(game) {
                 TAG: "Card",
                 _0: card
               },
+              "Waste",
               {
-                x: 70 + Math.imul(20, i) | 0,
+                x: Math.imul(20, i),
                 y: 0,
                 z: i + 1 | 0
               }
@@ -656,114 +666,128 @@ var Custom = {
   restock: restock
 };
 
-function Klondike$GameRules$Independent(props) {
-  var onMouseDown = props.onMouseDown;
+function Klondike$GameRules$Board(props) {
+  var game = props.game;
+  var autoProgress = props.autoProgress;
+  var moveToState = props.moveToState;
+  var setGame = props.setGame;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
-                [
-                    [],
-                    [],
-                    [],
-                    []
-                  ].map(function (param, i) {
-                      return JsxRuntime.jsx("div", {
-                                  ref: Caml_option.some(setRef({
-                                            TAG: "Foundation",
-                                            _0: i
-                                          })),
-                                  className: "absolute border border-slate-200 bg-slate-100 rounded w-14 h-20",
-                                  style: {
-                                    left: Math.imul(i, 70).toString() + "px",
-                                    top: "100px",
-                                    zIndex: "0"
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("div", {
+                              ref: Caml_option.some(setRef("Stock")),
+                              className: " bg-blue-200 rounded w-14 h-20",
+                              id: JSON.stringify(space_encode("Stock")),
+                              style: {
+                                zIndex: "1001"
+                              },
+                              onClick: (function (param) {
+                                  if (game.stock.length === 0) {
+                                    return restock(setGame, moveToState);
+                                  } else {
+                                    dealToWaste(setGame, moveToState, autoProgress);
+                                    return ;
                                   }
-                                }, JSON.stringify(space_encode({
-                                          TAG: "Foundation",
-                                          _0: i
-                                        })));
+                                })
+                            }, JSON.stringify(space_encode("Stock"))),
+                        JsxRuntime.jsx("div", {
+                              ref: Caml_option.some(setRef("Waste")),
+                              className: "  rounded w-14 h-20",
+                              id: JSON.stringify(space_encode("Waste")),
+                              style: {
+                                zIndex: "53"
+                              }
+                            }, JSON.stringify(space_encode("Waste")))
+                      ],
+                      className: "flex flex-row gap-3"
                     }),
-                [
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    []
-                  ].map(function (param, i) {
-                      return JsxRuntime.jsx("div", {
-                                  ref: Caml_option.some(setRef({
-                                            TAG: "Pile",
-                                            _0: i
-                                          })),
-                                  className: "absolute border border-slate-200 bg-slate-100  rounded w-14 h-20",
-                                  style: {
-                                    left: Math.imul(i, 70).toString() + "px",
-                                    top: "200px",
-                                    zIndex: "0"
-                                  }
-                                }, JSON.stringify(space_encode({
-                                          TAG: "Pile",
-                                          _0: i
-                                        })));
+                JsxRuntime.jsx("div", {
+                      children: [
+                          [],
+                          [],
+                          [],
+                          []
+                        ].map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Foundation",
+                                                  _0: i
+                                                })),
+                                        className: " border border-slate-200 bg-slate-100 rounded w-14 h-20",
+                                        id: JSON.stringify(space_encode({
+                                                  TAG: "Foundation",
+                                                  _0: i
+                                                }))
+                                      }, JSON.stringify(space_encode({
+                                                TAG: "Foundation",
+                                                _0: i
+                                              })));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
                     }),
-                shuffledDeck.map(function (card) {
-                      return JsxRuntime.jsx(Card.Display.make, {
-                                  card: card,
-                                  id: JSON.stringify(space_encode({
-                                            TAG: "Card",
-                                            _0: card
-                                          })),
-                                  cardRef: setRef({
-                                        TAG: "Card",
-                                        _0: card
-                                      }),
-                                  onMouseDown: onMouseDown
-                                }, JSON.stringify(space_encode({
-                                          TAG: "Card",
-                                          _0: card
-                                        })));
+                JsxRuntime.jsx("div", {
+                      children: [
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          []
+                        ].map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                })),
+                                        className: " border border-slate-200 bg-slate-100  rounded w-14 h-20",
+                                        id: JSON.stringify(space_encode({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                }))
+                                      }, JSON.stringify(space_encode({
+                                                TAG: "Pile",
+                                                _0: i
+                                              })));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
                     })
               ]
             });
 }
 
-var Independent = {
-  make: Klondike$GameRules$Independent
+var Board = {
+  make: Klondike$GameRules$Board
 };
 
-function Klondike$GameRules$Dependent(props) {
-  var autoProgress = props.autoProgress;
-  var moveToState = props.moveToState;
-  var setGame = props.setGame;
+function Klondike$GameRules$AllCards(props) {
+  var onMouseDown = props.onMouseDown;
+  var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
-              children: props.game.stock.length === 0 ? JsxRuntime.jsx("div", {
-                      className: "absolute bg-blue-200 rounded w-14 h-20",
-                      style: {
-                        left: "0px",
-                        top: "0px",
-                        zIndex: "53"
-                      },
-                      onClick: (function (param) {
-                          restock(setGame, moveToState);
-                        })
-                    }, "stock-base") : JsxRuntime.jsx("div", {
-                      className: "absolute bg-blue-700 rounded w-14 h-20",
-                      style: {
-                        left: "0px",
-                        top: "0px",
-                        zIndex: "53"
-                      },
-                      onClick: (function (param) {
-                          dealToWaste(setGame, moveToState, autoProgress);
-                        })
-                    }, "stock-cover")
+              children: shuffledDeck.map(function (card) {
+                    return JsxRuntime.jsx(Card.Display.make, {
+                                card: card,
+                                id: JSON.stringify(space_encode({
+                                          TAG: "Card",
+                                          _0: card
+                                        })),
+                                cardRef: setRef({
+                                      TAG: "Card",
+                                      _0: card
+                                    }),
+                                onMouseDown: onMouseDown
+                              }, JSON.stringify(space_encode({
+                                        TAG: "Card",
+                                        _0: card
+                                      })));
+                  })
             });
 }
 
-var Dependent = {
-  make: Klondike$GameRules$Dependent
+var AllCards = {
+  make: Klondike$GameRules$AllCards
 };
 
 var GameRules = {
@@ -782,8 +806,8 @@ var GameRules = {
   applyMoveToOthers: applyMoveToOthers,
   autoProgress: autoProgress,
   Custom: Custom,
-  Independent: Independent,
-  Dependent: Dependent
+  Board: Board,
+  AllCards: AllCards
 };
 
 var Game = GameBase.GameBase({
@@ -796,8 +820,8 @@ var Game = GameBase.GameBase({
       canDrop: canDrop,
       onDrop: onDrop,
       autoProgress: autoProgress,
-      Independent: Independent,
-      Dependent: Dependent
+      Board: Board,
+      AllCards: AllCards
     });
 
 export {

@@ -11,7 +11,7 @@ module type GameRules = {
   let spaceToString: space => string
 
   let initiateGame: unit => game
-  let getSpaceLocs: game => array<(space, pos)>
+  let getSpaceLocs: game => array<(space, space, pos)>
   let applyMoveToOthers: (space, game, space => unit) => unit
   let canDrag: (space, game) => bool
   let canDrop: (space, space, game) => bool
@@ -19,7 +19,26 @@ module type GameRules = {
 
   let autoProgress: ((game => game) => unit) => bool
 
-  module Independent: {
+  module Board: {
+    type props<'setRef, 'onMouseDown, 'setGame, 'moveToState, 'autoProgress, 'game> = {
+      setRef: 'setRef,
+      onMouseDown: 'onMouseDown,
+      setGame: 'setGame,
+      moveToState: 'moveToState,
+      autoProgress: 'autoProgress,
+      game: 'game,
+    }
+    let make: props<
+      space => ReactDOM.Ref.callbackDomRef,
+      'a,
+      (game => game) => unit,
+      unit => unit,
+      unit => 'b,
+      game,
+    > => React.element
+  }
+
+  module AllCards: {
     type props<'setRef, 'onMouseDown> = {
       setRef: 'setRef,
       onMouseDown: 'onMouseDown,
@@ -28,16 +47,6 @@ module type GameRules = {
       space => ReactDOM.Ref.callbackDomRef,
       JsxEventU.Mouse.t => unit,
     > => React.element
-  }
-
-  module Dependent: {
-    type props<'setGame, 'moveToState, 'autoProgress, 'game> = {
-      setGame: 'setGame,
-      moveToState: 'moveToState,
-      autoProgress: 'autoProgress,
-      game: 'game,
-    }
-    let make: props<(game => game) => unit, unit => unit, unit => 'a, game> => React.element
   }
 }
 
@@ -155,11 +164,11 @@ module GameBase = (GameRules: GameRules) => {
     game
   }
 
-  module DependentWrapper = {
+  module BoardWrapper = {
     @react.component
-    let make = (~setGame, ~moveToState, ~autoProgress) => {
+    let make = (~setRef, ~onMouseDown, ~setGame, ~moveToState, ~autoProgress) => {
       let game = useGame()
-      <GameRules.Dependent setGame moveToState autoProgress game />
+      <GameRules.Board setRef onMouseDown setGame moveToState autoProgress game />
     }
   }
 
@@ -219,6 +228,7 @@ module GameBase = (GameRules: GameRules) => {
     }
 
     let rec move = (element, left, top, offset) => {
+      // Console.log2(left, top)
       element->setStyleLeft(left->Int.toString ++ "px")
       element->setStyleTop(top->Int.toString ++ "px")
 
@@ -229,7 +239,7 @@ module GameBase = (GameRules: GameRules) => {
       })
     }
 
-    let moveWithTime = (element, targetLeft, targetTop, targetZIndex, offset, duration) => {
+    let moveWithTime = (element, refPos, targetLeft, targetTop, targetZIndex, offset, duration) => {
       let start = element->elementPosition
 
       let startZIndex = element->zIndexFromElement
@@ -254,6 +264,9 @@ module GameBase = (GameRules: GameRules) => {
         right: start.right -. boardPos.right,
       }
 
+      let adjustedTargetLeft = targetLeft +. refPos.left -. boardPos.left
+      let adjustedTargetTop = targetTop +. refPos.top -. boardPos.top
+
       let startTime = now()
 
       let rec step: float => unit = currentTime => {
@@ -261,8 +274,9 @@ module GameBase = (GameRules: GameRules) => {
         let progress = Math.min(elapsedTime /. duration, 1.) // Clamp progress between 0 and 1
         // let easedProgress = easeOutQuad(progress)
         let easedProgress = progress
-        let leftMove = start.left +. (targetLeft -. start.left) *. easedProgress
-        let topMove = start.top +. (targetTop -. start.top) *. easedProgress
+        let leftMove = start.left +. (adjustedTargetLeft -. start.left) *. easedProgress
+        let topMove = start.top +. (adjustedTargetTop -. start.top) *. easedProgress
+
         move(element, leftMove->Int.fromFloat, topMove->Int.fromFloat, offset)
 
         if progress < 1. {
@@ -273,18 +287,32 @@ module GameBase = (GameRules: GameRules) => {
         }
       }
 
-      if start.left != targetLeft || start.top != targetTop || startZIndex != targetZIndex {
+      if (
+        start.left != adjustedTargetLeft ||
+        start.top != adjustedTargetTop ||
+        startZIndex != targetZIndex
+      ) {
         liftUp(element, 1000)
         requestAnimationFrame(step)
       }
     }
 
     let moveToState = () => {
-      GameRules.getSpaceLocs(getGame())->Array.forEach(((space, pos)) => {
-        switch getElement(space) {
-        | None => ()
-        | Some(element) =>
-          moveWithTime(element, pos.x->Int.toFloat, pos.y->Int.toFloat, Some(pos.z), None, 100.)
+      GameRules.getSpaceLocs(getGame())->Array.forEach(((space, refSpace, pos)) => {
+        Console.log2(refSpace, getElement(refSpace))
+        switch (getElement(space), getElement(refSpace)) {
+        | (Some(element), Some(refElement)) =>
+          let refPos = refElement->elementPosition
+          moveWithTime(
+            element,
+            refPos,
+            pos.x->Int.toFloat,
+            pos.y->Int.toFloat,
+            Some(pos.z),
+            None,
+            100.,
+          )
+        | _ => ()
         }
       })
     }
@@ -341,6 +369,8 @@ module GameBase = (GameRules: GameRules) => {
             event->JsxEvent.Mouse.clientX - pos.left->Int.fromFloat + boardPos.left->Int.fromFloat,
             event->JsxEvent.Mouse.clientY - pos.top->Int.fromFloat + boardPos.top->Int.fromFloat,
           )
+
+          Console.log(offset.current)
         }
       | _ => ()
       }
@@ -435,8 +465,8 @@ module GameBase = (GameRules: GameRules) => {
     }, [])
 
     <div id={"board"} className="relative m-5">
-      <GameRules.Independent onMouseDown setRef />
-      <DependentWrapper setGame moveToState autoProgress />
+      <BoardWrapper onMouseDown setRef setGame moveToState autoProgress />
+      <GameRules.AllCards onMouseDown setRef />
     </div>
   }
 }

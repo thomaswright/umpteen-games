@@ -6,7 +6,6 @@ import * as React from "react";
 import * as Common from "./Common.res.mjs";
 import * as Js_json from "rescript/lib/es6/js_json.js";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
-import * as GameBase from "./GameBase.res.mjs";
 import * as Js_array from "rescript/lib/es6/js_array.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
@@ -201,8 +200,8 @@ function getSpaceLocs(game) {
   var cards = {
     contents: []
   };
-  var addToCards = function (card) {
-    cards.contents = cards.contents.concat([card]);
+  var addToCards = function (x) {
+    cards.contents = cards.contents.concat([x]);
   };
   Common.ArrayAux.forEach2(game.piles, (function (param, card, i, j) {
           addToCards([
@@ -211,8 +210,12 @@ function getSpaceLocs(game) {
                   _0: card
                 },
                 {
-                  x: Math.imul(i, 70),
-                  y: 200 + Math.imul(j, 20) | 0,
+                  TAG: "Pile",
+                  _0: i
+                },
+                {
+                  x: 0,
+                  y: Math.imul(j, 20),
                   z: j + 1 | 0
                 }
               ]);
@@ -224,8 +227,12 @@ function getSpaceLocs(game) {
                   _0: card
                 },
                 {
-                  x: 320 + Math.imul(i, 70) | 0,
-                  y: 100,
+                  TAG: "Foundation",
+                  _0: i
+                },
+                {
+                  x: 0,
+                  y: 0,
                   z: j + 1 | 0
                 }
               ]);
@@ -237,8 +244,12 @@ function getSpaceLocs(game) {
                   _0: card
                 },
                 {
-                  x: Math.imul(i, 70),
-                  y: 100,
+                  TAG: "Free",
+                  _0: i
+                },
+                {
+                  x: 0,
+                  y: 0,
                   z: 1
                 }
               ]);
@@ -612,74 +623,75 @@ function FreeCell$GameRules$Independent(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
-                [
-                    [],
-                    [],
-                    [],
-                    []
-                  ].map(function (param, i) {
-                      return JsxRuntime.jsx("div", {
-                                  ref: Caml_option.some(setRef({
-                                            TAG: "Free",
-                                            _0: i
-                                          })),
-                                  className: "absolute border border-slate-200 bg-slate-100 rounded w-14 h-20",
-                                  style: {
-                                    left: Math.imul(i, 70).toString() + "px",
-                                    top: "100px",
-                                    zIndex: "0"
-                                  }
-                                }, JSON.stringify(space_encode({
-                                          TAG: "Free",
-                                          _0: i
-                                        })));
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("div", {
+                              children: [
+                                  [],
+                                  [],
+                                  [],
+                                  []
+                                ].map(function (param, i) {
+                                    return JsxRuntime.jsx("div", {
+                                                ref: Caml_option.some(setRef({
+                                                          TAG: "Free",
+                                                          _0: i
+                                                        })),
+                                                className: " border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                                              }, JSON.stringify(space_encode({
+                                                        TAG: "Free",
+                                                        _0: i
+                                                      })));
+                                  }),
+                              className: "flex flex-row gap-3"
+                            }),
+                        JsxRuntime.jsx("div", {
+                              children: [
+                                  [],
+                                  [],
+                                  [],
+                                  []
+                                ].map(function (param, i) {
+                                    return JsxRuntime.jsx("div", {
+                                                ref: Caml_option.some(setRef({
+                                                          TAG: "Foundation",
+                                                          _0: i
+                                                        })),
+                                                className: " border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                                              }, JSON.stringify(space_encode({
+                                                        TAG: "Free",
+                                                        _0: i
+                                                      })));
+                                  }),
+                              className: "flex flex-row gap-3 ml-10"
+                            })
+                      ],
+                      className: "flex flex-row"
                     }),
-                [
-                    [],
-                    [],
-                    [],
-                    []
-                  ].map(function (param, i) {
-                      return JsxRuntime.jsx("div", {
-                                  ref: Caml_option.some(setRef({
-                                            TAG: "Foundation",
-                                            _0: i
-                                          })),
-                                  className: "absolute border border-slate-200 bg-slate-100 rounded w-14 h-20",
-                                  style: {
-                                    left: (320 + Math.imul(i, 70) | 0).toString() + "px",
-                                    top: "100px",
-                                    zIndex: "0"
-                                  }
-                                }, JSON.stringify(space_encode({
-                                          TAG: "Foundation",
-                                          _0: i
-                                        })));
-                    }),
-                [
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    []
-                  ].map(function (param, i) {
-                      return JsxRuntime.jsx("div", {
-                                  ref: Caml_option.some(setRef({
-                                            TAG: "Pile",
-                                            _0: i
-                                          })),
-                                  className: "absolute border border-slate-200 bg-slate-100  rounded w-14 h-20",
-                                  style: {
-                                    left: Math.imul(i, 70).toString() + "px",
-                                    top: "200px",
-                                    zIndex: "0"
-                                  }
-                                }, JSON.stringify(space_encode({
-                                          TAG: "Pile",
-                                          _0: i
-                                        })));
+                JsxRuntime.jsx("div", {}),
+                JsxRuntime.jsx("div", {
+                      children: [
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          []
+                        ].map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                })),
+                                        className: " border border-slate-200 bg-slate-100  rounded w-14 h-20"
+                                      }, JSON.stringify(space_encode({
+                                                TAG: "Pile",
+                                                _0: i
+                                              })));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
                     }),
                 shuffledDeck.map(function (card) {
                       return JsxRuntime.jsx(Card.Display.make, {
@@ -734,22 +746,7 @@ var GameRules = {
   Dependent: Dependent
 };
 
-var Game = GameBase.GameBase({
-      getSpace: getSpace,
-      spaceToString: spaceToString,
-      initiateGame: initiateGame,
-      getSpaceLocs: getSpaceLocs,
-      applyMoveToOthers: applyMoveToOthers,
-      canDrag: canDrag,
-      canDrop: canDrop,
-      onDrop: onDrop,
-      autoProgress: autoProgress,
-      Independent: Independent,
-      Dependent: Dependent
-    });
-
 export {
   GameRules ,
-  Game ,
 }
 /* shuffledDeck Not a pure module */

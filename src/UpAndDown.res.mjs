@@ -7,7 +7,6 @@ import * as React from "react";
 import * as Common from "./Common.res.mjs";
 import * as Js_json from "rescript/lib/es6/js_json.js";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
-import * as GameBase from "./GameBase.res.mjs";
 import * as Js_array from "rescript/lib/es6/js_array.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
@@ -1126,22 +1125,7 @@ var GameRules = {
   Dependent: Dependent
 };
 
-var Game = GameBase.GameBase({
-      getSpace: getSpace,
-      spaceToString: spaceToString,
-      initiateGame: initiateGame,
-      getSpaceLocs: getSpaceLocs,
-      applyMoveToOthers: applyMoveToOthers,
-      canDrag: canDrag,
-      canDrop: canDrop,
-      onDrop: onDrop,
-      autoProgress: autoProgress,
-      Independent: Independent,
-      Dependent: Dependent
-    });
-
 export {
   GameRules ,
-  Game ,
 }
 /* fullDeck Not a pure module */

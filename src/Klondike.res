@@ -52,9 +52,10 @@ module GameRules = {
     game.piles->ArrayAux.forEach2((_, card, i, j) => {
       addToCards((
         Card(card),
+        Pile(i),
         {
-          x: i * 70,
-          y: 200 + j * 20,
+          x: 0,
+          y: j * 20,
           z: j + 1,
         },
       ))
@@ -63,9 +64,10 @@ module GameRules = {
     game.foundations->ArrayAux.forEach2((_, card, i, j) => {
       addToCards((
         Card(card),
+        Foundation(i),
         {
-          x: i * 70,
-          y: 100,
+          x: 0,
+          y: 0,
           z: j + 1,
         },
       ))
@@ -74,6 +76,7 @@ module GameRules = {
     game.stock->Array.forEachWithIndex((card, i) => {
       addToCards((
         Card(card),
+        Stock,
         {
           x: 0,
           y: 0,
@@ -85,8 +88,9 @@ module GameRules = {
     game.waste->Array.forEachWithIndex((card, i) => {
       addToCards((
         Card(card),
+        Waste,
         {
-          x: 70 + 20 * i,
+          x: 20 * i,
           y: 0,
           z: i + 1,
         },
@@ -401,38 +405,69 @@ module GameRules = {
     }
   }
 
-  module Independent = {
+  module Board = {
+    @react.component
+    let make = (~setRef, ~onMouseDown as _, ~setGame, ~moveToState, ~autoProgress, ~game) => {
+      <React.Fragment>
+        <div className="flex flex-row gap-3">
+          <div
+            key={Stock->spaceToString}
+            id={Stock->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
+            onClick={_ => {
+              if game.stock->Array.length == 0 {
+                Custom.restock(setGame, moveToState)
+              } else {
+                Custom.dealToWaste(setGame, moveToState, autoProgress)->ignore
+              }
+            }}
+            className=" bg-blue-200 rounded w-14 h-20"
+            style={{
+              zIndex: "1001",
+            }}
+          />
+          <div
+            key={Waste->spaceToString}
+            id={Waste->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Waste))}
+            className="  rounded w-14 h-20"
+            style={{
+              zIndex: "53",
+            }}
+          />
+        </div>
+        <div className="flex flex-row gap-3 mt-5">
+          {[[], [], [], []]
+          ->Array.mapWithIndex((_, i) => {
+            <div
+              key={Foundation(i)->spaceToString}
+              id={Foundation(i)->spaceToString}
+              ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
+              className=" border border-slate-200 bg-slate-100 rounded w-14 h-20"
+            />
+          })
+          ->React.array}
+        </div>
+        <div className="flex flex-row gap-3 mt-5">
+          {[[], [], [], [], [], [], []]
+          ->Array.mapWithIndex((_, i) => {
+            <div
+              key={Pile(i)->spaceToString}
+              id={Pile(i)->spaceToString}
+              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+              className=" border border-slate-200 bg-slate-100  rounded w-14 h-20"
+            />
+          })
+          ->React.array}
+        </div>
+      </React.Fragment>
+    }
+  }
+
+  module AllCards = {
     @react.component
     let make = (~setRef, ~onMouseDown) => {
       <React.Fragment>
-        {[[], [], [], []]
-        ->Array.mapWithIndex((_, i) => {
-          <div
-            key={Foundation(i)->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-            className="absolute border border-slate-200 bg-slate-100 rounded w-14 h-20"
-            style={{
-              top: "100px",
-              left: (i * 70)->Int.toString ++ "px",
-              zIndex: "0",
-            }}
-          />
-        })
-        ->React.array}
-        {[[], [], [], [], [], [], []]
-        ->Array.mapWithIndex((_, i) => {
-          <div
-            key={Pile(i)->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-            className="absolute border border-slate-200 bg-slate-100  rounded w-14 h-20"
-            style={{
-              top: "200px",
-              left: (i * 70)->Int.toString ++ "px",
-              zIndex: "0",
-            }}
-          />
-        })
-        ->React.array}
         {shuffledDeck
         ->Array.map(card => {
           <Card.Display
@@ -444,41 +479,6 @@ module GameRules = {
           />
         })
         ->React.array}
-      </React.Fragment>
-    }
-  }
-
-  module Dependent = {
-    @react.component
-    let make = (~setGame, ~moveToState, ~autoProgress, ~game) => {
-      <React.Fragment>
-        {if game.stock->Array.length == 0 {
-          <div
-            key={"stock-base"}
-            onClick={_ => {
-              Custom.restock(setGame, moveToState)
-            }}
-            className="absolute bg-blue-200 rounded w-14 h-20"
-            style={{
-              top: "0px",
-              left: "0px",
-              zIndex: "53",
-            }}
-          />
-        } else {
-          <div
-            key={"stock-cover"}
-            onClick={_ => {
-              Custom.dealToWaste(setGame, moveToState, autoProgress)->ignore
-            }}
-            className="absolute bg-blue-700 rounded w-14 h-20"
-            style={{
-              top: "0px",
-              left: "0px",
-              zIndex: "53",
-            }}
-          />
-        }}
       </React.Fragment>
     }
   }
