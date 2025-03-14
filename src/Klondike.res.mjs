@@ -637,8 +637,8 @@ async function dealToWaste(setGame, moveToState, autoProgress) {
           return {
                   piles: game.piles,
                   foundations: game.foundations,
-                  stock: game.stock.slice(1),
-                  waste: game.waste.concat(game.stock.slice(0, 1)),
+                  stock: game.stock.slice(0, game.stock.length - 1 | 0),
+                  waste: game.waste.concat(game.stock.slice(game.stock.length - 1 | 0)),
                   gameEnded: game.gameEnded
                 };
         });
@@ -681,7 +681,7 @@ function Klondike$GameRules$Board(props) {
                               className: " bg-blue-200 rounded w-14 h-20",
                               id: JSON.stringify(space_encode("Stock")),
                               style: {
-                                zIndex: "1053"
+                                zIndex: "53"
                               },
                               onClick: (function (param) {
                                   if (game.stock.length === 0) {

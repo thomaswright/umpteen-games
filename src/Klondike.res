@@ -385,8 +385,10 @@ module GameRules = {
       let f = _ => {
         setGame(game => {
           ...game,
-          stock: game.stock->Array.sliceToEnd(~start=1),
-          waste: game.waste->Array.concat(game.stock->Array.slice(~start=0, ~end=1)),
+          stock: game.stock->Array.slice(~start=0, ~end=game.stock->Array.length - 1),
+          waste: game.waste->Array.concat(
+            game.stock->Array.sliceToEnd(~start=game.stock->Array.length - 1),
+          ),
         })
         moveToState()
       }
@@ -423,7 +425,7 @@ module GameRules = {
             }}
             className=" bg-blue-200 rounded w-14 h-20"
             style={{
-              zIndex: "1053",
+              zIndex: "53",
             }}
           />
           <div
