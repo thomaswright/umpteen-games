@@ -453,7 +453,7 @@ function baseSpace(dropItem, game) {
           }
           
         }));
-  game.tarotUp.forEach(function (tarot, i) {
+  game.tarotUp.forEach(function (tarot, param) {
         if (Caml_obj.equal({
                 TAG: "Tarot",
                 _0: tarot
@@ -463,7 +463,7 @@ function baseSpace(dropItem, game) {
         }
         
       });
-  game.tarotDown.forEach(function (tarot, i) {
+  game.tarotDown.forEach(function (tarot, param) {
         if (Caml_obj.equal({
                 TAG: "Tarot",
                 _0: tarot
@@ -618,57 +618,50 @@ function canDrop(dragSpace, dropSpace, game) {
   }
 }
 
-function onDrop(dropOnSpace, dragSpace, game, setGame) {
+function onDrop(dropOnSpace, dragSpace, game) {
   if (typeof dragSpace !== "object") {
-    return ;
+    return game;
   }
   if (dragSpace.TAG !== "Item") {
-    return ;
+    return game;
   }
   var dragCard = dragSpace._0;
   if (dragCard.TAG === "Card") {
     var dragCard$1 = dragCard._0;
-    var removeDrag = function (x) {
-      return x.filter(function (sCard) {
-                  return Caml_obj.notequal(sCard, {
-                              TAG: "Card",
-                              _0: dragCard$1
-                            });
-                });
-    };
-    setGame(function (game) {
-          var x = game.free;
-          return {
-                  piles: game.piles.map(removeDrag),
-                  foundations: game.foundations,
-                  tarotUp: game.tarotUp,
-                  tarotDown: game.tarotDown,
-                  free: x !== undefined && !Caml_obj.equal(x, {
-                        TAG: "Card",
-                        _0: dragCard$1
-                      }) ? x : undefined,
-                  gameEnded: game.gameEnded
-                };
+    var x = game.free;
+    var gameDragRemoved_piles = game.piles.map(function (x) {
+          return x.filter(function (sCard) {
+                      return Caml_obj.notequal(sCard, {
+                                  TAG: "Card",
+                                  _0: dragCard$1
+                                });
+                    });
         });
+    var gameDragRemoved_foundations = game.foundations;
+    var gameDragRemoved_tarotUp = game.tarotUp;
+    var gameDragRemoved_tarotDown = game.tarotDown;
+    var gameDragRemoved_free = x !== undefined && !Caml_obj.equal(x, {
+          TAG: "Card",
+          _0: dragCard$1
+        }) ? x : undefined;
+    var gameDragRemoved_gameEnded = game.gameEnded;
     if (typeof dropOnSpace !== "object") {
       switch (dropOnSpace) {
         case "TarotUp" :
         case "TarotDown" :
-            return ;
+            return game;
         case "Free" :
-            return setGame(function (game) {
-                        return {
-                                piles: game.piles,
-                                foundations: game.foundations,
-                                tarotUp: game.tarotUp,
-                                tarotDown: game.tarotDown,
-                                free: {
-                                  TAG: "Card",
-                                  _0: dragCard$1
-                                },
-                                gameEnded: game.gameEnded
-                              };
-                      });
+            return {
+                    piles: gameDragRemoved_piles,
+                    foundations: gameDragRemoved_foundations,
+                    tarotUp: gameDragRemoved_tarotUp,
+                    tarotDown: gameDragRemoved_tarotDown,
+                    free: {
+                      TAG: "Card",
+                      _0: dragCard$1
+                    },
+                    gameEnded: gameDragRemoved_gameEnded
+                  };
         
       }
     } else {
@@ -676,150 +669,130 @@ function onDrop(dropOnSpace, dragSpace, game, setGame) {
         case "Item" :
             var card = dropOnSpace._0;
             if (card.TAG !== "Card") {
-              return ;
+              return game;
             }
             var card$1 = card._0;
-            return setGame(function (game) {
-                        return {
-                                piles: game.piles.map(function (stack) {
-                                      return Common.ArrayAux.insertAfter(stack, {
-                                                  TAG: "Card",
-                                                  _0: card$1
-                                                }, [{
-                                                    TAG: "Card",
-                                                    _0: dragCard$1
-                                                  }]);
-                                    }),
-                                foundations: game.foundations.map(function (stack) {
-                                      return Common.ArrayAux.insertAfter(stack, card$1, [dragCard$1]);
-                                    }),
-                                tarotUp: game.tarotUp,
-                                tarotDown: game.tarotDown,
-                                free: game.free,
-                                gameEnded: game.gameEnded
-                              };
-                      });
+            return {
+                    piles: gameDragRemoved_piles.map(function (stack) {
+                          return Common.ArrayAux.insertAfter(stack, {
+                                      TAG: "Card",
+                                      _0: card$1
+                                    }, [{
+                                        TAG: "Card",
+                                        _0: dragCard$1
+                                      }]);
+                        }),
+                    foundations: gameDragRemoved_foundations.map(function (stack) {
+                          return Common.ArrayAux.insertAfter(stack, card$1, [dragCard$1]);
+                        }),
+                    tarotUp: gameDragRemoved_tarotUp,
+                    tarotDown: gameDragRemoved_tarotDown,
+                    free: gameDragRemoved_free,
+                    gameEnded: gameDragRemoved_gameEnded
+                  };
         case "Foundation" :
-            var i = dropOnSpace._0;
-            return setGame(function (game) {
-                        return {
-                                piles: game.piles,
-                                foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
-                                        return [dragCard$1];
-                                      })),
-                                tarotUp: game.tarotUp,
-                                tarotDown: game.tarotDown,
-                                free: game.free,
-                                gameEnded: game.gameEnded
-                              };
-                      });
+            return {
+                    piles: gameDragRemoved_piles,
+                    foundations: Common.ArrayAux.update(gameDragRemoved_foundations, dropOnSpace._0, (function (param) {
+                            return [dragCard$1];
+                          })),
+                    tarotUp: gameDragRemoved_tarotUp,
+                    tarotDown: gameDragRemoved_tarotDown,
+                    free: gameDragRemoved_free,
+                    gameEnded: gameDragRemoved_gameEnded
+                  };
         case "Pile" :
-            var i$1 = dropOnSpace._0;
-            return setGame(function (game) {
-                        return {
-                                piles: Common.ArrayAux.update(game.piles, i$1, (function (param) {
-                                        return [{
-                                                  TAG: "Card",
-                                                  _0: dragCard$1
-                                                }];
-                                      })),
-                                foundations: game.foundations,
-                                tarotUp: game.tarotUp,
-                                tarotDown: game.tarotDown,
-                                free: game.free,
-                                gameEnded: game.gameEnded
-                              };
-                      });
+            return {
+                    piles: Common.ArrayAux.update(gameDragRemoved_piles, dropOnSpace._0, (function (param) {
+                            return [{
+                                      TAG: "Card",
+                                      _0: dragCard$1
+                                    }];
+                          })),
+                    foundations: gameDragRemoved_foundations,
+                    tarotUp: gameDragRemoved_tarotUp,
+                    tarotDown: gameDragRemoved_tarotDown,
+                    free: gameDragRemoved_free,
+                    gameEnded: gameDragRemoved_gameEnded
+                  };
         
       }
     }
   } else {
     var dragTarot = dragCard._0;
-    var removeDrag$1 = function (x) {
-      return x.filter(function (sCard) {
-                  return Caml_obj.notequal(sCard, {
-                              TAG: "Tarot",
-                              _0: dragTarot
-                            });
-                });
-    };
-    setGame(function (game) {
-          var x = game.free;
-          return {
-                  piles: game.piles.map(removeDrag$1),
-                  foundations: game.foundations,
-                  tarotUp: game.tarotUp,
-                  tarotDown: game.tarotDown,
-                  free: x !== undefined && !Caml_obj.equal(x, {
-                        TAG: "Tarot",
-                        _0: dragTarot
-                      }) ? x : undefined,
-                  gameEnded: game.gameEnded
-                };
+    var x$1 = game.free;
+    var gameDragRemoved_piles$1 = game.piles.map(function (x) {
+          return x.filter(function (sCard) {
+                      return Caml_obj.notequal(sCard, {
+                                  TAG: "Tarot",
+                                  _0: dragTarot
+                                });
+                    });
         });
+    var gameDragRemoved_foundations$1 = game.foundations;
+    var gameDragRemoved_tarotUp$1 = game.tarotUp;
+    var gameDragRemoved_tarotDown$1 = game.tarotDown;
+    var gameDragRemoved_free$1 = x$1 !== undefined && !Caml_obj.equal(x$1, {
+          TAG: "Tarot",
+          _0: dragTarot
+        }) ? x$1 : undefined;
+    var gameDragRemoved_gameEnded$1 = game.gameEnded;
     if (typeof dropOnSpace !== "object") {
       if (dropOnSpace === "Free") {
-        return setGame(function (game) {
-                    return {
-                            piles: game.piles,
-                            foundations: game.foundations,
-                            tarotUp: game.tarotUp,
-                            tarotDown: game.tarotDown,
-                            free: {
-                              TAG: "Tarot",
-                              _0: dragTarot
-                            },
-                            gameEnded: game.gameEnded
-                          };
-                  });
+        return {
+                piles: gameDragRemoved_piles$1,
+                foundations: gameDragRemoved_foundations$1,
+                tarotUp: gameDragRemoved_tarotUp$1,
+                tarotDown: gameDragRemoved_tarotDown$1,
+                free: {
+                  TAG: "Tarot",
+                  _0: dragTarot
+                },
+                gameEnded: gameDragRemoved_gameEnded$1
+              };
       } else {
-        return ;
+        return game;
       }
     }
     switch (dropOnSpace.TAG) {
       case "Item" :
           var tarot = dropOnSpace._0;
           if (tarot.TAG === "Card") {
-            return ;
+            return game;
           }
           var tarot$1 = tarot._0;
-          return setGame(function (game) {
-                      return {
-                              piles: game.piles.map(function (stack) {
-                                    return Common.ArrayAux.insertAfter(stack, {
-                                                TAG: "Tarot",
-                                                _0: tarot$1
-                                              }, [{
-                                                  TAG: "Tarot",
-                                                  _0: dragTarot
-                                                }]);
-                                  }),
-                              foundations: game.foundations,
-                              tarotUp: Common.ArrayAux.insertAfter(game.tarotUp, tarot$1, [dragTarot]),
-                              tarotDown: Common.ArrayAux.insertAfter(game.tarotDown, tarot$1, [dragTarot]),
-                              free: game.free,
-                              gameEnded: game.gameEnded
-                            };
-                    });
+          return {
+                  piles: gameDragRemoved_piles$1.map(function (stack) {
+                        return Common.ArrayAux.insertAfter(stack, {
+                                    TAG: "Tarot",
+                                    _0: tarot$1
+                                  }, [{
+                                      TAG: "Tarot",
+                                      _0: dragTarot
+                                    }]);
+                      }),
+                  foundations: gameDragRemoved_foundations$1,
+                  tarotUp: Common.ArrayAux.insertAfter(gameDragRemoved_tarotUp$1, tarot$1, [dragTarot]),
+                  tarotDown: Common.ArrayAux.insertAfter(gameDragRemoved_tarotDown$1, tarot$1, [dragTarot]),
+                  free: gameDragRemoved_free$1,
+                  gameEnded: gameDragRemoved_gameEnded$1
+                };
       case "Pile" :
-          var i$2 = dropOnSpace._0;
-          return setGame(function (game) {
-                      return {
-                              piles: Common.ArrayAux.update(game.piles, i$2, (function (param) {
-                                      return [{
-                                                TAG: "Tarot",
-                                                _0: dragTarot
-                                              }];
-                                    })),
-                              foundations: game.foundations,
-                              tarotUp: game.tarotUp,
-                              tarotDown: game.tarotDown,
-                              free: game.free,
-                              gameEnded: game.gameEnded
-                            };
-                    });
+          return {
+                  piles: Common.ArrayAux.update(gameDragRemoved_piles$1, dropOnSpace._0, (function (param) {
+                          return [{
+                                    TAG: "Tarot",
+                                    _0: dragTarot
+                                  }];
+                        })),
+                  foundations: gameDragRemoved_foundations$1,
+                  tarotUp: gameDragRemoved_tarotUp$1,
+                  tarotDown: gameDragRemoved_tarotDown$1,
+                  free: gameDragRemoved_free$1,
+                  gameEnded: gameDragRemoved_gameEnded$1
+                };
       default:
-        return ;
+        return game;
     }
   }
 }
@@ -979,9 +952,18 @@ function autoProgress(setGame) {
 }
 
 function UpAndDown$GameRules$Board(props) {
+  var undo = props.undo;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
+                JsxRuntime.jsx("div", {
+                      children: JsxRuntime.jsx("button", {
+                            children: "Undo",
+                            onClick: (function (param) {
+                                undo();
+                              })
+                          })
+                    }),
                 JsxRuntime.jsxs("div", {
                       children: [
                         JsxRuntime.jsxs("div", {

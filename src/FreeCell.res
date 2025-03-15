@@ -229,7 +229,7 @@ module GameRules = {
     }
   }
 
-  let onDrop = (dropOnSpace, dragSpace, game, setGame) => {
+  let onDrop = (dropOnSpace, dragSpace, game) => {
     switch dragSpace {
     | Card(dragCard) => {
         let dragPile = buildDragPile(dragCard, game)
@@ -239,52 +239,43 @@ module GameRules = {
             !(dragPile->Array.some(dCard => sCard == dCard))
           })
 
-        setGame(game => {
+        let gameDragRemoved = {
           {
             ...game,
             foundations: game.foundations->Array.map(removeDragPile),
             piles: game.piles->Array.map(removeDragPile),
             free: game.free->Array.map(removeDragPile),
           }
-        })
+        }
 
         switch dropOnSpace {
-        | Card(card) =>
-          setGame(game => {
-            {
-              ...game,
-              foundations: game.foundations->Array.map(stack => {
-                stack->ArrayAux.insertAfter(card, dragPile)
-              }),
-              piles: game.piles->Array.map(stack => {
-                stack->ArrayAux.insertAfter(card, dragPile)
-              }),
-            }
-          })
-        | Foundation(i) =>
-          setGame(game => {
-            {
-              ...game,
-              foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
-            }
-          })
-        | Pile(i) =>
-          setGame(game => {
-            {
-              ...game,
-              piles: game.piles->ArrayAux.update(i, _ => dragPile),
-            }
-          })
-        | Free(i) =>
-          setGame(game => {
-            {
-              ...game,
-              free: game.free->ArrayAux.update(i, _ => dragPile),
-            }
-          })
+        | Card(card) => {
+            ...gameDragRemoved,
+            foundations: gameDragRemoved.foundations->Array.map(stack => {
+              stack->ArrayAux.insertAfter(card, dragPile)
+            }),
+            piles: gameDragRemoved.piles->Array.map(stack => {
+              stack->ArrayAux.insertAfter(card, dragPile)
+            }),
+          }
+
+        | Foundation(i) => {
+            ...gameDragRemoved,
+            foundations: gameDragRemoved.foundations->ArrayAux.update(i, _ => dragPile),
+          }
+
+        | Pile(i) => {
+            ...gameDragRemoved,
+            piles: gameDragRemoved.piles->ArrayAux.update(i, _ => dragPile),
+          }
+
+        | Free(i) => {
+            ...gameDragRemoved,
+            free: gameDragRemoved.free->ArrayAux.update(i, _ => dragPile),
+          }
         }
       }
-    | _ => ()
+    | _ => game
     }
   }
 
@@ -367,7 +358,14 @@ module GameRules = {
 
   module Board = {
     @react.component
-    let make = (~setRef, ~onMouseDown, ~setGame, ~moveToState, ~autoProgress, ~game) => {
+    let make = (
+      ~setRef,
+      ~onMouseDown as _,
+      ~setGame as _,
+      ~moveToState as _,
+      ~autoProgress as _,
+      ~game as _,
+    ) => {
       <React.Fragment>
         <div className="flex flex-row">
           <div className="flex flex-row gap-3">
@@ -429,4 +427,4 @@ module GameRules = {
   }
 }
 
-module Game = GameBase.GameBase(GameRules)
+// module Game = GameBase.GameBase(GameRules)

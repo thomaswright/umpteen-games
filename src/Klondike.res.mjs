@@ -6,7 +6,6 @@ import * as React from "react";
 import * as Common from "./Common.res.mjs";
 import * as Js_json from "rescript/lib/es6/js_json.js";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
-import * as GameBase from "./GameBase.res.mjs";
 import * as Js_array from "rescript/lib/es6/js_array.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
@@ -468,12 +467,12 @@ function canDrop(dragSpace, dropSpace, game) {
   }
 }
 
-function onDrop(dropOnSpace, dragSpace, game, setGame) {
+function onDrop(dropOnSpace, dragSpace, game) {
   if (typeof dragSpace !== "object") {
-    return ;
+    return game;
   }
   if (dragSpace.TAG !== "Card") {
-    return ;
+    return game;
   }
   var dragPile = buildDragPile(dragSpace._0, game);
   var removeDragPile = function (x) {
@@ -483,60 +482,48 @@ function onDrop(dropOnSpace, dragSpace, game, setGame) {
                           });
               });
   };
-  setGame(function (game) {
-        return {
-                piles: game.piles.map(removeDragPile),
-                foundations: game.foundations.map(removeDragPile),
-                stock: removeDragPile(game.stock),
-                waste: removeDragPile(game.waste),
-                gameEnded: game.gameEnded
-              };
-      });
+  var gameDragRemoved_piles = game.piles.map(removeDragPile);
+  var gameDragRemoved_foundations = game.foundations.map(removeDragPile);
+  var gameDragRemoved_stock = removeDragPile(game.stock);
+  var gameDragRemoved_waste = removeDragPile(game.waste);
+  var gameDragRemoved_gameEnded = game.gameEnded;
   if (typeof dropOnSpace !== "object") {
-    return ;
+    return game;
   }
   switch (dropOnSpace.TAG) {
     case "Card" :
         var card = dropOnSpace._0;
-        return setGame(function (game) {
-                    return {
-                            piles: game.piles.map(function (stack) {
-                                  return Common.ArrayAux.insertAfter(stack, card, dragPile);
-                                }),
-                            foundations: game.foundations.map(function (stack) {
-                                  return Common.ArrayAux.insertAfter(stack, card, dragPile);
-                                }),
-                            stock: game.stock,
-                            waste: game.waste,
-                            gameEnded: game.gameEnded
-                          };
-                  });
+        return {
+                piles: gameDragRemoved_piles.map(function (stack) {
+                      return Common.ArrayAux.insertAfter(stack, card, dragPile);
+                    }),
+                foundations: gameDragRemoved_foundations.map(function (stack) {
+                      return Common.ArrayAux.insertAfter(stack, card, dragPile);
+                    }),
+                stock: gameDragRemoved_stock,
+                waste: gameDragRemoved_waste,
+                gameEnded: gameDragRemoved_gameEnded
+              };
     case "Foundation" :
-        var i = dropOnSpace._0;
-        return setGame(function (game) {
-                    return {
-                            piles: game.piles,
-                            foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
-                                    return dragPile;
-                                  })),
-                            stock: game.stock,
-                            waste: game.waste,
-                            gameEnded: game.gameEnded
-                          };
-                  });
+        return {
+                piles: gameDragRemoved_piles,
+                foundations: Common.ArrayAux.update(gameDragRemoved_foundations, dropOnSpace._0, (function (param) {
+                        return dragPile;
+                      })),
+                stock: gameDragRemoved_stock,
+                waste: gameDragRemoved_waste,
+                gameEnded: gameDragRemoved_gameEnded
+              };
     case "Pile" :
-        var i$1 = dropOnSpace._0;
-        return setGame(function (game) {
-                    return {
-                            piles: Common.ArrayAux.update(game.piles, i$1, (function (param) {
-                                    return dragPile;
-                                  })),
-                            foundations: game.foundations,
-                            stock: game.stock,
-                            waste: game.waste,
-                            gameEnded: game.gameEnded
-                          };
-                  });
+        return {
+                piles: Common.ArrayAux.update(gameDragRemoved_piles, dropOnSpace._0, (function (param) {
+                        return dragPile;
+                      })),
+                foundations: gameDragRemoved_foundations,
+                stock: gameDragRemoved_stock,
+                waste: gameDragRemoved_waste,
+                gameEnded: gameDragRemoved_gameEnded
+              };
     
   }
 }
@@ -807,22 +794,7 @@ var GameRules = {
   AllCards: AllCards
 };
 
-var Game = GameBase.GameBase({
-      getSpace: getSpace,
-      spaceToString: spaceToString,
-      initiateGame: initiateGame,
-      getSpaceLocs: getSpaceLocs,
-      applyMoveToOthers: applyMoveToOthers,
-      canDrag: canDrag,
-      canDrop: canDrop,
-      onDrop: onDrop,
-      autoProgress: autoProgress,
-      Board: Board,
-      AllCards: AllCards
-    });
-
 export {
   GameRules ,
-  Game ,
 }
 /* shuffledDeck Not a pure module */

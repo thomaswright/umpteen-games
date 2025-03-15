@@ -246,7 +246,7 @@ module GameRules = {
     }
   }
 
-  let onDrop = (dropOnSpace, dragSpace, game, setGame) => {
+  let onDrop = (dropOnSpace, dragSpace, game) => {
     switch dragSpace {
     | Card(dragCard) => {
         let dragPile = buildDragPile(dragCard, game)
@@ -256,47 +256,39 @@ module GameRules = {
             !(dragPile->Array.some(dCard => sCard == dCard))
           })
 
-        setGame(game => {
-          {
-            ...game,
-            foundations: game.foundations->Array.map(removeDragPile),
-            piles: game.piles->Array.map(removeDragPile),
-            stock: game.stock->removeDragPile,
-            waste: game.waste->removeDragPile,
-          }
-        })
+        let gameDragRemoved = {
+          ...game,
+          foundations: game.foundations->Array.map(removeDragPile),
+          piles: game.piles->Array.map(removeDragPile),
+          stock: game.stock->removeDragPile,
+          waste: game.waste->removeDragPile,
+        }
 
         switch dropOnSpace {
-        | Card(card) =>
-          setGame(game => {
-            {
-              ...game,
-              foundations: game.foundations->Array.map(stack => {
-                stack->ArrayAux.insertAfter(card, dragPile)
-              }),
-              piles: game.piles->Array.map(stack => {
-                stack->ArrayAux.insertAfter(card, dragPile)
-              }),
-            }
-          })
-        | Foundation(i) =>
-          setGame(game => {
-            {
-              ...game,
-              foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
-            }
-          })
-        | Pile(i) =>
-          setGame(game => {
-            {
-              ...game,
-              piles: game.piles->ArrayAux.update(i, _ => dragPile),
-            }
-          })
-        | _ => ()
+        | Card(card) => {
+            ...gameDragRemoved,
+            foundations: gameDragRemoved.foundations->Array.map(stack => {
+              stack->ArrayAux.insertAfter(card, dragPile)
+            }),
+            piles: gameDragRemoved.piles->Array.map(stack => {
+              stack->ArrayAux.insertAfter(card, dragPile)
+            }),
+          }
+
+        | Foundation(i) => {
+            ...gameDragRemoved,
+            foundations: gameDragRemoved.foundations->ArrayAux.update(i, _ => dragPile),
+          }
+
+        | Pile(i) => {
+            ...gameDragRemoved,
+            piles: gameDragRemoved.piles->ArrayAux.update(i, _ => dragPile),
+          }
+
+        | _ => game
         }
       }
-    | _ => ()
+    | _ => game
     }
   }
 
@@ -483,4 +475,4 @@ module GameRules = {
   }
 }
 
-module Game = GameBase.GameBase(GameRules)
+// module Game = GameBase.GameBase(GameRules)

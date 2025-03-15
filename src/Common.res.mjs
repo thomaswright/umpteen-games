@@ -44,12 +44,18 @@ function forEach2(a, f) {
       });
 }
 
+function sliceBefore(arr, pred) {
+  var revIndex = arr.toReversed().findIndex(pred);
+  return arr.slice(0, (arr.length - 1 | 0) - revIndex | 0);
+}
+
 var ArrayAux = {
   removeLast: removeLast,
   getLast: getLast,
   update: update,
   insertAfter: insertAfter,
-  forEach2: forEach2
+  forEach2: forEach2,
+  sliceBefore: sliceBefore
 };
 
 export {

@@ -167,13 +167,13 @@ module GameRules = {
       }
     })
 
-    game.tarotUp->Array.forEachWithIndex((tarot, i) => {
+    game.tarotUp->Array.forEachWithIndex((tarot, _) => {
       if Tarot(tarot) == dropItem {
         base := Some(TarotUp)
       }
     })
 
-    game.tarotDown->Array.forEachWithIndex((tarot, i) => {
+    game.tarotDown->Array.forEachWithIndex((tarot, _) => {
       if Tarot(tarot) == dropItem {
         base := Some(TarotDown)
       }
@@ -246,113 +246,91 @@ module GameRules = {
     }
   }
 
-  let onDrop = (dropOnSpace, dragSpace, game, setGame) => {
+  let onDrop = (dropOnSpace, dragSpace, game) => {
     switch dragSpace {
     | Item(Card(dragCard)) => {
-        let removeDrag = x =>
-          x->Array.filter(sCard => {
-            sCard != Card(dragCard)
-          })
-
-        setGame(game => {
-          {
-            ...game,
-            piles: game.piles->Array.map(removeDrag),
-            free: switch game.free {
-            | None => None
-            | Some(x) => x == Card(dragCard) ? None : Some(x)
-            },
-          }
-        })
+        let gameDragRemoved = {
+          ...game,
+          piles: game.piles->Array.map(x =>
+            x->Array.filter(sCard => {
+              sCard != Card(dragCard)
+            })
+          ),
+          free: switch game.free {
+          | None => None
+          | Some(x) => x == Card(dragCard) ? None : Some(x)
+          },
+        }
 
         switch dropOnSpace {
-        | Item(Card(card)) =>
-          setGame(game => {
-            {
-              ...game,
-              foundations: game.foundations->Array.map(stack => {
-                stack->ArrayAux.insertAfter(card, [dragCard])
-              }),
-              piles: game.piles->Array.map(stack => {
-                stack->ArrayAux.insertAfter(Card(card), [Card(dragCard)])
-              }),
-            }
-          })
+        | Item(Card(card)) => {
+            ...gameDragRemoved,
+            foundations: gameDragRemoved.foundations->Array.map(stack => {
+              stack->ArrayAux.insertAfter(card, [dragCard])
+            }),
+            piles: gameDragRemoved.piles->Array.map(stack => {
+              stack->ArrayAux.insertAfter(Card(card), [Card(dragCard)])
+            }),
+          }
 
-        | Foundation(i) =>
-          setGame(game => {
-            {
-              ...game,
-              foundations: game.foundations->ArrayAux.update(i, _ => [dragCard]),
-            }
-          })
-        | Pile(i) =>
-          setGame(game => {
-            {
-              ...game,
-              piles: game.piles->ArrayAux.update(i, _ => [Card(dragCard)]),
-            }
-          })
-        | Free =>
-          setGame(game => {
-            {
-              ...game,
-              free: Some(Card(dragCard)),
-            }
-          })
-        | _ => ()
+        | Foundation(i) => {
+            ...gameDragRemoved,
+            foundations: gameDragRemoved.foundations->ArrayAux.update(i, _ => [dragCard]),
+          }
+
+        | Pile(i) => {
+            ...gameDragRemoved,
+            piles: gameDragRemoved.piles->ArrayAux.update(i, _ => [Card(dragCard)]),
+          }
+
+        | Free => {
+            ...gameDragRemoved,
+            free: Some(Card(dragCard)),
+          }
+
+        | _ => game
         }
       }
 
     | Item(Tarot(dragTarot)) => {
-        let removeDrag = x =>
-          x->Array.filter(sCard => {
-            sCard != Tarot(dragTarot)
-          })
-
-        setGame(game => {
-          {
-            ...game,
-            piles: game.piles->Array.map(removeDrag),
-            free: switch game.free {
-            | None => None
-            | Some(x) => x == Tarot(dragTarot) ? None : Some(x)
-            },
-          }
-        })
+        let gameDragRemoved = {
+          ...game,
+          piles: game.piles->Array.map(x =>
+            x->Array.filter(sCard => {
+              sCard != Tarot(dragTarot)
+            })
+          ),
+          free: switch game.free {
+          | None => None
+          | Some(x) => x == Tarot(dragTarot) ? None : Some(x)
+          },
+        }
 
         switch dropOnSpace {
-        | Item(Tarot(tarot)) =>
-          setGame(game => {
-            {
-              ...game,
-              piles: game.piles->Array.map(stack => {
-                stack->ArrayAux.insertAfter(Tarot(tarot), [Tarot(dragTarot)])
-              }),
-              tarotUp: game.tarotUp->ArrayAux.insertAfter(tarot, [dragTarot]),
-              tarotDown: game.tarotDown->ArrayAux.insertAfter(tarot, [dragTarot]),
-            }
-          })
+        | Item(Tarot(tarot)) => {
+            ...gameDragRemoved,
+            piles: gameDragRemoved.piles->Array.map(stack => {
+              stack->ArrayAux.insertAfter(Tarot(tarot), [Tarot(dragTarot)])
+            }),
+            tarotUp: gameDragRemoved.tarotUp->ArrayAux.insertAfter(tarot, [dragTarot]),
+            tarotDown: gameDragRemoved.tarotDown->ArrayAux.insertAfter(tarot, [dragTarot]),
+          }
 
-        | Pile(i) =>
-          setGame(game => {
-            {
-              ...game,
-              piles: game.piles->ArrayAux.update(i, _ => [Tarot(dragTarot)]),
-            }
-          })
-        | Free =>
-          setGame(game => {
-            {
-              ...game,
-              free: Some(Tarot(dragTarot)),
-            }
-          })
-        | _ => ()
+        | Pile(i) => {
+            ...gameDragRemoved,
+            piles: gameDragRemoved.piles->ArrayAux.update(i, _ => [Tarot(dragTarot)]),
+          }
+
+        | Free => {
+            ...gameDragRemoved,
+            free: Some(Tarot(dragTarot)),
+          }
+
+        | _ => game
         }
       }
 
-    | _ => ()
+    | _ => game
     }
   }
 
@@ -488,8 +466,19 @@ module GameRules = {
 
   module Board = {
     @react.component
-    let make = (~setRef, ~onMouseDown, ~setGame, ~moveToState, ~autoProgress, ~game) => {
+    let make = (
+      ~setRef,
+      ~onMouseDown as _,
+      ~setGame as _,
+      ~moveToState as _,
+      ~autoProgress as _,
+      ~game as _,
+      ~undo,
+    ) => {
       <React.Fragment>
+        <div>
+          <button onClick={_ => undo()}> {"Undo"->React.string} </button>
+        </div>
         <div className="flex flex-row  ">
           <div
             className="flex flex-row justify-between"

@@ -3,9 +3,9 @@ open Types
 
 @val @module("./other.js")
 external condInterval: (unit => unit, int, unit => bool) => unit = "condInterval"
+type stateActor = User | Auto
 
 let easeOutQuad = (t: float) => 1. -. (1. -. t) *. (1. -. t)
-
 module type GameRules = {
   type game
   type space
@@ -17,18 +17,19 @@ module type GameRules = {
   let applyMoveToOthers: (space, game, space => unit) => unit
   let canDrag: (space, game) => bool
   let canDrop: (space, space, game) => bool
-  let onDrop: (space, space, game, (game => game) => unit) => unit
+  let onDrop: (space, space, game) => game
 
   let autoProgress: ((game => game) => unit) => bool
 
   module Board: {
-    type props<'setRef, 'onMouseDown, 'setGame, 'moveToState, 'autoProgress, 'game> = {
+    type props<'setRef, 'onMouseDown, 'setGame, 'moveToState, 'autoProgress, 'game, 'undo> = {
       setRef: 'setRef,
       onMouseDown: 'onMouseDown,
       setGame: 'setGame,
       moveToState: 'moveToState,
       autoProgress: 'autoProgress,
       game: 'game,
+      undo: 'undo,
     }
     let make: props<
       space => ReactDOM.Ref.callbackDomRef,
@@ -37,6 +38,7 @@ module type GameRules = {
       unit => unit,
       unit => 'b,
       game,
+      unit => unit,
     > => React.element
   }
 
@@ -68,6 +70,11 @@ module GameBase = (GameRules: GameRules) => {
     Obj.magic(element)["style"]["z-index"]->Int.fromString
   }
 
+  type historySnapshot = {
+    game: GameRules.game,
+    actor: stateActor,
+  }
+
   type position = {
     top: float,
     right: float,
@@ -88,7 +95,7 @@ module GameBase = (GameRules: GameRules) => {
     ->elementPosition
   }
 
-  type state = {history: array<GameRules.game>}
+  type state = {history: array<historySnapshot>}
 
   type undoStats = {
     currentUndoDepth: int,
@@ -101,7 +108,7 @@ module GameBase = (GameRules: GameRules) => {
   })
 
   let state = ref({
-    history: [GameRules.initiateGame()],
+    history: [{actor: User, game: GameRules.initiateGame()}],
   })
 
   let listeners = Set.make()
@@ -120,8 +127,11 @@ module GameBase = (GameRules: GameRules) => {
     state.contents = f(state.contents)
   }
 
-  let getGame = () =>
-    state.contents.history->Array.getUnsafe(state.contents.history->Array.length - 1)
+  let getGame = () => {
+    let snapShot = state.contents.history->Array.getUnsafe(state.contents.history->Array.length - 1)
+
+    snapShot.game
+  }
 
   let setGame = f => {
     if undoStats.contents.currentUndoDepth > 0 {
@@ -136,18 +146,29 @@ module GameBase = (GameRules: GameRules) => {
       listeners->Set.forEach(listener => listener(_ => newGame))
 
       {
-        history: Array.concat(state.history, [newGame]),
+        history: Array.concat(state.history, [{game: newGame, actor: Auto}]),
       }
     })
   }
 
-  let _undo = () => {
-    if state.contents.history->Array.length > 1 {
+  let snapshot = () => {
+    setState(state => {
+      history: state.history->Common.ArrayAux.update(state.history->Array.length - 1, v => {
+        ...v,
+        actor: User,
+      }),
+    })
+  }
+
+  let undo = () => {
+    if state.contents.history->Array.filter(v => v.actor == User)->Array.length > 1 {
       setState(state => {
+        let newHistory = state.history->Common.ArrayAux.sliceBefore(v => v.actor == User)
         {
-          history: state.history->Array.slice(~start=0, ~end=state.history->Array.length - 1),
+          history: newHistory,
         }
       })
+
       setUndoStats(undoStats => {
         ...undoStats,
         currentUndoDepth: undoStats.currentUndoDepth + 1,
@@ -168,9 +189,13 @@ module GameBase = (GameRules: GameRules) => {
 
   module BoardWrapper = {
     @react.component
-    let make = (~setRef, ~onMouseDown, ~setGame, ~moveToState, ~autoProgress) => {
+    let make = (~setRef, ~onMouseDown, ~setGame, ~moveToState, ~autoProgress, ~undo) => {
       let game = useGame()
-      <GameRules.Board setRef onMouseDown setGame moveToState autoProgress game />
+      let undo = () => {
+        undo()
+        moveToState()
+      }
+      <GameRules.Board setRef onMouseDown setGame moveToState autoProgress game undo />
     }
   }
 
@@ -439,7 +464,12 @@ module GameBase = (GameRules: GameRules) => {
           | None => ()
           | Some(dropOnEl) =>
             switch dropOnEl->GameRules.getSpace {
-            | Some(dropOnSpace) => GameRules.onDrop(dropOnSpace, dragSpace, getGame(), setGame)
+            | Some(dropOnSpace) => {
+                setGame(game => {
+                  GameRules.onDrop(dropOnSpace, dragSpace, game)
+                })
+                snapshot()
+              }
             | None => ()
             }
           }
@@ -463,7 +493,7 @@ module GameBase = (GameRules: GameRules) => {
     }, [])
 
     <div id={"board"} className="relative m-5">
-      <BoardWrapper onMouseDown setRef setGame moveToState autoProgress />
+      <BoardWrapper onMouseDown setRef setGame moveToState autoProgress undo />
       <GameRules.AllCards onMouseDown setRef />
     </div>
   }

@@ -20,4 +20,9 @@ module ArrayAux = {
         f(el1, el2, i, j)
       })
     })
+
+  let sliceBefore = (arr, pred) => {
+    let revIndex = arr->Array.toReversed->Array.findIndex(pred)
+    arr->Array.slice(~start=0, ~end=arr->Array.length - 1 - revIndex)
+  }
 }
