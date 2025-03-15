@@ -47,6 +47,10 @@ let rankIsAbove = (a, b) => {
   allRanks->Array.findIndex(x => x == a.rank) == allRanks->Array.findIndex(x => x == b.rank) + 1
 }
 
+let rankIsAdjacent = (a, b) => {
+  rankIsBelow(a, b) || rankIsAbove(a, b)
+}
+
 let rankString = card => (card.rank :> string)
 
 let stringToRank = s => (s :> rank)

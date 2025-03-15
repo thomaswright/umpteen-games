@@ -359,6 +359,14 @@ function rankIsAbove(a, b) {
               }) + 1 | 0);
 }
 
+function rankIsAdjacent(a, b) {
+  if (rankIsBelow(a, b)) {
+    return true;
+  } else {
+    return rankIsAbove(a, b);
+  }
+}
+
 function rankString(card) {
   return card.rank;
 }
@@ -482,6 +490,7 @@ export {
   equals ,
   rankIsBelow ,
   rankIsAbove ,
+  rankIsAdjacent ,
   rankString ,
   stringToRank ,
   toString ,

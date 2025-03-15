@@ -216,9 +216,8 @@ module GameRules = {
             let topItem = game.piles->Array.getUnsafe(i)->ArrayAux.getLast
             if topItem == Some(dropItem) {
               switch (dropItem, dragItem) {
-              | (Card(c1), Card(c2)) =>
-                (Card.rankIsBelow(c1, c2) || Card.rankIsAbove(c1, c2)) && c1.suit == c2.suit
-              | (Tarot(c1), Tarot(c2)) => Tarot.rankIsBelow(c1, c2) || Tarot.rankIsAbove(c1, c2)
+              | (Card(c1), Card(c2)) => Card.rankIsAdjacent(c1, c2) && c1.suit == c2.suit
+              | (Tarot(c1), Tarot(c2)) => Tarot.rankIsAdjacent(c1, c2)
               | _ => false
               }
             } else {
@@ -226,9 +225,8 @@ module GameRules = {
             }
           | Some(_) =>
             switch (dropItem, dragItem) {
-            | (Card(c1), Card(c2)) =>
-              (Card.rankIsBelow(c1, c2) || Card.rankIsAbove(c1, c2)) && c1.suit == c2.suit
-            | (Tarot(c1), Tarot(c2)) => Tarot.rankIsBelow(c1, c2) || Tarot.rankIsAbove(c1, c2)
+            | (Card(c1), Card(c2)) => Card.rankIsAdjacent(c1, c2) && c1.suit == c2.suit
+            | (Tarot(c1), Tarot(c2)) => Tarot.rankIsAdjacent(c1, c2)
             | _ => false
             }
           | _ => false

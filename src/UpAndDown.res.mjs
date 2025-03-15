@@ -559,18 +559,12 @@ function canDrop(dragSpace, dropSpace, game) {
                   var c1 = dropItem._0;
                   if (dragItem.TAG === "Card") {
                     var c2 = dragItem._0;
-                    canBeParent = (Card.rankIsBelow(c1, c2) || Card.rankIsAbove(c1, c2)) && c1.suit === c2.suit;
+                    canBeParent = Card.rankIsAdjacent(c1, c2) && c1.suit === c2.suit;
                   } else {
                     canBeParent = false;
                   }
                 } else {
-                  var c1$1 = dropItem._0;
-                  if (dragItem.TAG === "Card") {
-                    canBeParent = false;
-                  } else {
-                    var c2$1 = dragItem._0;
-                    canBeParent = Tarot.rankIsBelow(c1$1, c2$1) || Tarot.rankIsAbove(c1$1, c2$1);
-                  }
+                  canBeParent = dragItem.TAG === "Card" ? false : Tarot.rankIsAdjacent(dropItem._0, dragItem._0);
                 }
               } else {
                 canBeParent = false;
@@ -580,21 +574,15 @@ function canDrop(dragSpace, dropSpace, game) {
             }
             if (exit === 1) {
               if (dropItem.TAG === "Card") {
-                var c1$2 = dropItem._0;
+                var c1$1 = dropItem._0;
                 if (dragItem.TAG === "Card") {
-                  var c2$2 = dragItem._0;
-                  canBeParent = (Card.rankIsBelow(c1$2, c2$2) || Card.rankIsAbove(c1$2, c2$2)) && c1$2.suit === c2$2.suit;
+                  var c2$1 = dragItem._0;
+                  canBeParent = Card.rankIsAdjacent(c1$1, c2$1) && c1$1.suit === c2$1.suit;
                 } else {
                   canBeParent = false;
                 }
               } else {
-                var c1$3 = dropItem._0;
-                if (dragItem.TAG === "Card") {
-                  canBeParent = false;
-                } else {
-                  var c2$3 = dragItem._0;
-                  canBeParent = Tarot.rankIsBelow(c1$3, c2$3) || Tarot.rankIsAbove(c1$3, c2$3);
-                }
+                canBeParent = dragItem.TAG === "Card" ? false : Tarot.rankIsAdjacent(dropItem._0, dragItem._0);
               }
             }
             
