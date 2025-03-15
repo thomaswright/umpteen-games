@@ -875,9 +875,9 @@ function autoProgress(setGame) {
           }
         };
         var canMoveTarotDown = function (tarotCard) {
-          var tarotUpCard = Common.ArrayAux.getLast(game.tarotUp);
-          if (tarotUpCard !== undefined) {
-            return Tarot.rankIsBelow(tarotCard, tarotUpCard);
+          var tarotDownCard = Common.ArrayAux.getLast(game.tarotDown);
+          if (tarotDownCard !== undefined) {
+            return Tarot.rankIsBelow(tarotCard, tarotDownCard);
           } else {
             return tarotCard.rank === "R21";
           }
@@ -938,7 +938,7 @@ function autoProgress(setGame) {
                         })),
                   foundations: game.foundations,
                   tarotUp: game.tarotUp,
-                  tarotDown: game.tarotUp.concat([pileTarot]),
+                  tarotDown: game.tarotDown.concat([pileTarot]),
                   free: game.free,
                   gameEnded: game.gameEnded
                 };

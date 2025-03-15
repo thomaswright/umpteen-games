@@ -403,9 +403,9 @@ module GameRules = {
         }
       }
       let canMoveTarotDown = (tarotCard: Tarot.card) => {
-        switch game.tarotUp->ArrayAux.getLast {
+        switch game.tarotDown->ArrayAux.getLast {
         | None => tarotCard.rank == R21
-        | Some(tarotUpCard) => Tarot.rankIsBelow(tarotCard, tarotUpCard)
+        | Some(tarotDownCard) => Tarot.rankIsBelow(tarotCard, tarotDownCard)
         }
       }
 
@@ -450,7 +450,7 @@ module GameRules = {
             newGame :=
               Some({
                 ...game,
-                tarotDown: game.tarotUp->Array.concat([pileTarot]),
+                tarotDown: game.tarotDown->Array.concat([pileTarot]),
                 piles: game.piles->ArrayAux.update(j, p => p->ArrayAux.removeLast),
               })
           }
