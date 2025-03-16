@@ -18,7 +18,7 @@ function easeOutQuad(t) {
   return 1 - (1 - t) * (1 - t);
 }
 
-function GameBase(GameRules) {
+function Create(GameRules) {
   var appendReactElement = function (prim0, prim1) {
     OtherJs.appendReactElement(prim0, prim1);
   };
@@ -137,7 +137,7 @@ function GameBase(GameRules) {
           }), []);
     return match[0];
   };
-  var GameBase$GameBase$BoardWrapper = function (props) {
+  var GameBase$Create$BoardWrapper = function (props) {
     var undo = props.undo;
     var moveToState = props.moveToState;
     var game = useGame();
@@ -156,16 +156,11 @@ function GameBase(GameRules) {
               });
   };
   var BoardWrapper = {
-    make: GameBase$GameBase$BoardWrapper
+    make: GameBase$Create$BoardWrapper
   };
-  var GameBase$GameBase = function (props) {
+  var GameBase$Create = function (props) {
     var refs = React.useRef([]);
-    var dragCard = React.useRef(undefined);
-    var offset = React.useRef([
-          0,
-          0
-        ]);
-    var originalData = React.useRef(undefined);
+    var dragData = React.useRef(undefined);
     var getElement = function (a) {
       return refs.current.find(function (el) {
                   return Caml_obj.equal(GameRules.getSpace(el), Caml_option.some(a));
@@ -187,7 +182,12 @@ function GameBase(GameRules) {
                         f(childEl);
                       }));
               };
-              GameRules.applyMoveToOthers(space, getGame(), appliedF);
+              Core__Option.mapOr(GameRules.getRule(getGame(), space), undefined, (function (rule) {
+                      if (rule.TAG === "Movable") {
+                        return rule._0.applyMoveToOthers(appliedF);
+                      }
+                      
+                    }));
             }));
     };
     var liftUp = function (element, zIndex) {
@@ -218,26 +218,65 @@ function GameBase(GameRules) {
             }));
     };
     var moveToState = function () {
-      GameRules.getSpaceLocs(getGame()).forEach(function (param) {
-            var pos = param[2];
-            var match = getElement(param[0]);
-            var match$1 = getElement(param[1]);
-            if (match === undefined) {
-              return ;
-            }
-            if (match$1 === undefined) {
-              return ;
-            }
-            var refPos = elementPosition(Caml_option.valFromOption(match$1));
-            var element = Caml_option.valFromOption(match);
-            var targetLeft = pos.x;
-            var targetTop = pos.y;
-            var targetZIndex = pos.z;
-            var offset;
-            var duration = 300;
-            var start = elementPosition(element);
-            var startZIndex = zIndexFromElement(element);
-            var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
+      refs.current.forEach(function (element) {
+            Core__Option.mapOr(Core__Option.flatMap(GameRules.getSpace(element), (function (space) {
+                        return GameRules.getRule(getGame(), space);
+                      })), undefined, (function (rule) {
+                    if (rule.TAG !== "Movable") {
+                      return ;
+                    }
+                    var match = rule._0;
+                    var locationAdjustment = match.locationAdjustment;
+                    Core__Option.mapOr(getElement(match.baseSpace), undefined, (function (baseElement) {
+                            var basePos = elementPosition(baseElement);
+                            var targetLeft = locationAdjustment.x;
+                            var targetTop = locationAdjustment.y;
+                            var targetZIndex = locationAdjustment.z;
+                            var offset;
+                            var duration = 300;
+                            var start = elementPosition(element);
+                            var startZIndex = zIndexFromElement(element);
+                            var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
+                                  top: 0,
+                                  right: 0,
+                                  bottom: 0,
+                                  left: 0
+                                }, (function (board) {
+                                    return elementPosition(board);
+                                  }));
+                            var start_top = start.top - boardPos.top;
+                            var start_right = start.right - boardPos.right;
+                            var start_bottom = start.bottom - boardPos.bottom;
+                            var start_left = start.left - boardPos.left;
+                            var adjustedTargetLeft = targetLeft + basePos.left - boardPos.left;
+                            var adjustedTargetTop = targetTop + basePos.top - boardPos.top;
+                            var startTime = performance.now();
+                            var step = function (currentTime) {
+                              var elapsedTime = currentTime - startTime;
+                              var progress = Math.min(elapsedTime / duration, 1);
+                              var easedProgress = easeOutQuad(progress);
+                              var leftMove = start_left + (adjustedTargetLeft - start_left) * easedProgress;
+                              var topMove = start_top + (adjustedTargetTop - start_top) * easedProgress;
+                              move(element, leftMove | 0, topMove | 0, offset);
+                              if (progress < 1) {
+                                requestAnimationFrame(step);
+                                return ;
+                              } else {
+                                return setDown(element, targetZIndex);
+                              }
+                            };
+                            if (start_left !== Math.floor(adjustedTargetLeft) || start_top !== Math.floor(adjustedTargetTop) || Caml_obj.notequal(startZIndex, targetZIndex)) {
+                              liftUp(element, 1000 + Core__Option.getOr(targetZIndex, 0) | 0);
+                              requestAnimationFrame(step);
+                              return ;
+                            }
+                            
+                          }));
+                  }));
+          });
+    };
+    var getBoardPos = function () {
+      return Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
                   top: 0,
                   right: 0,
                   bottom: 0,
@@ -245,34 +284,6 @@ function GameBase(GameRules) {
                 }, (function (board) {
                     return elementPosition(board);
                   }));
-            var start_top = start.top - boardPos.top;
-            var start_right = start.right - boardPos.right;
-            var start_bottom = start.bottom - boardPos.bottom;
-            var start_left = start.left - boardPos.left;
-            var adjustedTargetLeft = targetLeft + refPos.left - boardPos.left;
-            var adjustedTargetTop = targetTop + refPos.top - boardPos.top;
-            var startTime = performance.now();
-            var step = function (currentTime) {
-              var elapsedTime = currentTime - startTime;
-              var progress = Math.min(elapsedTime / duration, 1);
-              var easedProgress = easeOutQuad(progress);
-              var leftMove = start_left + (adjustedTargetLeft - start_left) * easedProgress;
-              var topMove = start_top + (adjustedTargetTop - start_top) * easedProgress;
-              move(element, leftMove | 0, topMove | 0, offset);
-              if (progress < 1) {
-                requestAnimationFrame(step);
-                return ;
-              } else {
-                return setDown(element, targetZIndex);
-              }
-            };
-            if (start_left !== Math.floor(adjustedTargetLeft) || start_top !== Math.floor(adjustedTargetTop) || Caml_obj.notequal(startZIndex, targetZIndex)) {
-              liftUp(element, 1000 + Core__Option.getOr(targetZIndex, 0) | 0);
-              requestAnimationFrame(step);
-              return ;
-            }
-            
-          });
     };
     var getOverlap = function (aEl, bEl) {
       var aPos = elementPosition(aEl);
@@ -282,109 +293,140 @@ function GameBase(GameRules) {
       return overlapX * overlapY;
     };
     var onMouseDown = function ($$event) {
-      var eventElement = $$event.currentTarget;
-      var space = GameRules.getSpace(eventElement);
-      if (space === undefined) {
-        return ;
-      }
-      if (!GameRules.canDrag(Caml_option.valFromOption(space), getGame())) {
-        return ;
-      }
-      dragCard.current = Caml_option.some(eventElement);
-      var dragCardPos = elementPosition(eventElement);
-      var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0
-          }, (function (board) {
-              return elementPosition(board);
+      var dragElement = $$event.currentTarget;
+      Core__Option.mapOr(GameRules.getSpace(dragElement), undefined, (function (dragSpace) {
+              Core__Option.mapOr(GameRules.getRule(getGame(), dragSpace), undefined, (function (rule) {
+                      if (rule.TAG === "Movable") {
+                        return Core__Option.mapOr(rule._0.dragPile(), undefined, (function (dragPile) {
+                                      var boardPos = getBoardPos();
+                                      var eventPos = elementPosition($$event.currentTarget);
+                                      dragData.current = {
+                                        dragElement: dragElement,
+                                        offset: [
+                                          ($$event.clientX - (eventPos.left | 0) | 0) + (boardPos.left | 0) | 0,
+                                          ($$event.clientY - (eventPos.top | 0) | 0) + (boardPos.top | 0) | 0
+                                        ],
+                                        dragSpace: dragSpace,
+                                        dragPile: dragPile
+                                      };
+                                      liftUp(dragElement, 1000);
+                                    }));
+                      }
+                      
+                    }));
             }));
-      originalData.current = Core__Option.map(zIndexFromElement(eventElement), (function (v) {
-              return [
-                      dragCardPos,
-                      v
-                    ];
-            }));
-      liftUp(eventElement, 1000);
-      var pos = elementPosition($$event.currentTarget);
-      offset.current = [
-        ($$event.clientX - (pos.left | 0) | 0) + (boardPos.left | 0) | 0,
-        ($$event.clientY - (pos.top | 0) | 0) + (boardPos.top | 0) | 0
-      ];
     };
     var onMouseMove = function ($$event) {
-      Core__Option.mapOr(dragCard.current, undefined, (function (dragCard) {
-              var match = offset.current;
+      Core__Option.mapOr(dragData.current, undefined, (function (dragData) {
+              var match = dragData.offset;
               var leftMove = $$event.clientX - match[0] | 0;
               var topMove = $$event.clientY - match[1] | 0;
-              move(dragCard, leftMove, topMove, [
+              move(dragData.dragElement, leftMove, topMove, [
                     0,
                     20
                   ]);
             }));
     };
-    var getDragCard = function () {
-      var dragCardEl = dragCard.current;
-      if (dragCardEl === undefined) {
-        return ;
-      }
-      var dragCardEl$1 = Caml_option.valFromOption(dragCardEl);
-      var dragSpace = GameRules.getSpace(dragCardEl$1);
-      if (dragSpace !== undefined) {
-        return [
-                dragCardEl$1,
-                Caml_option.valFromOption(dragSpace)
-              ];
-      }
-      
-    };
     var autoProgress = function () {
       condInterval((function () {
               moveToState();
             }), 300, (function () {
-              return GameRules.autoProgress(setGame);
+              var dragPiles = Core__Array.filterMap(refs.current, (function (el) {
+                      return Core__Option.mapOr(Core__Option.flatMap(GameRules.getSpace(el), (function (elSpace) {
+                                        return GameRules.getRule(getGame(), elSpace);
+                                      })), undefined, (function (rule) {
+                                    if (rule.TAG !== "Movable") {
+                                      return ;
+                                    }
+                                    var dragPile = rule._0.autoProgress();
+                                    if (typeof dragPile !== "object") {
+                                      return ;
+                                    } else {
+                                      return Caml_option.some(dragPile._0);
+                                    }
+                                  }));
+                    }));
+              var droppedUpons = Core__Array.filterMap(refs.current, (function (el) {
+                      return Core__Option.mapOr(Core__Option.flatMap(GameRules.getSpace(el), (function (elSpace) {
+                                        return GameRules.getRule(getGame(), elSpace);
+                                      })), undefined, (function (rule) {
+                                    if (rule.TAG === "Movable") {
+                                      var match = rule._0;
+                                      var match$1 = match.autoProgress();
+                                      if (typeof match$1 !== "object" && match$1 === "Seek") {
+                                        return match.droppedUpon;
+                                      } else {
+                                        return ;
+                                      }
+                                    }
+                                    var match$2 = rule._0;
+                                    if (match$2.autoProgress) {
+                                      return match$2.droppedUpon;
+                                    }
+                                    
+                                  }));
+                    }));
+              var op = {
+                contents: undefined
+              };
+              dragPiles.forEach(function (dragPile) {
+                    droppedUpons.forEach(function (droppedUpon) {
+                          if (Core__Option.isNone(op.contents)) {
+                            op.contents = droppedUpon(GameRules.removeDragFromGame(getGame(), dragPile), dragPile);
+                            return ;
+                          }
+                          
+                        });
+                  });
+              var game = op.contents;
+              if (game === undefined) {
+                return false;
+              }
+              var game$1 = Caml_option.valFromOption(game);
+              setGame(function (param) {
+                    return game$1;
+                  });
+              return true;
             }));
     };
     var onMouseUp = function (param) {
-      var match = getDragCard();
+      var match = dragData.current;
       if (match !== undefined) {
-        var dragSpace = match[1];
-        var dragCardEl = match[0];
-        var dropOn = Core__Option.map(Core__Array.reduce(refs.current, undefined, (function (acc, el) {
-                    return Core__Option.mapOr(GameRules.getSpace(el), acc, (function (elSpace) {
-                                  if (!GameRules.canDrop(dragSpace, elSpace, getGame())) {
-                                    return acc;
-                                  }
-                                  var overlap = getOverlap(el, dragCardEl);
-                                  var $$new = [
-                                    overlap,
-                                    el
-                                  ];
-                                  if (overlap > 0 && !(acc !== undefined && acc[0] > overlap)) {
-                                    return $$new;
-                                  } else {
-                                    return acc;
-                                  }
-                                }));
-                  })), (function (param) {
-                return param[1];
+        var dragPile = match.dragPile;
+        var dragElement = match.dragElement;
+        var greatestOverlap = {
+          contents: 0
+        };
+        var updatedGame = {
+          contents: undefined
+        };
+        refs.current.forEach(function (el) {
+              Core__Option.mapOr(Core__Option.flatMap(Core__Option.flatMap(GameRules.getSpace(el), (function (elSpace) {
+                              return GameRules.getRule(getGame(), elSpace);
+                            })), (function (rule) {
+                          var droppedUpon;
+                          droppedUpon = rule.TAG === "Movable" ? rule._0.droppedUpon : rule._0.droppedUpon;
+                          return droppedUpon(GameRules.removeDragFromGame(getGame(), dragPile), dragPile);
+                        })), undefined, (function (newGame) {
+                      var overlap = getOverlap(el, dragElement);
+                      if (overlap > greatestOverlap.contents) {
+                        greatestOverlap.contents = overlap;
+                        updatedGame.contents = Caml_option.some(newGame);
+                        return ;
+                      }
+                      
+                    }));
+            });
+        Core__Option.mapOr(updatedGame.contents, undefined, (function (updatedGame) {
+                setGame(function (param) {
+                      return updatedGame;
+                    });
+                snapshot();
               }));
-        if (dropOn !== undefined) {
-          var dropOnSpace = GameRules.getSpace(Caml_option.valFromOption(dropOn));
-          if (dropOnSpace !== undefined) {
-            var dropOnSpace$1 = Caml_option.valFromOption(dropOnSpace);
-            setGame(function (game) {
-                  return GameRules.onDrop(dropOnSpace$1, dragSpace, game);
-                });
-            snapshot();
-          }
-          
-        }
         moveToState();
         autoProgress();
       }
-      dragCard.current = undefined;
+      dragData.current = undefined;
     };
     React.useEffect((function () {
             window.addEventListener("mousemove", onMouseMove);
@@ -394,7 +436,7 @@ function GameBase(GameRules) {
           }), []);
     return JsxRuntime.jsxs("div", {
                 children: [
-                  JsxRuntime.jsx(GameBase$GameBase$BoardWrapper, {
+                  JsxRuntime.jsx(GameBase$Create$BoardWrapper, {
                         setRef: setRef,
                         onMouseDown: onMouseDown,
                         setGame: setGame,
@@ -428,13 +470,13 @@ function GameBase(GameRules) {
           undo: undo,
           useGame: useGame,
           BoardWrapper: BoardWrapper,
-          make: GameBase$GameBase
+          make: GameBase$Create
         };
 }
 
 export {
   condInterval ,
   easeOutQuad ,
-  GameBase ,
+  Create ,
 }
 /* react Not a pure module */

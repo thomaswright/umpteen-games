@@ -3,23 +3,53 @@ open Types
 
 @val @module("./other.js")
 external condInterval: (unit => unit, int, unit => bool) => unit = "condInterval"
-type stateActor = User | Auto
 
 let easeOutQuad = (t: float) => 1. -. (1. -. t) *. (1. -. t)
+
+type pos = {
+  x: int,
+  y: int,
+  z: int,
+}
+
+type stateActor = User | Auto
+
+type autoProgress<'a> = Send('a) | Seek | DoNothing
+
+type droppedUpon<'game, 'dragPile> = ('game, 'dragPile) => option<'game>
+
+type movableSpace<'game, 'space, 'dragPile> = {
+  locationAdjustment: pos,
+  baseSpace: 'space,
+  dragPile: unit => option<'dragPile>,
+  autoProgress: unit => autoProgress<'dragPile>,
+  droppedUpon: droppedUpon<'game, 'dragPile>,
+  applyMoveToOthers: ('space => unit) => unit,
+}
+
+type staticSpace<'game, 'dragPile> = {
+  droppedUpon: droppedUpon<'game, 'dragPile>,
+  autoProgress: bool,
+}
+
+type spaceFunction<'game, 'space, 'dragPile> =
+  Movable(movableSpace<'game, 'space, 'dragPile>) | Static(staticSpace<'game, 'dragPile>)
+
+type getRule<'game, 'space, 'dragPile> = (
+  'game,
+  'space,
+) => option<spaceFunction<'game, 'space, 'dragPile>>
+
 module type GameRules = {
   type game
   type space
+  type dragPile
+
   let getSpace: Element.t => option<space>
   let spaceToString: space => string
-
   let initiateGame: unit => game
-  let getSpaceLocs: game => array<(space, space, pos)>
-  let applyMoveToOthers: (space, game, space => unit) => unit
-  let canDrag: (space, game) => bool
-  let canDrop: (space, space, game) => bool
-  let onDrop: (space, space, game) => game
-
-  let autoProgress: ((game => game) => unit) => bool
+  let getRule: getRule<game, space, dragPile>
+  let removeDragFromGame: (game, dragPile) => game
 
   module Board: {
     type props<'setRef, 'onMouseDown, 'setGame, 'moveToState, 'autoProgress, 'game, 'undo> = {
@@ -54,7 +84,7 @@ module type GameRules = {
   }
 }
 
-module GameBase = (GameRules: GameRules) => {
+module Create = (GameRules: GameRules) => {
   @set @scope("style") external setStyleLeft: (Dom.element, string) => unit = "left"
   @set @scope("style") external setStyleDisplay: (Dom.element, string) => unit = "display"
   @set @scope("style") external setStyleTop: (Dom.element, string) => unit = "top"
@@ -199,13 +229,18 @@ module GameBase = (GameRules: GameRules) => {
     }
   }
 
+  type dragData = {
+    dragElement: Dom.element,
+    offset: (int, int),
+    dragSpace: GameRules.space,
+    dragPile: GameRules.dragPile,
+  }
+
   @react.component
   let make = () => {
     let refs = React.useRef([])
 
-    let dragCard: React.ref<option<Dom.element>> = React.useRef(None)
-    let offset = React.useRef((0, 0))
-    let originalData = React.useRef(None)
+    let dragData: React.ref<option<dragData>> = React.useRef(None)
 
     let getElement = a => refs.current->Array.find(el => el->GameRules.getSpace == Some(a))
 
@@ -233,7 +268,12 @@ module GameBase = (GameRules: GameRules) => {
           })
         }
 
-        GameRules.applyMoveToOthers(space, getGame(), appliedF)
+        GameRules.getRule(getGame(), space)->Option.mapOr((), rule => {
+          switch rule {
+          | Static(_) => ()
+          | Movable({applyMoveToOthers}) => applyMoveToOthers(appliedF)
+          }
+        })
       })
     }
 
@@ -324,22 +364,48 @@ module GameBase = (GameRules: GameRules) => {
     }
 
     let moveToState = () => {
-      GameRules.getSpaceLocs(getGame())->Array.forEach(((space, refSpace, pos)) => {
-        switch (getElement(space), getElement(refSpace)) {
-        | (Some(element), Some(refElement)) =>
-          let refPos = refElement->elementPosition
-          moveWithTime(
-            element,
-            refPos,
-            pos.x->Int.toFloat,
-            pos.y->Int.toFloat,
-            Some(pos.z),
-            None,
-            300.,
-          )
-        | _ => ()
-        }
+      refs.current->Array.forEach(element => {
+        element
+        ->GameRules.getSpace
+        ->Option.flatMap(space => GameRules.getRule(getGame(), space))
+        ->Option.mapOr((), rule => {
+          switch rule {
+          | Static(_) => ()
+          | Movable({locationAdjustment, baseSpace}) =>
+            baseSpace
+            ->getElement
+            ->Option.mapOr(
+              (),
+              baseElement => {
+                let basePos = baseElement->elementPosition
+                moveWithTime(
+                  element,
+                  basePos,
+                  locationAdjustment.x->Int.toFloat,
+                  locationAdjustment.y->Int.toFloat,
+                  Some(locationAdjustment.z),
+                  None,
+                  300.,
+                )
+              },
+            )
+          }
+        })
       })
+    }
+
+    let getBoardPos = () => {
+      document
+      ->Document.getElementById("board")
+      ->Option.mapOr(
+        {
+          top: 0.,
+          left: 0.,
+          bottom: 0.,
+          right: 0.,
+        },
+        board => board->elementPosition,
+      )
     }
 
     let getOverlap = (aEl, bEl) => {
@@ -359,65 +425,53 @@ module GameBase = (GameRules: GameRules) => {
     }
 
     let onMouseDown = event => {
-      let eventElement =
+      let dragElement =
         event
         ->JsxEvent.Mouse.currentTarget
         ->Obj.magic
 
-      switch eventElement->GameRules.getSpace {
-      | Some(space) =>
-        if GameRules.canDrag(space, getGame()) {
-          dragCard.current = eventElement->Some
+      dragElement
+      ->GameRules.getSpace
+      ->Option.mapOr((), dragSpace => {
+        GameRules.getRule(getGame(), dragSpace)->Option.mapOr((), rule => {
+          switch rule {
+          | Static(_) => ()
+          | Movable({dragPile}) =>
+            dragPile()->Option.mapOr(
+              (),
+              dragPile => {
+                let boardPos = getBoardPos()
+                let eventPos = event->eventPosition
 
-          let dragCardPos = eventElement->elementPosition
-
-          let boardPos =
-            document
-            ->Document.getElementById("board")
-            ->Option.mapOr(
-              {
-                top: 0.,
-                left: 0.,
-                bottom: 0.,
-                right: 0.,
+                dragData.current = Some({
+                  dragSpace,
+                  dragPile,
+                  dragElement,
+                  offset: (
+                    event->JsxEvent.Mouse.clientX -
+                    eventPos.left->Int.fromFloat +
+                    boardPos.left->Int.fromFloat,
+                    event->JsxEvent.Mouse.clientY -
+                    eventPos.top->Int.fromFloat +
+                    boardPos.top->Int.fromFloat,
+                  ),
+                })
+                liftUp(dragElement, 1000)
               },
-              board => board->elementPosition,
             )
-
-          originalData.current = eventElement->zIndexFromElement->Option.map(v => (dragCardPos, v))
-
-          liftUp(eventElement, 1000)
-
-          let pos = event->eventPosition
-
-          offset.current = (
-            event->JsxEvent.Mouse.clientX - pos.left->Int.fromFloat + boardPos.left->Int.fromFloat,
-            event->JsxEvent.Mouse.clientY - pos.top->Int.fromFloat + boardPos.top->Int.fromFloat,
-          )
-        }
-      | _ => ()
-      }
-    }
-
-    let onMouseMove = event => {
-      dragCard.current->Option.mapOr((), dragCard => {
-        let (offsetX, offsetY) = offset.current
-        let leftMove = event->MouseEvent.clientX - offsetX
-        let topMove = event->MouseEvent.clientY - offsetY
-
-        move(dragCard, leftMove, topMove, Some(0, 20))
+          }
+        })
       })
     }
 
-    let getDragCard = () => {
-      switch dragCard.current {
-      | Some(dragCardEl) =>
-        switch dragCardEl->GameRules.getSpace {
-        | Some(dragSpace) => Some(dragCardEl, dragSpace)
-        | _ => None
-        }
-      | _ => None
-      }
+    let onMouseMove = event => {
+      dragData.current->Option.mapOr((), dragData => {
+        let (offsetX, offsetY) = dragData.offset
+        let leftMove = event->MouseEvent.clientX - offsetX
+        let topMove = event->MouseEvent.clientY - offsetY
+
+        move(dragData.dragElement, leftMove, topMove, Some(0, 20))
+      })
     }
 
     let autoProgress = () => {
@@ -427,61 +481,98 @@ module GameBase = (GameRules: GameRules) => {
         },
         300,
         () => {
-          GameRules.autoProgress(setGame)
+          let dragPiles = refs.current->Array.filterMap(el => {
+            el
+            ->GameRules.getSpace
+            ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
+            ->Option.mapOr(None, rule => {
+              switch rule {
+              | Movable({autoProgress}) =>
+                switch autoProgress() {
+                | Send(dragPile) => Some(dragPile)
+                | _ => None
+                }
+              | _ => None
+              }
+            })
+          })
+
+          let droppedUpons = refs.current->Array.filterMap(el => {
+            el
+            ->GameRules.getSpace
+            ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
+            ->Option.mapOr(None, rule => {
+              switch rule {
+              | Static({autoProgress, droppedUpon}) if autoProgress => Some(droppedUpon)
+              | Movable({autoProgress, droppedUpon}) =>
+                switch autoProgress() {
+                | Seek => Some(droppedUpon)
+                | _ => None
+                }
+              | _ => None
+              }
+            })
+          })
+
+          let op = ref(None)
+
+          dragPiles->Array.forEach(dragPile => {
+            droppedUpons->Array.forEach(droppedUpon => {
+              if op.contents->Option.isNone {
+                op := droppedUpon(getGame()->GameRules.removeDragFromGame(dragPile), dragPile)
+              }
+            })
+          })
+
+          switch op.contents {
+          | Some(game) => {
+              setGame(_ => game)
+              true
+            }
+          | None => false
+          }
         },
       )
     }
 
     let onMouseUp = _ => {
-      switch getDragCard() {
-      | Some((dragCardEl, dragSpace)) => {
-          let dropOn =
-            refs.current
-            ->Array.reduce(None, (acc: option<(float, Dom.element)>, el) => {
-              el
-              ->GameRules.getSpace
-              ->Option.mapOr(acc, elSpace => {
-                if GameRules.canDrop(dragSpace, elSpace, getGame()) {
-                  let overlap = getOverlap(el, dragCardEl)
-                  let new = Some((overlap, el))
+      switch dragData.current {
+      | Some({dragElement, dragSpace, dragPile, offset}) => {
+          let greatestOverlap = ref(0.)
+          let updatedGame = ref(None)
 
-                  if overlap > 0. {
-                    switch acc {
-                    | None => new
-                    | Some((accOverlap, _)) => accOverlap > overlap ? acc : new
-                    }
-                  } else {
-                    acc
-                  }
-                } else {
-                  acc
-                }
-              })
-            })
-            ->Option.map(((_, x)) => x)
-
-          switch dropOn {
-          | None => ()
-          | Some(dropOnEl) =>
-            switch dropOnEl->GameRules.getSpace {
-            | Some(dropOnSpace) => {
-                setGame(game => {
-                  GameRules.onDrop(dropOnSpace, dragSpace, game)
-                })
-                snapshot()
+          refs.current->Array.forEach(el => {
+            el
+            ->GameRules.getSpace
+            ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
+            ->Option.flatMap(rule => {
+              let droppedUpon = switch rule {
+              | Static({droppedUpon}) => droppedUpon
+              | Movable({droppedUpon}) => droppedUpon
               }
-            | None => ()
-            }
-          }
 
+              droppedUpon(getGame()->GameRules.removeDragFromGame(dragPile), dragPile)
+            })
+            ->Option.mapOr((), newGame => {
+              let overlap = getOverlap(el, dragElement)
+              if overlap > greatestOverlap.contents {
+                greatestOverlap := overlap
+                updatedGame := Some(newGame)
+              }
+            })
+          })
+
+          updatedGame.contents->Option.mapOr((), updatedGame => {
+            setGame(_ => updatedGame)
+            snapshot()
+          })
           moveToState()
-
           autoProgress()
         }
       | None => ()
       }
 
-      dragCard.current = None
+      dragData.current = None
     }
 
     React.useEffect(() => {

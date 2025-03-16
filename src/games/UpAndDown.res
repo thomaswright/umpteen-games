@@ -1,9 +1,9 @@
 open Webapi.Dom
 open Types
 open Common
-open GameBase2
+open GameBase
 
-module GameRules: GameBase2.GameRules = {
+module GameRules: GameBase.GameRules = {
   @decco
   type item = Card(Card.card) | Tarot(Tarot.card)
 
@@ -51,8 +51,8 @@ module GameRules: GameBase2.GameRules = {
     gameEnded: bool,
   }
 
-  type movableSpace = GameBase2.movableSpace<game, space, dragPile>
-  type staticSpace = GameBase2.staticSpace<game, dragPile>
+  type movableSpace = GameBase.movableSpace<game, space, dragPile>
+  type staticSpace = GameBase.staticSpace<game, dragPile>
 
   let initiateGame = () => {
     {
@@ -346,7 +346,7 @@ module GameRules: GameBase2.GameRules = {
     }
   }
 
-  let getRule: GameBase2.getRule<game, space, dragPile> = (game: game, match: space) => {
+  let getRule: GameBase.getRule<game, space, dragPile> = (game: game, match: space) => {
     let result = ref(None)
 
     game.piles->Array.forEachWithIndex((pile, i) => {
@@ -508,4 +508,4 @@ module GameRules: GameBase2.GameRules = {
   }
 }
 
-module Game = GameBase2.GameBase(GameRules)
+module Game = GameBase.Create(GameRules)
