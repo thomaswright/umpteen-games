@@ -1,5 +1,4 @@
 open Webapi.Dom
-open Types
 
 @val @module("./other.js")
 external condInterval: (unit => unit, int, unit => bool) => unit = "condInterval"
