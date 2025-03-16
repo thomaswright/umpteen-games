@@ -7,6 +7,7 @@ import * as Common from "./Common.res.mjs";
 import * as Js_json from "rescript/lib/es6/js_json.js";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as Js_array from "rescript/lib/es6/js_array.js";
+import * as GameBase2 from "./GameBase2.res.mjs";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
@@ -165,6 +166,32 @@ function spaceToString(space) {
   return JSON.stringify(space_encode(space));
 }
 
+function dragPileValidation(dragPile) {
+  return Core__Array.reduce(dragPile.toReversed(), [
+                true,
+                undefined
+              ], (function (param, onBottom) {
+                  if (!param[0]) {
+                    return [
+                            false,
+                            undefined
+                          ];
+                  }
+                  var onTop = param[1];
+                  if (onTop !== undefined) {
+                    return [
+                            Card.rankIsBelow(onTop, onBottom) && Card.color(onTop) !== Card.color(onBottom),
+                            onBottom
+                          ];
+                  } else {
+                    return [
+                            true,
+                            onBottom
+                          ];
+                  }
+                }))[0];
+}
+
 function initiateGame() {
   return {
           piles: [
@@ -188,293 +215,7 @@ function initiateGame() {
         };
 }
 
-function getSpaceLocs(game) {
-  var cards = {
-    contents: []
-  };
-  var addToCards = function (card) {
-    cards.contents = cards.contents.concat([card]);
-  };
-  Common.ArrayAux.forEach2(game.piles, (function (param, card, i, j) {
-          addToCards([
-                {
-                  TAG: "Card",
-                  _0: card
-                },
-                {
-                  TAG: "Pile",
-                  _0: i
-                },
-                {
-                  x: 0,
-                  y: Math.imul(j, 20),
-                  z: j + 1 | 0
-                }
-              ]);
-        }));
-  Common.ArrayAux.forEach2(game.foundations, (function (param, card, i, j) {
-          addToCards([
-                {
-                  TAG: "Card",
-                  _0: card
-                },
-                {
-                  TAG: "Foundation",
-                  _0: i
-                },
-                {
-                  x: 0,
-                  y: 0,
-                  z: j + 1 | 0
-                }
-              ]);
-        }));
-  game.stock.forEach(function (card, i) {
-        addToCards([
-              {
-                TAG: "Card",
-                _0: card
-              },
-              "Stock",
-              {
-                x: 0,
-                y: 0,
-                z: i + 1 | 0
-              }
-            ]);
-      });
-  game.waste.forEach(function (card, i) {
-        addToCards([
-              {
-                TAG: "Card",
-                _0: card
-              },
-              "Waste",
-              {
-                x: Math.imul(20, i),
-                y: 0,
-                z: i + 1 | 0
-              }
-            ]);
-      });
-  return cards.contents;
-}
-
-function baseSpace(dropCard, game) {
-  var base = {
-    contents: undefined
-  };
-  Common.ArrayAux.forEach2(game.piles, (function (param, card, i, param$1) {
-          if (Caml_obj.equal(card, dropCard)) {
-            base.contents = {
-              TAG: "Pile",
-              _0: i
-            };
-            return ;
-          }
-          
-        }));
-  Common.ArrayAux.forEach2(game.foundations, (function (param, card, i, param$1) {
-          if (Caml_obj.equal(card, dropCard)) {
-            base.contents = {
-              TAG: "Foundation",
-              _0: i
-            };
-            return ;
-          }
-          
-        }));
-  game.waste.forEach(function (card) {
-        if (Caml_obj.equal(card, dropCard)) {
-          base.contents = "Waste";
-          return ;
-        }
-        
-      });
-  game.stock.forEach(function (card) {
-        if (Caml_obj.equal(card, dropCard)) {
-          base.contents = "Stock";
-          return ;
-        }
-        
-      });
-  return base.contents;
-}
-
-function buildDragPile(card, game) {
-  var dragPile = {
-    contents: []
-  };
-  Common.ArrayAux.forEach2(game.piles, (function (pile, pileCard, param, j) {
-          if (Caml_obj.equal(pileCard, card)) {
-            dragPile.contents = pile.slice(j);
-            return ;
-          }
-          
-        }));
-  Common.ArrayAux.forEach2(game.foundations, (function (pile, pileCard, param, j) {
-          if (Caml_obj.equal(pileCard, card)) {
-            dragPile.contents = pile.slice(j);
-            return ;
-          }
-          
-        }));
-  game.waste.forEach(function (wasteCard) {
-        if (Caml_obj.equal(wasteCard, card)) {
-          dragPile.contents = [card];
-          return ;
-        }
-        
-      });
-  return dragPile.contents;
-}
-
-function canDrag(space, game) {
-  if (typeof space !== "object") {
-    return false;
-  }
-  if (space.TAG !== "Card") {
-    return false;
-  }
-  var card = space._0;
-  var dragPile = buildDragPile(card, game);
-  var match = baseSpace(card, game);
-  var onTopIfNeeded;
-  if (match !== undefined) {
-    if (typeof match !== "object") {
-      onTopIfNeeded = match === "Waste" ? Core__Option.mapOr(Common.ArrayAux.getLast(game.waste), false, (function (top) {
-                return Caml_obj.equal(top, card);
-              })) : false;
-    } else {
-      switch (match.TAG) {
-        case "Card" :
-            onTopIfNeeded = false;
-            break;
-        case "Foundation" :
-            onTopIfNeeded = Core__Option.mapOr(Core__Option.flatMap(game.foundations[match._0], (function (stack) {
-                        return Common.ArrayAux.getLast(stack);
-                      })), false, (function (top) {
-                    return Caml_obj.equal(top, card);
-                  }));
-            break;
-        case "Pile" :
-            onTopIfNeeded = true;
-            break;
-        
-      }
-    }
-  } else {
-    onTopIfNeeded = false;
-  }
-  var match$1 = Core__Array.reduce(dragPile.toReversed(), [
-        true,
-        undefined
-      ], (function (param, onBottom) {
-          if (!param[0]) {
-            return [
-                    false,
-                    undefined
-                  ];
-          }
-          var onTop = param[1];
-          if (onTop !== undefined) {
-            return [
-                    Card.rankIsBelow(onTop, onBottom) && Card.color(onTop) !== Card.color(onBottom),
-                    onBottom
-                  ];
-          } else {
-            return [
-                    true,
-                    onBottom
-                  ];
-          }
-        }));
-  if (onTopIfNeeded) {
-    return match$1[0];
-  } else {
-    return false;
-  }
-}
-
-function canDrop(dragSpace, dropSpace, game) {
-  if (typeof dragSpace !== "object") {
-    return false;
-  }
-  if (dragSpace.TAG !== "Card") {
-    return false;
-  }
-  var dragCard = dragSpace._0;
-  var dragPile = buildDragPile(dragCard, game);
-  var notInDragPile = Core__Option.isNone(dragPile.find(function (pilePiece) {
-            return Caml_obj.equal({
-                        TAG: "Card",
-                        _0: pilePiece
-                      }, dropSpace);
-          }));
-  var dropHasNoChildren;
-  if (typeof dropSpace !== "object") {
-    dropHasNoChildren = false;
-  } else {
-    switch (dropSpace.TAG) {
-      case "Card" :
-          dropHasNoChildren = buildDragPile(dropSpace._0, game).length < 2;
-          break;
-      case "Foundation" :
-          dropHasNoChildren = game.foundations[dropSpace._0].length === 0;
-          break;
-      case "Pile" :
-          dropHasNoChildren = game.piles[dropSpace._0].length === 0;
-          break;
-      
-    }
-  }
-  var canBeParent;
-  if (typeof dropSpace !== "object") {
-    canBeParent = false;
-  } else {
-    switch (dropSpace.TAG) {
-      case "Card" :
-          var dropCard = dropSpace._0;
-          var match = baseSpace(dropCard, game);
-          if (match !== undefined && typeof match === "object") {
-            switch (match.TAG) {
-              case "Foundation" :
-                  canBeParent = Card.rankIsBelow(dropCard, dragCard) && dragCard.suit === dropCard.suit;
-                  break;
-              case "Pile" :
-                  canBeParent = Card.rankIsAbove(dropCard, dragCard) && Card.color(dragCard) !== Card.color(dropCard);
-                  break;
-              default:
-                canBeParent = false;
-            }
-          } else {
-            canBeParent = false;
-          }
-          break;
-      case "Foundation" :
-          canBeParent = dragCard.rank === "RA";
-          break;
-      case "Pile" :
-          canBeParent = dragCard.rank === "RK";
-          break;
-      
-    }
-  }
-  if (notInDragPile && dropHasNoChildren) {
-    return canBeParent;
-  } else {
-    return false;
-  }
-}
-
-function onDrop(dropOnSpace, dragSpace, game) {
-  if (typeof dragSpace !== "object") {
-    return game;
-  }
-  if (dragSpace.TAG !== "Card") {
-    return game;
-  }
-  var dragPile = buildDragPile(dragSpace._0, game);
+function removeDragFromGame(game, dragPile) {
   var removeDragPile = function (x) {
     return x.filter(function (sCard) {
                 return !dragPile.some(function (dCard) {
@@ -482,140 +223,285 @@ function onDrop(dropOnSpace, dragSpace, game) {
                           });
               });
   };
-  var gameDragRemoved_piles = game.piles.map(removeDragPile);
-  var gameDragRemoved_foundations = game.foundations.map(removeDragPile);
-  var gameDragRemoved_stock = removeDragPile(game.stock);
-  var gameDragRemoved_waste = removeDragPile(game.waste);
-  var gameDragRemoved_gameEnded = game.gameEnded;
-  if (typeof dropOnSpace !== "object") {
-    return game;
-  }
-  switch (dropOnSpace.TAG) {
-    case "Card" :
-        var card = dropOnSpace._0;
-        return {
-                piles: gameDragRemoved_piles.map(function (stack) {
-                      return Common.ArrayAux.insertAfter(stack, card, dragPile);
-                    }),
-                foundations: gameDragRemoved_foundations.map(function (stack) {
-                      return Common.ArrayAux.insertAfter(stack, card, dragPile);
-                    }),
-                stock: gameDragRemoved_stock,
-                waste: gameDragRemoved_waste,
-                gameEnded: gameDragRemoved_gameEnded
-              };
-    case "Foundation" :
-        return {
-                piles: gameDragRemoved_piles,
-                foundations: Common.ArrayAux.update(gameDragRemoved_foundations, dropOnSpace._0, (function (param) {
-                        return dragPile;
-                      })),
-                stock: gameDragRemoved_stock,
-                waste: gameDragRemoved_waste,
-                gameEnded: gameDragRemoved_gameEnded
-              };
-    case "Pile" :
-        return {
-                piles: Common.ArrayAux.update(gameDragRemoved_piles, dropOnSpace._0, (function (param) {
-                        return dragPile;
-                      })),
-                foundations: gameDragRemoved_foundations,
-                stock: gameDragRemoved_stock,
-                waste: gameDragRemoved_waste,
-                gameEnded: gameDragRemoved_gameEnded
-              };
-    
-  }
+  return {
+          piles: game.piles.map(removeDragPile),
+          foundations: game.foundations.map(removeDragPile),
+          stock: removeDragPile(game.stock),
+          waste: removeDragPile(game.waste),
+          gameEnded: game.gameEnded
+        };
 }
 
-function applyMoveToOthers(space, game, move) {
-  if (typeof space !== "object") {
-    return ;
-  }
-  if (space.TAG !== "Card") {
-    return ;
-  }
-  var card = space._0;
-  Common.ArrayAux.forEach2(game.foundations, (function (stack, sCard, param, j) {
-          if (Caml_obj.equal(card, sCard)) {
-            return Core__Option.mapOr(stack[j + 1 | 0], undefined, (function (x) {
-                          move({
-                                TAG: "Card",
-                                _0: x
-                              });
-                        }));
-          }
-          
-        }));
-  Common.ArrayAux.forEach2(game.piles, (function (stack, sCard, param, j) {
-          if (Caml_obj.equal(card, sCard)) {
-            return Core__Option.mapOr(stack[j + 1 | 0], undefined, (function (x) {
-                          move({
-                                TAG: "Card",
-                                _0: x
-                              });
-                        }));
-          }
-          
-        }));
+function pileBaseRules(i) {
+  return {
+          droppedUpon: (function (game, dragPile) {
+              var dragPileBase = dragPile[0];
+              var noChildren = game.piles[i].length === 0;
+              if (noChildren && dragPileBase.rank === "RK") {
+                return {
+                        piles: Common.ArrayAux.update(game.piles, i, (function (param) {
+                                return dragPile;
+                              })),
+                        foundations: game.foundations,
+                        stock: game.stock,
+                        waste: game.waste,
+                        gameEnded: game.gameEnded
+                      };
+              }
+              
+            }),
+          autoProgress: false
+        };
 }
 
-function autoProgress(setGame) {
-  var newGame = {
+function pileRules(game, pile, card, i, j) {
+  var isLast = j === (pile.length - 1 | 0);
+  return {
+          locationAdjustment: {
+            x: 0,
+            y: Math.imul(j, 20),
+            z: j + 1 | 0
+          },
+          baseSpace: {
+            TAG: "Pile",
+            _0: i
+          },
+          dragPile: (function () {
+              var dragPile = pile.slice(j);
+              if (dragPileValidation(dragPile)) {
+                return dragPile;
+              }
+              
+            }),
+          autoProgress: (function () {
+              if (isLast) {
+                return {
+                        TAG: "Send",
+                        _0: [card]
+                      };
+              } else {
+                return "DoNothing";
+              }
+            }),
+          droppedUpon: (function (game, dragPile) {
+              var dragPileBase = dragPile[0];
+              if (isLast && Card.rankIsAbove(card, dragPileBase) && Card.color(dragPileBase) !== Card.color(card)) {
+                return {
+                        piles: game.piles.map(function (stack) {
+                              return Common.ArrayAux.insertAfter(stack, card, dragPile);
+                            }),
+                        foundations: game.foundations,
+                        stock: game.stock,
+                        waste: game.waste,
+                        gameEnded: game.gameEnded
+                      };
+              }
+              
+            }),
+          applyMoveToOthers: (function (move) {
+              Core__Option.mapOr(pile[j + 1 | 0], undefined, (function (x) {
+                      move({
+                            TAG: "Card",
+                            _0: x
+                          });
+                    }));
+            })
+        };
+}
+
+function foundationBaseRules(i) {
+  return {
+          droppedUpon: (function (game, dragPile) {
+              var justOne = dragPile.length === 1;
+              var dragPileBase = dragPile[0];
+              var noChildren = game.foundations[i].length === 0;
+              if (noChildren && justOne && dragPileBase.rank === "RA") {
+                return {
+                        piles: game.piles,
+                        foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
+                                return dragPile;
+                              })),
+                        stock: game.stock,
+                        waste: game.waste,
+                        gameEnded: game.gameEnded
+                      };
+              }
+              
+            }),
+          autoProgress: true
+        };
+}
+
+function foundationRules(game, card, i, j) {
+  return {
+          locationAdjustment: {
+            x: 0,
+            y: 0,
+            z: j + 1 | 0
+          },
+          baseSpace: {
+            TAG: "Foundation",
+            _0: i
+          },
+          dragPile: (function () {
+              if (j === (game.foundations.length - 1 | 0)) {
+                return [card];
+              }
+              
+            }),
+          autoProgress: (function () {
+              return "Seek";
+            }),
+          droppedUpon: (function (game, dragPile) {
+              var justOne = dragPile.length === 1;
+              var dragPileBase = dragPile[0];
+              if (justOne && dragPileBase.suit === card.suit && Card.rankIsBelow(card, dragPileBase)) {
+                return {
+                        piles: game.piles,
+                        foundations: game.foundations.map(function (stack) {
+                              return Common.ArrayAux.insertAfter(stack, card, dragPile);
+                            }),
+                        stock: game.stock,
+                        waste: game.waste,
+                        gameEnded: game.gameEnded
+                      };
+              }
+              
+            }),
+          applyMoveToOthers: (function (param) {
+              
+            })
+        };
+}
+
+function wasteRules(game, card, i) {
+  return {
+          locationAdjustment: {
+            x: Math.imul(20, i),
+            y: 0,
+            z: i + 1 | 0
+          },
+          baseSpace: "Waste",
+          dragPile: (function () {
+              if (i === (game.waste.length - 1 | 0)) {
+                return [card];
+              }
+              
+            }),
+          autoProgress: (function () {
+              return "DoNothing";
+            }),
+          droppedUpon: (function (param, param$1) {
+              
+            }),
+          applyMoveToOthers: (function (param) {
+              
+            })
+        };
+}
+
+function stockRules(i) {
+  return {
+          locationAdjustment: {
+            x: 0,
+            y: 0,
+            z: i + 1 | 0
+          },
+          baseSpace: "Stock",
+          dragPile: (function () {
+              
+            }),
+          autoProgress: (function () {
+              return "DoNothing";
+            }),
+          droppedUpon: (function (param, param$1) {
+              
+            }),
+          applyMoveToOthers: (function (param) {
+              
+            })
+        };
+}
+
+function getRule(game, match) {
+  var result = {
     contents: undefined
   };
-  setGame(function (game) {
-        game.foundations.forEach(function (foundation, i) {
-              var canMove = function (c) {
-                var foundationCard = Common.ArrayAux.getLast(foundation);
-                if (foundationCard !== undefined) {
-                  if (Card.rankIsBelow(foundationCard, c)) {
-                    return foundationCard.suit === c.suit;
-                  } else {
-                    return false;
-                  }
-                } else {
-                  return c.rank === "RA";
-                }
-              };
-              Core__Option.mapOr(Common.ArrayAux.getLast(game.waste), undefined, (function (wasteCard) {
-                      if (Core__Option.isNone(newGame.contents) && canMove(wasteCard)) {
-                        newGame.contents = {
-                          piles: game.piles,
-                          foundations: Common.ArrayAux.update(game.foundations, i, (function (f) {
-                                  return f.concat([wasteCard]);
-                                })),
-                          stock: game.stock,
-                          waste: Common.ArrayAux.removeLast(game.waste),
-                          gameEnded: game.gameEnded
-                        };
-                        return ;
-                      }
-                      
-                    }));
-              game.piles.forEach(function (pile, j) {
-                    Core__Option.mapOr(Common.ArrayAux.getLast(pile), undefined, (function (pileCard) {
-                            if (Core__Option.isNone(newGame.contents) && canMove(pileCard)) {
-                              newGame.contents = {
-                                piles: Common.ArrayAux.update(game.piles, j, (function (p) {
-                                        return Common.ArrayAux.removeLast(p);
-                                      })),
-                                foundations: Common.ArrayAux.update(game.foundations, i, (function (f) {
-                                        return f.concat([pileCard]);
-                                      })),
-                                stock: game.stock,
-                                waste: game.waste,
-                                gameEnded: game.gameEnded
-                              };
-                              return ;
-                            }
-                            
-                          }));
-                  });
+  game.piles.forEach(function (pile, i) {
+        if (Caml_obj.equal({
+                TAG: "Pile",
+                _0: i
+              }, match)) {
+          result.contents = {
+            TAG: "Static",
+            _0: pileBaseRules(i)
+          };
+        }
+        pile.forEach(function (card, j) {
+              if (Caml_obj.equal({
+                      TAG: "Card",
+                      _0: card
+                    }, match)) {
+                result.contents = {
+                  TAG: "Movable",
+                  _0: pileRules(game, pile, card, i, j)
+                };
+                return ;
+              }
+              
             });
-        return Core__Option.getOr(newGame.contents, game);
       });
-  return Core__Option.isSome(newGame.contents);
+  game.foundations.forEach(function (foundation, i) {
+        if (Caml_obj.equal({
+                TAG: "Foundation",
+                _0: i
+              }, match)) {
+          result.contents = {
+            TAG: "Static",
+            _0: foundationBaseRules(i)
+          };
+        }
+        foundation.forEach(function (card, j) {
+              if (Caml_obj.equal({
+                      TAG: "Card",
+                      _0: card
+                    }, match)) {
+                result.contents = {
+                  TAG: "Movable",
+                  _0: foundationRules(game, card, i, j)
+                };
+                return ;
+              }
+              
+            });
+      });
+  game.waste.forEach(function (card, i) {
+        if (Caml_obj.equal({
+                TAG: "Card",
+                _0: card
+              }, match)) {
+          result.contents = {
+            TAG: "Movable",
+            _0: wasteRules(game, card, i)
+          };
+          return ;
+        }
+        
+      });
+  game.stock.forEach(function (card, i) {
+        if (Caml_obj.equal({
+                TAG: "Card",
+                _0: card
+              }, match)) {
+          result.contents = {
+            TAG: "Movable",
+            _0: stockRules(i)
+          };
+          return ;
+        }
+        
+      });
+  return result.contents;
 }
 
 async function dealToWaste(setGame, moveToState, autoProgress) {
@@ -634,24 +520,6 @@ async function dealToWaste(setGame, moveToState, autoProgress) {
   await Common.numInterval(f, 400, 3);
   return autoProgress();
 }
-
-function restock(setGame, moveToState) {
-  setGame(function (game) {
-        return {
-                piles: game.piles,
-                foundations: game.foundations,
-                stock: game.waste.toReversed(),
-                waste: [],
-                gameEnded: game.gameEnded
-              };
-      });
-  return moveToState();
-}
-
-var Custom = {
-  dealToWaste: dealToWaste,
-  restock: restock
-};
 
 function Klondike$GameRules$Board(props) {
   var game = props.game;
@@ -672,7 +540,16 @@ function Klondike$GameRules$Board(props) {
                               },
                               onClick: (function (param) {
                                   if (game.stock.length === 0) {
-                                    return restock(setGame, moveToState);
+                                    setGame(function (game) {
+                                          return {
+                                                  piles: game.piles,
+                                                  foundations: game.foundations,
+                                                  stock: game.waste.toReversed(),
+                                                  waste: [],
+                                                  gameEnded: game.gameEnded
+                                                };
+                                        });
+                                    return moveToState();
                                   } else {
                                     dealToWaste(setGame, moveToState, autoProgress);
                                     return ;
@@ -775,26 +652,19 @@ var AllCards = {
 };
 
 var GameRules = {
-  shuffledDeck: shuffledDeck,
-  space_encode: space_encode,
-  space_decode: space_decode,
   getSpace: getSpace,
   spaceToString: spaceToString,
   initiateGame: initiateGame,
-  getSpaceLocs: getSpaceLocs,
-  baseSpace: baseSpace,
-  buildDragPile: buildDragPile,
-  canDrag: canDrag,
-  canDrop: canDrop,
-  onDrop: onDrop,
-  applyMoveToOthers: applyMoveToOthers,
-  autoProgress: autoProgress,
-  Custom: Custom,
+  getRule: getRule,
+  removeDragFromGame: removeDragFromGame,
   Board: Board,
   AllCards: AllCards
 };
 
+var Game = GameBase2.GameBase(GameRules);
+
 export {
   GameRules ,
+  Game ,
 }
 /* shuffledDeck Not a pure module */

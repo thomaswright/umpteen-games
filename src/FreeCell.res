@@ -29,6 +29,27 @@ module GameRules: GameBase2.GameRules = {
     gameEnded: bool,
   }
 
+  type movableSpace = GameBase2.movableSpace<game, space, dragPile>
+  type staticSpace = GameBase2.staticSpace<game, dragPile>
+
+  let dragPileValidation = dragPile => {
+    let (dragPileIsValid, _) =
+      dragPile
+      ->Array.toReversed
+      ->Array.reduce((true, None), ((isStillValid, onTop), onBottom) => {
+        !isStillValid
+          ? (false, None)
+          : switch (onTop, onBottom) {
+            | (Some(onTop), onBottom) => (
+                Card.rankIsBelow(onTop, onBottom) && onTop->Card.color != onBottom->Card.color,
+                Some(onBottom),
+              )
+            | _ => (true, Some(onBottom))
+            }
+      })
+    dragPileIsValid
+  }
+
   let initiateGame = () => {
     {
       piles: [
@@ -47,9 +68,6 @@ module GameRules: GameBase2.GameRules = {
     }
   }
 
-  type movableSpace = GameBase2.movableSpace<game, space, dragPile>
-  type staticSpace = GameBase2.staticSpace<game, dragPile>
-
   let removeDragFromGame = (game: game, dragPile: dragPile) => {
     let removeDragPile = x =>
       x->Array.filter(sCard => {
@@ -66,24 +84,6 @@ module GameRules: GameBase2.GameRules = {
         )
       }),
     }
-  }
-
-  let dragPileValidation = dragPile => {
-    let (dragPileIsValid, _) =
-      dragPile
-      ->Array.toReversed
-      ->Array.reduce((true, None), ((isStillValid, onTop), onBottom) => {
-        !isStillValid
-          ? (false, None)
-          : switch (onTop, onBottom) {
-            | (Some(onTop), onBottom) => (
-                Card.rankIsBelow(onTop, onBottom) && onTop->Card.color != onBottom->Card.color,
-                Some(onBottom),
-              )
-            | _ => (true, Some(onBottom))
-            }
-      })
-    dragPileIsValid
   }
 
   let pileBaseRules = (i): staticSpace => {

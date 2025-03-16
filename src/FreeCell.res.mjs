@@ -169,6 +169,32 @@ function spaceToString(space) {
   return JSON.stringify(space_encode(space));
 }
 
+function dragPileValidation(dragPile) {
+  return Core__Array.reduce(dragPile.toReversed(), [
+                true,
+                undefined
+              ], (function (param, onBottom) {
+                  if (!param[0]) {
+                    return [
+                            false,
+                            undefined
+                          ];
+                  }
+                  var onTop = param[1];
+                  if (onTop !== undefined) {
+                    return [
+                            Card.rankIsBelow(onTop, onBottom) && Card.color(onTop) !== Card.color(onBottom),
+                            onBottom
+                          ];
+                  } else {
+                    return [
+                            true,
+                            onBottom
+                          ];
+                  }
+                }))[0];
+}
+
 function initiateGame() {
   return {
           piles: [
@@ -221,32 +247,6 @@ function removeDragFromGame(game, dragPile) {
               }),
           gameEnded: game.gameEnded
         };
-}
-
-function dragPileValidation(dragPile) {
-  return Core__Array.reduce(dragPile.toReversed(), [
-                true,
-                undefined
-              ], (function (param, onBottom) {
-                  if (!param[0]) {
-                    return [
-                            false,
-                            undefined
-                          ];
-                  }
-                  var onTop = param[1];
-                  if (onTop !== undefined) {
-                    return [
-                            Card.rankIsBelow(onTop, onBottom) && Card.color(onTop) !== Card.color(onBottom),
-                            onBottom
-                          ];
-                  } else {
-                    return [
-                            true,
-                            onBottom
-                          ];
-                  }
-                }))[0];
 }
 
 function pileBaseRules(i) {
