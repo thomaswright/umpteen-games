@@ -24,7 +24,7 @@ module GameRules = {
   type game = {
     piles: array<array<Card.card>>,
     foundations: array<array<Card.card>>,
-    free: array<array<Card.card>>,
+    free: array<option<Card.card>>,
     gameEnded: bool,
   }
 
@@ -41,319 +41,197 @@ module GameRules = {
         shuffledDeck->Array.slice(~start=46, ~end=52),
       ],
       foundations: [[], [], [], []],
-      free: [[], [], [], []],
+      free: [None, None, None, None],
       gameEnded: false,
     }
   }
 
-  let getSpaceLocs = (game: game) => {
-    // Todo: maybe change to a map
-    let cards = ref([])
-    let addToCards = x => cards := Array.concat(cards.contents, [x])
-    game.piles->ArrayAux.forEach2((_, card, i, j) => {
-      addToCards((
-        Card(card),
-        Pile(i),
-        {
-          x: 0,
-          y: j * 20,
-          z: j + 1,
-        },
-      ))
-    })
+  type autoProgress<'a> = Send('a) | Seek | DoNothing
 
-    game.foundations->ArrayAux.forEach2((_, card, i, j) => {
-      addToCards((
-        Card(card),
-        Foundation(i),
-        {
-          x: 0,
-          y: 0,
-          z: j + 1,
-        },
-      ))
-    })
-
-    game.free->ArrayAux.forEach2((_, card, i, _) => {
-      addToCards((
-        Card(card),
-        Free(i),
-        {
-          x: 0,
-          y: 0,
-          z: 1,
-        },
-      ))
-    })
-
-    cards.contents
+  type compound = {
+    locationAdjustment: pos,
+    baseSpace: space,
+    dragPile: unit => option<array<Card.card>>,
+    autoProgress: unit => autoProgress<array<Card.card>>,
+    droppedUpon: (game, array<Card.card>) => option<game>,
+    droppedUponBase: (game, array<Card.card>) => option<game>,
+    applyMoveToOthers: (space => unit) => unit,
   }
 
-  let baseSpace = (dropCard: Card.card, game: game) => {
-    let base = ref(None)
-
-    game.piles->ArrayAux.forEach2((_, card, i, _) => {
-      if card == dropCard {
-        base := Some(Pile(i))
-      }
-    })
-
-    game.foundations->ArrayAux.forEach2((_, card, i, _) => {
-      if card == dropCard {
-        base := Some(Foundation(i))
-      }
-    })
-
-    game.free->ArrayAux.forEach2((_, card, i, _) => {
-      if card == dropCard {
-        base := Some(Free(i))
-      }
-    })
-
-    base.contents
-  }
-
-  let buildDragPile = (card, game: game) => {
-    let dragPile = ref([])
-
-    game.piles->ArrayAux.forEach2((pile, pileCard, _, j) => {
-      if pileCard == card {
-        dragPile := pile->Array.sliceToEnd(~start=j)
-      }
-    })
-
-    game.foundations->ArrayAux.forEach2((pile, pileCard, _, j) => {
-      if pileCard == card {
-        dragPile := pile->Array.sliceToEnd(~start=j)
-      }
-    })
-
-    game.free->ArrayAux.forEach2((_, freeCard, _, _) => {
-      if freeCard == card {
-        dragPile := [card]
-      }
-    })
-
-    dragPile.contents
-  }
-
-  let canDrag = (space, game) => {
-    switch space {
-    | Card(card) => {
-        let dragPile = buildDragPile(card, game)
-
-        let onTopIfNeeded = switch baseSpace(card, game) {
-        | Some(Foundation(i)) =>
-          game.foundations
-          ->Array.get(i)
-          ->Option.flatMap(stack => {
-            stack->ArrayAux.getLast
-          })
-          ->Option.mapOr(false, top => {
-            top == card
-          })
-        | Some(Pile(_)) => true
-        // game.piles
-        // ->Array.get(i)
-        // ->Option.flatMap(stack => {
-        //   stack->ArrayAux.getLast
-        // })
-        // ->Option.mapOr(false, top => {
-        //   top == card
-        // })
-        | Some(Free(i)) =>
-          game.free
-          ->Array.get(i)
-          ->Option.flatMap(x => x->Array.get(0))
-          ->Option.mapOr(false, top => {
-            top == card
-          })
-        | _ => false
-        }
-
-        let (dragPileIsValid, _) =
-          dragPile
-          ->Array.toReversed
-          ->Array.reduce((true, None), ((isStillValid, onTop), onBottom) => {
-            !isStillValid
-              ? (false, None)
-              : switch (onTop, onBottom) {
-                | (Some(onTop), onBottom) => (
-                    Card.rankIsBelow(onTop, onBottom) && onTop->Card.color != onBottom->Card.color,
-                    Some(onBottom),
-                  )
-                | _ => (true, Some(onBottom))
-                }
-          })
-
-        onTopIfNeeded && dragPileIsValid
-      }
-    | _ => false
-    }
-  }
-
-  let canDrop = (dragSpace: space, dropSpace: space, game: game) => {
-    switch dragSpace {
-    | Card(dragCard) => {
-        let dragPile = buildDragPile(dragCard, game)
-
-        let notInDragPile =
-          dragPile
-          ->Array.find(pilePiece => Card(pilePiece) == dropSpace)
-          ->Option.isNone
-
-        let dropHasNoChildren = switch dropSpace {
-        | Card(card) => buildDragPile(card, game)->Array.length < 2
-        | Pile(i) => game.piles->Array.getUnsafe(i)->Array.length == 0
-        | Foundation(i) => game.foundations->Array.getUnsafe(i)->Array.length == 0
-        | Free(i) => game.free->Array.getUnsafe(i)->Array.length == 0
-        }
-
-        let canBeParent = switch dropSpace {
-        | Card(dropCard) =>
-          switch baseSpace(dropCard, game) {
-          | Some(Foundation(_)) =>
-            Card.rankIsBelow(dropCard, dragCard) && dragCard.suit == dropCard.suit
-          | Some(Pile(_)) =>
-            Card.rankIsAbove(dropCard, dragCard) && dragCard->Card.color != dropCard->Card.color
-          | _ => false
-          }
-        | Foundation(_) => dragCard.rank == RA
-        | Pile(_) => dragCard.rank == RK
-        | Free(_) => dragPile->Array.length == 1
-        }
-
-        notInDragPile && dropHasNoChildren && canBeParent
-      }
-    | _ => false
-    }
-  }
-
-  let onDrop = (dropOnSpace, dragSpace, game) => {
-    switch dragSpace {
-    | Card(dragCard) => {
-        let dragPile = buildDragPile(dragCard, game)
-
-        let removeDragPile = x =>
-          x->Array.filter(sCard => {
-            !(dragPile->Array.some(dCard => sCard == dCard))
-          })
-
-        let gameDragRemoved = {
-          {
-            ...game,
-            foundations: game.foundations->Array.map(removeDragPile),
-            piles: game.piles->Array.map(removeDragPile),
-            free: game.free->Array.map(removeDragPile),
-          }
-        }
-
-        switch dropOnSpace {
-        | Card(card) => {
-            ...gameDragRemoved,
-            foundations: gameDragRemoved.foundations->Array.map(stack => {
-              stack->ArrayAux.insertAfter(card, dragPile)
-            }),
-            piles: gameDragRemoved.piles->Array.map(stack => {
-              stack->ArrayAux.insertAfter(card, dragPile)
-            }),
-          }
-
-        | Foundation(i) => {
-            ...gameDragRemoved,
-            foundations: gameDragRemoved.foundations->ArrayAux.update(i, _ => dragPile),
-          }
-
-        | Pile(i) => {
-            ...gameDragRemoved,
-            piles: gameDragRemoved.piles->ArrayAux.update(i, _ => dragPile),
-          }
-
-        | Free(i) => {
-            ...gameDragRemoved,
-            free: gameDragRemoved.free->ArrayAux.update(i, _ => dragPile),
-          }
-        }
-      }
-    | _ => game
-    }
-  }
-
-  let applyMoveToOthers = (space: space, game, move) => {
-    switch space {
-    | Card(card) => {
-        game.foundations->ArrayAux.forEach2((stack, sCard, _, j) => {
-          if card == sCard {
-            stack->Array.get(j + 1)->Option.mapOr((), x => move(Card(x)))
-          }
-        })
-
-        game.piles->ArrayAux.forEach2((stack, sCard, _, j) => {
-          if card == sCard {
-            stack->Array.get(j + 1)->Option.mapOr((), x => move(Card(x)))
-          }
-        })
-      }
-    | _ => ()
-    }
-  }
-
-  let autoProgress = setGame => {
-    let newGame = ref(None)
-
-    setGame(game => {
-      game.foundations->Array.forEachWithIndex((foundation, i) => {
-        let canMove = (c: Card.card) => {
-          switch foundation->ArrayAux.getLast {
-          | None => c.rank == RA
-          | Some(foundationCard) =>
-            Card.rankIsBelow(foundationCard, c) && foundationCard.suit == c.suit
-          }
-        }
-        game.free->ArrayAux.forEach2(
-          (_, freeCard, freeIndex, _) => {
-            if newGame.contents->Option.isNone && canMove(freeCard) {
-              newGame :=
-                Some({
-                  ...game,
-                  foundations: game.foundations->ArrayAux.update(
-                    i,
-                    f => f->Array.concat([freeCard]),
-                  ),
-                  free: game.free->ArrayAux.update(freeIndex, _ => []),
-                })
+  let dragPileValidation = dragPile => {
+    let (dragPileIsValid, _) =
+      dragPile
+      ->Array.toReversed
+      ->Array.reduce((true, None), ((isStillValid, onTop), onBottom) => {
+        !isStillValid
+          ? (false, None)
+          : switch (onTop, onBottom) {
+            | (Some(onTop), onBottom) => (
+                Card.rankIsBelow(onTop, onBottom) && onTop->Card.color != onBottom->Card.color,
+                Some(onBottom),
+              )
+            | _ => (true, Some(onBottom))
             }
-          },
-        )
-
-        game.piles->Array.forEachWithIndex(
-          (pile, j) => {
-            pile
-            ->ArrayAux.getLast
-            ->Option.mapOr(
-              (),
-              pileCard => {
-                if newGame.contents->Option.isNone && canMove(pileCard) {
-                  newGame :=
-                    Some({
-                      ...game,
-                      foundations: game.foundations->ArrayAux.update(
-                        i,
-                        f => f->Array.concat([pileCard]),
-                      ),
-                      piles: game.piles->ArrayAux.update(j, p => p->ArrayAux.removeLast),
-                    })
-                }
-              },
-            )
-          },
-        )
       })
+    dragPileIsValid
+  }
 
-      newGame.contents->Option.getOr(game)
+  let pileRules = (game, pile, card, i, j) => {
+    let isLast = j == pile->Array.length - 1
+
+    {
+      locationAdjustment: {
+        x: 0,
+        y: j * 20,
+        z: j + 1,
+      },
+      baseSpace: Pile(i),
+      applyMoveToOthers: move => {
+        pile->Array.get(j + 1)->Option.mapOr((), x => move(Card(x)))
+      },
+      dragPile: () => {
+        let dragPile = pile->Array.sliceToEnd(~start=j)
+        if dragPile->dragPileValidation {
+          Some(dragPile)
+        } else {
+          None
+        }
+      },
+      autoProgress: () => {
+        if isLast {
+          Send([card])
+        } else {
+          DoNothing
+        }
+      },
+      droppedUponBase: (game, dragPile) => {
+        let dragPileTop = dragPile->Array.getUnsafe(0)
+        if dragPileTop.rank == RK {
+          Some({
+            ...game,
+            piles: game.piles->ArrayAux.update(i, _ => dragPile),
+          })
+        } else {
+          None
+        }
+      },
+      droppedUpon: (game, dragPile) => {
+        let dragPileBase = dragPile->Array.getUnsafe(0)
+
+        if (
+          isLast &&
+          Card.rankIsAbove(card, dragPileBase) &&
+          dragPileBase->Card.color != card->Card.color
+        ) {
+          Some({
+            ...game,
+            piles: game.piles->Array.map(stack => {
+              stack->ArrayAux.insertAfter(card, dragPile)
+            }),
+          })
+        } else {
+          None
+        }
+      },
+    }
+  }
+
+  let foundationRules = (game, card, i, j) => {
+    {
+      locationAdjustment: {
+        x: 0,
+        y: 0,
+        z: j + 1,
+      },
+      baseSpace: Pile(i),
+      applyMoveToOthers: _ => (),
+      dragPile: () => {
+        if j == game.foundations->Array.length - 1 {
+          Some([card])
+        } else {
+          None
+        }
+      },
+      autoProgress: () => {
+        Seek
+      },
+      droppedUponBase: (game, dragPile) => {
+        let justOne = dragPile->Array.length == 1
+        let dragPileBase = dragPile->Array.getUnsafe(0)
+
+        if justOne && dragPileBase.rank == RA {
+          Some({
+            ...game,
+            foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
+          })
+        } else {
+          None
+        }
+      },
+      droppedUpon: (game, dragPile) => {
+        let justOne = dragPile->Array.length == 1
+        let dragPileBase = dragPile->Array.getUnsafe(0)
+
+        if justOne && dragPileBase.rank == card.rank && Card.rankIsAbove(card, dragPileBase) {
+          Some({
+            ...game,
+            foundations: game.foundations->Array.map(stack => {
+              stack->ArrayAux.insertAfter(card, dragPile)
+            }),
+          })
+        } else {
+          None
+        }
+      },
+    }
+  }
+
+  let freeRules = (card, i) => {
+    {
+      locationAdjustment: {
+        x: 0,
+        y: 0,
+        z: 1,
+      },
+      baseSpace: Free(i),
+      applyMoveToOthers: _ => (),
+      autoProgress: () => Send([card]),
+      dragPile: () => Some([card]),
+      droppedUpon: (_game, _dragPile) => None,
+      droppedUponBase: (game, dragPile) => {
+        if dragPile->Array.length == 1 {
+          Some({
+            ...game,
+            free: game.free->ArrayAux.update(i, _ => dragPile->Array.get(0)),
+          })
+        } else {
+          None
+        }
+      },
+    }
+  }
+
+  let compound = (game: game, match) => {
+    let result = ref(None)
+    game.piles->ArrayAux.forEach2((pile, card, i, j) => {
+      if card == match {
+        result := Some(pileRules(game, pile, card, i, j))
+      }
     })
 
-    newGame.contents->Option.isSome
+    game.foundations->ArrayAux.forEach2((_foundation, card, i, j) => {
+      if card == match {
+        result := Some(foundationRules(game, card, i, j))
+      }
+    })
+
+    game.free->Array.forEachWithIndex((card, i) => {
+      card->Option.mapOr((), card => {
+        if card == match {
+          result := Some(freeRules(card, i))
+        }
+      })
+    })
   }
 
   module Board = {
