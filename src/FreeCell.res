@@ -1,8 +1,9 @@
 open Webapi.Dom
 open Types
 open Common
+open GameBase2
 
-module GameRules = {
+module GameRules: GameBase2.GameRules = {
   let foundationOffset = 40 + 70 * 4
 
   let shuffledDeck = Card.getShuffledDeck()
@@ -20,6 +21,8 @@ module GameRules = {
   let spaceToString = space => {
     space->space_encode->Js.Json.stringify
   }
+
+  type dragPile = array<Card.card>
 
   type game = {
     piles: array<array<Card.card>>,
@@ -46,17 +49,13 @@ module GameRules = {
     }
   }
 
-  type autoProgress<'a> = Send('a) | Seek | DoNothing
+  type movableSpace = GameBase2.movableSpace<game, space, dragPile>
+  type staticSpace = GameBase2.staticSpace<game, dragPile>
 
-  type compound = {
-    locationAdjustment: pos,
-    baseSpace: space,
-    dragPile: unit => option<array<Card.card>>,
-    autoProgress: unit => autoProgress<array<Card.card>>,
-    droppedUpon: (game, array<Card.card>) => option<game>,
-    droppedUponBase: (game, array<Card.card>) => option<game>,
-    applyMoveToOthers: (space => unit) => unit,
-  }
+  // Currently: writing remove drag pile thing
+  // let serializeDragpile = (game) => {
+  //   game ->
+  // }
 
   let dragPileValidation = dragPile => {
     let (dragPileIsValid, _) =
@@ -76,7 +75,24 @@ module GameRules = {
     dragPileIsValid
   }
 
-  let pileRules = (game, pile, card, i, j) => {
+  let pileBaseRules = (i): staticSpace => {
+    {
+      droppedUpon: (game, dragPile) => {
+        let dragPileTop = dragPile->Array.getUnsafe(0)
+        if dragPileTop.rank == RK {
+          Some({
+            ...game,
+            piles: game.piles->ArrayAux.update(i, _ => dragPile),
+          })
+        } else {
+          None
+        }
+      },
+      autoProgress: false,
+    }
+  }
+
+  let pileRules = (game, pile, card, i, j): movableSpace => {
     let isLast = j == pile->Array.length - 1
 
     {
@@ -104,17 +120,6 @@ module GameRules = {
           DoNothing
         }
       },
-      droppedUponBase: (game, dragPile) => {
-        let dragPileTop = dragPile->Array.getUnsafe(0)
-        if dragPileTop.rank == RK {
-          Some({
-            ...game,
-            piles: game.piles->ArrayAux.update(i, _ => dragPile),
-          })
-        } else {
-          None
-        }
-      },
       droppedUpon: (game, dragPile) => {
         let dragPileBase = dragPile->Array.getUnsafe(0)
 
@@ -136,7 +141,26 @@ module GameRules = {
     }
   }
 
-  let foundationRules = (game, card, i, j) => {
+  let foundationBaseRules = (i): staticSpace => {
+    {
+      autoProgress: true,
+      droppedUpon: (game, dragPile) => {
+        let justOne = dragPile->Array.length == 1
+        let dragPileBase = dragPile->Array.getUnsafe(0)
+
+        if justOne && dragPileBase.rank == RA {
+          Some({
+            ...game,
+            foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
+          })
+        } else {
+          None
+        }
+      },
+    }
+  }
+
+  let foundationRules = (game, card, i, j): movableSpace => {
     {
       locationAdjustment: {
         x: 0,
@@ -152,22 +176,7 @@ module GameRules = {
           None
         }
       },
-      autoProgress: () => {
-        Seek
-      },
-      droppedUponBase: (game, dragPile) => {
-        let justOne = dragPile->Array.length == 1
-        let dragPileBase = dragPile->Array.getUnsafe(0)
-
-        if justOne && dragPileBase.rank == RA {
-          Some({
-            ...game,
-            foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
-          })
-        } else {
-          None
-        }
-      },
+      autoProgress: () => Seek,
       droppedUpon: (game, dragPile) => {
         let justOne = dragPile->Array.length == 1
         let dragPileBase = dragPile->Array.getUnsafe(0)
@@ -186,7 +195,21 @@ module GameRules = {
     }
   }
 
-  let freeRules = (card, i) => {
+  let freeBaseRules = (i): staticSpace => {
+    autoProgress: false,
+    droppedUpon: (game, dragPile) => {
+      if dragPile->Array.length == 1 {
+        Some({
+          ...game,
+          free: game.free->ArrayAux.update(i, _ => dragPile->Array.get(0)),
+        })
+      } else {
+        None
+      }
+    },
+  }
+
+  let freeRules = (card, i): movableSpace => {
     {
       locationAdjustment: {
         x: 0,
@@ -198,40 +221,49 @@ module GameRules = {
       autoProgress: () => Send([card]),
       dragPile: () => Some([card]),
       droppedUpon: (_game, _dragPile) => None,
-      droppedUponBase: (game, dragPile) => {
-        if dragPile->Array.length == 1 {
-          Some({
-            ...game,
-            free: game.free->ArrayAux.update(i, _ => dragPile->Array.get(0)),
-          })
-        } else {
-          None
-        }
-      },
     }
   }
 
-  let compound = (game: game, match) => {
+  let getRule: GameBase2.getRule<game, space, dragPile> = (game: game, match: space) => {
     let result = ref(None)
-    game.piles->ArrayAux.forEach2((pile, card, i, j) => {
-      if card == match {
-        result := Some(pileRules(game, pile, card, i, j))
-      }
-    })
 
-    game.foundations->ArrayAux.forEach2((_foundation, card, i, j) => {
-      if card == match {
-        result := Some(foundationRules(game, card, i, j))
+    game.piles->Array.forEachWithIndex((pile, i) => {
+      if Pile(i) == match {
+        result := pileBaseRules(i)->Static->Some
       }
-    })
 
-    game.free->Array.forEachWithIndex((card, i) => {
-      card->Option.mapOr((), card => {
-        if card == match {
-          result := Some(freeRules(card, i))
+      pile->Array.forEachWithIndex((card, j) => {
+        if Card(card) == match {
+          result := pileRules(game, pile, card, i, j)->Movable->Some
         }
       })
     })
+
+    game.foundations->Array.forEachWithIndex((foundation, i) => {
+      if Foundation(i) == match {
+        result := foundationBaseRules(i)->Static->Some
+      }
+
+      foundation->Array.forEachWithIndex((card, j) => {
+        if Card(card) == match {
+          result := foundationRules(game, card, i, j)->Movable->Some
+        }
+      })
+    })
+
+    game.free->Array.forEachWithIndex((card, i) => {
+      if Free(i) == match {
+        result := freeBaseRules(i)->Static->Some
+      }
+
+      card->Option.mapOr((), card => {
+        if Card(card) == match {
+          result := freeRules(card, i)->Movable->Some
+        }
+      })
+    })
+
+    result.contents
   }
 
   module Board = {
@@ -243,6 +275,7 @@ module GameRules = {
       ~moveToState as _,
       ~autoProgress as _,
       ~game as _,
+      ~undo as _,
     ) => {
       <React.Fragment>
         <div className="flex flex-row">
