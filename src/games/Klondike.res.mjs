@@ -254,7 +254,7 @@ function pileBaseRules(i) {
         };
 }
 
-function pileRules(game, pile, card, i, j) {
+function pileRules(pile, card, i, j) {
   var isLast = j === (pile.length - 1 | 0);
   return {
           locationAdjustment: {
@@ -444,7 +444,7 @@ function getRule(game, match) {
                     }, match)) {
                 result.contents = {
                   TAG: "Movable",
-                  _0: pileRules(game, pile, card, i, j)
+                  _0: pileRules(pile, card, i, j)
                 };
                 return ;
               }

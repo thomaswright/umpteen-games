@@ -116,7 +116,7 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let pileRules = (game, pile, item, i, j): movableSpace => {
+  let pileRules = (pile, item, i, j): movableSpace => {
     let isLast = j == pile->Array.length - 1
 
     {
@@ -192,7 +192,7 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let foundationRules = (game, card: Card.card, i, j): movableSpace => {
+  let foundationRules = (card: Card.card, i, j): movableSpace => {
     {
       locationAdjustment: {
         x: 0,
@@ -243,7 +243,7 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let tarotUpRules = (game, tarot: Tarot.card, j): movableSpace => {
+  let tarotUpRules = (tarot: Tarot.card, j): movableSpace => {
     {
       locationAdjustment: {
         x: 10 * j,
@@ -292,7 +292,7 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let tarotDownRules = (game, tarot: Tarot.card, j): movableSpace => {
+  let tarotDownRules = (tarot: Tarot.card, j): movableSpace => {
     {
       locationAdjustment: {
         x: -10 * j,
@@ -355,7 +355,7 @@ module GameRules: GameBase.GameRules = {
 
       pile->Array.forEachWithIndex((card, j) => {
         if Item(card) == match {
-          result := pileRules(game, pile, card, i, j)->Movable->Some
+          result := pileRules(pile, card, i, j)->Movable->Some
         }
       })
     })
@@ -367,7 +367,7 @@ module GameRules: GameBase.GameRules = {
 
       foundation->Array.forEachWithIndex((card, j) => {
         if Item(Card(card)) == match {
-          result := foundationRules(game, card, i, j)->Movable->Some
+          result := foundationRules(card, i, j)->Movable->Some
         }
       })
     })
@@ -378,7 +378,7 @@ module GameRules: GameBase.GameRules = {
 
     game.tarotUp->Array.forEachWithIndex((card, i) => {
       if Item(Tarot(card)) == match {
-        result := tarotUpRules(game, card, i)->Movable->Some
+        result := tarotUpRules(card, i)->Movable->Some
       }
     })
 
@@ -388,7 +388,7 @@ module GameRules: GameBase.GameRules = {
 
     game.tarotDown->Array.forEachWithIndex((card, i) => {
       if Item(Tarot(card)) == match {
-        result := tarotDownRules(game, card, i)->Movable->Some
+        result := tarotDownRules(card, i)->Movable->Some
       }
     })
 

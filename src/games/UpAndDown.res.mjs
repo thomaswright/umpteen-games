@@ -371,7 +371,7 @@ function pileBaseRules(i) {
         };
 }
 
-function pileRules(game, pile, item, i, j) {
+function pileRules(pile, item, i, j) {
   var isLast = j === (pile.length - 1 | 0);
   return {
           locationAdjustment: {
@@ -467,7 +467,7 @@ function foundationBaseRules(i) {
         };
 }
 
-function foundationRules(game, card, i, j) {
+function foundationRules(card, i, j) {
   return {
           locationAdjustment: {
             x: 0,
@@ -533,7 +533,7 @@ function tarotUpBaseRules() {
         };
 }
 
-function tarotUpRules(game, tarot, j) {
+function tarotUpRules(tarot, j) {
   return {
           locationAdjustment: {
             x: Math.imul(10, j),
@@ -594,7 +594,7 @@ function tarotDownBaseRules() {
         };
 }
 
-function tarotDownRules(game, tarot, j) {
+function tarotDownRules(tarot, j) {
   return {
           locationAdjustment: {
             x: Math.imul(-10, j),
@@ -699,7 +699,7 @@ function getRule(game, match) {
                     }, match)) {
                 result.contents = {
                   TAG: "Movable",
-                  _0: pileRules(game, pile, card, i, j)
+                  _0: pileRules(pile, card, i, j)
                 };
                 return ;
               }
@@ -726,7 +726,7 @@ function getRule(game, match) {
                     }, match)) {
                 result.contents = {
                   TAG: "Movable",
-                  _0: foundationRules(game, card, i, j)
+                  _0: foundationRules(card, i, j)
                 };
                 return ;
               }
@@ -749,7 +749,7 @@ function getRule(game, match) {
               }, match)) {
           result.contents = {
             TAG: "Movable",
-            _0: tarotUpRules(game, card, i)
+            _0: tarotUpRules(card, i)
           };
           return ;
         }
@@ -771,7 +771,7 @@ function getRule(game, match) {
               }, match)) {
           result.contents = {
             TAG: "Movable",
-            _0: tarotDownRules(game, card, i)
+            _0: tarotDownRules(card, i)
           };
           return ;
         }

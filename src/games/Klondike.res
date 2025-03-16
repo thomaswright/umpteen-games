@@ -102,7 +102,7 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let pileRules = (game, pile, card, i, j): movableSpace => {
+  let pileRules = (pile, card, i, j): movableSpace => {
     let isLast = j == pile->Array.length - 1
 
     {
@@ -248,7 +248,7 @@ module GameRules: GameBase.GameRules = {
 
       pile->Array.forEachWithIndex((card, j) => {
         if Card(card) == match {
-          result := pileRules(game, pile, card, i, j)->Movable->Some
+          result := pileRules(pile, card, i, j)->Movable->Some
         }
       })
     })
@@ -316,7 +316,7 @@ module GameRules: GameBase.GameRules = {
       ~moveToState,
       ~autoProgress,
       ~game,
-      ~undo,
+      ~undo as _,
     ) => {
       <React.Fragment>
         <div className="flex flex-row gap-3">

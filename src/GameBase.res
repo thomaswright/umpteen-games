@@ -1,3 +1,4 @@
+@@warning("-44")
 open Webapi.Dom
 
 @val @module("./other.js")
@@ -536,7 +537,7 @@ module Create = (GameRules: GameRules) => {
 
     let onMouseUp = _ => {
       switch dragData.current {
-      | Some({dragElement, dragSpace, dragPile, offset}) => {
+      | Some({dragElement, dragPile}) => {
           let greatestOverlap = ref(0.)
           let updatedGame = ref(None)
 
