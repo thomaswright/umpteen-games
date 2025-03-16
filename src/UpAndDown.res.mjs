@@ -435,7 +435,7 @@ function pileRules(game, pile, item, i, j) {
               }
               
             }),
-          applyMoveToOthers: (function (move) {
+          applyMoveToOthers: (function (param) {
               
             })
         };
@@ -552,7 +552,7 @@ function tarotUpRules(game, tarot, j) {
                 return ;
               }
               var dragTarot = dragPile._0;
-              if (Tarot.rankIsAbove(tarot, dragTarot)) {
+              if (Tarot.rankIsBelow(tarot, dragTarot)) {
                 return {
                         piles: game.piles,
                         foundations: game.foundations,
@@ -613,7 +613,7 @@ function tarotDownRules(game, tarot, j) {
                 return ;
               }
               var dragTarot = dragPile._0;
-              if (Tarot.rankIsBelow(tarot, dragTarot)) {
+              if (Tarot.rankIsAbove(tarot, dragTarot)) {
                 return {
                         piles: game.piles,
                         foundations: game.foundations,

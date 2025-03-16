@@ -296,23 +296,23 @@ function GameBase(GameRules) {
       var dragElement = $$event.currentTarget;
       Core__Option.mapOr(GameRules.getSpace(dragElement), undefined, (function (dragSpace) {
               Core__Option.mapOr(GameRules.getRule(getGame(), dragSpace), undefined, (function (rule) {
-                      if (rule.TAG !== "Movable") {
-                        return ;
+                      if (rule.TAG === "Movable") {
+                        return Core__Option.mapOr(rule._0.dragPile(), undefined, (function (dragPile) {
+                                      var boardPos = getBoardPos();
+                                      var eventPos = elementPosition($$event.currentTarget);
+                                      dragData.current = {
+                                        dragElement: dragElement,
+                                        offset: [
+                                          ($$event.clientX - (eventPos.left | 0) | 0) + (boardPos.left | 0) | 0,
+                                          ($$event.clientY - (eventPos.top | 0) | 0) + (boardPos.top | 0) | 0
+                                        ],
+                                        dragSpace: dragSpace,
+                                        dragPile: dragPile
+                                      };
+                                      liftUp(dragElement, 1000);
+                                    }));
                       }
-                      Core__Option.mapOr(rule._0.dragPile(), undefined, (function (dragPile) {
-                              var boardPos = getBoardPos();
-                              var eventPos = elementPosition($$event.currentTarget);
-                              dragData.current = {
-                                dragElement: dragElement,
-                                offset: [
-                                  ($$event.clientX - (eventPos.left | 0) | 0) + (boardPos.left | 0) | 0,
-                                  ($$event.clientY - (eventPos.top | 0) | 0) + (boardPos.top | 0) | 0
-                                ],
-                                dragSpace: dragSpace,
-                                dragPile: dragPile
-                              };
-                            }));
-                      liftUp(dragElement, 1000);
+                      
                     }));
             }));
     };

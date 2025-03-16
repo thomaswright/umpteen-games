@@ -450,9 +450,9 @@ module GameBase = (GameRules: GameRules) => {
                     boardPos.top->Int.fromFloat,
                   ),
                 })
+                liftUp(dragElement, 1000)
               },
             )
-            liftUp(dragElement, 1000)
           }
         })
       })

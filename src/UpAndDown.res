@@ -131,7 +131,7 @@ module GameRules: GameBase2.GameRules = {
         z: j + 1,
       },
       baseSpace: Pile(i),
-      applyMoveToOthers: move => (),
+      applyMoveToOthers: _ => (),
       dragPile: () => {
         if isLast {
           Some(item)
@@ -262,7 +262,7 @@ module GameRules: GameBase2.GameRules = {
       droppedUpon: (game, dragPile) => {
         switch dragPile {
         | Tarot(dragTarot) =>
-          if Tarot.rankIsAbove(tarot, dragTarot) {
+          if Tarot.rankIsBelow(tarot, dragTarot) {
             Some({
               ...game,
               tarotUp: Array.concat(game.tarotUp, [dragTarot]),
@@ -311,7 +311,7 @@ module GameRules: GameBase2.GameRules = {
       droppedUpon: (game, dragPile) => {
         switch dragPile {
         | Tarot(dragTarot) =>
-          if Tarot.rankIsBelow(tarot, dragTarot) {
+          if Tarot.rankIsAbove(tarot, dragTarot) {
             Some({
               ...game,
               tarotDown: Array.concat(game.tarotDown, [dragTarot]),
