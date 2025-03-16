@@ -4,8 +4,6 @@ open Common
 open GameBase2
 
 module GameRules: GameBase2.GameRules = {
-  let foundationOffset = 40 + 70 * 4
-
   let shuffledDeck = Card.getShuffledDeck()
 
   @decco
@@ -52,10 +50,23 @@ module GameRules: GameBase2.GameRules = {
   type movableSpace = GameBase2.movableSpace<game, space, dragPile>
   type staticSpace = GameBase2.staticSpace<game, dragPile>
 
-  // Currently: writing remove drag pile thing
-  // let serializeDragpile = (game) => {
-  //   game ->
-  // }
+  let removeDragFromGame = (game: game, dragPile: dragPile) => {
+    let removeDragPile = x =>
+      x->Array.filter(sCard => {
+        !(dragPile->Array.some(dCard => sCard == dCard))
+      })
+
+    {
+      ...game,
+      foundations: game.foundations->Array.map(removeDragPile),
+      piles: game.piles->Array.map(removeDragPile),
+      free: game.free->Array.map(card => {
+        card->Option.flatMap(card =>
+          dragPile->Array.some(dCard => card == dCard) ? None : Some(card)
+        )
+      }),
+    }
+  }
 
   let dragPileValidation = dragPile => {
     let (dragPileIsValid, _) =
@@ -78,8 +89,10 @@ module GameRules: GameBase2.GameRules = {
   let pileBaseRules = (i): staticSpace => {
     {
       droppedUpon: (game, dragPile) => {
-        let dragPileTop = dragPile->Array.getUnsafe(0)
-        if dragPileTop.rank == RK {
+        let dragPileBase = dragPile->Array.getUnsafe(0)
+        let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
+
+        if noChildren && dragPileBase.rank == RK {
           Some({
             ...game,
             piles: game.piles->ArrayAux.update(i, _ => dragPile),
@@ -147,8 +160,9 @@ module GameRules: GameBase2.GameRules = {
       droppedUpon: (game, dragPile) => {
         let justOne = dragPile->Array.length == 1
         let dragPileBase = dragPile->Array.getUnsafe(0)
+        let noChildren = game.foundations->Array.getUnsafe(i)->Array.length == 0
 
-        if justOne && dragPileBase.rank == RA {
+        if noChildren && justOne && dragPileBase.rank == RA {
           Some({
             ...game,
             foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
@@ -167,7 +181,7 @@ module GameRules: GameBase2.GameRules = {
         y: 0,
         z: j + 1,
       },
-      baseSpace: Pile(i),
+      baseSpace: Foundation(i),
       applyMoveToOthers: _ => (),
       dragPile: () => {
         if j == game.foundations->Array.length - 1 {
@@ -181,7 +195,7 @@ module GameRules: GameBase2.GameRules = {
         let justOne = dragPile->Array.length == 1
         let dragPileBase = dragPile->Array.getUnsafe(0)
 
-        if justOne && dragPileBase.rank == card.rank && Card.rankIsAbove(card, dragPileBase) {
+        if justOne && dragPileBase.suit == card.suit && Card.rankIsBelow(card, dragPileBase) {
           Some({
             ...game,
             foundations: game.foundations->Array.map(stack => {
@@ -198,7 +212,9 @@ module GameRules: GameBase2.GameRules = {
   let freeBaseRules = (i): staticSpace => {
     autoProgress: false,
     droppedUpon: (game, dragPile) => {
-      if dragPile->Array.length == 1 {
+      let noChildren = game.free->Array.getUnsafe(i)->Option.isNone
+
+      if noChildren && dragPile->Array.length == 1 {
         Some({
           ...game,
           free: game.free->ArrayAux.update(i, _ => dragPile->Array.get(0)),
@@ -338,4 +354,4 @@ module GameRules: GameBase2.GameRules = {
   }
 }
 
-// module Game = GameBase.GameBase(GameRules)
+module Game = GameBase2.GameBase(GameRules)

@@ -43,6 +43,7 @@ module type GameRules = {
   let spaceToString: space => string
   let initiateGame: unit => game
   let getRule: getRule<game, space, dragPile>
+  let removeDragFromGame: (game, dragPile) => game
 
   module Board: {
     type props<'setRef, 'onMouseDown, 'setGame, 'moveToState, 'autoProgress, 'game, 'undo> = {
@@ -512,7 +513,7 @@ module GameBase = (GameRules: GameRules) => {
           dragPiles->Array.forEach(dragPile => {
             droppedUpons->Array.forEach(droppedUpon => {
               if op.contents->Option.isNone {
-                op := droppedUpon(getGame(), dragPile)
+                op := droppedUpon(getGame()->GameRules.removeDragFromGame(dragPile), dragPile)
               }
             })
           })
@@ -544,7 +545,7 @@ module GameBase = (GameRules: GameRules) => {
               | Movable({droppedUpon}) => droppedUpon
               }
 
-              droppedUpon(getGame(), dragPile)
+              droppedUpon(getGame()->GameRules.removeDragFromGame(dragPile), dragPile)
             })
             ->Option.mapOr((), newGame => {
               let overlap = getOverlap(el, dragElement)
@@ -558,9 +559,9 @@ module GameBase = (GameRules: GameRules) => {
           updatedGame.contents->Option.mapOr((), updatedGame => {
             setGame(_ => updatedGame)
             snapshot()
-            moveToState()
-            autoProgress()
           })
+          moveToState()
+          autoProgress()
         }
       | None => ()
       }

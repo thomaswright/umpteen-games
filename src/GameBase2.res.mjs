@@ -372,7 +372,7 @@ function GameBase(GameRules) {
               dragPiles.forEach(function (dragPile) {
                     droppedUpons.forEach(function (droppedUpon) {
                           if (Core__Option.isNone(op.contents)) {
-                            op.contents = droppedUpon(getGame(), dragPile);
+                            op.contents = droppedUpon(GameRules.removeDragFromGame(getGame(), dragPile), dragPile);
                             return ;
                           }
                           
@@ -406,7 +406,7 @@ function GameBase(GameRules) {
                             })), (function (rule) {
                           var droppedUpon;
                           droppedUpon = rule.TAG === "Movable" ? rule._0.droppedUpon : rule._0.droppedUpon;
-                          return droppedUpon(getGame(), dragPile);
+                          return droppedUpon(GameRules.removeDragFromGame(getGame(), dragPile), dragPile);
                         })), undefined, (function (newGame) {
                       var overlap = getOverlap(el, dragElement);
                       if (overlap > greatestOverlap.contents) {
@@ -422,9 +422,9 @@ function GameBase(GameRules) {
                       return updatedGame;
                     });
                 snapshot();
-                moveToState();
-                autoProgress();
               }));
+        moveToState();
+        autoProgress();
       }
       dragData.current = undefined;
     };

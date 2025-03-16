@@ -7,6 +7,7 @@ import * as Common from "./Common.res.mjs";
 import * as Js_json from "rescript/lib/es6/js_json.js";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as Js_array from "rescript/lib/es6/js_array.js";
+import * as GameBase2 from "./GameBase2.res.mjs";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
@@ -196,6 +197,32 @@ function initiateGame() {
         };
 }
 
+function removeDragFromGame(game, dragPile) {
+  var removeDragPile = function (x) {
+    return x.filter(function (sCard) {
+                return !dragPile.some(function (dCard) {
+                            return Caml_obj.equal(sCard, dCard);
+                          });
+              });
+  };
+  return {
+          piles: game.piles.map(removeDragPile),
+          foundations: game.foundations.map(removeDragPile),
+          free: game.free.map(function (card) {
+                return Core__Option.flatMap(card, (function (card) {
+                              if (dragPile.some(function (dCard) {
+                                      return Caml_obj.equal(card, dCard);
+                                    })) {
+                                return ;
+                              } else {
+                                return card;
+                              }
+                            }));
+              }),
+          gameEnded: game.gameEnded
+        };
+}
+
 function dragPileValidation(dragPile) {
   return Core__Array.reduce(dragPile.toReversed(), [
                 true,
@@ -225,8 +252,9 @@ function dragPileValidation(dragPile) {
 function pileBaseRules(i) {
   return {
           droppedUpon: (function (game, dragPile) {
-              var dragPileTop = dragPile[0];
-              if (dragPileTop.rank === "RK") {
+              var dragPileBase = dragPile[0];
+              var noChildren = game.piles[i].length === 0;
+              if (noChildren && dragPileBase.rank === "RK") {
                 return {
                         piles: Common.ArrayAux.update(game.piles, i, (function (param) {
                                 return dragPile;
@@ -301,7 +329,8 @@ function foundationBaseRules(i) {
           droppedUpon: (function (game, dragPile) {
               var justOne = dragPile.length === 1;
               var dragPileBase = dragPile[0];
-              if (justOne && dragPileBase.rank === "RA") {
+              var noChildren = game.foundations[i].length === 0;
+              if (noChildren && justOne && dragPileBase.rank === "RA") {
                 return {
                         piles: game.piles,
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
@@ -325,7 +354,7 @@ function foundationRules(game, card, i, j) {
             z: j + 1 | 0
           },
           baseSpace: {
-            TAG: "Pile",
+            TAG: "Foundation",
             _0: i
           },
           dragPile: (function () {
@@ -340,7 +369,7 @@ function foundationRules(game, card, i, j) {
           droppedUpon: (function (game, dragPile) {
               var justOne = dragPile.length === 1;
               var dragPileBase = dragPile[0];
-              if (justOne && dragPileBase.rank === card.rank && Card.rankIsAbove(card, dragPileBase)) {
+              if (justOne && dragPileBase.suit === card.suit && Card.rankIsBelow(card, dragPileBase)) {
                 return {
                         piles: game.piles,
                         foundations: game.foundations.map(function (stack) {
@@ -361,7 +390,8 @@ function foundationRules(game, card, i, j) {
 function freeBaseRules(i) {
   return {
           droppedUpon: (function (game, dragPile) {
-              if (dragPile.length === 1) {
+              var noChildren = Core__Option.isNone(game.free[i]);
+              if (noChildren && dragPile.length === 1) {
                 return {
                         piles: game.piles,
                         foundations: game.foundations,
@@ -600,11 +630,15 @@ var GameRules = {
   spaceToString: spaceToString,
   initiateGame: initiateGame,
   getRule: getRule,
+  removeDragFromGame: removeDragFromGame,
   Board: Board,
   AllCards: AllCards
 };
 
+var Game = GameBase2.GameBase(GameRules);
+
 export {
   GameRules ,
+  Game ,
 }
 /* shuffledDeck Not a pure module */
