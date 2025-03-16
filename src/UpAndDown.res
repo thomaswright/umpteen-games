@@ -1,9 +1,10 @@
 open Webapi.Dom
 open Types
 open Common
+open GameBase2
 
-module GameRules = {
-  let foundationOffset = 70 * 6
+module GameRules: GameBase2.GameRules = {
+  // let foundationOffset = 70 * 6
 
   module Item = {}
 
@@ -25,6 +26,8 @@ module GameRules = {
     | _ => None
     }
   }
+
+  type dragPile = item
 
   let spaceToString = space => {
     space->space_encode->Js.Json.stringify
@@ -51,6 +54,9 @@ module GameRules = {
     free: option<item>,
     gameEnded: bool,
   }
+
+  type movableSpace = GameBase2.movableSpace<game, space, dragPile>
+  type staticSpace = GameBase2.staticSpace<game, dragPile>
 
   let initiateGame = () => {
     {
@@ -80,386 +86,330 @@ module GameRules = {
     }
   }
 
-  let getSpaceLocs = (game: game) => {
-    // Todo: maybe change to a map
-    let cards = ref([])
-    let addToCards = card => cards := Array.concat(cards.contents, [card])
-    game.piles->ArrayAux.forEach2((_, item, i, j) => {
-      addToCards((
-        Item(item),
-        Pile(i),
-        {
-          x: 0,
-          y: j * 20,
-          z: j + 1,
-        },
-      ))
-    })
-
-    game.foundations->ArrayAux.forEach2((_, card, i, j) => {
-      addToCards((
-        Item(Card(card)),
-        Foundation(i),
-        {
-          x: 0,
-          y: 0,
-          z: j + 1,
-        },
-      ))
-    })
-
-    game.free->Option.mapOr((), item => {
-      addToCards((
-        Item(item),
-        Free,
-        {
-          x: 0,
-          y: 0,
-          z: 1,
-        },
-      ))
-    })
-    game.tarotUp->Array.forEachWithIndex((tarot, i) => {
-      addToCards((
-        Item(Tarot(tarot)),
-        TarotUp,
-        {
-          x: 10 * i,
-          y: 0,
-          z: i,
-        },
-      ))
-    })
-
-    game.tarotDown->Array.forEachWithIndex((tarot, i) => {
-      addToCards((
-        Item(Tarot(tarot)),
-        TarotDown,
-        {
-          x: -10 * i,
-          y: 0,
-          z: i,
-        },
-      ))
-    })
-
-    cards.contents
-  }
-
-  let baseSpace = (dropItem: item, game: game) => {
-    let base = ref(None)
-
-    game.piles->ArrayAux.forEach2((_, item, i, _) => {
-      if item == dropItem {
-        base := Some(Pile(i))
-      }
-    })
-
-    game.foundations->ArrayAux.forEach2((_, card, i, _) => {
-      if Card(card) == dropItem {
-        base := Some(Foundation(i))
-      }
-    })
-
-    game.free->Option.mapOr((), card => {
-      if card == dropItem {
-        base := Some(Free)
-      }
-    })
-
-    game.tarotUp->Array.forEachWithIndex((tarot, _) => {
-      if Tarot(tarot) == dropItem {
-        base := Some(TarotUp)
-      }
-    })
-
-    game.tarotDown->Array.forEachWithIndex((tarot, _) => {
-      if Tarot(tarot) == dropItem {
-        base := Some(TarotDown)
-      }
-    })
-
-    base.contents
-  }
-
-  let canDrag = (space, game) => {
-    switch space {
-    | Item(item) =>
-      // check if on top
-      switch baseSpace(item, game) {
-      | Some(Pile(pileIndex)) =>
-        game.piles
-        ->Array.get(pileIndex)
-        ->Option.flatMap(pile => {
-          pile->ArrayAux.getLast
+  let removeDragFromGame = (game: game, dragPile: dragPile): game => {
+    {
+      ...game,
+      foundations: game.foundations->Array.map(x =>
+        x->Array.filter(sCard => {
+          Card(sCard) != dragPile
         })
-        ->Option.mapOr(false, pileLast => {
-          pileLast == item
+      ),
+      piles: game.piles->Array.map(x =>
+        x->Array.filter(sCard => {
+          sCard != dragPile
         })
-      | Some(Free) => true
-      | _ => false
-      }
-    | _ => false
+      ),
+      free: game.free->Option.flatMap(card => card != dragPile ? Some(card) : None),
     }
   }
 
-  let canDrop = (dragSpace: space, dropSpace: space, game: game) => {
-    switch dragSpace {
-    | Item(dragItem) => {
-        let notDragSpace = dragSpace != dropSpace
+  let pileBaseRules = (i): staticSpace => {
+    {
+      droppedUpon: (game, dragPile) => {
+        let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
 
-        let canBeParent = switch dropSpace {
-        | Item(dropItem) =>
-          switch baseSpace(dropItem, game) {
-          | Some(Free) => false
-          | Some(Pile(i)) =>
-            let topItem = game.piles->Array.getUnsafe(i)->ArrayAux.getLast
-            if topItem == Some(dropItem) {
-              switch (dropItem, dragItem) {
-              | (Card(c1), Card(c2)) => Card.rankIsAdjacent(c1, c2) && c1.suit == c2.suit
-              | (Tarot(c1), Tarot(c2)) => Tarot.rankIsAdjacent(c1, c2)
-              | _ => false
-              }
-            } else {
-              false
-            }
-          | Some(_) =>
-            switch (dropItem, dragItem) {
-            | (Card(c1), Card(c2)) => Card.rankIsAdjacent(c1, c2) && c1.suit == c2.suit
-            | (Tarot(c1), Tarot(c2)) => Tarot.rankIsAdjacent(c1, c2)
-            | _ => false
-            }
-          | _ => false
-          }
-        | TarotUp => dragItem == Tarot({rank: R1})
-        | TarotDown => dragItem == Tarot({rank: R21})
-        | Pile(i) => game.piles->Array.getUnsafe(i)->Array.length == 0
-        | Free => game.free->Option.isNone
-        | Foundation(_) => false // Always starts with an Ace
+        if noChildren {
+          Some({
+            ...game,
+            piles: game.piles->ArrayAux.update(i, _ => [dragPile]),
+          })
+        } else {
+          None
         }
-
-        notDragSpace && canBeParent
-      }
-    | _ => false
+      },
+      autoProgress: false,
     }
   }
 
-  let onDrop = (dropOnSpace, dragSpace, game) => {
-    switch dragSpace {
-    | Item(Card(dragCard)) => {
-        let gameDragRemoved = {
-          ...game,
-          piles: game.piles->Array.map(x =>
-            x->Array.filter(sCard => {
-              sCard != Card(dragCard)
+  let pileRules = (game, pile, item, i, j): movableSpace => {
+    let isLast = j == pile->Array.length - 1
+
+    {
+      locationAdjustment: {
+        x: 0,
+        y: j * 20,
+        z: j + 1,
+      },
+      baseSpace: Pile(i),
+      applyMoveToOthers: move => (),
+      dragPile: () => {
+        if isLast {
+          Some(item)
+        } else {
+          None
+        }
+      },
+      autoProgress: () => {
+        if isLast {
+          Send(item)
+        } else {
+          DoNothing
+        }
+      },
+      droppedUpon: (game, dragPile) => {
+        switch (dragPile, item) {
+        | (Card(dragCard), Card(card)) =>
+          if isLast && Card.rankIsAdjacent(card, dragCard) && dragCard.suit == card.suit {
+            Some({
+              ...game,
+              piles: game.piles->Array.map(stack => {
+                stack->ArrayAux.insertAfter(item, [dragPile])
+              }),
             })
-          ),
-          free: switch game.free {
-          | None => None
-          | Some(x) => x == Card(dragCard) ? None : Some(x)
-          },
-        }
-
-        switch dropOnSpace {
-        | Item(Card(card)) => {
-            ...gameDragRemoved,
-            foundations: gameDragRemoved.foundations->Array.map(stack => {
-              stack->ArrayAux.insertAfter(card, [dragCard])
-            }),
-            piles: gameDragRemoved.piles->Array.map(stack => {
-              stack->ArrayAux.insertAfter(Card(card), [Card(dragCard)])
-            }),
+          } else {
+            None
           }
-
-        | Foundation(i) => {
-            ...gameDragRemoved,
-            foundations: gameDragRemoved.foundations->ArrayAux.update(i, _ => [dragCard]),
-          }
-
-        | Pile(i) => {
-            ...gameDragRemoved,
-            piles: gameDragRemoved.piles->ArrayAux.update(i, _ => [Card(dragCard)]),
-          }
-
-        | Free => {
-            ...gameDragRemoved,
-            free: Some(Card(dragCard)),
-          }
-
-        | _ => game
-        }
-      }
-
-    | Item(Tarot(dragTarot)) => {
-        let gameDragRemoved = {
-          ...game,
-          piles: game.piles->Array.map(x =>
-            x->Array.filter(sCard => {
-              sCard != Tarot(dragTarot)
+        | (Tarot(dragCard), Tarot(card)) =>
+          if isLast && Tarot.rankIsAdjacent(card, dragCard) {
+            Some({
+              ...game,
+              piles: game.piles->Array.map(stack => {
+                stack->ArrayAux.insertAfter(item, [dragPile])
+              }),
             })
-          ),
-          free: switch game.free {
-          | None => None
-          | Some(x) => x == Tarot(dragTarot) ? None : Some(x)
-          },
+          } else {
+            None
+          }
+        | _ => None
         }
-
-        switch dropOnSpace {
-        | Item(Tarot(tarot)) => {
-            ...gameDragRemoved,
-            piles: gameDragRemoved.piles->Array.map(stack => {
-              stack->ArrayAux.insertAfter(Tarot(tarot), [Tarot(dragTarot)])
-            }),
-            tarotUp: gameDragRemoved.tarotUp->ArrayAux.insertAfter(tarot, [dragTarot]),
-            tarotDown: gameDragRemoved.tarotDown->ArrayAux.insertAfter(tarot, [dragTarot]),
-          }
-
-        | Pile(i) => {
-            ...gameDragRemoved,
-            piles: gameDragRemoved.piles->ArrayAux.update(i, _ => [Tarot(dragTarot)]),
-          }
-
-        | Free => {
-            ...gameDragRemoved,
-            free: Some(Tarot(dragTarot)),
-          }
-
-        | _ => game
-        }
-      }
-
-    | _ => game
+      },
     }
   }
 
-  let applyMoveToOthers = (space: space, game, move) => {
-    ()
+  let foundationBaseRules = (i): staticSpace => {
+    {
+      autoProgress: true,
+      droppedUpon: (game, dragPile) => {
+        let noChildren = game.foundations->Array.getUnsafe(i)->Array.length == 0
+        switch dragPile {
+        | Card(card) =>
+          if noChildren && card.rank == RA {
+            Some({
+              ...game,
+              foundations: game.foundations->ArrayAux.update(i, _ => [card]),
+            })
+          } else {
+            None
+          }
+        | _ => None
+        }
+      },
+    }
   }
 
-  let autoProgress = setGame => {
-    let newGame = ref(None)
-
-    setGame(game => {
-      // Foundations Check
-      game.foundations->Array.forEachWithIndex((foundation, i) => {
-        let canMove = (c: Card.card) => {
-          switch foundation->ArrayAux.getLast {
-          | None => c.rank == RA
-          | Some(foundationCard) =>
-            Card.rankIsBelow(foundationCard, c) && foundationCard.suit == c.suit
+  let foundationRules = (game, card: Card.card, i, j): movableSpace => {
+    {
+      locationAdjustment: {
+        x: 0,
+        y: 0,
+        z: j + 1,
+      },
+      baseSpace: Foundation(i),
+      applyMoveToOthers: _ => (),
+      dragPile: () => None,
+      autoProgress: () => Seek,
+      droppedUpon: (game, dragPile) => {
+        switch dragPile {
+        | Card(dragCard) =>
+          if dragCard.suit == card.suit && Card.rankIsBelow(card, dragCard) {
+            Some({
+              ...game,
+              foundations: game.foundations->Array.map(stack => {
+                stack->ArrayAux.insertAfter(card, [dragCard])
+              }),
+            })
+          } else {
+            None
           }
+        | _ => None
         }
-        game.free->Option.mapOr(
-          (),
-          freeItem => {
-            switch freeItem {
-            | Card(freeCard) =>
-              if newGame.contents->Option.isNone && canMove(freeCard) {
-                newGame :=
-                  Some({
-                    ...game,
-                    foundations: game.foundations->ArrayAux.update(
-                      i,
-                      f => f->Array.concat([freeCard]),
-                    ),
-                    free: None,
-                  })
-              }
+      },
+    }
+  }
 
-            | _ => ()
-            }
-          },
-        )
-
-        game.piles->Array.forEachWithIndex(
-          (pile, j) => {
-            switch pile->ArrayAux.getLast {
-            | Some(Card(pileCard)) =>
-              if newGame.contents->Option.isNone && canMove(pileCard) {
-                newGame :=
-                  Some({
-                    ...game,
-                    foundations: game.foundations->ArrayAux.update(
-                      i,
-                      f => f->Array.concat([pileCard]),
-                    ),
-                    piles: game.piles->ArrayAux.update(j, p => p->ArrayAux.removeLast),
-                  })
-              }
-            | _ => ()
-            }
-          },
-        )
-      })
-
-      // Tarot Check
-
-      let canMoveTarotUp = (tarotCard: Tarot.card) => {
-        switch game.tarotUp->ArrayAux.getLast {
-        | None => tarotCard.rank == R0
-        | Some(tarotUpCard) => Tarot.rankIsAbove(tarotCard, tarotUpCard)
+  let tarotUpBaseRules = () => {
+    {
+      autoProgress: true,
+      droppedUpon: (game, dragPile) => {
+        let noChildren = game.tarotUp->Array.length == 0
+        switch dragPile {
+        | Tarot(tarot) =>
+          if noChildren && tarot.rank == R0 {
+            Some({
+              ...game,
+              tarotUp: [tarot],
+            })
+          } else {
+            None
+          }
+        | _ => None
         }
+      },
+    }
+  }
+
+  let tarotUpRules = (game, tarot: Tarot.card, j): movableSpace => {
+    {
+      locationAdjustment: {
+        x: 10 * j,
+        y: 0,
+        z: j,
+      },
+      baseSpace: TarotUp,
+      applyMoveToOthers: _ => (),
+      dragPile: () => None,
+      autoProgress: () => Seek,
+      droppedUpon: (game, dragPile) => {
+        switch dragPile {
+        | Tarot(dragTarot) =>
+          if Tarot.rankIsAbove(tarot, dragTarot) {
+            Some({
+              ...game,
+              tarotUp: Array.concat(game.tarotUp, [dragTarot]),
+            })
+          } else {
+            None
+          }
+        | _ => None
+        }
+      },
+    }
+  }
+
+  let tarotDownBaseRules = () => {
+    {
+      autoProgress: true,
+      droppedUpon: (game, dragPile) => {
+        let noChildren = game.tarotDown->Array.length == 0
+        switch dragPile {
+        | Tarot(tarot) =>
+          if noChildren && tarot.rank == R21 {
+            Some({
+              ...game,
+              tarotDown: [tarot],
+            })
+          } else {
+            None
+          }
+        | _ => None
+        }
+      },
+    }
+  }
+
+  let tarotDownRules = (game, tarot: Tarot.card, j): movableSpace => {
+    {
+      locationAdjustment: {
+        x: -10 * j,
+        y: 0,
+        z: j,
+      },
+      baseSpace: TarotDown,
+      applyMoveToOthers: _ => (),
+      dragPile: () => None,
+      autoProgress: () => Seek,
+      droppedUpon: (game, dragPile) => {
+        switch dragPile {
+        | Tarot(dragTarot) =>
+          if Tarot.rankIsBelow(tarot, dragTarot) {
+            Some({
+              ...game,
+              tarotDown: Array.concat(game.tarotDown, [dragTarot]),
+            })
+          } else {
+            None
+          }
+        | _ => None
+        }
+      },
+    }
+  }
+
+  let freeBaseRules = (): staticSpace => {
+    autoProgress: false,
+    droppedUpon: (game, dragPile) => {
+      switch game.free {
+      | Some(_) => None
+      | None => Some({...game, free: Some(dragPile)})
       }
-      let canMoveTarotDown = (tarotCard: Tarot.card) => {
-        switch game.tarotDown->ArrayAux.getLast {
-        | None => tarotCard.rank == R21
-        | Some(tarotDownCard) => Tarot.rankIsBelow(tarotCard, tarotDownCard)
-        }
+    },
+  }
+
+  let freeRules = (card): movableSpace => {
+    {
+      locationAdjustment: {
+        x: 0,
+        y: 0,
+        z: 1,
+      },
+      baseSpace: Free,
+      applyMoveToOthers: _ => (),
+      autoProgress: () => Send(card),
+      dragPile: () => Some(card),
+      droppedUpon: (_game, _dragPile) => None,
+    }
+  }
+
+  let getRule: GameBase2.getRule<game, space, dragPile> = (game: game, match: space) => {
+    let result = ref(None)
+
+    game.piles->Array.forEachWithIndex((pile, i) => {
+      if Pile(i) == match {
+        result := pileBaseRules(i)->Static->Some
       }
 
-      game.free->Option.mapOr((), freeItem => {
-        switch freeItem {
-        | Tarot(freeTarot) =>
-          if newGame.contents->Option.isNone && canMoveTarotUp(freeTarot) {
-            newGame :=
-              Some({
-                ...game,
-                tarotUp: game.tarotUp->Array.concat([freeTarot]),
-                free: None,
-              })
-          }
-
-          if newGame.contents->Option.isNone && canMoveTarotDown(freeTarot) {
-            newGame :=
-              Some({
-                ...game,
-                tarotDown: game.tarotDown->Array.concat([freeTarot]),
-                free: None,
-              })
-          }
-
-        | _ => ()
+      pile->Array.forEachWithIndex((card, j) => {
+        if Item(card) == match {
+          result := pileRules(game, pile, card, i, j)->Movable->Some
         }
       })
-
-      game.piles->Array.forEachWithIndex((pile, j) => {
-        switch pile->ArrayAux.getLast {
-        | Some(Tarot(pileTarot)) =>
-          if newGame.contents->Option.isNone && canMoveTarotUp(pileTarot) {
-            newGame :=
-              Some({
-                ...game,
-                tarotUp: game.tarotUp->Array.concat([pileTarot]),
-                piles: game.piles->ArrayAux.update(j, p => p->ArrayAux.removeLast),
-              })
-          }
-
-          if newGame.contents->Option.isNone && canMoveTarotDown(pileTarot) {
-            newGame :=
-              Some({
-                ...game,
-                tarotDown: game.tarotDown->Array.concat([pileTarot]),
-                piles: game.piles->ArrayAux.update(j, p => p->ArrayAux.removeLast),
-              })
-          }
-        | _ => ()
-        }
-      })
-
-      newGame.contents->Option.getOr(game)
     })
 
-    newGame.contents->Option.isSome
+    game.foundations->Array.forEachWithIndex((foundation, i) => {
+      if Foundation(i) == match {
+        result := foundationBaseRules(i)->Static->Some
+      }
+
+      foundation->Array.forEachWithIndex((card, j) => {
+        if Item(Card(card)) == match {
+          result := foundationRules(game, card, i, j)->Movable->Some
+        }
+      })
+    })
+
+    if TarotUp == match {
+      result := tarotUpBaseRules()->Static->Some
+    }
+
+    game.tarotUp->Array.forEachWithIndex((card, i) => {
+      if Item(Tarot(card)) == match {
+        result := tarotUpRules(game, card, i)->Movable->Some
+      }
+    })
+
+    if TarotDown == match {
+      result := tarotDownBaseRules()->Static->Some
+    }
+
+    game.tarotDown->Array.forEachWithIndex((card, i) => {
+      if Item(Tarot(card)) == match {
+        result := tarotDownRules(game, card, i)->Movable->Some
+      }
+    })
+
+    if Free == match {
+      result := freeBaseRules()->Static->Some
+    }
+
+    switch game.free {
+    | Some(free) =>
+      if Item(free) == match {
+        result := freeRules(free)->Movable->Some
+      }
+    | None => ()
+    }
+
+    result.contents
   }
 
   module Board = {
@@ -562,4 +512,4 @@ module GameRules = {
   }
 }
 
-module Game = GameBase.GameBase(GameRules)
+module Game = GameBase2.GameBase(GameRules)
