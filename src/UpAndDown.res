@@ -4,10 +4,6 @@ open Common
 open GameBase2
 
 module GameRules: GameBase2.GameRules = {
-  // let foundationOffset = 70 * 6
-
-  module Item = {}
-
   @decco
   type item = Card(Card.card) | Tarot(Tarot.card)
 
