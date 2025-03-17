@@ -642,13 +642,13 @@ module Create = (GameRules: GameRules) => {
 
   @react.component
   let make = (~getState: unit => state, ~setState: (state => state) => unit) => {
-    let getDeck = () => {
-      getState().deck
-    }
+    // let getDeck = () => {
+    //   getState().deck
+    // }
 
-    let getDeckKey = () => {
-      getDeck()->GameRules.deck_encode->Js.Json.stringify
-    }
-    <Main key={getDeckKey()} setState getState />
+    // let getDeckKey = () => {
+    //   getDeck()->GameRules.deck_encode->Js.Json.stringify
+    // }
+    <Main setState getState />
   }
 }

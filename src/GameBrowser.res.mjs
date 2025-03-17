@@ -182,7 +182,7 @@ function GameBrowser(props) {
                                 };
                         });
                   })
-              });
+              }, "klondike" + state.contents.klondike.length.toString());
         break;
     case "FreeCell" :
         tmp = state.contents.freeCell.length === 0 ? null : JsxRuntime.jsx(FreeCell.Game.make, {
@@ -198,7 +198,7 @@ function GameBrowser(props) {
                                 };
                         });
                   })
-              });
+              }, "freeCell" + state.contents.klondike.length.toString());
         break;
     case "UpAndDown" :
         tmp = state.contents.upAndDown.length === 0 ? null : JsxRuntime.jsx(UpAndDown.Game.make, {
@@ -214,7 +214,7 @@ function GameBrowser(props) {
                                 };
                         });
                   })
-              });
+              }, "upAndDown" + state.contents.klondike.length.toString());
         break;
     
   }
@@ -244,7 +244,7 @@ function GameBrowser(props) {
                                                           return v;
                                                         });
                                                   })
-                                              });
+                                              }, v);
                                   }),
                               className: "flex flex-row gap-4"
                             }),

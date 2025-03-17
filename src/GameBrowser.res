@@ -79,6 +79,7 @@ let make = () => {
         ->Array.map(v => {
           let selected = v == selectGameType
           <button
+            key={v->gameString}
             className={[selected ? "text-blue-700 underline" : "", "font-medium"]->Array.join(" ")}
             onClick={_ => setSelectGameType(_ => v)}>
             {v->gameString->React.string}
@@ -95,6 +96,7 @@ let make = () => {
       state.contents.klondike->Array.length == 0
         ? React.null
         : <Klondike.Game
+            key={"klondike" ++ state.contents.klondike->Array.length->Int.toString}
             getState={() => state.contents.klondike->Array.getUnsafe(0)}
             setState={f =>
               setState(state => {
@@ -106,6 +108,7 @@ let make = () => {
       state.contents.freeCell->Array.length == 0
         ? React.null
         : <FreeCell.Game
+            key={"freeCell" ++ state.contents.klondike->Array.length->Int.toString}
             getState={() => state.contents.freeCell->Array.getUnsafe(0)}
             setState={f =>
               setState(state => {
@@ -117,6 +120,7 @@ let make = () => {
       state.contents.upAndDown->Array.length == 0
         ? React.null
         : <UpAndDown.Game
+            key={"upAndDown" ++ state.contents.klondike->Array.length->Int.toString}
             getState={() => state.contents.upAndDown->Array.getUnsafe(0)}
             setState={f =>
               setState(state => {

@@ -694,14 +694,10 @@ function Create(GameRules) {
     make: GameBase$Create$Main
   };
   var GameBase$Create = function (props) {
-    var getState = props.getState;
-    var getDeckKey = function () {
-      return JSON.stringify(GameRules.deck_encode(getState().deck));
-    };
     return JsxRuntime.jsx(GameBase$Create$Main, {
-                getState: getState,
+                getState: props.getState,
                 setState: props.setState
-              }, getDeckKey());
+              });
   };
   return {
           appendReactElement: appendReactElement,
