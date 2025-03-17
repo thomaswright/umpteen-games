@@ -28,18 +28,9 @@ module GameRules: GameBase.GameRules = {
     space->space_encode->Js.Json.stringify
   }
 
-  let fullDeck =
-    Array.concat(
-      Card.getShuffledDeck()->Array.map(card => Card(card)),
-      Tarot.getShuffledDeck()->Array.map(card => Tarot(card)),
-    )->Array.toShuffled
+  @decco
+  type deck = array<item>
 
-  let deckToDeal = fullDeck->Array.filter(card => {
-    switch card {
-    | Card(card) => card.rank != RA
-    | _ => true
-    }
-  })
   @decco
   type game = {
     piles: array<array<item>>,
@@ -48,37 +39,51 @@ module GameRules: GameBase.GameRules = {
     tarotDown: array<Tarot.card>,
     free: option<item>,
   }
-  let game_encode = game_encode
-  let game_decode = game_decode
 
   type movableSpace = GameBase.movableSpace<game, space, dragPile>
   type staticSpace = GameBase.staticSpace<game, dragPile>
 
   let initiateGame = () => {
-    {
-      piles: [
-        deckToDeal->Array.slice(~start=0, ~end=7),
-        deckToDeal->Array.slice(~start=7, ~end=14),
-        deckToDeal->Array.slice(~start=14, ~end=21),
-        deckToDeal->Array.slice(~start=21, ~end=28),
-        deckToDeal->Array.slice(~start=28, ~end=35),
-        [],
-        deckToDeal->Array.slice(~start=35, ~end=42),
-        deckToDeal->Array.slice(~start=42, ~end=49),
-        deckToDeal->Array.slice(~start=49, ~end=56),
-        deckToDeal->Array.slice(~start=56, ~end=63),
-        deckToDeal->Array.slice(~start=63, ~end=70),
-      ],
-      foundations: [
-        [{rank: RA, suit: Clubs}],
-        [{rank: RA, suit: Diamonds}],
-        [{rank: RA, suit: Hearts}],
-        [{rank: RA, suit: Spades}],
-      ],
-      tarotUp: [],
-      tarotDown: [],
-      free: None,
-    }
+    let fullDeck =
+      Array.concat(
+        Card.getShuffledDeck()->Array.map(card => Card(card)),
+        Tarot.getShuffledDeck()->Array.map(card => Tarot(card)),
+      )->Array.toShuffled
+
+    let deckWithoutAces = fullDeck->Array.filter(card => {
+      switch card {
+      | Card(card) => card.rank != RA
+      | _ => true
+      }
+    })
+
+    (
+      fullDeck,
+      {
+        piles: [
+          deckWithoutAces->Array.slice(~start=0, ~end=7),
+          deckWithoutAces->Array.slice(~start=7, ~end=14),
+          deckWithoutAces->Array.slice(~start=14, ~end=21),
+          deckWithoutAces->Array.slice(~start=21, ~end=28),
+          deckWithoutAces->Array.slice(~start=28, ~end=35),
+          [],
+          deckWithoutAces->Array.slice(~start=35, ~end=42),
+          deckWithoutAces->Array.slice(~start=42, ~end=49),
+          deckWithoutAces->Array.slice(~start=49, ~end=56),
+          deckWithoutAces->Array.slice(~start=56, ~end=63),
+          deckWithoutAces->Array.slice(~start=63, ~end=70),
+        ],
+        foundations: [
+          [{rank: RA, suit: Clubs}],
+          [{rank: RA, suit: Diamonds}],
+          [{rank: RA, suit: Hearts}],
+          [{rank: RA, suit: Spades}],
+        ],
+        tarotUp: [],
+        tarotDown: [],
+        free: None,
+      },
+    )
   }
 
   let winCheck = (game: game) => {
@@ -479,9 +484,9 @@ module GameRules: GameBase.GameRules = {
 
   module AllCards = {
     @react.component
-    let make = (~setRef, ~onMouseDown) => {
+    let make = (~setRef, ~onMouseDown, ~deck) => {
       <React.Fragment>
-        {fullDeck
+        {deck
         ->Array.map(item => {
           switch item {
           | Card(card) =>

@@ -16,8 +16,6 @@ import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
-var shuffledDeck = Card.getShuffledDeck();
-
 function space_encode(value) {
   if (typeof value !== "object") {
     if (value === "Waste") {
@@ -168,6 +166,14 @@ function spaceToString(space) {
   return JSON.stringify(space_encode(space));
 }
 
+function deck_encode(value) {
+  return Decco.arrayToJson(Card.card_encode, value);
+}
+
+function deck_decode(value) {
+  return Decco.arrayFromJson(Card.card_decode, value);
+}
+
 function game_encode(value) {
   return Js_dict.fromArray([
               [
@@ -299,25 +305,29 @@ function dragPileValidation(dragPile) {
 }
 
 function initiateGame() {
-  return {
-          piles: [
-            shuffledDeck.slice(0, 1),
-            shuffledDeck.slice(1, 3),
-            shuffledDeck.slice(3, 6),
-            shuffledDeck.slice(6, 10),
-            shuffledDeck.slice(10, 15),
-            shuffledDeck.slice(15, 21),
-            shuffledDeck.slice(21, 28)
-          ],
-          foundations: [
-            [],
-            [],
-            [],
-            []
-          ],
-          stock: shuffledDeck.slice(28),
-          waste: []
-        };
+  var shuffledDeck = Card.getShuffledDeck();
+  return [
+          shuffledDeck,
+          {
+            piles: [
+              shuffledDeck.slice(0, 1),
+              shuffledDeck.slice(1, 3),
+              shuffledDeck.slice(3, 6),
+              shuffledDeck.slice(6, 10),
+              shuffledDeck.slice(10, 15),
+              shuffledDeck.slice(15, 21),
+              shuffledDeck.slice(21, 28)
+            ],
+            foundations: [
+              [],
+              [],
+              [],
+              []
+            ],
+            stock: shuffledDeck.slice(28),
+            waste: []
+          }
+        ];
 }
 
 function winCheck(game) {
@@ -735,7 +745,7 @@ function Klondike$GameRules$AllCards(props) {
   var onMouseDown = props.onMouseDown;
   var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
-              children: shuffledDeck.map(function (card) {
+              children: props.deck.map(function (card) {
                     return JsxRuntime.jsx(Card.Display.make, {
                                 card: card,
                                 id: JSON.stringify(space_encode({
@@ -762,6 +772,8 @@ var AllCards = {
 var GameRules = {
   game_encode: game_encode,
   game_decode: game_decode,
+  deck_encode: deck_encode,
+  deck_decode: deck_decode,
   getSpace: getSpace,
   spaceToString: spaceToString,
   initiateGame: initiateGame,
@@ -778,4 +790,4 @@ export {
   GameRules ,
   Game ,
 }
-/* shuffledDeck Not a pure module */
+/* Game Not a pure module */

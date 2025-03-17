@@ -199,6 +199,10 @@ function Create(GameRules) {
   var state_encode = function (value) {
     return Js_dict.fromArray([
                 [
+                  "deck",
+                  GameRules.deck_encode(value.deck)
+                ],
+                [
                   "history",
                   (function (extra) {
                         return Decco.arrayToJson(historySnapshot_encode, extra);
@@ -219,39 +223,53 @@ function Create(GameRules) {
       return Decco.error(undefined, "Not an object", value);
     }
     var dict$1 = dict._0;
-    var history = Decco.arrayFromJson(historySnapshot_decode, Belt_Option.getWithDefault(Js_dict.get(dict$1, "history"), null));
-    if (history.TAG === "Ok") {
-      var undoStats = undoStats_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "undoStats"), null));
-      if (undoStats.TAG === "Ok") {
+    var deck = Curry._1(GameRules.deck_decode, Belt_Option.getWithDefault(Js_dict.get(dict$1, "deck"), null));
+    if (deck.TAG === "Ok") {
+      var history = Decco.arrayFromJson(historySnapshot_decode, Belt_Option.getWithDefault(Js_dict.get(dict$1, "history"), null));
+      if (history.TAG === "Ok") {
+        var undoStats = undoStats_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "undoStats"), null));
+        if (undoStats.TAG === "Ok") {
+          return {
+                  TAG: "Ok",
+                  _0: Decco.unsafeAddFieldToObject("deck", deck._0, Decco.unsafeAddFieldToObject("history", history._0, Decco.unsafeAddFieldToObject("undoStats", undoStats._0, {})))
+                };
+        }
+        var e = undoStats._0;
         return {
-                TAG: "Ok",
-                _0: Decco.unsafeAddFieldToObject("history", history._0, Decco.unsafeAddFieldToObject("undoStats", undoStats._0, {}))
+                TAG: "Error",
+                _0: {
+                  path: ".undoStats" + e.path,
+                  message: e.message,
+                  value: e.value
+                }
               };
       }
-      var e = undoStats._0;
+      var e$1 = history._0;
       return {
               TAG: "Error",
               _0: {
-                path: ".undoStats" + e.path,
-                message: e.message,
-                value: e.value
+                path: ".history" + e$1.path,
+                message: e$1.message,
+                value: e$1.value
               }
             };
     }
-    var e$1 = history._0;
+    var e$2 = deck._0;
     return {
             TAG: "Error",
             _0: {
-              path: ".history" + e$1.path,
-              message: e$1.message,
-              value: e$1.value
+              path: ".deck" + e$2.path,
+              message: e$2.message,
+              value: e$2.value
             }
           };
   };
   var createNewGame = function () {
+    var match = GameRules.initiateGame();
     return {
+            deck: match[0],
             history: [{
-                game: GameRules.initiateGame(),
+                game: match[1],
                 actor: "User"
               }],
             undoStats: {
@@ -260,80 +278,9 @@ function Create(GameRules) {
             }
           };
   };
-  var state = {
-    contents: createNewGame()
-  };
-  var listeners = new Set();
-  var subscribe = function (listener) {
-    listeners.add(listener);
-    return function () {
-      listeners.delete(listener);
-    };
-  };
-  var setState = {
-    contents: (function (f) {
-        state.contents = f(state.contents);
-      })
-  };
-  var getGame = function () {
-    return state.contents.history[state.contents.history.length - 1 | 0].game;
-  };
-  var setGame = function (f) {
-    setState.contents(function (state) {
-          var newGame = f(getGame());
-          listeners.forEach(function (listener) {
-                listener(function (param) {
-                      return newGame;
-                    });
-              });
-          return {
-                  history: state.history.concat([{
-                          game: newGame,
-                          actor: "Auto"
-                        }]),
-                  undoStats: state.undoStats.currentUndoDepth > 0 ? ({
-                        currentUndoDepth: 0,
-                        undos: state.undoStats.undos.concat([state.undoStats.currentUndoDepth])
-                      }) : state.undoStats
-                };
-        });
-  };
-  var snapshot = function () {
-    setState.contents(function (state) {
-          return {
-                  history: Common.ArrayAux.update(state.history, state.history.length - 1 | 0, (function (v) {
-                          return {
-                                  game: v.game,
-                                  actor: "User"
-                                };
-                        })),
-                  undoStats: state.undoStats
-                };
-        });
-  };
-  var undo = function () {
-    if (state.contents.history.filter(function (v) {
-            return v.actor === "User";
-          }).length > 1) {
-      return setState.contents(function (state) {
-                  var newHistory = Common.ArrayAux.sliceBefore(state.history, (function (v) {
-                          return v.actor === "User";
-                        }));
-                  var init = state.undoStats;
-                  return {
-                          history: newHistory,
-                          undoStats: {
-                            currentUndoDepth: state.undoStats.currentUndoDepth + 1 | 0,
-                            undos: init.undos
-                          }
-                        };
-                });
-    }
-    
-  };
-  var useGame = function () {
+  var useGame = function (subscribe, getInitial) {
     var match = React.useState(function () {
-          return getGame();
+          return getInitial();
         });
     var setExternalState = match[1];
     React.useEffect((function () {
@@ -347,7 +294,7 @@ function Create(GameRules) {
   var GameBase$Create$BoardWrapper = function (props) {
     var undo = props.undo;
     var moveToState = props.moveToState;
-    var game = useGame();
+    var game = useGame(props.subscribe, props.getInitial);
     var undo$1 = function () {
       undo();
       moveToState();
@@ -375,7 +322,77 @@ function Create(GameRules) {
   var BoardWrapper = {
     make: GameBase$Create$BoardWrapper
   };
-  var GameBase$Create = function (props) {
+  var GameBase$Create$Main = function (props) {
+    var setState = props.setState;
+    var getState = props.getState;
+    var listeners = {
+      contents: new Set()
+    };
+    var subscribe = function (listener) {
+      listeners.contents.add(listener);
+      return function () {
+        listeners.contents.delete(listener);
+      };
+    };
+    var getGame = function () {
+      return getState().history[getState().history.length - 1 | 0].game;
+    };
+    var setGame = function (f) {
+      setState(function (state) {
+            var newGame = f(getGame());
+            listeners.contents.forEach(function (listener) {
+                  listener(function (param) {
+                        return newGame;
+                      });
+                });
+            return {
+                    deck: state.deck,
+                    history: state.history.concat([{
+                            game: newGame,
+                            actor: "Auto"
+                          }]),
+                    undoStats: state.undoStats.currentUndoDepth > 0 ? ({
+                          currentUndoDepth: 0,
+                          undos: state.undoStats.undos.concat([state.undoStats.currentUndoDepth])
+                        }) : state.undoStats
+                  };
+          });
+    };
+    var snapshot = function () {
+      setState(function (state) {
+            return {
+                    deck: state.deck,
+                    history: Common.ArrayAux.update(state.history, state.history.length - 1 | 0, (function (v) {
+                            return {
+                                    game: v.game,
+                                    actor: "User"
+                                  };
+                          })),
+                    undoStats: state.undoStats
+                  };
+          });
+    };
+    var undo = function () {
+      if (getState().history.filter(function (v) {
+              return v.actor === "User";
+            }).length > 1) {
+        return setState(function (state) {
+                    var newHistory = Common.ArrayAux.sliceBefore(state.history, (function (v) {
+                            return v.actor === "User";
+                          }));
+                    var init = state.undoStats;
+                    return {
+                            deck: state.deck,
+                            history: newHistory,
+                            undoStats: {
+                              currentUndoDepth: state.undoStats.currentUndoDepth + 1 | 0,
+                              undos: init.undos
+                            }
+                          };
+                  });
+      }
+      
+    };
     var refs = React.useRef([]);
     var dragData = React.useRef(undefined);
     var getElement = function (a) {
@@ -654,6 +671,8 @@ function Create(GameRules) {
     return JsxRuntime.jsxs("div", {
                 children: [
                   JsxRuntime.jsx(GameBase$Create$BoardWrapper, {
+                        subscribe: subscribe,
+                        getInitial: getGame,
                         setRef: setRef,
                         onMouseDown: onMouseDown,
                         setGame: setGame,
@@ -663,12 +682,26 @@ function Create(GameRules) {
                       }),
                   JsxRuntime.jsx(GameRules.AllCards.make, {
                         setRef: setRef,
-                        onMouseDown: onMouseDown
+                        onMouseDown: onMouseDown,
+                        deck: getState().deck
                       })
                 ],
                 className: "relative m-5 mt-0",
                 id: "board"
               });
+  };
+  var Main = {
+    make: GameBase$Create$Main
+  };
+  var GameBase$Create = function (props) {
+    var getState = props.getState;
+    var getDeckKey = function () {
+      return JSON.stringify(GameRules.deck_encode(getState().deck));
+    };
+    return JsxRuntime.jsx(GameBase$Create$Main, {
+                getState: getState,
+                setState: props.setState
+              }, getDeckKey());
   };
   return {
           appendReactElement: appendReactElement,
@@ -682,16 +715,9 @@ function Create(GameRules) {
           state_encode: state_encode,
           state_decode: state_decode,
           createNewGame: createNewGame,
-          state: state,
-          listeners: listeners,
-          subscribe: subscribe,
-          setState: setState,
-          getGame: getGame,
-          setGame: setGame,
-          snapshot: snapshot,
-          undo: undo,
           useGame: useGame,
           BoardWrapper: BoardWrapper,
+          Main: Main,
           make: GameBase$Create
         };
 }

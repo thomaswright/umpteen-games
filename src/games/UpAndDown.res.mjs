@@ -264,25 +264,13 @@ function spaceToString(space) {
   return JSON.stringify(space_encode(space));
 }
 
-var fullDeck = Core__Array.toShuffled(Card.getShuffledDeck().map(function (card) {
-            return {
-                    TAG: "Card",
-                    _0: card
-                  };
-          }).concat(Tarot.getShuffledDeck().map(function (card) {
-              return {
-                      TAG: "Tarot",
-                      _0: card
-                    };
-            })));
+function deck_encode(value) {
+  return Decco.arrayToJson(item_encode, value);
+}
 
-var deckToDeal = fullDeck.filter(function (card) {
-      if (card.TAG === "Card") {
-        return card._0.rank !== "RA";
-      } else {
-        return true;
-      }
-    });
+function deck_decode(value) {
+  return Decco.arrayFromJson(item_decode, value);
+}
 
 function game_encode(value) {
   return Js_dict.fromArray([
@@ -407,42 +395,63 @@ function game_decode(value) {
 }
 
 function initiateGame() {
-  return {
-          piles: [
-            deckToDeal.slice(0, 7),
-            deckToDeal.slice(7, 14),
-            deckToDeal.slice(14, 21),
-            deckToDeal.slice(21, 28),
-            deckToDeal.slice(28, 35),
-            [],
-            deckToDeal.slice(35, 42),
-            deckToDeal.slice(42, 49),
-            deckToDeal.slice(49, 56),
-            deckToDeal.slice(56, 63),
-            deckToDeal.slice(63, 70)
-          ],
-          foundations: [
-            [{
-                suit: "Clubs",
-                rank: "RA"
-              }],
-            [{
-                suit: "Diamonds",
-                rank: "RA"
-              }],
-            [{
-                suit: "Hearts",
-                rank: "RA"
-              }],
-            [{
-                suit: "Spades",
-                rank: "RA"
-              }]
-          ],
-          tarotUp: [],
-          tarotDown: [],
-          free: undefined
-        };
+  var fullDeck = Core__Array.toShuffled(Card.getShuffledDeck().map(function (card) {
+              return {
+                      TAG: "Card",
+                      _0: card
+                    };
+            }).concat(Tarot.getShuffledDeck().map(function (card) {
+                return {
+                        TAG: "Tarot",
+                        _0: card
+                      };
+              })));
+  var deckWithoutAces = fullDeck.filter(function (card) {
+        if (card.TAG === "Card") {
+          return card._0.rank !== "RA";
+        } else {
+          return true;
+        }
+      });
+  return [
+          fullDeck,
+          {
+            piles: [
+              deckWithoutAces.slice(0, 7),
+              deckWithoutAces.slice(7, 14),
+              deckWithoutAces.slice(14, 21),
+              deckWithoutAces.slice(21, 28),
+              deckWithoutAces.slice(28, 35),
+              [],
+              deckWithoutAces.slice(35, 42),
+              deckWithoutAces.slice(42, 49),
+              deckWithoutAces.slice(49, 56),
+              deckWithoutAces.slice(56, 63),
+              deckWithoutAces.slice(63, 70)
+            ],
+            foundations: [
+              [{
+                  suit: "Clubs",
+                  rank: "RA"
+                }],
+              [{
+                  suit: "Diamonds",
+                  rank: "RA"
+                }],
+              [{
+                  suit: "Hearts",
+                  rank: "RA"
+                }],
+              [{
+                  suit: "Spades",
+                  rank: "RA"
+                }]
+            ],
+            tarotUp: [],
+            tarotDown: [],
+            free: undefined
+          }
+        ];
 }
 
 function winCheck(game) {
@@ -1008,7 +1017,7 @@ function UpAndDown$GameRules$AllCards(props) {
   var onMouseDown = props.onMouseDown;
   var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
-              children: fullDeck.map(function (item) {
+              children: props.deck.map(function (item) {
                     if (item.TAG === "Card") {
                       return JsxRuntime.jsx(Card.Display.make, {
                                   card: item._0,
@@ -1054,6 +1063,8 @@ var AllCards = {
 var GameRules = {
   game_encode: game_encode,
   game_decode: game_decode,
+  deck_encode: deck_encode,
+  deck_decode: deck_decode,
   getSpace: getSpace,
   spaceToString: spaceToString,
   initiateGame: initiateGame,
@@ -1070,4 +1081,4 @@ export {
   GameRules ,
   Game ,
 }
-/* fullDeck Not a pure module */
+/* Game Not a pure module */

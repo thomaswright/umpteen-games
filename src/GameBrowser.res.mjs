@@ -3,144 +3,101 @@
 import * as Decco from "@rescript-labs/decco/src/Decco.res.mjs";
 import * as React from "react";
 import * as Common from "./Common.res.mjs";
+import * as Js_dict from "rescript/lib/es6/js_dict.js";
 import * as Js_json from "rescript/lib/es6/js_json.js";
 import * as FreeCell from "./games/FreeCell.res.mjs";
-import * as Js_array from "rescript/lib/es6/js_array.js";
 import * as Klondike from "./games/Klondike.res.mjs";
 import * as UpAndDown from "./games/UpAndDown.res.mjs";
-import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
-import * as Caml_option from "rescript/lib/es6/caml_option.js";
-import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
-import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
+import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function gameString(a) {
   return a;
 }
 
-function gameData_encode(value) {
-  switch (value.TAG) {
-    case "Klondike" :
-        return [
-                "Klondike",
-                Klondike.Game.state_encode(value._0)
-              ];
-    case "FreeCell" :
-        return [
-                "FreeCell",
-                FreeCell.Game.state_encode(value._0)
-              ];
-    case "UpAndDown" :
-        return [
-                "UpAndDown",
-                UpAndDown.Game.state_encode(value._0)
-              ];
-    
-  }
-}
-
-function gameData_decode(value) {
-  var jsonArr = Js_json.classify(value);
-  if (typeof jsonArr !== "object") {
-    return Decco.error(undefined, "Not a variant", value);
-  }
-  if (jsonArr.TAG !== "JSONArray") {
-    return Decco.error(undefined, "Not a variant", value);
-  }
-  var jsonArr$1 = jsonArr._0;
-  if (jsonArr$1.length === 0) {
-    return Decco.error(undefined, "Expected variant, found empty array", value);
-  }
-  var tagged = Js_array.map(Js_json.classify, jsonArr$1);
-  var match = Belt_Array.getExn(tagged, 0);
-  if (typeof match === "object" && match.TAG === "JSONString") {
-    switch (match._0) {
-      case "FreeCell" :
-          if (tagged.length !== 2) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          }
-          var v0 = FreeCell.Game.state_decode(Belt_Array.getExn(jsonArr$1, 1));
-          if (v0.TAG === "Ok") {
-            return {
-                    TAG: "Ok",
-                    _0: {
-                      TAG: "FreeCell",
-                      _0: v0._0
-                    }
-                  };
-          }
-          var e = v0._0;
-          return {
-                  TAG: "Error",
-                  _0: {
-                    path: "[0]" + e.path,
-                    message: e.message,
-                    value: e.value
-                  }
-                };
-      case "Klondike" :
-          if (tagged.length !== 2) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          }
-          var v0$1 = Klondike.Game.state_decode(Belt_Array.getExn(jsonArr$1, 1));
-          if (v0$1.TAG === "Ok") {
-            return {
-                    TAG: "Ok",
-                    _0: {
-                      TAG: "Klondike",
-                      _0: v0$1._0
-                    }
-                  };
-          }
-          var e$1 = v0$1._0;
-          return {
-                  TAG: "Error",
-                  _0: {
-                    path: "[0]" + e$1.path,
-                    message: e$1.message,
-                    value: e$1.value
-                  }
-                };
-      case "UpAndDown" :
-          if (tagged.length !== 2) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          }
-          var v0$2 = UpAndDown.Game.state_decode(Belt_Array.getExn(jsonArr$1, 1));
-          if (v0$2.TAG === "Ok") {
-            return {
-                    TAG: "Ok",
-                    _0: {
-                      TAG: "UpAndDown",
-                      _0: v0$2._0
-                    }
-                  };
-          }
-          var e$2 = v0$2._0;
-          return {
-                  TAG: "Error",
-                  _0: {
-                    path: "[0]" + e$2.path,
-                    message: e$2.message,
-                    value: e$2.value
-                  }
-                };
-      default:
-        
-    }
-  }
-  return Decco.error(undefined, "Invalid variant constructor", Belt_Array.getExn(jsonArr$1, 0));
-}
-
 function state_encode(value) {
-  return Decco.arrayToJson(gameData_encode, value);
+  return Js_dict.fromArray([
+              [
+                "klondike",
+                (function (extra) {
+                      return Decco.arrayToJson(Klondike.Game.state_encode, extra);
+                    })(value.klondike)
+              ],
+              [
+                "freeCell",
+                (function (extra) {
+                      return Decco.arrayToJson(FreeCell.Game.state_encode, extra);
+                    })(value.freeCell)
+              ],
+              [
+                "upAndDown",
+                (function (extra) {
+                      return Decco.arrayToJson(UpAndDown.Game.state_encode, extra);
+                    })(value.upAndDown)
+              ]
+            ]);
 }
 
 function state_decode(value) {
-  return Decco.arrayFromJson(gameData_decode, value);
+  var dict = Js_json.classify(value);
+  if (typeof dict !== "object") {
+    return Decco.error(undefined, "Not an object", value);
+  }
+  if (dict.TAG !== "JSONObject") {
+    return Decco.error(undefined, "Not an object", value);
+  }
+  var dict$1 = dict._0;
+  var extra = Belt_Option.getWithDefault(Js_dict.get(dict$1, "klondike"), null);
+  var klondike = Decco.arrayFromJson(Klondike.Game.state_decode, extra);
+  if (klondike.TAG === "Ok") {
+    var extra$1 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "freeCell"), null);
+    var freeCell = Decco.arrayFromJson(FreeCell.Game.state_decode, extra$1);
+    if (freeCell.TAG === "Ok") {
+      var extra$2 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "upAndDown"), null);
+      var upAndDown = Decco.arrayFromJson(UpAndDown.Game.state_decode, extra$2);
+      if (upAndDown.TAG === "Ok") {
+        return {
+                TAG: "Ok",
+                _0: Decco.unsafeAddFieldToObject("klondike", klondike._0, Decco.unsafeAddFieldToObject("freeCell", freeCell._0, Decco.unsafeAddFieldToObject("upAndDown", upAndDown._0, {})))
+              };
+      }
+      var e = upAndDown._0;
+      return {
+              TAG: "Error",
+              _0: {
+                path: ".upAndDown" + e.path,
+                message: e.message,
+                value: e.value
+              }
+            };
+    }
+    var e$1 = freeCell._0;
+    return {
+            TAG: "Error",
+            _0: {
+              path: ".freeCell" + e$1.path,
+              message: e$1.message,
+              value: e$1.value
+            }
+          };
+  }
+  var e$2 = klondike._0;
+  return {
+          TAG: "Error",
+          _0: {
+            path: ".klondike" + e$2.path,
+            message: e$2.message,
+            value: e$2.value
+          }
+        };
 }
 
 var state = {
-  contents: []
+  contents: {
+    klondike: [],
+    freeCell: [],
+    upAndDown: []
+  }
 };
 
 function setState(f) {
@@ -149,107 +106,115 @@ function setState(f) {
   localStorage.setItem("state", JSON.stringify(state_encode(newState)));
 }
 
+function useForceUpdate() {
+  var match = React.useState(function () {
+        return 0;
+      });
+  var setValue = match[1];
+  return function () {
+    setValue(function (value) {
+          return value + 1 | 0;
+        });
+  };
+}
+
 function GameBrowser(props) {
   var match = React.useState(function () {
-        return "Klondike_";
+        return "Klondike";
       });
   var setSelectGameType = match[1];
   var selectGameType = match[0];
+  var forceUpdate = useForceUpdate();
   React.useEffect((function () {
-          Core__Option.mapOr(Caml_option.null_to_opt(localStorage.getItem("state")), undefined, (function (s) {
-                  var d = state_decode(JSON.parse(s));
-                  if (d.TAG === "Ok") {
-                    state.contents = d._0;
-                    return ;
-                  }
-                  
-                }));
-        }), []);
-  var createNewGame_ = function () {
-    switch (selectGameType) {
-      case "Klondike_" :
-          return {
-                  TAG: "Klondike",
-                  _0: Klondike.Game.createNewGame()
-                };
-      case "FreeCell_" :
-          return {
-                  TAG: "FreeCell",
-                  _0: FreeCell.Game.createNewGame()
-                };
-      case "UpAndDown_" :
-          return {
-                  TAG: "UpAndDown",
-                  _0: UpAndDown.Game.createNewGame()
-                };
-      
-    }
-  };
-  var createNewGame = function () {
-    state.contents = Belt_Array.concatMany([
-          state.contents,
-          [createNewGame_()]
-        ]);
-  };
-  var getGameUtils = function () {
-    var reversedIndex = Core__Array.findIndexOpt(state.contents.toReversed(), (function (x) {
-            switch (x.TAG) {
-              case "Klondike" :
-                  switch (selectGameType) {
-                    case "Klondike_" :
-                        return true;
-                    case "FreeCell_" :
-                    case "UpAndDown_" :
-                        return false;
-                    
-                  }
-              case "FreeCell" :
-                  switch (selectGameType) {
-                    case "FreeCell_" :
-                        return true;
-                    case "Klondike_" :
-                    case "UpAndDown_" :
-                        return false;
-                    
-                  }
-              case "UpAndDown" :
-                  switch (selectGameType) {
-                    case "Klondike_" :
-                    case "FreeCell_" :
-                        return false;
-                    case "UpAndDown_" :
-                        return true;
-                    
-                  }
-              
+          var s = localStorage.getItem("state");
+          if (s !== null) {
+            var d = state_decode(JSON.parse(s));
+            if (d.TAG === "Ok") {
+              state.contents = d._0;
             }
-          }));
-    if (reversedIndex === undefined) {
-      return ;
-    }
-    var index = (state.contents.length - 1 | 0) - reversedIndex | 0;
-    var get = function () {
-      return state.contents[index];
-    };
-    var set = function (f) {
-      state.contents = Common.ArrayAux.update(state.contents, index, f);
-    };
-    return [
-            get,
-            set
-          ];
+            
+          } else {
+            setState(function (x) {
+                  return x;
+                });
+          }
+          forceUpdate();
+        }), []);
+  var createNewGame = function () {
+    setState(function (state) {
+          switch (selectGameType) {
+            case "Klondike" :
+                return {
+                        klondike: [Klondike.Game.createNewGame()].concat(state.klondike),
+                        freeCell: state.freeCell,
+                        upAndDown: state.upAndDown
+                      };
+            case "FreeCell" :
+                return {
+                        klondike: state.klondike,
+                        freeCell: [FreeCell.Game.createNewGame()].concat(state.freeCell),
+                        upAndDown: state.upAndDown
+                      };
+            case "UpAndDown" :
+                return {
+                        klondike: state.klondike,
+                        freeCell: state.freeCell,
+                        upAndDown: [UpAndDown.Game.createNewGame()].concat(state.upAndDown)
+                      };
+            
+          }
+        });
+    forceUpdate();
   };
-  getGameUtils();
   var tmp;
   switch (selectGameType) {
-    case "Klondike_" :
-        tmp = JsxRuntime.jsx(Klondike.Game.make, {});
+    case "Klondike" :
+        tmp = state.contents.klondike.length === 0 ? null : JsxRuntime.jsx(Klondike.Game.make, {
+                getState: (function () {
+                    return state.contents.klondike[0];
+                  }),
+                setState: (function (f) {
+                    setState(function (state) {
+                          return {
+                                  klondike: Common.ArrayAux.update(state.klondike, 0, f),
+                                  freeCell: state.freeCell,
+                                  upAndDown: state.upAndDown
+                                };
+                        });
+                  })
+              });
         break;
-    case "FreeCell_" :
-        tmp = JsxRuntime.jsx(FreeCell.Game.make, {});
+    case "FreeCell" :
+        tmp = state.contents.freeCell.length === 0 ? null : JsxRuntime.jsx(FreeCell.Game.make, {
+                getState: (function () {
+                    return state.contents.freeCell[0];
+                  }),
+                setState: (function (f) {
+                    setState(function (state) {
+                          return {
+                                  klondike: state.klondike,
+                                  freeCell: Common.ArrayAux.update(state.freeCell, 0, f),
+                                  upAndDown: state.upAndDown
+                                };
+                        });
+                  })
+              });
         break;
-    case "UpAndDown_" :
-        tmp = JsxRuntime.jsx(UpAndDown.Game.make, {});
+    case "UpAndDown" :
+        tmp = state.contents.upAndDown.length === 0 ? null : JsxRuntime.jsx(UpAndDown.Game.make, {
+                getState: (function () {
+                    return state.contents.upAndDown[0];
+                  }),
+                setState: (function (f) {
+                    setState(function (state) {
+                          return {
+                                  klondike: state.klondike,
+                                  freeCell: state.freeCell,
+                                  upAndDown: Common.ArrayAux.update(state.upAndDown, 0, f)
+                                };
+                        });
+                  })
+              });
         break;
     
   }
@@ -263,9 +228,9 @@ function GameBrowser(props) {
                             }),
                         JsxRuntime.jsx("div", {
                               children: [
-                                  "Klondike_",
-                                  "FreeCell_",
-                                  "UpAndDown_"
+                                  "Klondike",
+                                  "FreeCell",
+                                  "UpAndDown"
                                 ].map(function (v) {
                                     var selected = v === selectGameType;
                                     return JsxRuntime.jsx("button", {
@@ -303,12 +268,11 @@ var make = GameBrowser;
 
 export {
   gameString ,
-  gameData_encode ,
-  gameData_decode ,
   state_encode ,
   state_decode ,
   state ,
   setState ,
+  useForceUpdate ,
   make ,
 }
 /* react Not a pure module */

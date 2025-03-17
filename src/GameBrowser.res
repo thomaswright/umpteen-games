@@ -1,6 +1,6 @@
 open Webapi.Dom
 
-type gameType = Klondike_ | FreeCell_ | UpAndDown_
+type gameType = Klondike | FreeCell | UpAndDown
 
 let gameString = (a: gameType) => (a :> string)
 
@@ -20,78 +20,62 @@ let state: ref<state> = ref({
 let setState = f => {
   let newState = f(state.contents)
   state := newState
+
   Dom.Storage2.localStorage->Dom.Storage2.setItem(
     "state",
     newState->state_encode->Js.Json.stringify,
   )
 }
 
+let useForceUpdate = () => {
+  let (value, setValue) = React.useState(() => 0)
+  () => setValue(value => value + 1)
+}
+
 @react.component
 let make = () => {
-  let (selectGameType: gameType, setSelectGameType) = React.useState(() => Klondike_)
+  let (selectGameType: gameType, setSelectGameType) = React.useState(() => Klondike)
+  let forceUpdate = useForceUpdate()
 
   React.useEffect0(() => {
-    Dom.Storage2.localStorage
-    ->Dom.Storage2.getItem("state")
-    ->Option.mapOr((), s => {
+    switch Dom.Storage2.localStorage->Dom.Storage2.getItem("state") {
+    | Some(s) =>
       switch s->Js.Json.parseExn->state_decode {
       | Ok(d) => state := d
       | _ => ()
       }
-    })
+    | None => setState(x => x)
+    }
+    forceUpdate()
+
     None
   })
 
   let createNewGame = () => {
-    state :=
+    setState(state =>
       switch selectGameType {
-      | Klondike_ => {
-          ...state.contents,
-          klondike: [...state.contents.klondike, Klondike.Game.createNewGame()],
+      | Klondike => {
+          ...state,
+          klondike: Array.concat([Klondike.Game.createNewGame()], state.klondike),
         }
-      | FreeCell_ => {
-          ...state.contents,
-          freeCell: [...state.contents.freeCell, FreeCell.Game.createNewGame()],
+      | FreeCell => {
+          ...state,
+          freeCell: Array.concat([FreeCell.Game.createNewGame()], state.freeCell),
         }
-      | UpAndDown_ => {
-          ...state.contents,
-          upAndDown: [...state.contents.upAndDown, UpAndDown.Game.createNewGame()],
+      | UpAndDown => {
+          ...state,
+          upAndDown: Array.concat([UpAndDown.Game.createNewGame()], state.upAndDown),
         }
       }
+    )
+    forceUpdate()
   }
-
-  let setGameType = (set, get) => {
-    switch selectGameType {
-    | Klondike_ => Klondike.Game.setUtils(set, get)
-    | FreeCell_ => FreeCell.Game.setUtils(set, get)
-    | UpAndDown_ => UpAndDown.Game.setUtils(set, get)
-    }
-  }
-
-  let getGameUtils = () => {
-    switch selectGameType {
-    | Klondike_ =>
-      Klondike.Game.setUtils(state.contents.klondike->Common.ArrayAux.getLast, f =>
-        state := {
-            ...state,
-            klondike: state.contents.klondike->Common.ArrayAux.update(
-              state.contents.klondike->Array.length - 1,
-              f,
-            ),
-          }
-      )
-    | FreeCell_ => FreeCell.Game.setUtils(set, get)
-    | UpAndDown_ => UpAndDown.Game.setUtils(set, get)
-    }
-  }
-
-  let gameUtils = getGameUtils()
 
   <div>
     <div className="px-5 pt-3 ">
       <div className="font-black text-xl mb-1"> {"Card Games!"->React.string} </div>
       <div className="flex flex-row gap-4">
-        {[Klondike_, FreeCell_, UpAndDown_]
+        {[Klondike, FreeCell, UpAndDown]
         ->Array.map(v => {
           let selected = v == selectGameType
           <button
@@ -107,9 +91,39 @@ let make = () => {
       </div>
     </div>
     {switch selectGameType {
-    | Klondike_ => <Klondike.Game />
-    | FreeCell_ => <FreeCell.Game />
-    | UpAndDown_ => <UpAndDown.Game />
+    | Klondike =>
+      state.contents.klondike->Array.length == 0
+        ? React.null
+        : <Klondike.Game
+            getState={() => state.contents.klondike->Array.getUnsafe(0)}
+            setState={f =>
+              setState(state => {
+                ...state,
+                klondike: state.klondike->Common.ArrayAux.update(0, f),
+              })}
+          />
+    | FreeCell =>
+      state.contents.freeCell->Array.length == 0
+        ? React.null
+        : <FreeCell.Game
+            getState={() => state.contents.freeCell->Array.getUnsafe(0)}
+            setState={f =>
+              setState(state => {
+                ...state,
+                freeCell: state.freeCell->Common.ArrayAux.update(0, f),
+              })}
+          />
+    | UpAndDown =>
+      state.contents.upAndDown->Array.length == 0
+        ? React.null
+        : <UpAndDown.Game
+            getState={() => state.contents.upAndDown->Array.getUnsafe(0)}
+            setState={f =>
+              setState(state => {
+                ...state,
+                upAndDown: state.upAndDown->Common.ArrayAux.update(0, f),
+              })}
+          />
     }}
   </div>
 }

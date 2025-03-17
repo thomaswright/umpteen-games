@@ -42,15 +42,16 @@ type getRule<'game, 'space, 'dragPile> = (
 ) => option<spaceFunction<'game, 'space, 'dragPile>>
 
 module type GameRules = {
+  @decco
   type game
   type space
   type dragPile
-  let game_encode: game => Js.Json.t
-  let game_decode: Js.Json.t => Belt.Result.t<game, Decco.decodeError>
+  @decco
+  type deck
 
   let getSpace: Element.t => option<space>
   let spaceToString: space => string
-  let initiateGame: unit => game
+  let initiateGame: unit => (deck, game)
   let getRule: getRule<game, space, dragPile>
   let removeDragFromGame: (game, dragPile) => game
   let winCheck: game => bool
@@ -88,13 +89,15 @@ module type GameRules = {
   }
 
   module AllCards: {
-    type props<'setRef, 'onMouseDown> = {
+    type props<'setRef, 'onMouseDown, 'deck> = {
       setRef: 'setRef,
       onMouseDown: 'onMouseDown,
+      deck: 'deck,
     }
     let make: props<
       space => ReactDOM.Ref.callbackDomRef,
       JsxEventU.Mouse.t => unit,
+      deck,
     > => React.element
   }
 }
@@ -148,85 +151,27 @@ module Create = (GameRules: GameRules) => {
   }
 
   @decco
-  type state = {history: array<historySnapshot>, undoStats: undoStats}
+  type state = {deck: GameRules.deck, history: array<historySnapshot>, undoStats: undoStats}
 
   let createNewGame = () => {
-    history: [
-      {
-        actor: User,
-        game: GameRules.initiateGame(),
-      },
-    ],
-    undoStats: {
-      currentUndoDepth: 0,
-      undos: [],
-    },
-  }
-
-  let state = ref(createNewGame())
-
-  let listeners = Set.make()
-
-  let subscribe = listener => {
-    listeners->Set.add(listener)
-    let unsubscribe = () => listeners->Set.delete(listener)->ignore
-    unsubscribe
-  }
-
-  let setState = ref(f => {
-    state.contents = f(state.contents)
-  })
-
-  let getGame = () => {
-    let snapShot = state.contents.history->Array.getUnsafe(state.contents.history->Array.length - 1)
-
-    snapShot.game
-  }
-
-  let setGame = f => {
-    setState.contents(state => {
-      let newGame = f(getGame())
-      listeners->Set.forEach(listener => listener(_ => newGame))
-
-      {
-        undoStats: state.undoStats.currentUndoDepth > 0
-          ? {
-              currentUndoDepth: 0,
-              undos: Array.concat(state.undoStats.undos, [state.undoStats.currentUndoDepth]),
-            }
-          : state.undoStats,
-        history: Array.concat(state.history, [{game: newGame, actor: Auto}]),
-      }
-    })
-  }
-
-  let snapshot = () => {
-    setState.contents(state => {
-      ...state,
-      history: state.history->Common.ArrayAux.update(state.history->Array.length - 1, v => {
-        ...v,
-        actor: User,
-      }),
-    })
-  }
-
-  let undo = () => {
-    if state.contents.history->Array.filter(v => v.actor == User)->Array.length > 1 {
-      setState.contents(state => {
-        let newHistory = state.history->Common.ArrayAux.sliceBefore(v => v.actor == User)
+    let (deck, game) = GameRules.initiateGame()
+    {
+      deck,
+      history: [
         {
-          history: newHistory,
-          undoStats: {
-            ...state.undoStats,
-            currentUndoDepth: state.undoStats.currentUndoDepth + 1,
-          },
-        }
-      })
+          actor: User,
+          game,
+        },
+      ],
+      undoStats: {
+        currentUndoDepth: 0,
+        undos: [],
+      },
     }
   }
 
-  let useGame = () => {
-    let (externalState, setExternalState) = React.useState(() => getGame())
+  let useGame = (subscribe, getInitial) => {
+    let (externalState, setExternalState) = React.useState(() => getInitial())
     React.useEffect0(() => {
       let unsubscribe = subscribe(setExternalState)
       Some(() => unsubscribe())
@@ -238,8 +183,18 @@ module Create = (GameRules: GameRules) => {
 
   module BoardWrapper = {
     @react.component
-    let make = (~setRef, ~onMouseDown, ~setGame, ~moveToState, ~autoProgress, ~undo) => {
-      let game = useGame()
+    let make = (
+      ~subscribe,
+      ~getInitial,
+      ~setRef,
+      ~onMouseDown,
+      ~setGame,
+      ~moveToState,
+      ~autoProgress,
+      ~undo,
+    ) => {
+      let game = useGame(subscribe, getInitial)
+
       let undo = () => {
         undo()
         moveToState()
@@ -259,81 +214,235 @@ module Create = (GameRules: GameRules) => {
     dragPile: GameRules.dragPile,
   }
 
-  @react.component
-  let make = () => {
-    let refs = React.useRef([])
+  module Main = {
+    @react.component
+    let make = (~getState: unit => state, ~setState: (state => state) => unit) => {
+      let listeners = ref(Set.make())
 
-    let dragData: React.ref<option<dragData>> = React.useRef(None)
-
-    let getElement = a => refs.current->Array.find(el => el->GameRules.getSpace == Some(a))
-
-    let setRef = card => (element: Js.Nullable.t<Dom.element>) => {
-      switch element {
-      | Value(a) => {
-          a->Element.setId(card->GameRules.spaceToString)
-
-          refs.current->Array.push(a)
-        }
-      | Null => ()
-      | Undefined => ()
+      let subscribe = listener => {
+        listeners.contents->Set.add(listener)
+        let unsubscribe = () => listeners.contents->Set.delete(listener)->ignore
+        unsubscribe
       }
-    }
 
-    let applyMoveToOthers = (element, f) => {
-      element
-      ->GameRules.getSpace
-      ->Option.mapOr((), space => {
-        let appliedF = s => {
-          s
-          ->getElement
-          ->Option.mapOr((), childEl => {
-            f(childEl)
-          })
-        }
+      let getDeck = () => {
+        getState().deck
+      }
+      let getGame = () => {
+        let snapShot = getState().history->Array.getUnsafe(getState().history->Array.length - 1)
 
-        GameRules.getRule(getGame(), space)->Option.mapOr((), rule => {
-          switch rule {
-          | Static(_) => ()
-          | Movable({applyMoveToOthers}) => applyMoveToOthers(appliedF)
+        snapShot.game
+      }
+
+      let setGame = f => {
+        setState(state => {
+          let newGame = f(getGame())
+          listeners.contents->Set.forEach(listener => listener(_ => newGame))
+
+          {
+            ...state,
+            undoStats: state.undoStats.currentUndoDepth > 0
+              ? {
+                  currentUndoDepth: 0,
+                  undos: Array.concat(state.undoStats.undos, [state.undoStats.currentUndoDepth]),
+                }
+              : state.undoStats,
+            history: Array.concat(state.history, [{game: newGame, actor: Auto}]),
           }
         })
-      })
-    }
+      }
 
-    let rec liftUp = (element, zIndex) => {
-      element->setStyleZIndex(zIndex->Int.toString)
-      applyMoveToOthers(element, childEl => {
-        liftUp(childEl, zIndex + 1)
-      })
-    }
+      let snapshot = () => {
+        setState(state => {
+          ...state,
+          history: state.history->Common.ArrayAux.update(state.history->Array.length - 1, v => {
+            ...v,
+            actor: User,
+          }),
+        })
+      }
 
-    let rec setDown = (element, zIndex) => {
-      zIndex->Option.mapOr((), zIndex => {
+      let undo = () => {
+        if getState().history->Array.filter(v => v.actor == User)->Array.length > 1 {
+          setState(state => {
+            let newHistory = state.history->Common.ArrayAux.sliceBefore(v => v.actor == User)
+            {
+              ...state,
+              history: newHistory,
+              undoStats: {
+                ...state.undoStats,
+                currentUndoDepth: state.undoStats.currentUndoDepth + 1,
+              },
+            }
+          })
+        }
+      }
+
+      let refs = React.useRef([])
+
+      let dragData: React.ref<option<dragData>> = React.useRef(None)
+
+      let getElement = a => refs.current->Array.find(el => el->GameRules.getSpace == Some(a))
+
+      let setRef = card => (element: Js.Nullable.t<Dom.element>) => {
+        switch element {
+        | Value(a) => {
+            a->Element.setId(card->GameRules.spaceToString)
+
+            refs.current->Array.push(a)
+          }
+        | Null => ()
+        | Undefined => ()
+        }
+      }
+
+      let applyMoveToOthers = (element, f) => {
+        element
+        ->GameRules.getSpace
+        ->Option.mapOr((), space => {
+          let appliedF = s => {
+            s
+            ->getElement
+            ->Option.mapOr((), childEl => {
+              f(childEl)
+            })
+          }
+
+          GameRules.getRule(getGame(), space)->Option.mapOr((), rule => {
+            switch rule {
+            | Static(_) => ()
+            | Movable({applyMoveToOthers}) => applyMoveToOthers(appliedF)
+            }
+          })
+        })
+      }
+
+      let rec liftUp = (element, zIndex) => {
         element->setStyleZIndex(zIndex->Int.toString)
-      })
+        applyMoveToOthers(element, childEl => {
+          liftUp(childEl, zIndex + 1)
+        })
+      }
 
-      applyMoveToOthers(element, childEl =>
-        setDown(childEl, zIndex->Option.map(zIndex => zIndex + 1))
-      )
-    }
+      let rec setDown = (element, zIndex) => {
+        zIndex->Option.mapOr((), zIndex => {
+          element->setStyleZIndex(zIndex->Int.toString)
+        })
 
-    let rec move = (element, left, top, offset) => {
-      element->setStyleLeft(left->Int.toString ++ "px")
-      element->setStyleTop(top->Int.toString ++ "px")
-
-      offset->Option.mapOr((), ((leftOffset, topOffset)) => {
         applyMoveToOthers(element, childEl =>
-          move(childEl, left + leftOffset, top + topOffset, offset)
+          setDown(childEl, zIndex->Option.map(zIndex => zIndex + 1))
         )
-      })
-    }
+      }
 
-    let moveWithTime = (element, refPos, targetLeft, targetTop, targetZIndex, offset, duration) => {
-      let start = element->elementPosition
+      let rec move = (element, left, top, offset) => {
+        element->setStyleLeft(left->Int.toString ++ "px")
+        element->setStyleTop(top->Int.toString ++ "px")
 
-      let startZIndex = element->zIndexFromElement
+        offset->Option.mapOr((), ((leftOffset, topOffset)) => {
+          applyMoveToOthers(element, childEl =>
+            move(childEl, left + leftOffset, top + topOffset, offset)
+          )
+        })
+      }
 
-      let boardPos =
+      let moveWithTime = (
+        element,
+        refPos,
+        targetLeft,
+        targetTop,
+        targetZIndex,
+        offset,
+        duration,
+      ) => {
+        let start = element->elementPosition
+
+        let startZIndex = element->zIndexFromElement
+
+        let boardPos =
+          document
+          ->Document.getElementById("board")
+          ->Option.mapOr(
+            {
+              top: 0.,
+              left: 0.,
+              bottom: 0.,
+              right: 0.,
+            },
+            board => board->elementPosition,
+          )
+
+        let start = {
+          top: start.top -. boardPos.top,
+          left: start.left -. boardPos.left,
+          bottom: start.bottom -. boardPos.bottom,
+          right: start.right -. boardPos.right,
+        }
+
+        let adjustedTargetLeft = targetLeft +. refPos.left -. boardPos.left
+        let adjustedTargetTop = targetTop +. refPos.top -. boardPos.top
+
+        let startTime = now()
+
+        let rec step: float => unit = currentTime => {
+          let elapsedTime = currentTime -. startTime
+          let progress = Math.min(elapsedTime /. duration, 1.) // Clamp progress between 0 and 1
+          let easedProgress = easeOutQuad(progress)
+          // let easedProgress = progress
+          let leftMove = start.left +. (adjustedTargetLeft -. start.left) *. easedProgress
+          let topMove = start.top +. (adjustedTargetTop -. start.top) *. easedProgress
+
+          move(element, leftMove->Int.fromFloat, topMove->Int.fromFloat, offset)
+
+          if progress < 1. {
+            requestAnimationFrame(step)
+          } else {
+            // set down
+            setDown(element, targetZIndex)
+          }
+        }
+
+        if (
+          start.left != Math.floor(adjustedTargetLeft) ||
+          start.top != Math.floor(adjustedTargetTop) ||
+          startZIndex != targetZIndex
+        ) {
+          liftUp(element, 1000 + targetZIndex->Option.getOr(0))
+          requestAnimationFrame(step)
+        }
+      }
+
+      let moveToState = () => {
+        refs.current->Array.forEach(element => {
+          element
+          ->GameRules.getSpace
+          ->Option.flatMap(space => GameRules.getRule(getGame(), space))
+          ->Option.mapOr((), rule => {
+            switch rule {
+            | Static(_) => ()
+            | Movable({locationAdjustment, baseSpace}) =>
+              baseSpace
+              ->getElement
+              ->Option.mapOr(
+                (),
+                baseElement => {
+                  let basePos = baseElement->elementPosition
+                  moveWithTime(
+                    element,
+                    basePos,
+                    locationAdjustment.x->Int.toFloat,
+                    locationAdjustment.y->Int.toFloat,
+                    Some(locationAdjustment.z),
+                    None,
+                    300.,
+                  )
+                },
+              )
+            }
+          })
+        })
+      }
+
+      let getBoardPos = () => {
         document
         ->Document.getElementById("board")
         ->Option.mapOr(
@@ -345,270 +454,201 @@ module Create = (GameRules: GameRules) => {
           },
           board => board->elementPosition,
         )
-
-      let start = {
-        top: start.top -. boardPos.top,
-        left: start.left -. boardPos.left,
-        bottom: start.bottom -. boardPos.bottom,
-        right: start.right -. boardPos.right,
       }
 
-      let adjustedTargetLeft = targetLeft +. refPos.left -. boardPos.left
-      let adjustedTargetTop = targetTop +. refPos.top -. boardPos.top
+      let getOverlap = (aEl, bEl) => {
+        let aPos = aEl->elementPosition
+        let bPos = bEl->elementPosition
 
-      let startTime = now()
+        let overlapX = Math.max(
+          0.,
+          Math.min(aPos.right, bPos.right) -. Math.max(aPos.left, bPos.left),
+        )
+        let overlapY = Math.max(
+          0.,
+          Math.min(aPos.bottom, bPos.bottom) -. Math.max(aPos.top, bPos.top),
+        )
 
-      let rec step: float => unit = currentTime => {
-        let elapsedTime = currentTime -. startTime
-        let progress = Math.min(elapsedTime /. duration, 1.) // Clamp progress between 0 and 1
-        let easedProgress = easeOutQuad(progress)
-        // let easedProgress = progress
-        let leftMove = start.left +. (adjustedTargetLeft -. start.left) *. easedProgress
-        let topMove = start.top +. (adjustedTargetTop -. start.top) *. easedProgress
-
-        move(element, leftMove->Int.fromFloat, topMove->Int.fromFloat, offset)
-
-        if progress < 1. {
-          requestAnimationFrame(step)
-        } else {
-          // set down
-          setDown(element, targetZIndex)
-        }
+        overlapX *. overlapY
       }
 
-      if (
-        start.left != Math.floor(adjustedTargetLeft) ||
-        start.top != Math.floor(adjustedTargetTop) ||
-        startZIndex != targetZIndex
-      ) {
-        liftUp(element, 1000 + targetZIndex->Option.getOr(0))
-        requestAnimationFrame(step)
-      }
-    }
+      let onMouseDown = event => {
+        let dragElement =
+          event
+          ->JsxEvent.Mouse.currentTarget
+          ->Obj.magic
 
-    let moveToState = () => {
-      refs.current->Array.forEach(element => {
-        element
+        dragElement
         ->GameRules.getSpace
-        ->Option.flatMap(space => GameRules.getRule(getGame(), space))
-        ->Option.mapOr((), rule => {
-          switch rule {
-          | Static(_) => ()
-          | Movable({locationAdjustment, baseSpace}) =>
-            baseSpace
-            ->getElement
-            ->Option.mapOr(
-              (),
-              baseElement => {
-                let basePos = baseElement->elementPosition
-                moveWithTime(
-                  element,
-                  basePos,
-                  locationAdjustment.x->Int.toFloat,
-                  locationAdjustment.y->Int.toFloat,
-                  Some(locationAdjustment.z),
-                  None,
-                  300.,
-                )
-              },
-            )
-          }
-        })
-      })
-    }
+        ->Option.mapOr((), dragSpace => {
+          GameRules.getRule(getGame(), dragSpace)->Option.mapOr((), rule => {
+            switch rule {
+            | Static(_) => ()
+            | Movable({dragPile}) =>
+              dragPile()->Option.mapOr(
+                (),
+                dragPile => {
+                  let boardPos = getBoardPos()
+                  let eventPos = event->eventPosition
 
-    let getBoardPos = () => {
-      document
-      ->Document.getElementById("board")
-      ->Option.mapOr(
-        {
-          top: 0.,
-          left: 0.,
-          bottom: 0.,
-          right: 0.,
-        },
-        board => board->elementPosition,
-      )
-    }
-
-    let getOverlap = (aEl, bEl) => {
-      let aPos = aEl->elementPosition
-      let bPos = bEl->elementPosition
-
-      let overlapX = Math.max(
-        0.,
-        Math.min(aPos.right, bPos.right) -. Math.max(aPos.left, bPos.left),
-      )
-      let overlapY = Math.max(
-        0.,
-        Math.min(aPos.bottom, bPos.bottom) -. Math.max(aPos.top, bPos.top),
-      )
-
-      overlapX *. overlapY
-    }
-
-    let onMouseDown = event => {
-      let dragElement =
-        event
-        ->JsxEvent.Mouse.currentTarget
-        ->Obj.magic
-
-      dragElement
-      ->GameRules.getSpace
-      ->Option.mapOr((), dragSpace => {
-        GameRules.getRule(getGame(), dragSpace)->Option.mapOr((), rule => {
-          switch rule {
-          | Static(_) => ()
-          | Movable({dragPile}) =>
-            dragPile()->Option.mapOr(
-              (),
-              dragPile => {
-                let boardPos = getBoardPos()
-                let eventPos = event->eventPosition
-
-                dragData.current = Some({
-                  dragSpace,
-                  dragPile,
-                  dragElement,
-                  offset: (
-                    event->JsxEvent.Mouse.clientX -
-                    eventPos.left->Int.fromFloat +
-                    boardPos.left->Int.fromFloat,
-                    event->JsxEvent.Mouse.clientY -
-                    eventPos.top->Int.fromFloat +
-                    boardPos.top->Int.fromFloat,
-                  ),
-                })
-                liftUp(dragElement, 1000)
-              },
-            )
-          }
-        })
-      })
-    }
-
-    let onMouseMove = event => {
-      dragData.current->Option.mapOr((), dragData => {
-        let (offsetX, offsetY) = dragData.offset
-        let leftMove = event->MouseEvent.clientX - offsetX
-        let topMove = event->MouseEvent.clientY - offsetY
-
-        move(dragData.dragElement, leftMove, topMove, Some(0, 20))
-      })
-    }
-
-    let autoProgress = () => {
-      condInterval(
-        () => {
-          moveToState()
-        },
-        300,
-        () => {
-          let dragPiles = refs.current->Array.filterMap(el => {
-            el
-            ->GameRules.getSpace
-            ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
-            ->Option.mapOr(None, rule => {
-              switch rule {
-              | Movable({autoProgress}) =>
-                switch autoProgress() {
-                | Send(dragPile) => Some(dragPile)
-                | _ => None
-                }
-              | _ => None
-              }
-            })
-          })
-
-          let droppedUpons = refs.current->Array.filterMap(el => {
-            el
-            ->GameRules.getSpace
-            ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
-            ->Option.mapOr(None, rule => {
-              switch rule {
-              | Static({autoProgress, droppedUpon}) if autoProgress => Some(droppedUpon)
-              | Movable({autoProgress, droppedUpon}) =>
-                switch autoProgress() {
-                | Seek => Some(droppedUpon)
-                | _ => None
-                }
-              | _ => None
-              }
-            })
-          })
-
-          let op = ref(None)
-
-          dragPiles->Array.forEach(dragPile => {
-            droppedUpons->Array.forEach(droppedUpon => {
-              if op.contents->Option.isNone {
-                op := droppedUpon(getGame()->GameRules.removeDragFromGame(dragPile), dragPile)
-              }
-            })
-          })
-
-          switch op.contents {
-          | Some(game) => {
-              setGame(_ => game)
-              true
+                  dragData.current = Some({
+                    dragSpace,
+                    dragPile,
+                    dragElement,
+                    offset: (
+                      event->JsxEvent.Mouse.clientX -
+                      eventPos.left->Int.fromFloat +
+                      boardPos.left->Int.fromFloat,
+                      event->JsxEvent.Mouse.clientY -
+                      eventPos.top->Int.fromFloat +
+                      boardPos.top->Int.fromFloat,
+                    ),
+                  })
+                  liftUp(dragElement, 1000)
+                },
+              )
             }
-          | None => false
-          }
-        },
-      )
-    }
-
-    let onMouseUp = _ => {
-      switch dragData.current {
-      | Some({dragElement, dragPile}) => {
-          let greatestOverlap = ref(0.)
-          let updatedGame = ref(None)
-
-          refs.current->Array.forEach(el => {
-            el
-            ->GameRules.getSpace
-            ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
-            ->Option.flatMap(rule => {
-              let droppedUpon = switch rule {
-              | Static({droppedUpon}) => droppedUpon
-              | Movable({droppedUpon}) => droppedUpon
-              }
-
-              droppedUpon(getGame()->GameRules.removeDragFromGame(dragPile), dragPile)
-            })
-            ->Option.mapOr((), newGame => {
-              let overlap = getOverlap(el, dragElement)
-              if overlap > greatestOverlap.contents {
-                greatestOverlap := overlap
-                updatedGame := Some(newGame)
-              }
-            })
           })
-
-          updatedGame.contents->Option.mapOr((), updatedGame => {
-            setGame(_ => updatedGame)
-            snapshot()
-          })
-          moveToState()
-          autoProgress()
-        }
-      | None => ()
+        })
       }
 
-      dragData.current = None
+      let onMouseMove = event => {
+        dragData.current->Option.mapOr((), dragData => {
+          let (offsetX, offsetY) = dragData.offset
+          let leftMove = event->MouseEvent.clientX - offsetX
+          let topMove = event->MouseEvent.clientY - offsetY
+
+          move(dragData.dragElement, leftMove, topMove, Some(0, 20))
+        })
+      }
+
+      let autoProgress = () => {
+        condInterval(
+          () => {
+            moveToState()
+          },
+          300,
+          () => {
+            let dragPiles = refs.current->Array.filterMap(el => {
+              el
+              ->GameRules.getSpace
+              ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
+              ->Option.mapOr(None, rule => {
+                switch rule {
+                | Movable({autoProgress}) =>
+                  switch autoProgress() {
+                  | Send(dragPile) => Some(dragPile)
+                  | _ => None
+                  }
+                | _ => None
+                }
+              })
+            })
+
+            let droppedUpons = refs.current->Array.filterMap(el => {
+              el
+              ->GameRules.getSpace
+              ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
+              ->Option.mapOr(None, rule => {
+                switch rule {
+                | Static({autoProgress, droppedUpon}) if autoProgress => Some(droppedUpon)
+                | Movable({autoProgress, droppedUpon}) =>
+                  switch autoProgress() {
+                  | Seek => Some(droppedUpon)
+                  | _ => None
+                  }
+                | _ => None
+                }
+              })
+            })
+
+            let op = ref(None)
+
+            dragPiles->Array.forEach(dragPile => {
+              droppedUpons->Array.forEach(droppedUpon => {
+                if op.contents->Option.isNone {
+                  op := droppedUpon(getGame()->GameRules.removeDragFromGame(dragPile), dragPile)
+                }
+              })
+            })
+
+            switch op.contents {
+            | Some(game) => {
+                setGame(_ => game)
+                true
+              }
+            | None => false
+            }
+          },
+        )
+      }
+
+      let onMouseUp = _ => {
+        switch dragData.current {
+        | Some({dragElement, dragPile}) => {
+            let greatestOverlap = ref(0.)
+            let updatedGame = ref(None)
+
+            refs.current->Array.forEach(el => {
+              el
+              ->GameRules.getSpace
+              ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
+              ->Option.flatMap(rule => {
+                let droppedUpon = switch rule {
+                | Static({droppedUpon}) => droppedUpon
+                | Movable({droppedUpon}) => droppedUpon
+                }
+
+                droppedUpon(getGame()->GameRules.removeDragFromGame(dragPile), dragPile)
+              })
+              ->Option.mapOr((), newGame => {
+                let overlap = getOverlap(el, dragElement)
+                if overlap > greatestOverlap.contents {
+                  greatestOverlap := overlap
+                  updatedGame := Some(newGame)
+                }
+              })
+            })
+
+            updatedGame.contents->Option.mapOr((), updatedGame => {
+              setGame(_ => updatedGame)
+              snapshot()
+            })
+            moveToState()
+            autoProgress()
+          }
+        | None => ()
+        }
+
+        dragData.current = None
+      }
+
+      React.useEffect(() => {
+        window->Window.addMouseMoveEventListener(onMouseMove)
+        window->Window.addMouseUpEventListener(onMouseUp)
+        moveToState()
+        autoProgress()
+        None
+      }, [])
+
+      <div id={"board"} className="relative m-5 mt-0">
+        <BoardWrapper
+          subscribe getInitial={getGame} onMouseDown setRef setGame moveToState autoProgress undo
+        />
+        <GameRules.AllCards onMouseDown setRef deck={getDeck()} />
+      </div>
+    }
+  }
+
+  @react.component
+  let make = (~getState: unit => state, ~setState: (state => state) => unit) => {
+    let getDeck = () => {
+      getState().deck
     }
 
-    React.useEffect(() => {
-      window->Window.addMouseMoveEventListener(onMouseMove)
-      window->Window.addMouseUpEventListener(onMouseUp)
-      moveToState()
-      autoProgress()
-      None
-    }, [])
-
-    <div id={"board"} className="relative m-5 mt-0">
-      <BoardWrapper onMouseDown setRef setGame moveToState autoProgress undo />
-      <GameRules.AllCards onMouseDown setRef />
-    </div>
+    let getDeckKey = () => {
+      getDeck()->GameRules.deck_encode->Js.Json.stringify
+    }
+    <Main key={getDeckKey()} setState getState />
   }
 }

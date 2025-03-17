@@ -3,8 +3,6 @@ open Common
 open GameBase
 
 module GameRules: GameBase.GameRules = {
-  let shuffledDeck = Card.getShuffledDeck()
-
   @decco
   type space = Card(Card.card) | Foundation(int) | Pile(int) | Waste | Stock
 
@@ -20,7 +18,8 @@ module GameRules: GameBase.GameRules = {
   }
 
   type dragPile = array<Card.card>
-
+  @decco
+  type deck = array<Card.card>
   @decco
   type game = {
     piles: array<array<Card.card>>,
@@ -28,9 +27,6 @@ module GameRules: GameBase.GameRules = {
     stock: array<Card.card>,
     waste: array<Card.card>,
   }
-
-  let game_encode = game_encode
-  let game_decode = game_decode
 
   type movableSpace = GameBase.movableSpace<game, space, dragPile>
   type staticSpace = GameBase.staticSpace<game, dragPile>
@@ -54,20 +50,25 @@ module GameRules: GameBase.GameRules = {
   }
 
   let initiateGame = () => {
-    {
-      piles: [
-        shuffledDeck->Array.slice(~start=0, ~end=1),
-        shuffledDeck->Array.slice(~start=1, ~end=3),
-        shuffledDeck->Array.slice(~start=3, ~end=6),
-        shuffledDeck->Array.slice(~start=6, ~end=10),
-        shuffledDeck->Array.slice(~start=10, ~end=15),
-        shuffledDeck->Array.slice(~start=15, ~end=21),
-        shuffledDeck->Array.slice(~start=21, ~end=28),
-      ],
-      foundations: [[], [], [], []],
-      stock: shuffledDeck->Array.sliceToEnd(~start=28),
-      waste: [],
-    }
+    let shuffledDeck = Card.getShuffledDeck()
+
+    (
+      shuffledDeck,
+      {
+        piles: [
+          shuffledDeck->Array.slice(~start=0, ~end=1),
+          shuffledDeck->Array.slice(~start=1, ~end=3),
+          shuffledDeck->Array.slice(~start=3, ~end=6),
+          shuffledDeck->Array.slice(~start=6, ~end=10),
+          shuffledDeck->Array.slice(~start=10, ~end=15),
+          shuffledDeck->Array.slice(~start=15, ~end=21),
+          shuffledDeck->Array.slice(~start=21, ~end=28),
+        ],
+        foundations: [[], [], [], []],
+        stock: shuffledDeck->Array.sliceToEnd(~start=28),
+        waste: [],
+      },
+    )
   }
 
   let winCheck = (game: game) => {
@@ -381,9 +382,9 @@ module GameRules: GameBase.GameRules = {
 
   module AllCards = {
     @react.component
-    let make = (~setRef, ~onMouseDown) => {
+    let make = (~setRef, ~onMouseDown, ~deck) => {
       <React.Fragment>
-        {shuffledDeck
+        {deck
         ->Array.map(card => {
           <Card.Display
             card={card}
