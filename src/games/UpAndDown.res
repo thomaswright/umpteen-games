@@ -40,7 +40,7 @@ module GameRules: GameBase.GameRules = {
     | _ => true
     }
   })
-
+  @decco
   type game = {
     piles: array<array<item>>,
     foundations: array<array<Card.card>>,
@@ -48,6 +48,8 @@ module GameRules: GameBase.GameRules = {
     tarotDown: array<Tarot.card>,
     free: option<item>,
   }
+  let game_encode = game_encode
+  let game_decode = game_decode
 
   type movableSpace = GameBase.movableSpace<game, space, dragPile>
   type staticSpace = GameBase.staticSpace<game, dragPile>

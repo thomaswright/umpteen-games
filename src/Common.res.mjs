@@ -4,6 +4,7 @@ import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as OtherJs from "./other.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
+import UseLocalStorageJs from "./useLocalStorage.js";
 
 function numInterval(prim0, prim1, prim2) {
   return OtherJs.numInterval(prim0, prim1, prim2);
@@ -83,9 +84,14 @@ var UtilBoard = {
   make: Common$UtilBoard
 };
 
+function useLocalStorage(prim0, prim1) {
+  return UseLocalStorageJs(prim0, prim1);
+}
+
 export {
   numInterval ,
   ArrayAux ,
   UtilBoard ,
+  useLocalStorage ,
 }
 /* ./other.js Not a pure module */

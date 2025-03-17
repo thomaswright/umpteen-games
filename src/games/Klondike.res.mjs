@@ -4,11 +4,13 @@ import * as Card from "../Card.res.mjs";
 import * as Decco from "@rescript-labs/decco/src/Decco.res.mjs";
 import * as React from "react";
 import * as Common from "../Common.res.mjs";
+import * as Js_dict from "rescript/lib/es6/js_dict.js";
 import * as Js_json from "rescript/lib/es6/js_json.js";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as GameBase from "../GameBase.res.mjs";
 import * as Js_array from "rescript/lib/es6/js_array.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
+import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
@@ -164,6 +166,110 @@ function getSpace(element) {
 
 function spaceToString(space) {
   return JSON.stringify(space_encode(space));
+}
+
+function game_encode(value) {
+  return Js_dict.fromArray([
+              [
+                "piles",
+                (function (extra) {
+                      return Decco.arrayToJson((function (extra) {
+                                    return Decco.arrayToJson(Card.card_encode, extra);
+                                  }), extra);
+                    })(value.piles)
+              ],
+              [
+                "foundations",
+                (function (extra) {
+                      return Decco.arrayToJson((function (extra) {
+                                    return Decco.arrayToJson(Card.card_encode, extra);
+                                  }), extra);
+                    })(value.foundations)
+              ],
+              [
+                "stock",
+                (function (extra) {
+                      return Decco.arrayToJson(Card.card_encode, extra);
+                    })(value.stock)
+              ],
+              [
+                "waste",
+                (function (extra) {
+                      return Decco.arrayToJson(Card.card_encode, extra);
+                    })(value.waste)
+              ]
+            ]);
+}
+
+function game_decode(value) {
+  var dict = Js_json.classify(value);
+  if (typeof dict !== "object") {
+    return Decco.error(undefined, "Not an object", value);
+  }
+  if (dict.TAG !== "JSONObject") {
+    return Decco.error(undefined, "Not an object", value);
+  }
+  var dict$1 = dict._0;
+  var extra = Belt_Option.getWithDefault(Js_dict.get(dict$1, "piles"), null);
+  var piles = Decco.arrayFromJson((function (extra) {
+          return Decco.arrayFromJson(Card.card_decode, extra);
+        }), extra);
+  if (piles.TAG === "Ok") {
+    var extra$1 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "foundations"), null);
+    var foundations = Decco.arrayFromJson((function (extra) {
+            return Decco.arrayFromJson(Card.card_decode, extra);
+          }), extra$1);
+    if (foundations.TAG === "Ok") {
+      var extra$2 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "stock"), null);
+      var stock = Decco.arrayFromJson(Card.card_decode, extra$2);
+      if (stock.TAG === "Ok") {
+        var extra$3 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "waste"), null);
+        var waste = Decco.arrayFromJson(Card.card_decode, extra$3);
+        if (waste.TAG === "Ok") {
+          return {
+                  TAG: "Ok",
+                  _0: Decco.unsafeAddFieldToObject("piles", piles._0, Decco.unsafeAddFieldToObject("foundations", foundations._0, Decco.unsafeAddFieldToObject("stock", stock._0, Decco.unsafeAddFieldToObject("waste", waste._0, {}))))
+                };
+        }
+        var e = waste._0;
+        return {
+                TAG: "Error",
+                _0: {
+                  path: ".waste" + e.path,
+                  message: e.message,
+                  value: e.value
+                }
+              };
+      }
+      var e$1 = stock._0;
+      return {
+              TAG: "Error",
+              _0: {
+                path: ".stock" + e$1.path,
+                message: e$1.message,
+                value: e$1.value
+              }
+            };
+    }
+    var e$2 = foundations._0;
+    return {
+            TAG: "Error",
+            _0: {
+              path: ".foundations" + e$2.path,
+              message: e$2.message,
+              value: e$2.value
+            }
+          };
+  }
+  var e$3 = piles._0;
+  return {
+          TAG: "Error",
+          _0: {
+            path: ".piles" + e$3.path,
+            message: e$3.message,
+            value: e$3.value
+          }
+        };
 }
 
 function dragPileValidation(dragPile) {
@@ -654,6 +760,8 @@ var AllCards = {
 };
 
 var GameRules = {
+  game_encode: game_encode,
+  game_decode: game_decode,
   getSpace: getSpace,
   spaceToString: spaceToString,
   initiateGame: initiateGame,

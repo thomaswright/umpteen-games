@@ -21,12 +21,16 @@ module GameRules: GameBase.GameRules = {
 
   type dragPile = array<Card.card>
 
+  @decco
   type game = {
     piles: array<array<Card.card>>,
     foundations: array<array<Card.card>>,
     stock: array<Card.card>,
     waste: array<Card.card>,
   }
+
+  let game_encode = game_encode
+  let game_decode = game_decode
 
   type movableSpace = GameBase.movableSpace<game, space, dragPile>
   type staticSpace = GameBase.staticSpace<game, dragPile>

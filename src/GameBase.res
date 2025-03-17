@@ -12,6 +12,7 @@ type pos = {
   z: int,
 }
 
+@decco
 type stateActor = User | Auto
 
 type autoProgress<'a> = Send('a) | Seek | DoNothing
@@ -44,6 +45,8 @@ module type GameRules = {
   type game
   type space
   type dragPile
+  let game_encode: game => Js.Json.t
+  let game_decode: Js.Json.t => Belt.Result.t<game, Decco.decodeError>
 
   let getSpace: Element.t => option<space>
   let spaceToString: space => string
@@ -112,6 +115,7 @@ module Create = (GameRules: GameRules) => {
     Obj.magic(element)["style"]["z-index"]->Int.fromString
   }
 
+  @decco
   type historySnapshot = {
     game: GameRules.game,
     actor: stateActor,
@@ -137,6 +141,7 @@ module Create = (GameRules: GameRules) => {
     ->elementPosition
   }
 
+  @decco
   type state = {history: array<historySnapshot>}
 
   type undoStats = {
