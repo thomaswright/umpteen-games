@@ -102,10 +102,10 @@ let colorHex = card =>
 
 let multiColorHex = card =>
   switch card.suit {
-  | Spades => "hsl(223.96 100% 40.67%)"
-  | Hearts => "hsl(0 100% 42.94%)"
-  | Diamonds => "hsl(39.12 100% 50%)"
-  | Clubs => "hsl(130.15 100% 30.51%)"
+  | Spades => "hsl(224 100% 40%)"
+  | Hearts => "hsl(0 100% 43%)"
+  | Diamonds => "hsl(39 100% 50%)"
+  | Clubs => "hsl(130 100% 25%)"
   }
 
 let isOppositeColor = (a, b) => isRed(a) != isRed(b)

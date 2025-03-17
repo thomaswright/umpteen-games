@@ -472,13 +472,13 @@ function multiColorHex(card) {
   var match = card.suit;
   switch (match) {
     case "Spades" :
-        return "hsl(223.96 100% 40.67%)";
+        return "hsl(224 100% 40%)";
     case "Hearts" :
-        return "hsl(0 100% 42.94%)";
+        return "hsl(0 100% 43%)";
     case "Diamonds" :
-        return "hsl(39.12 100% 50%)";
+        return "hsl(39 100% 50%)";
     case "Clubs" :
-        return "hsl(130.15 100% 30.51%)";
+        return "hsl(130 100% 25%)";
     
   }
 }
