@@ -145,6 +145,7 @@ function Create(GameRules) {
       undo();
       moveToState();
     };
+    var isWin = GameRules.winCheck(game);
     return JsxRuntime.jsx(GameRules.Board.make, {
                 setRef: props.setRef,
                 onMouseDown: props.onMouseDown,
@@ -152,7 +153,8 @@ function Create(GameRules) {
                 moveToState: moveToState,
                 autoProgress: props.autoProgress,
                 game: game,
-                undo: undo$1
+                undo: undo$1,
+                isWin: isWin
               });
   };
   var BoardWrapper = {

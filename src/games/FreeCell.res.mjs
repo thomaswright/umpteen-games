@@ -218,9 +218,18 @@ function initiateGame() {
             undefined,
             undefined,
             undefined
-          ],
-          gameEnded: false
+          ]
         };
+}
+
+function winCheck(game) {
+  if (game.piles.every(function (pile) {
+          return pile.length === 0;
+        })) {
+    return game.free.every(Core__Option.isNone);
+  } else {
+    return false;
+  }
 }
 
 function removeDragFromGame(game, dragPile) {
@@ -244,8 +253,7 @@ function removeDragFromGame(game, dragPile) {
                                 return card;
                               }
                             }));
-              }),
-          gameEnded: game.gameEnded
+              })
         };
 }
 
@@ -260,8 +268,7 @@ function pileBaseRules(i) {
                                 return dragPile;
                               })),
                         foundations: game.foundations,
-                        free: game.free,
-                        gameEnded: game.gameEnded
+                        free: game.free
                       };
               }
               
@@ -307,8 +314,7 @@ function pileRules(pile, card, i, j) {
                               return Common.ArrayAux.insertAfter(stack, card, dragPile);
                             }),
                         foundations: game.foundations,
-                        free: game.free,
-                        gameEnded: game.gameEnded
+                        free: game.free
                       };
               }
               
@@ -336,8 +342,7 @@ function foundationBaseRules(i) {
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                 return dragPile;
                               })),
-                        free: game.free,
-                        gameEnded: game.gameEnded
+                        free: game.free
                       };
               }
               
@@ -375,8 +380,7 @@ function foundationRules(game, card, i, j) {
                         foundations: game.foundations.map(function (stack) {
                               return Common.ArrayAux.insertAfter(stack, card, dragPile);
                             }),
-                        free: game.free,
-                        gameEnded: game.gameEnded
+                        free: game.free
                       };
               }
               
@@ -397,8 +401,7 @@ function freeBaseRules(i) {
                         foundations: game.foundations,
                         free: Common.ArrayAux.update(game.free, i, (function (param) {
                                 return dragPile[0];
-                              })),
-                        gameEnded: game.gameEnded
+                              }))
                       };
               }
               
@@ -631,6 +634,7 @@ var GameRules = {
   initiateGame: initiateGame,
   getRule: getRule,
   removeDragFromGame: removeDragFromGame,
+  winCheck: winCheck,
   Board: Board,
   AllCards: AllCards
 };

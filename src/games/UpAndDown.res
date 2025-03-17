@@ -47,7 +47,6 @@ module GameRules: GameBase.GameRules = {
     tarotUp: array<Tarot.card>,
     tarotDown: array<Tarot.card>,
     free: option<item>,
-    gameEnded: bool,
   }
 
   type movableSpace = GameBase.movableSpace<game, space, dragPile>
@@ -77,8 +76,11 @@ module GameRules: GameBase.GameRules = {
       tarotUp: [],
       tarotDown: [],
       free: None,
-      gameEnded: false,
     }
+  }
+
+  let winCheck = (game: game) => {
+    game.piles->Array.every(pile => pile->Array.length == 0) && game.free->Option.isNone
   }
 
   let removeDragFromGame = (game: game, dragPile: dragPile): game => {
@@ -417,10 +419,12 @@ module GameRules: GameBase.GameRules = {
       ~autoProgress as _,
       ~game as _,
       ~undo,
+      ~isWin: bool,
     ) => {
       <React.Fragment>
-        <div>
+        <div className="flex flex-row">
           <button onClick={_ => undo()}> {"Undo"->React.string} </button>
+          <div> {isWin ? "You Won!"->React.string : React.null} </div>
         </div>
         <div className="flex flex-row  ">
           <div

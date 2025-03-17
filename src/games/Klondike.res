@@ -26,7 +26,6 @@ module GameRules: GameBase.GameRules = {
     foundations: array<array<Card.card>>,
     stock: array<Card.card>,
     waste: array<Card.card>,
-    gameEnded: bool,
   }
 
   type movableSpace = GameBase.movableSpace<game, space, dragPile>
@@ -64,8 +63,13 @@ module GameRules: GameBase.GameRules = {
       foundations: [[], [], [], []],
       stock: shuffledDeck->Array.sliceToEnd(~start=28),
       waste: [],
-      gameEnded: false,
     }
+  }
+
+  let winCheck = (game: game) => {
+    game.piles->Array.every(pile => pile->Array.length == 0) &&
+    game.stock->Array.length == 0 &&
+    game.waste->Array.length == 0
   }
 
   let removeDragFromGame = (game: game, dragPile: dragPile) => {
@@ -75,7 +79,6 @@ module GameRules: GameBase.GameRules = {
       })
 
     {
-      ...game,
       foundations: game.foundations->Array.map(removeDragPile),
       piles: game.piles->Array.map(removeDragPile),
       stock: game.stock->removeDragPile,
@@ -317,6 +320,7 @@ module GameRules: GameBase.GameRules = {
       ~autoProgress,
       ~game,
       ~undo as _,
+      ~isWin as _,
     ) => {
       <React.Fragment>
         <div className="flex flex-row gap-3">

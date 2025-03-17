@@ -210,9 +210,18 @@ function initiateGame() {
             []
           ],
           stock: shuffledDeck.slice(28),
-          waste: [],
-          gameEnded: false
+          waste: []
         };
+}
+
+function winCheck(game) {
+  if (game.piles.every(function (pile) {
+          return pile.length === 0;
+        }) && game.stock.length === 0) {
+    return game.waste.length === 0;
+  } else {
+    return false;
+  }
 }
 
 function removeDragFromGame(game, dragPile) {
@@ -227,8 +236,7 @@ function removeDragFromGame(game, dragPile) {
           piles: game.piles.map(removeDragPile),
           foundations: game.foundations.map(removeDragPile),
           stock: removeDragPile(game.stock),
-          waste: removeDragPile(game.waste),
-          gameEnded: game.gameEnded
+          waste: removeDragPile(game.waste)
         };
 }
 
@@ -244,8 +252,7 @@ function pileBaseRules(i) {
                               })),
                         foundations: game.foundations,
                         stock: game.stock,
-                        waste: game.waste,
-                        gameEnded: game.gameEnded
+                        waste: game.waste
                       };
               }
               
@@ -292,8 +299,7 @@ function pileRules(pile, card, i, j) {
                             }),
                         foundations: game.foundations,
                         stock: game.stock,
-                        waste: game.waste,
-                        gameEnded: game.gameEnded
+                        waste: game.waste
                       };
               }
               
@@ -322,8 +328,7 @@ function foundationBaseRules(i) {
                                 return dragPile;
                               })),
                         stock: game.stock,
-                        waste: game.waste,
-                        gameEnded: game.gameEnded
+                        waste: game.waste
                       };
               }
               
@@ -362,8 +367,7 @@ function foundationRules(game, card, i, j) {
                               return Common.ArrayAux.insertAfter(stack, card, dragPile);
                             }),
                         stock: game.stock,
-                        waste: game.waste,
-                        gameEnded: game.gameEnded
+                        waste: game.waste
                       };
               }
               
@@ -511,8 +515,7 @@ async function dealToWaste(setGame, moveToState, autoProgress) {
                   piles: game.piles,
                   foundations: game.foundations,
                   stock: game.stock.slice(0, game.stock.length - 1 | 0),
-                  waste: game.waste.concat(game.stock.slice(game.stock.length - 1 | 0)),
-                  gameEnded: game.gameEnded
+                  waste: game.waste.concat(game.stock.slice(game.stock.length - 1 | 0))
                 };
         });
     moveToState();
@@ -545,8 +548,7 @@ function Klondike$GameRules$Board(props) {
                                                   piles: game.piles,
                                                   foundations: game.foundations,
                                                   stock: game.waste.toReversed(),
-                                                  waste: [],
-                                                  gameEnded: game.gameEnded
+                                                  waste: []
                                                 };
                                         });
                                     return moveToState();
@@ -657,6 +659,7 @@ var GameRules = {
   initiateGame: initiateGame,
   getRule: getRule,
   removeDragFromGame: removeDragFromGame,
+  winCheck: winCheck,
   Board: Board,
   AllCards: AllCards
 };

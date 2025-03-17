@@ -317,9 +317,18 @@ function initiateGame() {
           ],
           tarotUp: [],
           tarotDown: [],
-          free: undefined,
-          gameEnded: false
+          free: undefined
         };
+}
+
+function winCheck(game) {
+  if (game.piles.every(function (pile) {
+          return pile.length === 0;
+        })) {
+    return Core__Option.isNone(game.free);
+  } else {
+    return false;
+  }
 }
 
 function removeDragFromGame(game, dragPile) {
@@ -344,8 +353,7 @@ function removeDragFromGame(game, dragPile) {
                     return card;
                   }
                   
-                })),
-          gameEnded: game.gameEnded
+                }))
         };
 }
 
@@ -361,8 +369,7 @@ function pileBaseRules(i) {
                         foundations: game.foundations,
                         tarotUp: game.tarotUp,
                         tarotDown: game.tarotDown,
-                        free: game.free,
-                        gameEnded: game.gameEnded
+                        free: game.free
                       };
               }
               
@@ -411,8 +418,7 @@ function pileRules(pile, item, i, j) {
                           foundations: game.foundations,
                           tarotUp: game.tarotUp,
                           tarotDown: game.tarotDown,
-                          free: game.free,
-                          gameEnded: game.gameEnded
+                          free: game.free
                         };
                 }
               }
@@ -429,8 +435,7 @@ function pileRules(pile, item, i, j) {
                         foundations: game.foundations,
                         tarotUp: game.tarotUp,
                         tarotDown: game.tarotDown,
-                        free: game.free,
-                        gameEnded: game.gameEnded
+                        free: game.free
                       };
               }
               
@@ -457,8 +462,7 @@ function foundationBaseRules(i) {
                               })),
                         tarotUp: game.tarotUp,
                         tarotDown: game.tarotDown,
-                        free: game.free,
-                        gameEnded: game.gameEnded
+                        free: game.free
                       };
               }
               
@@ -497,8 +501,7 @@ function foundationRules(card, i, j) {
                             }),
                         tarotUp: game.tarotUp,
                         tarotDown: game.tarotDown,
-                        free: game.free,
-                        gameEnded: game.gameEnded
+                        free: game.free
                       };
               }
               
@@ -523,8 +526,7 @@ function tarotUpBaseRules() {
                         foundations: game.foundations,
                         tarotUp: [tarot],
                         tarotDown: game.tarotDown,
-                        free: game.free,
-                        gameEnded: game.gameEnded
+                        free: game.free
                       };
               }
               
@@ -558,8 +560,7 @@ function tarotUpRules(tarot, j) {
                         foundations: game.foundations,
                         tarotUp: game.tarotUp.concat([dragTarot]),
                         tarotDown: game.tarotDown,
-                        free: game.free,
-                        gameEnded: game.gameEnded
+                        free: game.free
                       };
               }
               
@@ -584,8 +585,7 @@ function tarotDownBaseRules() {
                         foundations: game.foundations,
                         tarotUp: game.tarotUp,
                         tarotDown: [tarot],
-                        free: game.free,
-                        gameEnded: game.gameEnded
+                        free: game.free
                       };
               }
               
@@ -619,8 +619,7 @@ function tarotDownRules(tarot, j) {
                         foundations: game.foundations,
                         tarotUp: game.tarotUp,
                         tarotDown: game.tarotDown.concat([dragTarot]),
-                        free: game.free,
-                        gameEnded: game.gameEnded
+                        free: game.free
                       };
               }
               
@@ -643,8 +642,7 @@ function freeBaseRules() {
                         foundations: game.foundations,
                         tarotUp: game.tarotUp,
                         tarotDown: game.tarotDown,
-                        free: dragPile,
-                        gameEnded: game.gameEnded
+                        free: dragPile
                       };
               }
             }),
@@ -801,13 +799,19 @@ function UpAndDown$GameRules$Board(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
-                JsxRuntime.jsx("div", {
-                      children: JsxRuntime.jsx("button", {
-                            children: "Undo",
-                            onClick: (function (param) {
-                                undo();
-                              })
-                          })
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("button", {
+                              children: "Undo",
+                              onClick: (function (param) {
+                                  undo();
+                                })
+                            }),
+                        JsxRuntime.jsx("div", {
+                              children: props.isWin ? "You Won!" : null
+                            })
+                      ],
+                      className: "flex flex-row"
                     }),
                 JsxRuntime.jsxs("div", {
                       children: [
@@ -944,6 +948,7 @@ var GameRules = {
   initiateGame: initiateGame,
   getRule: getRule,
   removeDragFromGame: removeDragFromGame,
+  winCheck: winCheck,
   Board: Board,
   AllCards: AllCards
 };

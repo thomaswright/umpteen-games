@@ -50,9 +50,19 @@ module type GameRules = {
   let initiateGame: unit => game
   let getRule: getRule<game, space, dragPile>
   let removeDragFromGame: (game, dragPile) => game
+  let winCheck: game => bool
 
   module Board: {
-    type props<'setRef, 'onMouseDown, 'setGame, 'moveToState, 'autoProgress, 'game, 'undo> = {
+    type props<
+      'setRef,
+      'onMouseDown,
+      'setGame,
+      'moveToState,
+      'autoProgress,
+      'game,
+      'undo,
+      'isWin,
+    > = {
       setRef: 'setRef,
       onMouseDown: 'onMouseDown,
       setGame: 'setGame,
@@ -60,6 +70,7 @@ module type GameRules = {
       autoProgress: 'autoProgress,
       game: 'game,
       undo: 'undo,
+      isWin: 'isWin,
     }
     let make: props<
       space => ReactDOM.Ref.callbackDomRef,
@@ -69,6 +80,7 @@ module type GameRules = {
       unit => 'b,
       game,
       unit => unit,
+      bool,
     > => React.element
   }
 
@@ -225,7 +237,9 @@ module Create = (GameRules: GameRules) => {
         undo()
         moveToState()
       }
-      <GameRules.Board setRef onMouseDown setGame moveToState autoProgress game undo />
+      let isWin = GameRules.winCheck(game)
+
+      <GameRules.Board setRef onMouseDown setGame moveToState autoProgress game undo isWin />
     }
   }
 
