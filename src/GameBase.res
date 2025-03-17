@@ -238,8 +238,10 @@ module Create = (GameRules: GameRules) => {
         moveToState()
       }
       let isWin = GameRules.winCheck(game)
-
-      <GameRules.Board setRef onMouseDown setGame moveToState autoProgress game undo isWin />
+      <React.Fragment>
+        <Common.UtilBoard undo isWin />
+        <GameRules.Board setRef onMouseDown setGame moveToState autoProgress game undo isWin />
+      </React.Fragment>
     }
   }
 
@@ -597,7 +599,7 @@ module Create = (GameRules: GameRules) => {
       None
     }, [])
 
-    <div id={"board"} className="relative m-5">
+    <div id={"board"} className="relative m-5 mt-0">
       <BoardWrapper onMouseDown setRef setGame moveToState autoProgress undo />
       <GameRules.AllCards onMouseDown setRef />
     </div>

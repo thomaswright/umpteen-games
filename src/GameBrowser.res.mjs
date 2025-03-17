@@ -35,7 +35,7 @@ function GameBrowser(props) {
                       children: [
                         JsxRuntime.jsx("div", {
                               children: "Card Games!",
-                              className: "font-black text-xl"
+                              className: "font-black text-xl mb-1"
                             }),
                         JsxRuntime.jsx("div", {
                               children: [

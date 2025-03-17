@@ -93,7 +93,7 @@ module GameRules: GameBase.GameRules = {
         let dragPileBase = dragPile->Array.getUnsafe(0)
         let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
 
-        if noChildren && dragPileBase.rank == RK {
+        if noChildren {
           Some({
             ...game,
             piles: game.piles->ArrayAux.update(i, _ => dragPile),

@@ -260,9 +260,8 @@ function removeDragFromGame(game, dragPile) {
 function pileBaseRules(i) {
   return {
           droppedUpon: (function (game, dragPile) {
-              var dragPileBase = dragPile[0];
               var noChildren = game.piles[i].length === 0;
-              if (noChildren && dragPileBase.rank === "RK") {
+              if (noChildren) {
                 return {
                         piles: Common.ArrayAux.update(game.piles, i, (function (param) {
                                 return dragPile;

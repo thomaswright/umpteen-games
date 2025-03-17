@@ -3,6 +3,7 @@
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as OtherJs from "./other.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
+import * as JsxRuntime from "react/jsx-runtime";
 
 function numInterval(prim0, prim1, prim2) {
   return OtherJs.numInterval(prim0, prim1, prim2);
@@ -58,8 +59,33 @@ var ArrayAux = {
   sliceBefore: sliceBefore
 };
 
+function Common$UtilBoard(props) {
+  var undo = props.undo;
+  return JsxRuntime.jsxs("div", {
+              children: [
+                JsxRuntime.jsx("button", {
+                      children: "Undo",
+                      className: "bg-gray-200 rounded px-4 ",
+                      onClick: (function (param) {
+                          undo();
+                        })
+                    }),
+                JsxRuntime.jsx("div", {
+                      children: props.isWin ? "You Won!" : null,
+                      className: "px-4 font-black text-blue-600"
+                    })
+              ],
+              className: "flex flex-row mb-5 mt-4"
+            });
+}
+
+var UtilBoard = {
+  make: Common$UtilBoard
+};
+
 export {
   numInterval ,
   ArrayAux ,
+  UtilBoard ,
 }
 /* ./other.js Not a pure module */

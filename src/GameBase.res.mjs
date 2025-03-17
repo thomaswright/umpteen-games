@@ -146,15 +146,23 @@ function Create(GameRules) {
       moveToState();
     };
     var isWin = GameRules.winCheck(game);
-    return JsxRuntime.jsx(GameRules.Board.make, {
-                setRef: props.setRef,
-                onMouseDown: props.onMouseDown,
-                setGame: props.setGame,
-                moveToState: moveToState,
-                autoProgress: props.autoProgress,
-                game: game,
-                undo: undo$1,
-                isWin: isWin
+    return JsxRuntime.jsxs(React.Fragment, {
+                children: [
+                  JsxRuntime.jsx(Common.UtilBoard.make, {
+                        undo: undo$1,
+                        isWin: isWin
+                      }),
+                  JsxRuntime.jsx(GameRules.Board.make, {
+                        setRef: props.setRef,
+                        onMouseDown: props.onMouseDown,
+                        setGame: props.setGame,
+                        moveToState: moveToState,
+                        autoProgress: props.autoProgress,
+                        game: game,
+                        undo: undo$1,
+                        isWin: isWin
+                      })
+                ]
               });
   };
   var BoardWrapper = {
@@ -451,7 +459,7 @@ function Create(GameRules) {
                         onMouseDown: onMouseDown
                       })
                 ],
-                className: "relative m-5",
+                className: "relative m-5 mt-0",
                 id: "board"
               });
   };

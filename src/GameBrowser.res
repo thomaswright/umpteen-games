@@ -7,7 +7,7 @@ let make = () => {
   let (selectGame, setSelectGame) = React.useState(() => Klondike)
   <div>
     <div className="px-5 pt-3 ">
-      <div className="font-black text-xl"> {"Card Games!"->React.string} </div>
+      <div className="font-black text-xl mb-1"> {"Card Games!"->React.string} </div>
       <div className="flex flex-row gap-4">
         {[Klondike, FreeCell, UpAndDown]
         ->Array.map(v => {

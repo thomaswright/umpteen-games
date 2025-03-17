@@ -26,3 +26,17 @@ module ArrayAux = {
     arr->Array.slice(~start=0, ~end=arr->Array.length - 1 - revIndex)
   }
 }
+
+module UtilBoard = {
+  @react.component
+  let make = (~undo, ~isWin) => {
+    <div className="flex flex-row mb-5 mt-4">
+      <button className={"bg-gray-200 rounded px-4 "} onClick={_ => undo()}>
+        {"Undo"->React.string}
+      </button>
+      <div className="px-4 font-black text-blue-600">
+        {isWin ? "You Won!"->React.string : React.null}
+      </div>
+    </div>
+  }
+}

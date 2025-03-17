@@ -795,24 +795,9 @@ function getRule(game, match) {
 }
 
 function UpAndDown$GameRules$Board(props) {
-  var undo = props.undo;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
-                JsxRuntime.jsxs("div", {
-                      children: [
-                        JsxRuntime.jsx("button", {
-                              children: "Undo",
-                              onClick: (function (param) {
-                                  undo();
-                                })
-                            }),
-                        JsxRuntime.jsx("div", {
-                              children: props.isWin ? "You Won!" : null
-                            })
-                      ],
-                      className: "flex flex-row"
-                    }),
                 JsxRuntime.jsxs("div", {
                       children: [
                         JsxRuntime.jsxs("div", {

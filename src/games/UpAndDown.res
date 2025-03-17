@@ -418,14 +418,10 @@ module GameRules: GameBase.GameRules = {
       ~moveToState as _,
       ~autoProgress as _,
       ~game as _,
-      ~undo,
-      ~isWin: bool,
+      ~undo as _,
+      ~isWin as _,
     ) => {
       <React.Fragment>
-        <div className="flex flex-row">
-          <button onClick={_ => undo()}> {"Undo"->React.string} </button>
-          <div> {isWin ? "You Won!"->React.string : React.null} </div>
-        </div>
         <div className="flex flex-row  ">
           <div
             className="flex flex-row justify-between"
