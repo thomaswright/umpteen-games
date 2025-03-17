@@ -143,13 +143,72 @@ function Create(GameRules) {
   var eventPosition = function ($$event) {
     return elementPosition($$event.currentTarget);
   };
+  var undoStats_encode = function (value) {
+    return Js_dict.fromArray([
+                [
+                  "currentUndoDepth",
+                  Decco.intToJson(value.currentUndoDepth)
+                ],
+                [
+                  "undos",
+                  (function (extra) {
+                        return Decco.arrayToJson(Decco.intToJson, extra);
+                      })(value.undos)
+                ]
+              ]);
+  };
+  var undoStats_decode = function (value) {
+    var dict = Js_json.classify(value);
+    if (typeof dict !== "object") {
+      return Decco.error(undefined, "Not an object", value);
+    }
+    if (dict.TAG !== "JSONObject") {
+      return Decco.error(undefined, "Not an object", value);
+    }
+    var dict$1 = dict._0;
+    var currentUndoDepth = Decco.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "currentUndoDepth"), null));
+    if (currentUndoDepth.TAG === "Ok") {
+      var extra = Belt_Option.getWithDefault(Js_dict.get(dict$1, "undos"), null);
+      var undos = Decco.arrayFromJson(Decco.intFromJson, extra);
+      if (undos.TAG === "Ok") {
+        return {
+                TAG: "Ok",
+                _0: Decco.unsafeAddFieldToObject("currentUndoDepth", currentUndoDepth._0, Decco.unsafeAddFieldToObject("undos", undos._0, {}))
+              };
+      }
+      var e = undos._0;
+      return {
+              TAG: "Error",
+              _0: {
+                path: ".undos" + e.path,
+                message: e.message,
+                value: e.value
+              }
+            };
+    }
+    var e$1 = currentUndoDepth._0;
+    return {
+            TAG: "Error",
+            _0: {
+              path: ".currentUndoDepth" + e$1.path,
+              message: e$1.message,
+              value: e$1.value
+            }
+          };
+  };
   var state_encode = function (value) {
-    return Js_dict.fromArray([[
+    return Js_dict.fromArray([
+                [
                   "history",
                   (function (extra) {
                         return Decco.arrayToJson(historySnapshot_encode, extra);
                       })(value.history)
-                ]]);
+                ],
+                [
+                  "undoStats",
+                  undoStats_encode(value.undoStats)
+                ]
+              ]);
   };
   var state_decode = function (value) {
     var dict = Js_json.classify(value);
@@ -159,36 +218,50 @@ function Create(GameRules) {
     if (dict.TAG !== "JSONObject") {
       return Decco.error(undefined, "Not an object", value);
     }
-    var history = Decco.arrayFromJson(historySnapshot_decode, Belt_Option.getWithDefault(Js_dict.get(dict._0, "history"), null));
+    var dict$1 = dict._0;
+    var history = Decco.arrayFromJson(historySnapshot_decode, Belt_Option.getWithDefault(Js_dict.get(dict$1, "history"), null));
     if (history.TAG === "Ok") {
+      var undoStats = undoStats_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "undoStats"), null));
+      if (undoStats.TAG === "Ok") {
+        return {
+                TAG: "Ok",
+                _0: Decco.unsafeAddFieldToObject("history", history._0, Decco.unsafeAddFieldToObject("undoStats", undoStats._0, {}))
+              };
+      }
+      var e = undoStats._0;
       return {
-              TAG: "Ok",
-              _0: Decco.unsafeAddFieldToObject("history", history._0, {})
+              TAG: "Error",
+              _0: {
+                path: ".undoStats" + e.path,
+                message: e.message,
+                value: e.value
+              }
             };
     }
-    var e = history._0;
+    var e$1 = history._0;
     return {
             TAG: "Error",
             _0: {
-              path: ".history" + e.path,
-              message: e.message,
-              value: e.value
+              path: ".history" + e$1.path,
+              message: e$1.message,
+              value: e$1.value
             }
           };
   };
-  var undoStats = {
-    contents: {
-      currentUndoDepth: 0,
-      undos: []
-    }
+  var createNewGame = function () {
+    return {
+            history: [{
+                game: GameRules.initiateGame(),
+                actor: "User"
+              }],
+            undoStats: {
+              currentUndoDepth: 0,
+              undos: []
+            }
+          };
   };
   var state = {
-    contents: {
-      history: [{
-          game: GameRules.initiateGame(),
-          actor: "User"
-        }]
-    }
+    contents: createNewGame()
   };
   var listeners = new Set();
   var subscribe = function (listener) {
@@ -197,25 +270,16 @@ function Create(GameRules) {
       listeners.delete(listener);
     };
   };
-  var setUndoStats = function (f) {
-    undoStats.contents = f(undoStats.contents);
-  };
-  var setState = function (f) {
-    state.contents = f(state.contents);
+  var setState = {
+    contents: (function (f) {
+        state.contents = f(state.contents);
+      })
   };
   var getGame = function () {
     return state.contents.history[state.contents.history.length - 1 | 0].game;
   };
   var setGame = function (f) {
-    if (undoStats.contents.currentUndoDepth > 0) {
-      setUndoStats(function (undoStats) {
-            return {
-                    currentUndoDepth: 0,
-                    undos: undoStats.undos.concat([undoStats.currentUndoDepth])
-                  };
-          });
-    }
-    setState(function (state) {
+    setState.contents(function (state) {
           var newGame = f(getGame());
           listeners.forEach(function (listener) {
                 listener(function (param) {
@@ -226,19 +290,24 @@ function Create(GameRules) {
                   history: state.history.concat([{
                           game: newGame,
                           actor: "Auto"
-                        }])
+                        }]),
+                  undoStats: state.undoStats.currentUndoDepth > 0 ? ({
+                        currentUndoDepth: 0,
+                        undos: state.undoStats.undos.concat([state.undoStats.currentUndoDepth])
+                      }) : state.undoStats
                 };
         });
   };
   var snapshot = function () {
-    setState(function (state) {
+    setState.contents(function (state) {
           return {
                   history: Common.ArrayAux.update(state.history, state.history.length - 1 | 0, (function (v) {
                           return {
                                   game: v.game,
                                   actor: "User"
                                 };
-                        }))
+                        })),
+                  undoStats: state.undoStats
                 };
         });
   };
@@ -246,18 +315,17 @@ function Create(GameRules) {
     if (state.contents.history.filter(function (v) {
             return v.actor === "User";
           }).length > 1) {
-      setState(function (state) {
-            var newHistory = Common.ArrayAux.sliceBefore(state.history, (function (v) {
-                    return v.actor === "User";
-                  }));
-            return {
-                    history: newHistory
-                  };
-          });
-      return setUndoStats(function (undoStats) {
+      return setState.contents(function (state) {
+                  var newHistory = Common.ArrayAux.sliceBefore(state.history, (function (v) {
+                          return v.actor === "User";
+                        }));
+                  var init = state.undoStats;
                   return {
-                          currentUndoDepth: undoStats.currentUndoDepth + 1 | 0,
-                          undos: undoStats.undos
+                          history: newHistory,
+                          undoStats: {
+                            currentUndoDepth: state.undoStats.currentUndoDepth + 1 | 0,
+                            undos: init.undos
+                          }
                         };
                 });
     }
@@ -609,13 +677,14 @@ function Create(GameRules) {
           historySnapshot_decode: historySnapshot_decode,
           elementPosition: elementPosition,
           eventPosition: eventPosition,
+          undoStats_encode: undoStats_encode,
+          undoStats_decode: undoStats_decode,
           state_encode: state_encode,
           state_decode: state_decode,
-          undoStats: undoStats,
+          createNewGame: createNewGame,
           state: state,
           listeners: listeners,
           subscribe: subscribe,
-          setUndoStats: setUndoStats,
           setState: setState,
           getGame: getGame,
           setGame: setGame,

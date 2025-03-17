@@ -2,6 +2,7 @@
 
 import * as Decco from "@rescript-labs/decco/src/Decco.res.mjs";
 import * as React from "react";
+import * as Common from "./Common.res.mjs";
 import * as Js_json from "rescript/lib/es6/js_json.js";
 import * as FreeCell from "./games/FreeCell.res.mjs";
 import * as Js_array from "rescript/lib/es6/js_array.js";
@@ -9,6 +10,7 @@ import * as Klondike from "./games/Klondike.res.mjs";
 import * as UpAndDown from "./games/UpAndDown.res.mjs";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
+import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
@@ -163,6 +165,81 @@ function GameBrowser(props) {
                   
                 }));
         }), []);
+  var createNewGame_ = function () {
+    switch (selectGameType) {
+      case "Klondike_" :
+          return {
+                  TAG: "Klondike",
+                  _0: Klondike.Game.createNewGame()
+                };
+      case "FreeCell_" :
+          return {
+                  TAG: "FreeCell",
+                  _0: FreeCell.Game.createNewGame()
+                };
+      case "UpAndDown_" :
+          return {
+                  TAG: "UpAndDown",
+                  _0: UpAndDown.Game.createNewGame()
+                };
+      
+    }
+  };
+  var createNewGame = function () {
+    state.contents = Belt_Array.concatMany([
+          state.contents,
+          [createNewGame_()]
+        ]);
+  };
+  var getGameUtils = function () {
+    var reversedIndex = Core__Array.findIndexOpt(state.contents.toReversed(), (function (x) {
+            switch (x.TAG) {
+              case "Klondike" :
+                  switch (selectGameType) {
+                    case "Klondike_" :
+                        return true;
+                    case "FreeCell_" :
+                    case "UpAndDown_" :
+                        return false;
+                    
+                  }
+              case "FreeCell" :
+                  switch (selectGameType) {
+                    case "FreeCell_" :
+                        return true;
+                    case "Klondike_" :
+                    case "UpAndDown_" :
+                        return false;
+                    
+                  }
+              case "UpAndDown" :
+                  switch (selectGameType) {
+                    case "Klondike_" :
+                    case "FreeCell_" :
+                        return false;
+                    case "UpAndDown_" :
+                        return true;
+                    
+                  }
+              
+            }
+          }));
+    if (reversedIndex === undefined) {
+      return ;
+    }
+    var index = (state.contents.length - 1 | 0) - reversedIndex | 0;
+    var get = function () {
+      return state.contents[index];
+    };
+    var set = function (f) {
+      state.contents = Common.ArrayAux.update(state.contents, index, f);
+    };
+    return [
+            get,
+            set
+          ];
+  };
+  getGameUtils();
   var tmp;
   switch (selectGameType) {
     case "Klondike_" :
@@ -205,6 +282,14 @@ function GameBrowser(props) {
                                               });
                                   }),
                               className: "flex flex-row gap-4"
+                            }),
+                        JsxRuntime.jsx("div", {
+                              children: JsxRuntime.jsx("button", {
+                                    children: "New Game",
+                                    onClick: (function (param) {
+                                        createNewGame();
+                                      })
+                                  })
                             })
                       ],
                       className: "px-5 pt-3 "

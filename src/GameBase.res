@@ -142,21 +142,28 @@ module Create = (GameRules: GameRules) => {
   }
 
   @decco
-  type state = {history: array<historySnapshot>}
-
   type undoStats = {
     currentUndoDepth: int,
     undos: array<int>,
   }
 
-  let undoStats = ref({
-    currentUndoDepth: 0,
-    undos: [],
-  })
+  @decco
+  type state = {history: array<historySnapshot>, undoStats: undoStats}
 
-  let state = ref({
-    history: [{actor: User, game: GameRules.initiateGame()}],
-  })
+  let createNewGame = () => {
+    history: [
+      {
+        actor: User,
+        game: GameRules.initiateGame(),
+      },
+    ],
+    undoStats: {
+      currentUndoDepth: 0,
+      undos: [],
+    },
+  }
+
+  let state = ref(createNewGame())
 
   let listeners = Set.make()
 
@@ -166,13 +173,9 @@ module Create = (GameRules: GameRules) => {
     unsubscribe
   }
 
-  let setUndoStats = f => {
-    undoStats.contents = f(undoStats.contents)
-  }
-
-  let setState = f => {
+  let setState = ref(f => {
     state.contents = f(state.contents)
-  }
+  })
 
   let getGame = () => {
     let snapShot = state.contents.history->Array.getUnsafe(state.contents.history->Array.length - 1)
@@ -181,25 +184,25 @@ module Create = (GameRules: GameRules) => {
   }
 
   let setGame = f => {
-    if undoStats.contents.currentUndoDepth > 0 {
-      setUndoStats(undoStats => {
-        currentUndoDepth: 0,
-        undos: Array.concat(undoStats.undos, [undoStats.currentUndoDepth]),
-      })
-    }
-
-    setState(state => {
+    setState.contents(state => {
       let newGame = f(getGame())
       listeners->Set.forEach(listener => listener(_ => newGame))
 
       {
+        undoStats: state.undoStats.currentUndoDepth > 0
+          ? {
+              currentUndoDepth: 0,
+              undos: Array.concat(state.undoStats.undos, [state.undoStats.currentUndoDepth]),
+            }
+          : state.undoStats,
         history: Array.concat(state.history, [{game: newGame, actor: Auto}]),
       }
     })
   }
 
   let snapshot = () => {
-    setState(state => {
+    setState.contents(state => {
+      ...state,
       history: state.history->Common.ArrayAux.update(state.history->Array.length - 1, v => {
         ...v,
         actor: User,
@@ -209,16 +212,15 @@ module Create = (GameRules: GameRules) => {
 
   let undo = () => {
     if state.contents.history->Array.filter(v => v.actor == User)->Array.length > 1 {
-      setState(state => {
+      setState.contents(state => {
         let newHistory = state.history->Common.ArrayAux.sliceBefore(v => v.actor == User)
         {
           history: newHistory,
+          undoStats: {
+            ...state.undoStats,
+            currentUndoDepth: state.undoStats.currentUndoDepth + 1,
+          },
         }
-      })
-
-      setUndoStats(undoStats => {
-        ...undoStats,
-        currentUndoDepth: undoStats.currentUndoDepth + 1,
       })
     }
   }
