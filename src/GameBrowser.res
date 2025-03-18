@@ -51,25 +51,6 @@ let make = () => {
     None
   })
 
-  let createNewGame = () => {
-    setState(state =>
-      switch selectGameType {
-      | Klondike => {
-          ...state,
-          klondike: Array.concat([Klondike.Game.createNewGame()], state.klondike),
-        }
-      | FreeCell => {
-          ...state,
-          freeCell: Array.concat([FreeCell.Game.createNewGame()], state.freeCell),
-        }
-      | UpAndDown => {
-          ...state,
-          upAndDown: Array.concat([UpAndDown.Game.createNewGame()], state.upAndDown),
-        }
-      }
-    )
-    forceUpdate()
-  }
   <div>
     <div className="px-5 pt-3 ">
       <div className="font-black text-xl mb-1"> {"Card Games!"->React.string} </div>
@@ -86,9 +67,6 @@ let make = () => {
         })
         ->React.array}
       </div>
-      // <div>
-      //   <button onClick={_ => createNewGame()}> {"New Game"->React.string} </button>
-      // </div>
     </div>
     {switch selectGameType {
     | Klondike =>
@@ -96,7 +74,13 @@ let make = () => {
         ? React.null
         : <Klondike.Game
             key={"klondike" ++ state.contents.klondike->Array.length->Int.toString}
-            createNewGame
+            onCreateNewGame={x => {
+              setState(state => {
+                ...state,
+                klondike: Array.concat([x], state.klondike),
+              })
+              forceUpdate()
+            }}
             getState={() => state.contents.klondike->Array.getUnsafe(0)}
             setState={f =>
               setState(state => {
@@ -109,7 +93,13 @@ let make = () => {
         ? React.null
         : <FreeCell.Game
             key={"freeCell" ++ state.contents.freeCell->Array.length->Int.toString}
-            createNewGame
+            onCreateNewGame={x => {
+              setState(state => {
+                ...state,
+                freeCell: Array.concat([x], state.freeCell),
+              })
+              forceUpdate()
+            }}
             getState={() => state.contents.freeCell->Array.getUnsafe(0)}
             setState={f =>
               setState(state => {
@@ -122,7 +112,13 @@ let make = () => {
         ? React.null
         : <UpAndDown.Game
             key={"upAndDown" ++ state.contents.upAndDown->Array.length->Int.toString}
-            createNewGame
+            onCreateNewGame={x => {
+              setState(state => {
+                ...state,
+                upAndDown: Array.concat([x], state.upAndDown),
+              })
+              forceUpdate()
+            }}
             getState={() => state.contents.upAndDown->Array.getUnsafe(0)}
             setState={f =>
               setState(state => {

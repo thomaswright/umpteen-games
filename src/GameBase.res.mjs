@@ -264,20 +264,6 @@ function Create(GameRules) {
             }
           };
   };
-  var createNewGame = function () {
-    var match = GameRules.initiateGame();
-    return {
-            deck: match[0],
-            history: [{
-                game: match[1],
-                actor: "User"
-              }],
-            undoStats: {
-              currentUndoDepth: 0,
-              undos: []
-            }
-          };
-  };
   var useGame = function (subscribe, getInitial) {
     var match = React.useState(function () {
           return getInitial();
@@ -330,6 +316,7 @@ function Create(GameRules) {
     make: GameBase$Create$BoardWrapper
   };
   var GameBase$Create = function (props) {
+    var onCreateNewGame = props.onCreateNewGame;
     var setState = props.setState;
     var getState = props.getState;
     var listeners = {
@@ -681,6 +668,24 @@ function Create(GameRules) {
       }
       dragData.current = undefined;
     };
+    var createNewGame = function () {
+      var match = GameRules.initiateGame();
+      var newGame_deck = match[0];
+      var newGame_history = [{
+          game: match[1],
+          actor: "User"
+        }];
+      var newGame_undoStats = {
+        currentUndoDepth: 0,
+        undos: []
+      };
+      var newGame = {
+        deck: newGame_deck,
+        history: newGame_history,
+        undoStats: newGame_undoStats
+      };
+      onCreateNewGame(newGame);
+    };
     React.useEffect((function () {
             window.addEventListener("mousemove", onMouseMove);
             window.addEventListener("mouseup", onMouseUp);
@@ -698,7 +703,7 @@ function Create(GameRules) {
                         moveToState: moveToState,
                         autoProgress: autoProgress,
                         undo: undo,
-                        createNewGame: props.createNewGame,
+                        createNewGame: createNewGame,
                         restartGame: restartGame
                       }),
                   JsxRuntime.jsx(GameRules.AllCards.make, {
@@ -722,7 +727,6 @@ function Create(GameRules) {
           undoStats_decode: undoStats_decode,
           state_encode: state_encode,
           state_decode: state_decode,
-          createNewGame: createNewGame,
           useGame: useGame,
           BoardWrapper: BoardWrapper,
           make: GameBase$Create

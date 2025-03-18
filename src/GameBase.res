@@ -153,23 +153,6 @@ module Create = (GameRules: GameRules) => {
   @decco
   type state = {deck: GameRules.deck, history: array<historySnapshot>, undoStats: undoStats}
 
-  let createNewGame = () => {
-    let (deck, game) = GameRules.initiateGame()
-    {
-      deck,
-      history: [
-        {
-          actor: User,
-          game,
-        },
-      ],
-      undoStats: {
-        currentUndoDepth: 0,
-        undos: [],
-      },
-    }
-  }
-
   let useGame = (subscribe, getInitial) => {
     let (externalState, setExternalState) = React.useState(() => getInitial())
     React.useEffect0(() => {
@@ -221,7 +204,11 @@ module Create = (GameRules: GameRules) => {
   }
 
   @react.component
-  let make = (~getState: unit => state, ~setState: (state => state) => unit, ~createNewGame) => {
+  let make = (
+    ~getState: unit => state,
+    ~setState: (state => state) => unit,
+    ~onCreateNewGame: state => unit,
+  ) => {
     let listeners = ref(Set.make())
 
     let subscribe = listener => {
@@ -631,6 +618,25 @@ module Create = (GameRules: GameRules) => {
       }
 
       dragData.current = None
+    }
+
+    let createNewGame = () => {
+      let (deck, game) = GameRules.initiateGame()
+      let newGame = {
+        deck,
+        history: [
+          {
+            actor: User,
+            game,
+          },
+        ],
+        undoStats: {
+          currentUndoDepth: 0,
+          undos: [],
+        },
+      }
+
+      onCreateNewGame(newGame)
     }
 
     React.useEffect(() => {

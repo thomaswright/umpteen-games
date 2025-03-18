@@ -140,32 +140,6 @@ function GameBrowser(props) {
           }
           forceUpdate();
         }), []);
-  var createNewGame = function () {
-    setState(function (state) {
-          switch (selectGameType) {
-            case "Klondike" :
-                return {
-                        klondike: [Klondike.Game.createNewGame()].concat(state.klondike),
-                        freeCell: state.freeCell,
-                        upAndDown: state.upAndDown
-                      };
-            case "FreeCell" :
-                return {
-                        klondike: state.klondike,
-                        freeCell: [FreeCell.Game.createNewGame()].concat(state.freeCell),
-                        upAndDown: state.upAndDown
-                      };
-            case "UpAndDown" :
-                return {
-                        klondike: state.klondike,
-                        freeCell: state.freeCell,
-                        upAndDown: [UpAndDown.Game.createNewGame()].concat(state.upAndDown)
-                      };
-            
-          }
-        });
-    forceUpdate();
-  };
   var tmp;
   switch (selectGameType) {
     case "Klondike" :
@@ -182,7 +156,16 @@ function GameBrowser(props) {
                                 };
                         });
                   }),
-                createNewGame: createNewGame
+                onCreateNewGame: (function (x) {
+                    setState(function (state) {
+                          return {
+                                  klondike: [x].concat(state.klondike),
+                                  freeCell: state.freeCell,
+                                  upAndDown: state.upAndDown
+                                };
+                        });
+                    forceUpdate();
+                  })
               }, "klondike" + state.contents.klondike.length.toString());
         break;
     case "FreeCell" :
@@ -199,7 +182,16 @@ function GameBrowser(props) {
                                 };
                         });
                   }),
-                createNewGame: createNewGame
+                onCreateNewGame: (function (x) {
+                    setState(function (state) {
+                          return {
+                                  klondike: state.klondike,
+                                  freeCell: [x].concat(state.freeCell),
+                                  upAndDown: state.upAndDown
+                                };
+                        });
+                    forceUpdate();
+                  })
               }, "freeCell" + state.contents.freeCell.length.toString());
         break;
     case "UpAndDown" :
@@ -216,7 +208,16 @@ function GameBrowser(props) {
                                 };
                         });
                   }),
-                createNewGame: createNewGame
+                onCreateNewGame: (function (x) {
+                    setState(function (state) {
+                          return {
+                                  klondike: state.klondike,
+                                  freeCell: state.freeCell,
+                                  upAndDown: [x].concat(state.upAndDown)
+                                };
+                        });
+                    forceUpdate();
+                  })
               }, "upAndDown" + state.contents.upAndDown.length.toString());
         break;
     
