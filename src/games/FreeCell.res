@@ -96,7 +96,6 @@ module GameRules: GameBase.GameRules = {
   let pileBaseRules = (i): staticSpace => {
     {
       droppedUpon: (game, dragPile) => {
-        let dragPileBase = dragPile->Array.getUnsafe(0)
         let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
 
         if noChildren {
