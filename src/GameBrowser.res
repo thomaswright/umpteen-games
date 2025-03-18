@@ -70,7 +70,6 @@ let make = () => {
     )
     forceUpdate()
   }
-
   <div>
     <div className="px-5 pt-3 ">
       <div className="font-black text-xl mb-1"> {"Card Games!"->React.string} </div>
@@ -108,7 +107,7 @@ let make = () => {
       state.contents.freeCell->Array.length == 0
         ? React.null
         : <FreeCell.Game
-            key={"freeCell" ++ state.contents.klondike->Array.length->Int.toString}
+            key={"freeCell" ++ state.contents.freeCell->Array.length->Int.toString}
             getState={() => state.contents.freeCell->Array.getUnsafe(0)}
             setState={f =>
               setState(state => {
@@ -120,7 +119,7 @@ let make = () => {
       state.contents.upAndDown->Array.length == 0
         ? React.null
         : <UpAndDown.Game
-            key={"upAndDown" ++ state.contents.klondike->Array.length->Int.toString}
+            key={"upAndDown" ++ state.contents.upAndDown->Array.length->Int.toString}
             getState={() => state.contents.upAndDown->Array.getUnsafe(0)}
             setState={f =>
               setState(state => {

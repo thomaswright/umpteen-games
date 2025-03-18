@@ -166,6 +166,7 @@ function GameBrowser(props) {
         });
     forceUpdate();
   };
+  console.log("render");
   var tmp;
   switch (selectGameType) {
     case "Klondike" :
@@ -198,7 +199,7 @@ function GameBrowser(props) {
                                 };
                         });
                   })
-              }, "freeCell" + state.contents.klondike.length.toString());
+              }, "freeCell" + state.contents.freeCell.length.toString());
         break;
     case "UpAndDown" :
         tmp = state.contents.upAndDown.length === 0 ? null : JsxRuntime.jsx(UpAndDown.Game.make, {
@@ -214,7 +215,7 @@ function GameBrowser(props) {
                                 };
                         });
                   })
-              }, "upAndDown" + state.contents.klondike.length.toString());
+              }, "upAndDown" + state.contents.upAndDown.length.toString());
         break;
     
   }
