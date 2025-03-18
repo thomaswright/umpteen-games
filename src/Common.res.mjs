@@ -61,6 +61,8 @@ var ArrayAux = {
 };
 
 function Common$UtilBoard(props) {
+  var restartGame = props.restartGame;
+  var createNewGame = props.createNewGame;
   var undo = props.undo;
   return JsxRuntime.jsxs("div", {
               children: [
@@ -71,12 +73,26 @@ function Common$UtilBoard(props) {
                           undo();
                         })
                     }),
+                JsxRuntime.jsx("button", {
+                      children: "New Game",
+                      className: "bg-gray-200 rounded px-4 ",
+                      onClick: (function (param) {
+                          createNewGame();
+                        })
+                    }),
+                JsxRuntime.jsx("button", {
+                      children: "Restart Game",
+                      className: "bg-gray-200 rounded px-4 ",
+                      onClick: (function (param) {
+                          restartGame();
+                        })
+                    }),
                 JsxRuntime.jsx("div", {
                       children: props.isWin ? "You Won!" : null,
                       className: "px-4 font-black text-blue-600"
                     })
               ],
-              className: "flex flex-row mb-5 mt-4"
+              className: "flex flex-row mb-5 mt-4 gap-2"
             });
 }
 

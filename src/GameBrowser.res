@@ -86,9 +86,9 @@ let make = () => {
         })
         ->React.array}
       </div>
-      <div>
-        <button onClick={_ => createNewGame()}> {"New Game"->React.string} </button>
-      </div>
+      // <div>
+      //   <button onClick={_ => createNewGame()}> {"New Game"->React.string} </button>
+      // </div>
     </div>
     {switch selectGameType {
     | Klondike =>
@@ -96,6 +96,7 @@ let make = () => {
         ? React.null
         : <Klondike.Game
             key={"klondike" ++ state.contents.klondike->Array.length->Int.toString}
+            createNewGame
             getState={() => state.contents.klondike->Array.getUnsafe(0)}
             setState={f =>
               setState(state => {
@@ -108,6 +109,7 @@ let make = () => {
         ? React.null
         : <FreeCell.Game
             key={"freeCell" ++ state.contents.freeCell->Array.length->Int.toString}
+            createNewGame
             getState={() => state.contents.freeCell->Array.getUnsafe(0)}
             setState={f =>
               setState(state => {
@@ -120,6 +122,7 @@ let make = () => {
         ? React.null
         : <UpAndDown.Game
             key={"upAndDown" ++ state.contents.upAndDown->Array.length->Int.toString}
+            createNewGame
             getState={() => state.contents.upAndDown->Array.getUnsafe(0)}
             setState={f =>
               setState(state => {

@@ -166,7 +166,6 @@ function GameBrowser(props) {
         });
     forceUpdate();
   };
-  console.log("render");
   var tmp;
   switch (selectGameType) {
     case "Klondike" :
@@ -182,7 +181,8 @@ function GameBrowser(props) {
                                   upAndDown: state.upAndDown
                                 };
                         });
-                  })
+                  }),
+                createNewGame: createNewGame
               }, "klondike" + state.contents.klondike.length.toString());
         break;
     case "FreeCell" :
@@ -198,7 +198,8 @@ function GameBrowser(props) {
                                   upAndDown: state.upAndDown
                                 };
                         });
-                  })
+                  }),
+                createNewGame: createNewGame
               }, "freeCell" + state.contents.freeCell.length.toString());
         break;
     case "UpAndDown" :
@@ -214,7 +215,8 @@ function GameBrowser(props) {
                                   upAndDown: Common.ArrayAux.update(state.upAndDown, 0, f)
                                 };
                         });
-                  })
+                  }),
+                createNewGame: createNewGame
               }, "upAndDown" + state.contents.upAndDown.length.toString());
         break;
     
@@ -248,14 +250,6 @@ function GameBrowser(props) {
                                               }, v);
                                   }),
                               className: "flex flex-row gap-4"
-                            }),
-                        JsxRuntime.jsx("div", {
-                              children: JsxRuntime.jsx("button", {
-                                    children: "New Game",
-                                    onClick: (function (param) {
-                                        createNewGame();
-                                      })
-                                  })
                             })
                       ],
                       className: "px-5 pt-3 "

@@ -29,10 +29,16 @@ module ArrayAux = {
 
 module UtilBoard = {
   @react.component
-  let make = (~undo, ~isWin) => {
-    <div className="flex flex-row mb-5 mt-4">
+  let make = (~undo, ~isWin, ~createNewGame, ~restartGame) => {
+    <div className="flex flex-row mb-5 mt-4 gap-2">
       <button className={"bg-gray-200 rounded px-4 "} onClick={_ => undo()}>
         {"Undo"->React.string}
+      </button>
+      <button className={"bg-gray-200 rounded px-4 "} onClick={_ => createNewGame()}>
+        {"New Game"->React.string}
+      </button>
+      <button className={"bg-gray-200 rounded px-4 "} onClick={_ => restartGame()}>
+        {"Restart Game"->React.string}
       </button>
       <div className="px-4 font-black text-blue-600">
         {isWin ? "You Won!"->React.string : React.null}

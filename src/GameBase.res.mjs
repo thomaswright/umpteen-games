@@ -292,6 +292,7 @@ function Create(GameRules) {
     return match[0];
   };
   var GameBase$Create$BoardWrapper = function (props) {
+    var restartGame = props.restartGame;
     var undo = props.undo;
     var moveToState = props.moveToState;
     var game = useGame(props.subscribe, props.getInitial);
@@ -299,12 +300,18 @@ function Create(GameRules) {
       undo();
       moveToState();
     };
+    var restartGame$1 = function () {
+      restartGame();
+      moveToState();
+    };
     var isWin = GameRules.winCheck(game);
     return JsxRuntime.jsxs(React.Fragment, {
                 children: [
                   JsxRuntime.jsx(Common.UtilBoard.make, {
                         undo: undo$1,
-                        isWin: isWin
+                        isWin: isWin,
+                        createNewGame: props.createNewGame,
+                        restartGame: restartGame$1
                       }),
                   JsxRuntime.jsx(GameRules.Board.make, {
                         setRef: props.setRef,
@@ -322,7 +329,7 @@ function Create(GameRules) {
   var BoardWrapper = {
     make: GameBase$Create$BoardWrapper
   };
-  var GameBase$Create$Main = function (props) {
+  var GameBase$Create = function (props) {
     var setState = props.setState;
     var getState = props.getState;
     var listeners = {
@@ -392,6 +399,18 @@ function Create(GameRules) {
                   });
       }
       
+    };
+    var restartGame = function () {
+      setState(function (state) {
+            return {
+                    deck: state.deck,
+                    history: state.history.slice(0, 1),
+                    undoStats: {
+                      currentUndoDepth: 0,
+                      undos: []
+                    }
+                  };
+          });
     };
     var refs = React.useRef([]);
     var dragData = React.useRef(undefined);
@@ -678,7 +697,9 @@ function Create(GameRules) {
                         setGame: setGame,
                         moveToState: moveToState,
                         autoProgress: autoProgress,
-                        undo: undo
+                        undo: undo,
+                        createNewGame: props.createNewGame,
+                        restartGame: restartGame
                       }),
                   JsxRuntime.jsx(GameRules.AllCards.make, {
                         setRef: setRef,
@@ -688,15 +709,6 @@ function Create(GameRules) {
                 ],
                 className: "relative m-5 mt-0",
                 id: "board"
-              });
-  };
-  var Main = {
-    make: GameBase$Create$Main
-  };
-  var GameBase$Create = function (props) {
-    return JsxRuntime.jsx(GameBase$Create$Main, {
-                getState: props.getState,
-                setState: props.setState
               });
   };
   return {
@@ -713,7 +725,6 @@ function Create(GameRules) {
           createNewGame: createNewGame,
           useGame: useGame,
           BoardWrapper: BoardWrapper,
-          Main: Main,
           make: GameBase$Create
         };
 }
