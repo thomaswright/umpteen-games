@@ -112,7 +112,7 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let pileRules = (pile, card, i, j): movableSpace => {
+  let pileRules = (game, pile, card, i, j): movableSpace => {
     let isLast = j == pile->Array.length - 1
 
     {
@@ -126,8 +126,11 @@ module GameRules: GameBase.GameRules = {
         pile->Array.get(j + 1)->Option.mapOr((), x => move(Card(x)))
       },
       dragPile: () => {
+        let freeCellCount =
+          game.piles->Array.filter(pile => pile->Array.length == 0)->Array.length +
+            game.free->Array.filter(Option.isNone)->Array.length
         let dragPile = pile->Array.sliceToEnd(~start=j)
-        if dragPile->dragPileValidation {
+        if dragPile->dragPileValidation && freeCellCount >= dragPile->Array.length - 1 {
           Some(dragPile)
         } else {
           None
@@ -257,7 +260,7 @@ module GameRules: GameBase.GameRules = {
 
       pile->Array.forEachWithIndex((card, j) => {
         if Card(card) == match {
-          result := pileRules(pile, card, i, j)->Movable->Some
+          result := pileRules(game, pile, card, i, j)->Movable->Some
         }
       })
     })

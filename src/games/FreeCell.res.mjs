@@ -377,7 +377,7 @@ function pileBaseRules(i) {
         };
 }
 
-function pileRules(pile, card, i, j) {
+function pileRules(game, pile, card, i, j) {
   var isLast = j === (pile.length - 1 | 0);
   return {
           locationAdjustment: {
@@ -390,8 +390,11 @@ function pileRules(pile, card, i, j) {
             _0: i
           },
           dragPile: (function () {
+              var freeCellCount = game.piles.filter(function (pile) {
+                    return pile.length === 0;
+                  }).length + game.free.filter(Core__Option.isNone).length | 0;
               var dragPile = pile.slice(j);
-              if (dragPileValidation(dragPile)) {
+              if (dragPileValidation(dragPile) && freeCellCount >= (dragPile.length - 1 | 0)) {
                 return dragPile;
               }
               
@@ -560,7 +563,7 @@ function getRule(game, match) {
                     }, match)) {
                 result.contents = {
                   TAG: "Movable",
-                  _0: pileRules(pile, card, i, j)
+                  _0: pileRules(game, pile, card, i, j)
                 };
                 return ;
               }
