@@ -281,7 +281,7 @@ function Create(GameRules) {
     var restartGame = props.restartGame;
     var undo = props.undo;
     var moveToState = props.moveToState;
-    var game = useGame(props.subscribe, props.getInitial);
+    var game = useGame(props.subscribe, props.getGame);
     var undo$1 = function () {
       undo();
       moveToState();
@@ -315,8 +315,7 @@ function Create(GameRules) {
   var BoardWrapper = {
     make: GameBase$Create$BoardWrapper
   };
-  var GameBase$Create = function (props) {
-    var onCreateNewGame = props.onCreateNewGame;
+  var GameBase$Create$Main = function (props) {
     var setState = props.setState;
     var getState = props.getState;
     var listeners = {
@@ -668,6 +667,42 @@ function Create(GameRules) {
       }
       dragData.current = undefined;
     };
+    React.useEffect((function () {
+            window.addEventListener("mousemove", onMouseMove);
+            window.addEventListener("mouseup", onMouseUp);
+            moveToState();
+            autoProgress();
+          }), []);
+    return JsxRuntime.jsxs("div", {
+                children: [
+                  JsxRuntime.jsx(GameBase$Create$BoardWrapper, {
+                        subscribe: subscribe,
+                        getGame: getGame,
+                        setRef: setRef,
+                        onMouseDown: onMouseDown,
+                        setGame: setGame,
+                        moveToState: moveToState,
+                        autoProgress: autoProgress,
+                        undo: undo,
+                        createNewGame: props.createNewGame,
+                        restartGame: restartGame
+                      }),
+                  JsxRuntime.jsx(GameRules.AllCards.make, {
+                        setRef: setRef,
+                        onMouseDown: onMouseDown,
+                        deck: getState().deck
+                      })
+                ],
+                className: "relative m-5 mt-0",
+                id: "board"
+              });
+  };
+  var Main = {
+    make: GameBase$Create$Main
+  };
+  var GameBase$Create = function (props) {
+    var onCreateNewGame = props.onCreateNewGame;
+    var getState = props.getState;
     var createNewGame = function () {
       var match = GameRules.initiateGame();
       var newGame_deck = match[0];
@@ -687,34 +722,20 @@ function Create(GameRules) {
       onCreateNewGame(newGame);
     };
     React.useEffect((function () {
-            window.addEventListener("mousemove", onMouseMove);
-            window.addEventListener("mouseup", onMouseUp);
-            moveToState();
-            autoProgress();
+            if (Core__Option.isNone(getState)) {
+              createNewGame();
+            }
+            
           }), []);
-    return JsxRuntime.jsxs("div", {
-                children: [
-                  JsxRuntime.jsx(GameBase$Create$BoardWrapper, {
-                        subscribe: subscribe,
-                        getInitial: getGame,
-                        setRef: setRef,
-                        onMouseDown: onMouseDown,
-                        setGame: setGame,
-                        moveToState: moveToState,
-                        autoProgress: autoProgress,
-                        undo: undo,
-                        createNewGame: createNewGame,
-                        restartGame: restartGame
-                      }),
-                  JsxRuntime.jsx(GameRules.AllCards.make, {
-                        setRef: setRef,
-                        onMouseDown: onMouseDown,
-                        deck: getState().deck
-                      })
-                ],
-                className: "relative m-5 mt-0",
-                id: "board"
-              });
+    if (getState !== undefined) {
+      return JsxRuntime.jsx(GameBase$Create$Main, {
+                  getState: getState,
+                  setState: props.setState,
+                  createNewGame: createNewGame
+                });
+    } else {
+      return null;
+    }
   };
   return {
           appendReactElement: appendReactElement,
@@ -729,6 +750,7 @@ function Create(GameRules) {
           state_decode: state_decode,
           useGame: useGame,
           BoardWrapper: BoardWrapper,
+          Main: Main,
           make: GameBase$Create
         };
 }

@@ -143,82 +143,82 @@ function GameBrowser(props) {
   var tmp;
   switch (selectGameType) {
     case "Klondike" :
-        tmp = state.contents.klondike.length === 0 ? null : JsxRuntime.jsx(Klondike.Game.make, {
-                getState: (function () {
+        tmp = JsxRuntime.jsx(Klondike.Game.make, {
+              getState: state.contents.klondike.length === 0 ? undefined : (function () {
                     return state.contents.klondike[0];
                   }),
-                setState: (function (f) {
-                    setState(function (state) {
-                          return {
-                                  klondike: Common.ArrayAux.update(state.klondike, 0, f),
-                                  freeCell: state.freeCell,
-                                  upAndDown: state.upAndDown
-                                };
-                        });
-                  }),
-                onCreateNewGame: (function (x) {
-                    setState(function (state) {
-                          return {
-                                  klondike: [x].concat(state.klondike),
-                                  freeCell: state.freeCell,
-                                  upAndDown: state.upAndDown
-                                };
-                        });
-                    forceUpdate();
-                  })
-              }, "klondike" + state.contents.klondike.length.toString());
+              setState: (function (f) {
+                  setState(function (state) {
+                        return {
+                                klondike: Common.ArrayAux.update(state.klondike, 0, f),
+                                freeCell: state.freeCell,
+                                upAndDown: state.upAndDown
+                              };
+                      });
+                }),
+              onCreateNewGame: (function (x) {
+                  setState(function (state) {
+                        return {
+                                klondike: [x].concat(state.klondike),
+                                freeCell: state.freeCell,
+                                upAndDown: state.upAndDown
+                              };
+                      });
+                  forceUpdate();
+                })
+            }, "klondike" + state.contents.klondike.length.toString());
         break;
     case "FreeCell" :
-        tmp = state.contents.freeCell.length === 0 ? null : JsxRuntime.jsx(FreeCell.Game.make, {
-                getState: (function () {
+        tmp = JsxRuntime.jsx(FreeCell.Game.make, {
+              getState: state.contents.freeCell.length === 0 ? undefined : (function () {
                     return state.contents.freeCell[0];
                   }),
-                setState: (function (f) {
-                    setState(function (state) {
-                          return {
-                                  klondike: state.klondike,
-                                  freeCell: Common.ArrayAux.update(state.freeCell, 0, f),
-                                  upAndDown: state.upAndDown
-                                };
-                        });
-                  }),
-                onCreateNewGame: (function (x) {
-                    setState(function (state) {
-                          return {
-                                  klondike: state.klondike,
-                                  freeCell: [x].concat(state.freeCell),
-                                  upAndDown: state.upAndDown
-                                };
-                        });
-                    forceUpdate();
-                  })
-              }, "freeCell" + state.contents.freeCell.length.toString());
+              setState: (function (f) {
+                  setState(function (state) {
+                        return {
+                                klondike: state.klondike,
+                                freeCell: Common.ArrayAux.update(state.freeCell, 0, f),
+                                upAndDown: state.upAndDown
+                              };
+                      });
+                }),
+              onCreateNewGame: (function (x) {
+                  setState(function (state) {
+                        return {
+                                klondike: state.klondike,
+                                freeCell: [x].concat(state.freeCell),
+                                upAndDown: state.upAndDown
+                              };
+                      });
+                  forceUpdate();
+                })
+            }, "freeCell" + state.contents.freeCell.length.toString());
         break;
     case "UpAndDown" :
-        tmp = state.contents.upAndDown.length === 0 ? null : JsxRuntime.jsx(UpAndDown.Game.make, {
-                getState: (function () {
+        tmp = JsxRuntime.jsx(UpAndDown.Game.make, {
+              getState: state.contents.upAndDown.length === 0 ? undefined : (function () {
                     return state.contents.upAndDown[0];
                   }),
-                setState: (function (f) {
-                    setState(function (state) {
-                          return {
-                                  klondike: state.klondike,
-                                  freeCell: state.freeCell,
-                                  upAndDown: Common.ArrayAux.update(state.upAndDown, 0, f)
-                                };
-                        });
-                  }),
-                onCreateNewGame: (function (x) {
-                    setState(function (state) {
-                          return {
-                                  klondike: state.klondike,
-                                  freeCell: state.freeCell,
-                                  upAndDown: [x].concat(state.upAndDown)
-                                };
-                        });
-                    forceUpdate();
-                  })
-              }, "upAndDown" + state.contents.upAndDown.length.toString());
+              setState: (function (f) {
+                  setState(function (state) {
+                        return {
+                                klondike: state.klondike,
+                                freeCell: state.freeCell,
+                                upAndDown: Common.ArrayAux.update(state.upAndDown, 0, f)
+                              };
+                      });
+                }),
+              onCreateNewGame: (function (x) {
+                  setState(function (state) {
+                        return {
+                                klondike: state.klondike,
+                                freeCell: state.freeCell,
+                                upAndDown: [x].concat(state.upAndDown)
+                              };
+                      });
+                  forceUpdate();
+                })
+            }, "upAndDown" + state.contents.upAndDown.length.toString());
         break;
     
   }
