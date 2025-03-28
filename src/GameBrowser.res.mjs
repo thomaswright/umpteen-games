@@ -125,6 +125,10 @@ function GameBrowser(props) {
   var setSelectGameType = match[1];
   var selectGameType = match[0];
   var forceUpdate = useForceUpdate();
+  var match$1 = React.useState(function () {
+        return false;
+      });
+  var setLoaded = match$1[1];
   React.useEffect((function () {
           var s = localStorage.getItem("state");
           if (s !== null) {
@@ -138,8 +142,14 @@ function GameBrowser(props) {
                   return x;
                 });
           }
+          setLoaded(function (param) {
+                return true;
+              });
           forceUpdate();
         }), []);
+  if (!match$1[0]) {
+    return null;
+  }
   var tmp;
   switch (selectGameType) {
     case "Klondike" :
