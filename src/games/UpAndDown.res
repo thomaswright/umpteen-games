@@ -108,11 +108,11 @@ module GameRules: GameBase.GameRules = {
   }
 
   let applyLiftToDragPile = (dragPile, lift) => {
-    ()
+    lift(Item(dragPile), 0)
   }
 
   let applyMoveToDragPile = (dragPile, move) => {
-    ()
+    move(Item(dragPile), 0, 0)
   }
 
   let pileBaseRules = (i): staticSpace => {

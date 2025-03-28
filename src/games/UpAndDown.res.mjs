@@ -491,11 +491,17 @@ function removeDragFromGame(game, dragPile) {
 }
 
 function applyLiftToDragPile(dragPile, lift) {
-  
+  return lift({
+              TAG: "Item",
+              _0: dragPile
+            }, 0);
 }
 
 function applyMoveToDragPile(dragPile, move) {
-  
+  return move({
+              TAG: "Item",
+              _0: dragPile
+            }, 0, 0);
 }
 
 function pileBaseRules(i) {
