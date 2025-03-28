@@ -31,6 +31,18 @@ module GameRules: GameBase.GameRules = {
   type movableSpace = GameBase.movableSpace<game, space, dragPile>
   type staticSpace = GameBase.staticSpace<game, dragPile>
 
+  let applyLiftToDragPile = (dragPile, lift) => {
+    dragPile->Array.forEachWithIndex((v, j) => {
+      lift(Card(v), j)
+    })
+  }
+
+  let applyMoveToDragPile = (dragPile, move) => {
+    dragPile->Array.forEachWithIndex((v, j) => {
+      move(Card(v), 0, j * 20)
+    })
+  }
+
   let dragPileValidation = dragPile => {
     let (dragPileIsValid, _) =
       dragPile
@@ -120,9 +132,6 @@ module GameRules: GameBase.GameRules = {
         z: j + 1,
       },
       baseSpace: Pile(i),
-      applyMoveToOthers: move => {
-        pile->Array.get(j + 1)->Option.mapOr((), x => move(Card(x)))
-      },
       dragPile: () => {
         let dragPile = pile->Array.sliceToEnd(~start=j)
         if dragPile->dragPileValidation {
@@ -187,7 +196,6 @@ module GameRules: GameBase.GameRules = {
         z: j + 1,
       },
       baseSpace: Foundation(i),
-      applyMoveToOthers: _ => (),
       dragPile: () => {
         if j == game.foundations->Array.length - 1 {
           Some([card])
@@ -221,7 +229,6 @@ module GameRules: GameBase.GameRules = {
       y: 0,
       z: i + 1,
     },
-    applyMoveToOthers: _ => (),
     dragPile: () => {
       if i == game.waste->Array.length - 1 {
         Some([card])
@@ -240,7 +247,6 @@ module GameRules: GameBase.GameRules = {
       y: 0,
       z: i + 1,
     },
-    applyMoveToOthers: _ => (),
     dragPile: () => None,
     autoProgress: () => DoNothing,
     droppedUpon: (_, _) => None,

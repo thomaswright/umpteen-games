@@ -25,7 +25,7 @@ type movableSpace<'game, 'space, 'dragPile> = {
   dragPile: unit => option<'dragPile>,
   autoProgress: unit => autoProgress<'dragPile>,
   droppedUpon: droppedUpon<'game, 'dragPile>,
-  applyMoveToOthers: ('space => unit) => unit,
+  // applyMoveToOthers: ('space => unit) => unit,
 }
 
 type staticSpace<'game, 'dragPile> = {
@@ -55,6 +55,8 @@ module type GameRules = {
   let getRule: getRule<game, space, dragPile>
   let removeDragFromGame: (game, dragPile) => game
   let winCheck: game => bool
+  let applyLiftToDragPile: (dragPile, (space, int) => unit) => unit
+  let applyMoveToDragPile: (dragPile, (space, int, int) => unit) => unit
 
   module Board: {
     type props<
@@ -303,64 +305,32 @@ module Create = (GameRules: GameRules) => {
         }
       }
 
-      let applyMoveToOthers = (element, f) => {
-        element
-        ->GameRules.getSpace
-        ->Option.mapOr((), space => {
-          let appliedF = s => {
-            s
-            ->getElement
-            ->Option.mapOr((), childEl => {
-              f(childEl)
-            })
-          }
-
-          GameRules.getRule(getGame(), space)->Option.mapOr((), rule => {
-            switch rule {
-            | Static(_) => ()
-            | Movable({applyMoveToOthers}) => applyMoveToOthers(appliedF)
-            }
+      let liftUpDragPile = dragPile => {
+        GameRules.applyLiftToDragPile(dragPile, (space, zIndex) => {
+          space
+          ->getElement
+          ->Option.mapOr((), element => {
+            element->setStyleZIndex((1000 + zIndex)->Int.toString)
           })
         })
       }
 
-      let rec liftUp = (element, zIndex) => {
+      let liftUp = (element, zIndex) => {
         element->setStyleZIndex(zIndex->Int.toString)
-        applyMoveToOthers(element, childEl => {
-          liftUp(childEl, zIndex + 1)
-        })
       }
 
-      let rec setDown = (element, zIndex) => {
+      let setDown = (element, zIndex) => {
         zIndex->Option.mapOr((), zIndex => {
           element->setStyleZIndex(zIndex->Int.toString)
         })
-
-        applyMoveToOthers(element, childEl =>
-          setDown(childEl, zIndex->Option.map(zIndex => zIndex + 1))
-        )
       }
 
-      let rec move = (element, left, top, offset) => {
+      let move = (element, left, top) => {
         element->setStyleLeft(left->Int.toString ++ "px")
         element->setStyleTop(top->Int.toString ++ "px")
-
-        offset->Option.mapOr((), ((leftOffset, topOffset)) => {
-          applyMoveToOthers(element, childEl =>
-            move(childEl, left + leftOffset, top + topOffset, offset)
-          )
-        })
       }
 
-      let moveWithTime = (
-        element,
-        refPos,
-        targetLeft,
-        targetTop,
-        targetZIndex,
-        offset,
-        duration,
-      ) => {
+      let moveWithTime = (element, refPos, targetLeft, targetTop, targetZIndex, duration) => {
         let start = element->elementPosition
 
         let startZIndex = element->zIndexFromElement
@@ -398,7 +368,7 @@ module Create = (GameRules: GameRules) => {
           let leftMove = start.left +. (adjustedTargetLeft -. start.left) *. easedProgress
           let topMove = start.top +. (adjustedTargetTop -. start.top) *. easedProgress
 
-          move(element, leftMove->Int.fromFloat, topMove->Int.fromFloat, offset)
+          move(element, leftMove->Int.fromFloat, topMove->Int.fromFloat)
 
           if progress < 1. {
             requestAnimationFrame(step)
@@ -439,7 +409,6 @@ module Create = (GameRules: GameRules) => {
                     locationAdjustment.x->Int.toFloat,
                     locationAdjustment.y->Int.toFloat,
                     Some(locationAdjustment.z),
-                    None,
                     300.,
                   )
                 },
@@ -511,7 +480,7 @@ module Create = (GameRules: GameRules) => {
                       boardPos.top->Int.fromFloat,
                     ),
                   })
-                  liftUp(dragElement, 1000)
+                  liftUpDragPile(dragPile)
                 },
               )
             }
@@ -525,7 +494,16 @@ module Create = (GameRules: GameRules) => {
           let leftMove = event->MouseEvent.clientX - offsetX
           let topMove = event->MouseEvent.clientY - offsetY
 
-          move(dragData.dragElement, leftMove, topMove, Some(0, 20))
+          GameRules.applyMoveToDragPile(dragData.dragPile, (space, x, y) => {
+            space
+            ->getElement
+            ->Option.mapOr(
+              (),
+              element => {
+                move(element, leftMove + x, topMove + y)
+              },
+            )
+          })
         })
       }
 

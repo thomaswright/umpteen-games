@@ -107,6 +107,14 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
+  let applyLiftToDragPile = (dragPile, lift) => {
+    ()
+  }
+
+  let applyMoveToDragPile = (dragPile, move) => {
+    ()
+  }
+
   let pileBaseRules = (i): staticSpace => {
     {
       droppedUpon: (game, dragPile) => {
@@ -135,7 +143,6 @@ module GameRules: GameBase.GameRules = {
         z: j + 1,
       },
       baseSpace: Pile(i),
-      applyMoveToOthers: _ => (),
       dragPile: () => {
         if isLast {
           Some(item)
@@ -209,7 +216,6 @@ module GameRules: GameBase.GameRules = {
         z: j + 1,
       },
       baseSpace: Foundation(i),
-      applyMoveToOthers: _ => (),
       dragPile: () => None,
       autoProgress: () => Seek,
       droppedUpon: (game, dragPile) => {
@@ -260,7 +266,6 @@ module GameRules: GameBase.GameRules = {
         z: j,
       },
       baseSpace: TarotUp,
-      applyMoveToOthers: _ => (),
       dragPile: () => None,
       autoProgress: () => Seek,
       droppedUpon: (game, dragPile) => {
@@ -309,7 +314,6 @@ module GameRules: GameBase.GameRules = {
         z: j,
       },
       baseSpace: TarotDown,
-      applyMoveToOthers: _ => (),
       dragPile: () => None,
       autoProgress: () => Seek,
       droppedUpon: (game, dragPile) => {
@@ -347,7 +351,6 @@ module GameRules: GameBase.GameRules = {
         z: 1,
       },
       baseSpace: Free,
-      applyMoveToOthers: _ => (),
       autoProgress: () => Send(card),
       dragPile: () => Some(card),
       droppedUpon: (_game, _dragPile) => None,

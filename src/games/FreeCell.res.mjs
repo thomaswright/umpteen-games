@@ -358,6 +358,24 @@ function removeDragFromGame(game, dragPile) {
         };
 }
 
+function applyLiftToDragPile(dragPile, lift) {
+  dragPile.forEach(function (v, j) {
+        lift({
+              TAG: "Card",
+              _0: v
+            }, j);
+      });
+}
+
+function applyMoveToDragPile(dragPile, move) {
+  dragPile.forEach(function (v, j) {
+        move({
+              TAG: "Card",
+              _0: v
+            }, 0, Math.imul(j, 20));
+      });
+}
+
 function pileBaseRules(i) {
   return {
           droppedUpon: (function (game, dragPile) {
@@ -421,14 +439,6 @@ function pileRules(game, pile, card, i, j) {
                       };
               }
               
-            }),
-          applyMoveToOthers: (function (move) {
-              Core__Option.mapOr(pile[j + 1 | 0], undefined, (function (x) {
-                      move({
-                            TAG: "Card",
-                            _0: x
-                          });
-                    }));
             })
         };
 }
@@ -487,9 +497,6 @@ function foundationRules(game, card, i, j) {
                       };
               }
               
-            }),
-          applyMoveToOthers: (function (param) {
-              
             })
         };
 }
@@ -534,9 +541,6 @@ function freeRules(card, i) {
                     };
             }),
           droppedUpon: (function (_game, _dragPile) {
-              
-            }),
-          applyMoveToOthers: (function (param) {
               
             })
         };
@@ -742,6 +746,8 @@ var GameRules = {
   getRule: getRule,
   removeDragFromGame: removeDragFromGame,
   winCheck: winCheck,
+  applyLiftToDragPile: applyLiftToDragPile,
+  applyMoveToDragPile: applyMoveToDragPile,
   Board: Board,
   AllCards: AllCards
 };

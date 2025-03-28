@@ -490,6 +490,14 @@ function removeDragFromGame(game, dragPile) {
         };
 }
 
+function applyLiftToDragPile(dragPile, lift) {
+  
+}
+
+function applyMoveToDragPile(dragPile, move) {
+  
+}
+
 function pileBaseRules(i) {
   return {
           droppedUpon: (function (game, dragPile) {
@@ -572,9 +580,6 @@ function pileRules(pile, item, i, j) {
                       };
               }
               
-            }),
-          applyMoveToOthers: (function (param) {
-              
             })
         };
 }
@@ -638,9 +643,6 @@ function foundationRules(card, i, j) {
                       };
               }
               
-            }),
-          applyMoveToOthers: (function (param) {
-              
             })
         };
 }
@@ -696,9 +698,6 @@ function tarotUpRules(tarot, j) {
                         free: game.free
                       };
               }
-              
-            }),
-          applyMoveToOthers: (function (param) {
               
             })
         };
@@ -756,9 +755,6 @@ function tarotDownRules(tarot, j) {
                       };
               }
               
-            }),
-          applyMoveToOthers: (function (param) {
-              
             })
         };
 }
@@ -801,9 +797,6 @@ function freeRules(card) {
                     };
             }),
           droppedUpon: (function (_game, _dragPile) {
-              
-            }),
-          applyMoveToOthers: (function (param) {
               
             })
         };
@@ -1071,6 +1064,8 @@ var GameRules = {
   getRule: getRule,
   removeDragFromGame: removeDragFromGame,
   winCheck: winCheck,
+  applyLiftToDragPile: applyLiftToDragPile,
+  applyMoveToDragPile: applyMoveToDragPile,
   Board: Board,
   AllCards: AllCards
 };

@@ -414,47 +414,12 @@ function Create(GameRules) {
         refs.current.push(element);
       };
     };
-    var applyMoveToOthers = function (element, f) {
-      Core__Option.mapOr(GameRules.getSpace(element), undefined, (function (space) {
-              var appliedF = function (s) {
-                Core__Option.mapOr(getElement(s), undefined, (function (childEl) {
-                        f(childEl);
-                      }));
-              };
-              Core__Option.mapOr(GameRules.getRule(getGame(), space), undefined, (function (rule) {
-                      if (rule.TAG === "Movable") {
-                        return rule._0.applyMoveToOthers(appliedF);
-                      }
-                      
-                    }));
-            }));
-    };
     var liftUp = function (element, zIndex) {
       element.style["z-index"] = zIndex.toString();
-      applyMoveToOthers(element, (function (childEl) {
-              liftUp(childEl, zIndex + 1 | 0);
-            }));
     };
-    var setDown = function (element, zIndex) {
-      Core__Option.mapOr(zIndex, undefined, (function (zIndex) {
-              element.style["z-index"] = zIndex.toString();
-            }));
-      applyMoveToOthers(element, (function (childEl) {
-              setDown(childEl, Core__Option.map(zIndex, (function (zIndex) {
-                          return zIndex + 1 | 0;
-                        })));
-            }));
-    };
-    var move = function (element, left, top, offset) {
+    var move = function (element, left, top) {
       element.style.left = left.toString() + "px";
       element.style.top = top.toString() + "px";
-      Core__Option.mapOr(offset, undefined, (function (param) {
-              var topOffset = param[1];
-              var leftOffset = param[0];
-              applyMoveToOthers(element, (function (childEl) {
-                      move(childEl, left + leftOffset | 0, top + topOffset | 0, offset);
-                    }));
-            }));
     };
     var moveToState = function () {
       refs.current.forEach(function (element) {
@@ -471,7 +436,6 @@ function Create(GameRules) {
                             var targetLeft = locationAdjustment.x;
                             var targetTop = locationAdjustment.y;
                             var targetZIndex = locationAdjustment.z;
-                            var offset;
                             var duration = 300;
                             var start = elementPosition(element);
                             var startZIndex = zIndexFromElement(element);
@@ -496,12 +460,14 @@ function Create(GameRules) {
                               var easedProgress = easeOutQuad(progress);
                               var leftMove = start_left + (adjustedTargetLeft - start_left) * easedProgress;
                               var topMove = start_top + (adjustedTargetTop - start_top) * easedProgress;
-                              move(element, leftMove | 0, topMove | 0, offset);
+                              move(element, leftMove | 0, topMove | 0);
                               if (progress < 1) {
                                 requestAnimationFrame(step);
                                 return ;
                               } else {
-                                return setDown(element, targetZIndex);
+                                return Core__Option.mapOr(targetZIndex, undefined, (function (zIndex) {
+                                              element.style["z-index"] = zIndex.toString();
+                                            }));
                               }
                             };
                             if (start_left !== Math.floor(adjustedTargetLeft) || start_top !== Math.floor(adjustedTargetTop) || Caml_obj.notequal(startZIndex, targetZIndex)) {
@@ -548,7 +514,11 @@ function Create(GameRules) {
                                         dragSpace: dragSpace,
                                         dragPile: dragPile
                                       };
-                                      liftUp(dragElement, 1000);
+                                      GameRules.applyLiftToDragPile(dragPile, (function (space, zIndex) {
+                                              Core__Option.mapOr(getElement(space), undefined, (function (element) {
+                                                      element.style["z-index"] = (1000 + zIndex | 0).toString();
+                                                    }));
+                                            }));
                                     }));
                       }
                       
@@ -560,10 +530,11 @@ function Create(GameRules) {
               var match = dragData.offset;
               var leftMove = $$event.clientX - match[0] | 0;
               var topMove = $$event.clientY - match[1] | 0;
-              move(dragData.dragElement, leftMove, topMove, [
-                    0,
-                    20
-                  ]);
+              GameRules.applyMoveToDragPile(dragData.dragPile, (function (space, x, y) {
+                      Core__Option.mapOr(getElement(space), undefined, (function (element) {
+                              move(element, leftMove + x | 0, topMove + y | 0);
+                            }));
+                    }));
             }));
     };
     var autoProgress = function () {

@@ -13,7 +13,6 @@ import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
-import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function space_encode(value) {
@@ -278,6 +277,24 @@ function game_decode(value) {
         };
 }
 
+function applyLiftToDragPile(dragPile, lift) {
+  dragPile.forEach(function (v, j) {
+        lift({
+              TAG: "Card",
+              _0: v
+            }, j);
+      });
+}
+
+function applyMoveToDragPile(dragPile, move) {
+  dragPile.forEach(function (v, j) {
+        move({
+              TAG: "Card",
+              _0: v
+            }, 0, Math.imul(j, 20));
+      });
+}
+
 function dragPileValidation(dragPile) {
   return Core__Array.reduce(dragPile.toReversed(), [
                 true,
@@ -419,14 +436,6 @@ function pileRules(pile, card, i, j) {
                       };
               }
               
-            }),
-          applyMoveToOthers: (function (move) {
-              Core__Option.mapOr(pile[j + 1 | 0], undefined, (function (x) {
-                      move({
-                            TAG: "Card",
-                            _0: x
-                          });
-                    }));
             })
         };
 }
@@ -487,9 +496,6 @@ function foundationRules(game, card, i, j) {
                       };
               }
               
-            }),
-          applyMoveToOthers: (function (param) {
-              
             })
         };
 }
@@ -513,9 +519,6 @@ function wasteRules(game, card, i) {
             }),
           droppedUpon: (function (param, param$1) {
               
-            }),
-          applyMoveToOthers: (function (param) {
-              
             })
         };
 }
@@ -535,9 +538,6 @@ function stockRules(i) {
               return "DoNothing";
             }),
           droppedUpon: (function (param, param$1) {
-              
-            }),
-          applyMoveToOthers: (function (param) {
               
             })
         };
@@ -780,6 +780,8 @@ var GameRules = {
   getRule: getRule,
   removeDragFromGame: removeDragFromGame,
   winCheck: winCheck,
+  applyLiftToDragPile: applyLiftToDragPile,
+  applyMoveToDragPile: applyMoveToDragPile,
   Board: Board,
   AllCards: AllCards
 };
