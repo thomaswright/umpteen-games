@@ -4,7 +4,7 @@ open GameBase
 
 module GameRules: GameBase.GameRules = {
   @decco
-  type space = Card(Card.card) | Foundation(int) | Pile(int) | Waste | Stock
+  type space = Card(Card.card) | Foundation(int) | Pile(int) | Free(int)
 
   let getSpace = element => {
     switch element->Element.id->Js.Json.parseExn->space_decode {
@@ -20,28 +20,16 @@ module GameRules: GameBase.GameRules = {
   type dragPile = array<Card.card>
   @decco
   type deck = array<Card.card>
+
   @decco
   type game = {
     piles: array<array<Card.card>>,
     foundations: array<array<Card.card>>,
-    stock: array<Card.card>,
-    waste: array<Card.card>,
+    free: array<option<Card.card>>,
   }
 
   type movableSpace = GameBase.movableSpace<game, space, dragPile>
   type staticSpace = GameBase.staticSpace<game, dragPile>
-
-  let applyLiftToDragPile = (dragPile, lift) => {
-    dragPile->Array.forEachWithIndex((v, j) => {
-      lift(Card(v), j)
-    })
-  }
-
-  let applyMoveToDragPile = (dragPile, move) => {
-    dragPile->Array.forEachWithIndex((v, j) => {
-      move(Card(v), 0, j * 20)
-    })
-  }
 
   let dragPileValidation = dragPile => {
     let (dragPileIsValid, _) =
@@ -62,32 +50,36 @@ module GameRules: GameBase.GameRules = {
   }
 
   let initiateGame = () => {
-    let shuffledDeck = Card.getDeck(0)->Array.toShuffled
+    let shuffledDeck0 = Card.getDeck(0)
+    let shuffledDeck1 = Card.getDeck(1)
+    let shuffledDeck = Array.concat(shuffledDeck0, shuffledDeck1)->Array.toShuffled
+
     let deckToDeal = ref(shuffledDeck)
 
     (
       shuffledDeck,
       {
         piles: [
-          deckToDeal->ArrayAux.popN(1),
-          deckToDeal->ArrayAux.popN(2),
-          deckToDeal->ArrayAux.popN(3),
-          deckToDeal->ArrayAux.popN(4),
-          deckToDeal->ArrayAux.popN(5),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(11),
+          deckToDeal->ArrayAux.popN(11),
+          deckToDeal->ArrayAux.popN(11),
+          deckToDeal->ArrayAux.popN(11),
+          deckToDeal->ArrayAux.popN(10),
+          deckToDeal->ArrayAux.popN(10),
+          deckToDeal->ArrayAux.popN(10),
+          deckToDeal->ArrayAux.popN(10),
+          deckToDeal->ArrayAux.popN(10),
+          deckToDeal->ArrayAux.popN(10),
         ],
-        foundations: [[], [], [], []],
-        stock: deckToDeal.contents,
-        waste: [],
+        foundations: [[], [], [], [], [], [], [], []],
+        free: [None, None, None, None, None, None, None, None],
       },
     )
   }
 
   let winCheck = (game: game) => {
     game.piles->Array.every(pile => pile->Array.length == 0) &&
-    game.stock->Array.length == 0 &&
-    game.waste->Array.length == 0
+      game.free->Array.every(Option.isNone)
   }
 
   let removeDragFromGame = (game: game, dragPile: dragPile) => {
@@ -99,18 +91,32 @@ module GameRules: GameBase.GameRules = {
     {
       foundations: game.foundations->Array.map(removeDragPile),
       piles: game.piles->Array.map(removeDragPile),
-      stock: game.stock->removeDragPile,
-      waste: game.waste->removeDragPile,
+      free: game.free->Array.map(card => {
+        card->Option.flatMap(card =>
+          dragPile->Array.some(dCard => card == dCard) ? None : Some(card)
+        )
+      }),
     }
+  }
+
+  let applyLiftToDragPile = (dragPile, lift) => {
+    dragPile->Array.forEachWithIndex((v, j) => {
+      lift(Card(v), j)
+    })
+  }
+
+  let applyMoveToDragPile = (dragPile, move) => {
+    dragPile->Array.forEachWithIndex((v, j) => {
+      move(Card(v), 0, j * 20)
+    })
   }
 
   let pileBaseRules = (i): staticSpace => {
     {
       droppedUpon: (game, dragPile) => {
-        let dragPileBase = dragPile->Array.getUnsafe(0)
         let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
 
-        if noChildren && dragPileBase.rank == RK {
+        if noChildren {
           Some({
             ...game,
             piles: game.piles->ArrayAux.update(i, _ => dragPile),
@@ -123,7 +129,7 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let pileRules = (pile, card, i, j): movableSpace => {
+  let pileRules = (game, pile, card, i, j): movableSpace => {
     let isLast = j == pile->Array.length - 1
 
     {
@@ -134,8 +140,11 @@ module GameRules: GameBase.GameRules = {
       },
       baseSpace: Pile(i),
       dragPile: () => {
+        let freeCellCount =
+          game.piles->Array.filter(pile => pile->Array.length == 0)->Array.length +
+            game.free->Array.filter(Option.isNone)->Array.length
         let dragPile = pile->Array.sliceToEnd(~start=j)
-        if dragPile->dragPileValidation {
+        if dragPile->dragPileValidation && freeCellCount >= dragPile->Array.length - 1 {
           Some(dragPile)
         } else {
           None
@@ -223,34 +232,34 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let wasteRules = (game, card, i) => {
-    baseSpace: Waste,
-    locationAdjustment: {
-      x: 20 * i,
-      y: 0,
-      z: i + 1,
-    },
-    dragPile: () => {
-      if i == game.waste->Array.length - 1 {
-        Some([card])
+  let freeBaseRules = (i): staticSpace => {
+    autoProgress: false,
+    droppedUpon: (game, dragPile) => {
+      let noChildren = game.free->Array.getUnsafe(i)->Option.isNone
+
+      if noChildren && dragPile->Array.length == 1 {
+        Some({
+          ...game,
+          free: game.free->ArrayAux.update(i, _ => dragPile->Array.get(0)),
+        })
       } else {
         None
       }
     },
-    autoProgress: () => DoNothing,
-    droppedUpon: (_, _) => None,
   }
 
-  let stockRules = i => {
-    baseSpace: Stock,
-    locationAdjustment: {
-      x: 0,
-      y: 0,
-      z: i + 1,
-    },
-    dragPile: () => None,
-    autoProgress: () => DoNothing,
-    droppedUpon: (_, _) => None,
+  let freeRules = (card, i): movableSpace => {
+    {
+      locationAdjustment: {
+        x: 0,
+        y: 0,
+        z: 1,
+      },
+      baseSpace: Free(i),
+      autoProgress: () => Send([card]),
+      dragPile: () => Some([card]),
+      droppedUpon: (_game, _dragPile) => None,
+    }
   }
 
   let getRule: GameBase.getRule<game, space, dragPile> = (game: game, match: space) => {
@@ -263,7 +272,7 @@ module GameRules: GameBase.GameRules = {
 
       pile->Array.forEachWithIndex((card, j) => {
         if Card(card) == match {
-          result := pileRules(pile, card, i, j)->Movable->Some
+          result := pileRules(game, pile, card, i, j)->Movable->Some
         }
       })
     })
@@ -280,46 +289,19 @@ module GameRules: GameBase.GameRules = {
       })
     })
 
-    game.waste->Array.forEachWithIndex((card, i) => {
-      if Card(card) == match {
-        result := wasteRules(game, card, i)->Movable->Some
+    game.free->Array.forEachWithIndex((card, i) => {
+      if Free(i) == match {
+        result := freeBaseRules(i)->Static->Some
       }
-    })
 
-    game.stock->Array.forEachWithIndex((card, i) => {
-      if Card(card) == match {
-        result := stockRules(i)->Movable->Some
-      }
+      card->Option.mapOr((), card => {
+        if Card(card) == match {
+          result := freeRules(card, i)->Movable->Some
+        }
+      })
     })
 
     result.contents
-  }
-
-  module Custom = {
-    let dealToWaste = async (setGame, moveToState, autoProgress) => {
-      let f = _ => {
-        setGame(game => {
-          ...game,
-          stock: game.stock->Array.slice(~start=0, ~end=game.stock->Array.length - 1),
-          waste: game.waste->Array.concat(
-            game.stock->Array.sliceToEnd(~start=game.stock->Array.length - 1),
-          ),
-        })
-        moveToState()
-      }
-
-      await numInterval(f, 400, 3)
-      autoProgress()
-    }
-
-    let restock = (setGame, moveToState) => {
-      setGame(game => {
-        ...game,
-        stock: game.waste->Array.toReversed,
-        waste: [],
-      })
-      moveToState()
-    }
   }
 
   module Board = {
@@ -327,56 +309,70 @@ module GameRules: GameBase.GameRules = {
     let make = (
       ~setRef,
       ~onMouseDown as _,
-      ~setGame,
-      ~moveToState,
-      ~autoProgress,
-      ~game,
+      ~setGame as _,
+      ~moveToState as _,
+      ~autoProgress as _,
+      ~game as _,
       ~undo as _,
       ~isWin as _,
     ) => {
       <React.Fragment>
-        <div className="flex flex-row gap-3">
-          <div
-            key={Stock->spaceToString}
-            id={Stock->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
-            onClick={_ => {
-              if game.stock->Array.length == 0 {
-                Custom.restock(setGame, moveToState)
-              } else {
-                Custom.dealToWaste(setGame, moveToState, autoProgress)->ignore
-              }
-            }}
-            className=" bg-blue-200 rounded w-14 h-20"
-            style={{
-              zIndex: "53",
-            }}
-          />
-          <div
-            key={Waste->spaceToString}
-            id={Waste->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Waste))}
-            className=" w-14 h-20"
-          />
+        <div className="flex flex-row">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-row gap-3">
+              {[[], [], [], []]
+              ->Array.mapWithIndex((_, i) => {
+                <div
+                  key={Free(i)->spaceToString}
+                  ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
+                  className=" border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                />
+              })
+              ->React.array}
+            </div>
+            <div className="flex flex-row gap-3">
+              {[[], [], [], []]
+              ->Array.mapWithIndex((_, i) => {
+                <div
+                  key={Free(i + 4)->spaceToString}
+                  ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i + 4)))}
+                  className=" border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                />
+              })
+              ->React.array}
+            </div>
+          </div>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-row gap-3 ml-10">
+              {[[], [], [], []]
+              ->Array.mapWithIndex((_, i) => {
+                <div
+                  key={Free(i)->spaceToString}
+                  ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
+                  className=" border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                />
+              })
+              ->React.array}
+            </div>
+            <div className="flex flex-row gap-3 ml-10">
+              {[[], [], [], []]
+              ->Array.mapWithIndex((_, i) => {
+                <div
+                  key={Free(i + 4)->spaceToString}
+                  ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i + 4)))}
+                  className=" border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                />
+              })
+              ->React.array}
+            </div>
+          </div>
         </div>
+        <div />
         <div className="flex flex-row gap-3 mt-5">
-          {[[], [], [], []]
-          ->Array.mapWithIndex((_, i) => {
-            <div
-              key={Foundation(i)->spaceToString}
-              id={Foundation(i)->spaceToString}
-              ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-              className=" border border-slate-200 bg-slate-100 rounded w-14 h-20"
-            />
-          })
-          ->React.array}
-        </div>
-        <div className="flex flex-row gap-3 mt-5">
-          {[[], [], [], [], [], [], []]
+          {[[], [], [], [], [], [], [], [], [], []]
           ->Array.mapWithIndex((_, i) => {
             <div
               key={Pile(i)->spaceToString}
-              id={Pile(i)->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
               className=" border border-slate-200 bg-slate-100  rounded w-14 h-20"
             />

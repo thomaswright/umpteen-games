@@ -282,10 +282,16 @@ function rank_decode(value) {
 }
 
 function card_encode(value) {
-  return Js_dict.fromArray([[
+  return Js_dict.fromArray([
+              [
                 "rank",
                 rank_encode(value.rank)
-              ]]);
+              ],
+              [
+                "deck",
+                Decco.intToJson(value.deck)
+              ]
+            ]);
 }
 
 function card_decode(value) {
@@ -296,20 +302,33 @@ function card_decode(value) {
   if (dict.TAG !== "JSONObject") {
     return Decco.error(undefined, "Not an object", value);
   }
-  var rank = rank_decode(Belt_Option.getWithDefault(Js_dict.get(dict._0, "rank"), null));
+  var dict$1 = dict._0;
+  var rank = rank_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "rank"), null));
   if (rank.TAG === "Ok") {
+    var deck = Decco.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "deck"), null));
+    if (deck.TAG === "Ok") {
+      return {
+              TAG: "Ok",
+              _0: Decco.unsafeAddFieldToObject("rank", rank._0, Decco.unsafeAddFieldToObject("deck", deck._0, {}))
+            };
+    }
+    var e = deck._0;
     return {
-            TAG: "Ok",
-            _0: Decco.unsafeAddFieldToObject("rank", rank._0, {})
+            TAG: "Error",
+            _0: {
+              path: ".deck" + e.path,
+              message: e.message,
+              value: e.value
+            }
           };
   }
-  var e = rank._0;
+  var e$1 = rank._0;
   return {
           TAG: "Error",
           _0: {
-            path: ".rank" + e.path,
-            message: e.message,
-            value: e.value
+            path: ".rank" + e$1.path,
+            message: e$1.message,
+            value: e$1.value
           }
         };
 }
@@ -473,12 +492,13 @@ var Display = {
   make: Tarot$Display
 };
 
-function getShuffledDeck() {
-  return Core__Array.toShuffled(Core__Array.reduce(allRanks, [], (function (a, rank) {
-                    return a.concat([{
-                                  rank: rank
-                                }]);
-                  })));
+function getDeck(deck) {
+  return Core__Array.reduce(allRanks, [], (function (a, rank) {
+                return a.concat([{
+                              rank: rank,
+                              deck: deck
+                            }]);
+              }));
 }
 
 export {
@@ -497,6 +517,6 @@ export {
   displayRank ,
   rotation ,
   Display ,
-  getShuffledDeck ,
+  getDeck ,
 }
 /* react/jsx-runtime Not a pure module */

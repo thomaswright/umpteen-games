@@ -293,19 +293,22 @@ function dragPileValidation(dragPile) {
 }
 
 function initiateGame() {
-  var shuffledDeck = Card.getShuffledDeck();
+  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0));
+  var deckToDeal = {
+    contents: shuffledDeck
+  };
   return [
           shuffledDeck,
           {
             piles: [
-              shuffledDeck.slice(0, 7),
-              shuffledDeck.slice(7, 14),
-              shuffledDeck.slice(14, 21),
-              shuffledDeck.slice(21, 28),
-              shuffledDeck.slice(28, 34),
-              shuffledDeck.slice(34, 40),
-              shuffledDeck.slice(40, 46),
-              shuffledDeck.slice(46, 52)
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6)
             ],
             foundations: [
               [],

@@ -24,7 +24,7 @@ type rank =
   | R21
 
 @decco
-type card = {rank: rank}
+type card = {rank: rank, deck: int}
 
 let allRanks = [
   R0,
@@ -139,16 +139,15 @@ module Display = {
   }
 }
 
-let getShuffledDeck = () => {
-  allRanks
-  ->Array.reduce([], (a, rank) => {
+let getDeck = deck => {
+  allRanks->Array.reduce([], (a, rank) => {
     a->Array.concat([
       (
         {
-          rank: rank,
+          rank,
+          deck,
         }: card
       ),
     ])
   })
-  ->Array.toShuffled
 }

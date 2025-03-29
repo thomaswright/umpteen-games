@@ -46,8 +46,8 @@ module GameRules: GameBase.GameRules = {
   let initiateGame = () => {
     let fullDeck =
       Array.concat(
-        Card.getShuffledDeck()->Array.map(card => Card(card)),
-        Tarot.getShuffledDeck()->Array.map(card => Tarot(card)),
+        Card.getDeck(0)->Array.toShuffled->Array.map(card => Card(card)),
+        Tarot.getDeck(0)->Array.toShuffled->Array.map(card => Tarot(card)),
       )->Array.toShuffled
 
     let deckWithoutAces = fullDeck->Array.filter(card => {
@@ -57,27 +57,29 @@ module GameRules: GameBase.GameRules = {
       }
     })
 
+    let deckToDeal = ref(deckWithoutAces)
+
     (
       fullDeck,
       {
         piles: [
-          deckWithoutAces->Array.slice(~start=0, ~end=7),
-          deckWithoutAces->Array.slice(~start=7, ~end=14),
-          deckWithoutAces->Array.slice(~start=14, ~end=21),
-          deckWithoutAces->Array.slice(~start=21, ~end=28),
-          deckWithoutAces->Array.slice(~start=28, ~end=35),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
           [],
-          deckWithoutAces->Array.slice(~start=35, ~end=42),
-          deckWithoutAces->Array.slice(~start=42, ~end=49),
-          deckWithoutAces->Array.slice(~start=49, ~end=56),
-          deckWithoutAces->Array.slice(~start=56, ~end=63),
-          deckWithoutAces->Array.slice(~start=63, ~end=70),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
         ],
         foundations: [
-          [{rank: RA, suit: Clubs}],
-          [{rank: RA, suit: Diamonds}],
-          [{rank: RA, suit: Hearts}],
-          [{rank: RA, suit: Spades}],
+          [{rank: RA, suit: Clubs, deck: 0}],
+          [{rank: RA, suit: Diamonds, deck: 0}],
+          [{rank: RA, suit: Hearts, deck: 0}],
+          [{rank: RA, suit: Spades, deck: 0}],
         ],
         tarotUp: [],
         tarotDown: [],

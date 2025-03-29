@@ -13,16 +13,10 @@ import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
+import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function space_encode(value) {
-  if (typeof value !== "object") {
-    if (value === "Waste") {
-      return ["Waste"];
-    } else {
-      return ["Stock"];
-    }
-  }
   switch (value.TAG) {
     case "Card" :
         return [
@@ -37,6 +31,11 @@ function space_encode(value) {
     case "Pile" :
         return [
                 "Pile",
+                Decco.intToJson(value._0)
+              ];
+    case "Free" :
+        return [
+                "Free",
                 Decco.intToJson(value._0)
               ];
     
@@ -105,7 +104,7 @@ function space_decode(value) {
                     value: e$1.value
                   }
                 };
-      case "Pile" :
+      case "Free" :
           if (tagged.length !== 2) {
             return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
           }
@@ -114,7 +113,7 @@ function space_decode(value) {
             return {
                     TAG: "Ok",
                     _0: {
-                      TAG: "Pile",
+                      TAG: "Free",
                       _0: v0$2._0
                     }
                   };
@@ -128,24 +127,29 @@ function space_decode(value) {
                     value: e$2.value
                   }
                 };
-      case "Stock" :
-          if (tagged.length !== 1) {
+      case "Pile" :
+          if (tagged.length !== 2) {
             return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          } else {
+          }
+          var v0$3 = Decco.intFromJson(Belt_Array.getExn(jsonArr$1, 1));
+          if (v0$3.TAG === "Ok") {
             return {
                     TAG: "Ok",
-                    _0: "Stock"
+                    _0: {
+                      TAG: "Pile",
+                      _0: v0$3._0
+                    }
                   };
           }
-      case "Waste" :
-          if (tagged.length !== 1) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          } else {
-            return {
-                    TAG: "Ok",
-                    _0: "Waste"
-                  };
-          }
+          var e$3 = v0$3._0;
+          return {
+                  TAG: "Error",
+                  _0: {
+                    path: "[0]" + e$3.path,
+                    message: e$3.message,
+                    value: e$3.value
+                  }
+                };
       default:
         
     }
@@ -192,16 +196,12 @@ function game_encode(value) {
                     })(value.foundations)
               ],
               [
-                "stock",
+                "free",
                 (function (extra) {
-                      return Decco.arrayToJson(Card.card_encode, extra);
-                    })(value.stock)
-              ],
-              [
-                "waste",
-                (function (extra) {
-                      return Decco.arrayToJson(Card.card_encode, extra);
-                    })(value.waste)
+                      return Decco.arrayToJson((function (extra) {
+                                    return Decco.optionToJson(Card.card_encode, extra);
+                                  }), extra);
+                    })(value.free)
               ]
             ]);
 }
@@ -225,74 +225,45 @@ function game_decode(value) {
             return Decco.arrayFromJson(Card.card_decode, extra);
           }), extra$1);
     if (foundations.TAG === "Ok") {
-      var extra$2 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "stock"), null);
-      var stock = Decco.arrayFromJson(Card.card_decode, extra$2);
-      if (stock.TAG === "Ok") {
-        var extra$3 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "waste"), null);
-        var waste = Decco.arrayFromJson(Card.card_decode, extra$3);
-        if (waste.TAG === "Ok") {
-          return {
-                  TAG: "Ok",
-                  _0: Decco.unsafeAddFieldToObject("piles", piles._0, Decco.unsafeAddFieldToObject("foundations", foundations._0, Decco.unsafeAddFieldToObject("stock", stock._0, Decco.unsafeAddFieldToObject("waste", waste._0, {}))))
-                };
-        }
-        var e = waste._0;
+      var extra$2 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "free"), null);
+      var free = Decco.arrayFromJson((function (extra) {
+              return Decco.optionFromJson(Card.card_decode, extra);
+            }), extra$2);
+      if (free.TAG === "Ok") {
         return {
-                TAG: "Error",
-                _0: {
-                  path: ".waste" + e.path,
-                  message: e.message,
-                  value: e.value
-                }
+                TAG: "Ok",
+                _0: Decco.unsafeAddFieldToObject("piles", piles._0, Decco.unsafeAddFieldToObject("foundations", foundations._0, Decco.unsafeAddFieldToObject("free", free._0, {})))
               };
       }
-      var e$1 = stock._0;
+      var e = free._0;
       return {
               TAG: "Error",
               _0: {
-                path: ".stock" + e$1.path,
-                message: e$1.message,
-                value: e$1.value
+                path: ".free" + e.path,
+                message: e.message,
+                value: e.value
               }
             };
     }
-    var e$2 = foundations._0;
+    var e$1 = foundations._0;
     return {
             TAG: "Error",
             _0: {
-              path: ".foundations" + e$2.path,
-              message: e$2.message,
-              value: e$2.value
+              path: ".foundations" + e$1.path,
+              message: e$1.message,
+              value: e$1.value
             }
           };
   }
-  var e$3 = piles._0;
+  var e$2 = piles._0;
   return {
           TAG: "Error",
           _0: {
-            path: ".piles" + e$3.path,
-            message: e$3.message,
-            value: e$3.value
+            path: ".piles" + e$2.path,
+            message: e$2.message,
+            value: e$2.value
           }
         };
-}
-
-function applyLiftToDragPile(dragPile, lift) {
-  dragPile.forEach(function (v, j) {
-        lift({
-              TAG: "Card",
-              _0: v
-            }, j);
-      });
-}
-
-function applyMoveToDragPile(dragPile, move) {
-  dragPile.forEach(function (v, j) {
-        move({
-              TAG: "Card",
-              _0: v
-            }, 0, Math.imul(j, 20));
-      });
 }
 
 function dragPileValidation(dragPile) {
@@ -322,7 +293,9 @@ function dragPileValidation(dragPile) {
 }
 
 function initiateGame() {
-  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0));
+  var shuffledDeck0 = Card.getDeck(0);
+  var shuffledDeck1 = Card.getDeck(1);
+  var shuffledDeck = Core__Array.toShuffled(shuffledDeck0.concat(shuffledDeck1));
   var deckToDeal = {
     contents: shuffledDeck
   };
@@ -330,22 +303,37 @@ function initiateGame() {
           shuffledDeck,
           {
             piles: [
-              Common.ArrayAux.popN(deckToDeal, 1),
-              Common.ArrayAux.popN(deckToDeal, 2),
-              Common.ArrayAux.popN(deckToDeal, 3),
-              Common.ArrayAux.popN(deckToDeal, 4),
-              Common.ArrayAux.popN(deckToDeal, 5),
-              Common.ArrayAux.popN(deckToDeal, 6),
-              Common.ArrayAux.popN(deckToDeal, 7)
+              Common.ArrayAux.popN(deckToDeal, 11),
+              Common.ArrayAux.popN(deckToDeal, 11),
+              Common.ArrayAux.popN(deckToDeal, 11),
+              Common.ArrayAux.popN(deckToDeal, 11),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10)
             ],
             foundations: [
               [],
               [],
               [],
+              [],
+              [],
+              [],
+              [],
               []
             ],
-            stock: deckToDeal.contents,
-            waste: []
+            free: [
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined
+            ]
           }
         ];
 }
@@ -353,8 +341,8 @@ function initiateGame() {
 function winCheck(game) {
   if (game.piles.every(function (pile) {
           return pile.length === 0;
-        }) && game.stock.length === 0) {
-    return game.waste.length === 0;
+        })) {
+    return game.free.every(Core__Option.isNone);
   } else {
     return false;
   }
@@ -371,24 +359,49 @@ function removeDragFromGame(game, dragPile) {
   return {
           piles: game.piles.map(removeDragPile),
           foundations: game.foundations.map(removeDragPile),
-          stock: removeDragPile(game.stock),
-          waste: removeDragPile(game.waste)
+          free: game.free.map(function (card) {
+                return Core__Option.flatMap(card, (function (card) {
+                              if (dragPile.some(function (dCard) {
+                                      return Caml_obj.equal(card, dCard);
+                                    })) {
+                                return ;
+                              } else {
+                                return card;
+                              }
+                            }));
+              })
         };
+}
+
+function applyLiftToDragPile(dragPile, lift) {
+  dragPile.forEach(function (v, j) {
+        lift({
+              TAG: "Card",
+              _0: v
+            }, j);
+      });
+}
+
+function applyMoveToDragPile(dragPile, move) {
+  dragPile.forEach(function (v, j) {
+        move({
+              TAG: "Card",
+              _0: v
+            }, 0, Math.imul(j, 20));
+      });
 }
 
 function pileBaseRules(i) {
   return {
           droppedUpon: (function (game, dragPile) {
-              var dragPileBase = dragPile[0];
               var noChildren = game.piles[i].length === 0;
-              if (noChildren && dragPileBase.rank === "RK") {
+              if (noChildren) {
                 return {
                         piles: Common.ArrayAux.update(game.piles, i, (function (param) {
                                 return dragPile;
                               })),
                         foundations: game.foundations,
-                        stock: game.stock,
-                        waste: game.waste
+                        free: game.free
                       };
               }
               
@@ -397,7 +410,7 @@ function pileBaseRules(i) {
         };
 }
 
-function pileRules(pile, card, i, j) {
+function pileRules(game, pile, card, i, j) {
   var isLast = j === (pile.length - 1 | 0);
   return {
           locationAdjustment: {
@@ -410,8 +423,11 @@ function pileRules(pile, card, i, j) {
             _0: i
           },
           dragPile: (function () {
+              var freeCellCount = game.piles.filter(function (pile) {
+                    return pile.length === 0;
+                  }).length + game.free.filter(Core__Option.isNone).length | 0;
               var dragPile = pile.slice(j);
-              if (dragPileValidation(dragPile)) {
+              if (dragPileValidation(dragPile) && freeCellCount >= (dragPile.length - 1 | 0)) {
                 return dragPile;
               }
               
@@ -434,8 +450,7 @@ function pileRules(pile, card, i, j) {
                               return Common.ArrayAux.insertAfter(stack, card, dragPile);
                             }),
                         foundations: game.foundations,
-                        stock: game.stock,
-                        waste: game.waste
+                        free: game.free
                       };
               }
               
@@ -455,8 +470,7 @@ function foundationBaseRules(i) {
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                 return dragPile;
                               })),
-                        stock: game.stock,
-                        waste: game.waste
+                        free: game.free
                       };
               }
               
@@ -494,8 +508,7 @@ function foundationRules(game, card, i, j) {
                         foundations: game.foundations.map(function (stack) {
                               return Common.ArrayAux.insertAfter(stack, card, dragPile);
                             }),
-                        stock: game.stock,
-                        waste: game.waste
+                        free: game.free
                       };
               }
               
@@ -503,44 +516,46 @@ function foundationRules(game, card, i, j) {
         };
 }
 
-function wasteRules(game, card, i) {
+function freeBaseRules(i) {
   return {
-          locationAdjustment: {
-            x: Math.imul(20, i),
-            y: 0,
-            z: i + 1 | 0
-          },
-          baseSpace: "Waste",
-          dragPile: (function () {
-              if (i === (game.waste.length - 1 | 0)) {
-                return [card];
+          droppedUpon: (function (game, dragPile) {
+              var noChildren = Core__Option.isNone(game.free[i]);
+              if (noChildren && dragPile.length === 1) {
+                return {
+                        piles: game.piles,
+                        foundations: game.foundations,
+                        free: Common.ArrayAux.update(game.free, i, (function (param) {
+                                return dragPile[0];
+                              }))
+                      };
               }
               
             }),
-          autoProgress: (function () {
-              return "DoNothing";
-            }),
-          droppedUpon: (function (param, param$1) {
-              
-            })
+          autoProgress: false
         };
 }
 
-function stockRules(i) {
+function freeRules(card, i) {
   return {
           locationAdjustment: {
             x: 0,
             y: 0,
-            z: i + 1 | 0
+            z: 1
           },
-          baseSpace: "Stock",
+          baseSpace: {
+            TAG: "Free",
+            _0: i
+          },
           dragPile: (function () {
-              
+              return [card];
             }),
           autoProgress: (function () {
-              return "DoNothing";
+              return {
+                      TAG: "Send",
+                      _0: [card]
+                    };
             }),
-          droppedUpon: (function (param, param$1) {
+          droppedUpon: (function (_game, _dragPile) {
               
             })
         };
@@ -567,7 +582,7 @@ function getRule(game, match) {
                     }, match)) {
                 result.contents = {
                   TAG: "Movable",
-                  _0: pileRules(pile, card, i, j)
+                  _0: pileRules(game, pile, card, i, j)
                 };
                 return ;
               }
@@ -598,119 +613,138 @@ function getRule(game, match) {
               
             });
       });
-  game.waste.forEach(function (card, i) {
+  game.free.forEach(function (card, i) {
         if (Caml_obj.equal({
-                TAG: "Card",
-                _0: card
+                TAG: "Free",
+                _0: i
               }, match)) {
           result.contents = {
-            TAG: "Movable",
-            _0: wasteRules(game, card, i)
+            TAG: "Static",
+            _0: freeBaseRules(i)
           };
-          return ;
         }
-        
-      });
-  game.stock.forEach(function (card, i) {
-        if (Caml_obj.equal({
-                TAG: "Card",
-                _0: card
-              }, match)) {
-          result.contents = {
-            TAG: "Movable",
-            _0: stockRules(i)
-          };
-          return ;
-        }
-        
+        Core__Option.mapOr(card, undefined, (function (card) {
+                if (Caml_obj.equal({
+                        TAG: "Card",
+                        _0: card
+                      }, match)) {
+                  result.contents = {
+                    TAG: "Movable",
+                    _0: freeRules(card, i)
+                  };
+                  return ;
+                }
+                
+              }));
       });
   return result.contents;
 }
 
-async function dealToWaste(setGame, moveToState, autoProgress) {
-  var f = function (param) {
-    setGame(function (game) {
-          return {
-                  piles: game.piles,
-                  foundations: game.foundations,
-                  stock: game.stock.slice(0, game.stock.length - 1 | 0),
-                  waste: game.waste.concat(game.stock.slice(game.stock.length - 1 | 0))
-                };
-        });
-    moveToState();
-  };
-  await Common.numInterval(f, 400, 3);
-  return autoProgress();
-}
-
-function Klondike$GameRules$Board(props) {
-  var game = props.game;
-  var autoProgress = props.autoProgress;
-  var moveToState = props.moveToState;
-  var setGame = props.setGame;
+function DoubleFreeCell$GameRules$Board(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
                 JsxRuntime.jsxs("div", {
                       children: [
-                        JsxRuntime.jsx("div", {
-                              ref: Caml_option.some(setRef("Stock")),
-                              className: " bg-blue-200 rounded w-14 h-20",
-                              id: JSON.stringify(space_encode("Stock")),
-                              style: {
-                                zIndex: "53"
-                              },
-                              onClick: (function (param) {
-                                  if (game.stock.length === 0) {
-                                    setGame(function (game) {
-                                          return {
-                                                  piles: game.piles,
-                                                  foundations: game.foundations,
-                                                  stock: game.waste.toReversed(),
-                                                  waste: []
-                                                };
-                                        });
-                                    return moveToState();
-                                  } else {
-                                    dealToWaste(setGame, moveToState, autoProgress);
-                                    return ;
-                                  }
-                                })
-                            }, JSON.stringify(space_encode("Stock"))),
-                        JsxRuntime.jsx("div", {
-                              ref: Caml_option.some(setRef("Waste")),
-                              className: " w-14 h-20",
-                              id: JSON.stringify(space_encode("Waste"))
-                            }, JSON.stringify(space_encode("Waste")))
+                        JsxRuntime.jsxs("div", {
+                              children: [
+                                JsxRuntime.jsx("div", {
+                                      children: [
+                                          [],
+                                          [],
+                                          [],
+                                          []
+                                        ].map(function (param, i) {
+                                            return JsxRuntime.jsx("div", {
+                                                        ref: Caml_option.some(setRef({
+                                                                  TAG: "Free",
+                                                                  _0: i
+                                                                })),
+                                                        className: " border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                                                      }, JSON.stringify(space_encode({
+                                                                TAG: "Free",
+                                                                _0: i
+                                                              })));
+                                          }),
+                                      className: "flex flex-row gap-3"
+                                    }),
+                                JsxRuntime.jsx("div", {
+                                      children: [
+                                          [],
+                                          [],
+                                          [],
+                                          []
+                                        ].map(function (param, i) {
+                                            return JsxRuntime.jsx("div", {
+                                                        ref: Caml_option.some(setRef({
+                                                                  TAG: "Free",
+                                                                  _0: i + 4 | 0
+                                                                })),
+                                                        className: " border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                                                      }, JSON.stringify(space_encode({
+                                                                TAG: "Free",
+                                                                _0: i + 4 | 0
+                                                              })));
+                                          }),
+                                      className: "flex flex-row gap-3"
+                                    })
+                              ],
+                              className: "flex flex-col gap-3"
+                            }),
+                        JsxRuntime.jsxs("div", {
+                              children: [
+                                JsxRuntime.jsx("div", {
+                                      children: [
+                                          [],
+                                          [],
+                                          [],
+                                          []
+                                        ].map(function (param, i) {
+                                            return JsxRuntime.jsx("div", {
+                                                        ref: Caml_option.some(setRef({
+                                                                  TAG: "Foundation",
+                                                                  _0: i
+                                                                })),
+                                                        className: " border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                                                      }, JSON.stringify(space_encode({
+                                                                TAG: "Free",
+                                                                _0: i
+                                                              })));
+                                          }),
+                                      className: "flex flex-row gap-3 ml-10"
+                                    }),
+                                JsxRuntime.jsx("div", {
+                                      children: [
+                                          [],
+                                          [],
+                                          [],
+                                          []
+                                        ].map(function (param, i) {
+                                            return JsxRuntime.jsx("div", {
+                                                        ref: Caml_option.some(setRef({
+                                                                  TAG: "Foundation",
+                                                                  _0: i + 4 | 0
+                                                                })),
+                                                        className: " border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                                                      }, JSON.stringify(space_encode({
+                                                                TAG: "Free",
+                                                                _0: i + 4 | 0
+                                                              })));
+                                          }),
+                                      className: "flex flex-row gap-3 ml-10"
+                                    })
+                              ],
+                              className: "flex flex-col gap-3"
+                            })
                       ],
-                      className: "flex flex-row gap-3"
+                      className: "flex flex-row"
                     }),
+                JsxRuntime.jsx("div", {}),
                 JsxRuntime.jsx("div", {
                       children: [
                           [],
                           [],
                           [],
-                          []
-                        ].map(function (param, i) {
-                            return JsxRuntime.jsx("div", {
-                                        ref: Caml_option.some(setRef({
-                                                  TAG: "Foundation",
-                                                  _0: i
-                                                })),
-                                        className: " border border-slate-200 bg-slate-100 rounded w-14 h-20",
-                                        id: JSON.stringify(space_encode({
-                                                  TAG: "Foundation",
-                                                  _0: i
-                                                }))
-                                      }, JSON.stringify(space_encode({
-                                                TAG: "Foundation",
-                                                _0: i
-                                              })));
-                          }),
-                      className: "flex flex-row gap-3 mt-5"
-                    }),
-                JsxRuntime.jsx("div", {
-                      children: [
                           [],
                           [],
                           [],
@@ -724,11 +758,7 @@ function Klondike$GameRules$Board(props) {
                                                   TAG: "Pile",
                                                   _0: i
                                                 })),
-                                        className: " border border-slate-200 bg-slate-100  rounded w-14 h-20",
-                                        id: JSON.stringify(space_encode({
-                                                  TAG: "Pile",
-                                                  _0: i
-                                                }))
+                                        className: " border border-slate-200 bg-slate-100  rounded w-14 h-20"
                                       }, JSON.stringify(space_encode({
                                                 TAG: "Pile",
                                                 _0: i
@@ -741,10 +771,10 @@ function Klondike$GameRules$Board(props) {
 }
 
 var Board = {
-  make: Klondike$GameRules$Board
+  make: DoubleFreeCell$GameRules$Board
 };
 
-function Klondike$GameRules$AllCards(props) {
+function DoubleFreeCell$GameRules$AllCards(props) {
   var onMouseDown = props.onMouseDown;
   var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
@@ -769,7 +799,7 @@ function Klondike$GameRules$AllCards(props) {
 }
 
 var AllCards = {
-  make: Klondike$GameRules$AllCards
+  make: DoubleFreeCell$GameRules$AllCards
 };
 
 var GameRules = {

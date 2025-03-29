@@ -25,6 +25,7 @@ type rank =
 type card = {
   suit: suit,
   rank: rank,
+  deck: int,
 }
 
 type color = Black | Red
@@ -159,19 +160,18 @@ module Display = {
   }
 }
 
-let getShuffledDeck = () => {
-  allRanks
-  ->Array.reduce([], (a, rank) => {
+let getDeck = deck => {
+  allRanks->Array.reduce([], (a, rank) => {
     allSuits->Array.reduce(a, (a2, suit) => {
       a2->Array.concat([
         (
           {
             suit,
             rank,
+            deck,
           }: card
         ),
       ])
     })
   })
-  ->Array.toShuffled
 }

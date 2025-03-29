@@ -264,6 +264,10 @@ function card_encode(value) {
               [
                 "rank",
                 rank_encode(value.rank)
+              ],
+              [
+                "deck",
+                Decco.intToJson(value.deck)
               ]
             ]);
 }
@@ -281,28 +285,40 @@ function card_decode(value) {
   if (suit.TAG === "Ok") {
     var rank = rank_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "rank"), null));
     if (rank.TAG === "Ok") {
+      var deck = Decco.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "deck"), null));
+      if (deck.TAG === "Ok") {
+        return {
+                TAG: "Ok",
+                _0: Decco.unsafeAddFieldToObject("suit", suit._0, Decco.unsafeAddFieldToObject("rank", rank._0, Decco.unsafeAddFieldToObject("deck", deck._0, {})))
+              };
+      }
+      var e = deck._0;
       return {
-              TAG: "Ok",
-              _0: Decco.unsafeAddFieldToObject("suit", suit._0, Decco.unsafeAddFieldToObject("rank", rank._0, {}))
+              TAG: "Error",
+              _0: {
+                path: ".deck" + e.path,
+                message: e.message,
+                value: e.value
+              }
             };
     }
-    var e = rank._0;
+    var e$1 = rank._0;
     return {
             TAG: "Error",
             _0: {
-              path: ".rank" + e.path,
-              message: e.message,
-              value: e.value
+              path: ".rank" + e$1.path,
+              message: e$1.message,
+              value: e$1.value
             }
           };
   }
-  var e$1 = suit._0;
+  var e$2 = suit._0;
   return {
           TAG: "Error",
           _0: {
-            path: ".suit" + e$1.path,
-            message: e$1.message,
-            value: e$1.value
+            path: ".suit" + e$2.path,
+            message: e$2.message,
+            value: e$2.value
           }
         };
 }
@@ -552,15 +568,16 @@ var Display = {
   make: Card$Display
 };
 
-function getShuffledDeck() {
-  return Core__Array.toShuffled(Core__Array.reduce(allRanks, [], (function (a, rank) {
-                    return Core__Array.reduce(allSuits, a, (function (a2, suit) {
-                                  return a2.concat([{
-                                                suit: suit,
-                                                rank: rank
-                                              }]);
-                                }));
-                  })));
+function getDeck(deck) {
+  return Core__Array.reduce(allRanks, [], (function (a, rank) {
+                return Core__Array.reduce(allSuits, a, (function (a2, suit) {
+                              return a2.concat([{
+                                            suit: suit,
+                                            rank: rank,
+                                            deck: deck
+                                          }]);
+                            }));
+              }));
 }
 
 export {
@@ -591,6 +608,6 @@ export {
   rotation ,
   toString ,
   Display ,
-  getShuffledDeck ,
+  getDeck ,
 }
 /* react/jsx-runtime Not a pure module */

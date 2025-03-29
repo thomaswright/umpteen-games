@@ -50,20 +50,22 @@ module GameRules: GameBase.GameRules = {
   }
 
   let initiateGame = () => {
-    let shuffledDeck = Card.getShuffledDeck()
+    let shuffledDeck = Card.getDeck(0)->Array.toShuffled
+
+    let deckToDeal = ref(shuffledDeck)
 
     (
       shuffledDeck,
       {
         piles: [
-          shuffledDeck->Array.slice(~start=0, ~end=7),
-          shuffledDeck->Array.slice(~start=7, ~end=14),
-          shuffledDeck->Array.slice(~start=14, ~end=21),
-          shuffledDeck->Array.slice(~start=21, ~end=28),
-          shuffledDeck->Array.slice(~start=28, ~end=34),
-          shuffledDeck->Array.slice(~start=34, ~end=40),
-          shuffledDeck->Array.slice(~start=40, ~end=46),
-          shuffledDeck->Array.slice(~start=46, ~end=52),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
         ],
         foundations: [[], [], [], []],
         free: [None, None, None, None],

@@ -51,13 +51,20 @@ function sliceBefore(arr, pred) {
   return arr.slice(0, (arr.length - 1 | 0) - revIndex | 0);
 }
 
+function popN(deck, n) {
+  var result = deck.contents.slice(0, n);
+  deck.contents = deck.contents.slice(n);
+  return result;
+}
+
 var ArrayAux = {
   removeLast: removeLast,
   getLast: getLast,
   update: update,
   insertAfter: insertAfter,
   forEach2: forEach2,
-  sliceBefore: sliceBefore
+  sliceBefore: sliceBefore,
+  popN: popN
 };
 
 function Common$UtilBoard(props) {

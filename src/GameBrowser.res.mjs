@@ -9,6 +9,7 @@ import * as FreeCell from "./games/FreeCell.res.mjs";
 import * as Klondike from "./games/Klondike.res.mjs";
 import * as UpAndDown from "./games/UpAndDown.res.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
+import * as DoubleFreeCell from "./games/DoubleFreeCell.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function gameString(a) {
@@ -28,6 +29,12 @@ function state_encode(value) {
                 (function (extra) {
                       return Decco.arrayToJson(FreeCell.Game.state_encode, extra);
                     })(value.freeCell)
+              ],
+              [
+                "doubleFreeCell",
+                (function (extra) {
+                      return Decco.arrayToJson(DoubleFreeCell.Game.state_encode, extra);
+                    })(value.doubleFreeCell)
               ],
               [
                 "upAndDown",
@@ -53,41 +60,54 @@ function state_decode(value) {
     var extra$1 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "freeCell"), null);
     var freeCell = Decco.arrayFromJson(FreeCell.Game.state_decode, extra$1);
     if (freeCell.TAG === "Ok") {
-      var extra$2 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "upAndDown"), null);
-      var upAndDown = Decco.arrayFromJson(UpAndDown.Game.state_decode, extra$2);
-      if (upAndDown.TAG === "Ok") {
+      var extra$2 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "doubleFreeCell"), null);
+      var doubleFreeCell = Decco.arrayFromJson(DoubleFreeCell.Game.state_decode, extra$2);
+      if (doubleFreeCell.TAG === "Ok") {
+        var extra$3 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "upAndDown"), null);
+        var upAndDown = Decco.arrayFromJson(UpAndDown.Game.state_decode, extra$3);
+        if (upAndDown.TAG === "Ok") {
+          return {
+                  TAG: "Ok",
+                  _0: Decco.unsafeAddFieldToObject("klondike", klondike._0, Decco.unsafeAddFieldToObject("freeCell", freeCell._0, Decco.unsafeAddFieldToObject("doubleFreeCell", doubleFreeCell._0, Decco.unsafeAddFieldToObject("upAndDown", upAndDown._0, {}))))
+                };
+        }
+        var e = upAndDown._0;
         return {
-                TAG: "Ok",
-                _0: Decco.unsafeAddFieldToObject("klondike", klondike._0, Decco.unsafeAddFieldToObject("freeCell", freeCell._0, Decco.unsafeAddFieldToObject("upAndDown", upAndDown._0, {})))
+                TAG: "Error",
+                _0: {
+                  path: ".upAndDown" + e.path,
+                  message: e.message,
+                  value: e.value
+                }
               };
       }
-      var e = upAndDown._0;
+      var e$1 = doubleFreeCell._0;
       return {
               TAG: "Error",
               _0: {
-                path: ".upAndDown" + e.path,
-                message: e.message,
-                value: e.value
+                path: ".doubleFreeCell" + e$1.path,
+                message: e$1.message,
+                value: e$1.value
               }
             };
     }
-    var e$1 = freeCell._0;
+    var e$2 = freeCell._0;
     return {
             TAG: "Error",
             _0: {
-              path: ".freeCell" + e$1.path,
-              message: e$1.message,
-              value: e$1.value
+              path: ".freeCell" + e$2.path,
+              message: e$2.message,
+              value: e$2.value
             }
           };
   }
-  var e$2 = klondike._0;
+  var e$3 = klondike._0;
   return {
           TAG: "Error",
           _0: {
-            path: ".klondike" + e$2.path,
-            message: e$2.message,
-            value: e$2.value
+            path: ".klondike" + e$3.path,
+            message: e$3.message,
+            value: e$3.value
           }
         };
 }
@@ -96,6 +116,7 @@ var state = {
   contents: {
     klondike: [],
     freeCell: [],
+    doubleFreeCell: [],
     upAndDown: []
   }
 };
@@ -162,6 +183,7 @@ function GameBrowser(props) {
                         return {
                                 klondike: Common.ArrayAux.update(state.klondike, 0, f),
                                 freeCell: state.freeCell,
+                                doubleFreeCell: state.doubleFreeCell,
                                 upAndDown: state.upAndDown
                               };
                       });
@@ -171,6 +193,7 @@ function GameBrowser(props) {
                         return {
                                 klondike: [x].concat(state.klondike),
                                 freeCell: state.freeCell,
+                                doubleFreeCell: state.doubleFreeCell,
                                 upAndDown: state.upAndDown
                               };
                       });
@@ -188,6 +211,7 @@ function GameBrowser(props) {
                         return {
                                 klondike: state.klondike,
                                 freeCell: Common.ArrayAux.update(state.freeCell, 0, f),
+                                doubleFreeCell: state.doubleFreeCell,
                                 upAndDown: state.upAndDown
                               };
                       });
@@ -197,12 +221,41 @@ function GameBrowser(props) {
                         return {
                                 klondike: state.klondike,
                                 freeCell: [x].concat(state.freeCell),
+                                doubleFreeCell: state.doubleFreeCell,
                                 upAndDown: state.upAndDown
                               };
                       });
                   forceUpdate();
                 })
             }, "freeCell" + state.contents.freeCell.length.toString());
+        break;
+    case "DoubleFreeCell" :
+        tmp = JsxRuntime.jsx(DoubleFreeCell.Game.make, {
+              getState: state.contents.doubleFreeCell.length === 0 ? undefined : (function () {
+                    return state.contents.doubleFreeCell[0];
+                  }),
+              setState: (function (f) {
+                  setState(function (state) {
+                        return {
+                                klondike: state.klondike,
+                                freeCell: state.freeCell,
+                                doubleFreeCell: Common.ArrayAux.update(state.doubleFreeCell, 0, f),
+                                upAndDown: state.upAndDown
+                              };
+                      });
+                }),
+              onCreateNewGame: (function (x) {
+                  setState(function (state) {
+                        return {
+                                klondike: state.klondike,
+                                freeCell: state.freeCell,
+                                doubleFreeCell: [x].concat(state.doubleFreeCell),
+                                upAndDown: state.upAndDown
+                              };
+                      });
+                  forceUpdate();
+                })
+            }, "doubleFreeCell" + state.contents.doubleFreeCell.length.toString());
         break;
     case "UpAndDown" :
         tmp = JsxRuntime.jsx(UpAndDown.Game.make, {
@@ -214,6 +267,7 @@ function GameBrowser(props) {
                         return {
                                 klondike: state.klondike,
                                 freeCell: state.freeCell,
+                                doubleFreeCell: state.doubleFreeCell,
                                 upAndDown: Common.ArrayAux.update(state.upAndDown, 0, f)
                               };
                       });
@@ -223,6 +277,7 @@ function GameBrowser(props) {
                         return {
                                 klondike: state.klondike,
                                 freeCell: state.freeCell,
+                                doubleFreeCell: state.doubleFreeCell,
                                 upAndDown: [x].concat(state.upAndDown)
                               };
                       });
@@ -244,6 +299,7 @@ function GameBrowser(props) {
                               children: [
                                   "Klondike",
                                   "FreeCell",
+                                  "DoubleFreeCell",
                                   "UpAndDown"
                                 ].map(function (v) {
                                     var selected = v === selectGameType;

@@ -25,6 +25,12 @@ module ArrayAux = {
     let revIndex = arr->Array.toReversed->Array.findIndex(pred)
     arr->Array.slice(~start=0, ~end=arr->Array.length - 1 - revIndex)
   }
+
+  let popN = (deck, n) => {
+    let result = deck.contents->Array.slice(~start=0, ~end=n)
+    deck := deck.contents->Array.sliceToEnd(~start=n)
+    result
+  }
 }
 
 module UtilBoard = {

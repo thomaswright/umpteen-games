@@ -395,12 +395,12 @@ function game_decode(value) {
 }
 
 function initiateGame() {
-  var fullDeck = Core__Array.toShuffled(Card.getShuffledDeck().map(function (card) {
+  var fullDeck = Core__Array.toShuffled(Core__Array.toShuffled(Card.getDeck(0)).map(function (card) {
               return {
                       TAG: "Card",
                       _0: card
                     };
-            }).concat(Tarot.getShuffledDeck().map(function (card) {
+            }).concat(Core__Array.toShuffled(Tarot.getDeck(0)).map(function (card) {
                 return {
                         TAG: "Tarot",
                         _0: card
@@ -413,38 +413,45 @@ function initiateGame() {
           return true;
         }
       });
+  var deckToDeal = {
+    contents: deckWithoutAces
+  };
   return [
           fullDeck,
           {
             piles: [
-              deckWithoutAces.slice(0, 7),
-              deckWithoutAces.slice(7, 14),
-              deckWithoutAces.slice(14, 21),
-              deckWithoutAces.slice(21, 28),
-              deckWithoutAces.slice(28, 35),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
               [],
-              deckWithoutAces.slice(35, 42),
-              deckWithoutAces.slice(42, 49),
-              deckWithoutAces.slice(49, 56),
-              deckWithoutAces.slice(56, 63),
-              deckWithoutAces.slice(63, 70)
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7)
             ],
             foundations: [
               [{
                   suit: "Clubs",
-                  rank: "RA"
+                  rank: "RA",
+                  deck: 0
                 }],
               [{
                   suit: "Diamonds",
-                  rank: "RA"
+                  rank: "RA",
+                  deck: 0
                 }],
               [{
                   suit: "Hearts",
-                  rank: "RA"
+                  rank: "RA",
+                  deck: 0
                 }],
               [{
                   suit: "Spades",
-                  rank: "RA"
+                  rank: "RA",
+                  deck: 0
                 }]
             ],
             tarotUp: [],

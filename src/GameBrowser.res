@@ -1,6 +1,6 @@
 open Webapi.Dom
 
-type gameType = Klondike | FreeCell | UpAndDown
+type gameType = Klondike | FreeCell | DoubleFreeCell | UpAndDown
 
 let gameString = (a: gameType) => (a :> string)
 
@@ -8,12 +8,14 @@ let gameString = (a: gameType) => (a :> string)
 type state = {
   klondike: array<Klondike.Game.state>,
   freeCell: array<FreeCell.Game.state>,
+  doubleFreeCell: array<DoubleFreeCell.Game.state>,
   upAndDown: array<UpAndDown.Game.state>,
 }
 
 let state: ref<state> = ref({
   klondike: [],
   freeCell: [],
+  doubleFreeCell: [],
   upAndDown: [],
 })
 
@@ -59,7 +61,7 @@ let make = () => {
       <div className="px-5 pt-3 ">
         <div className="font-black text-xl mb-1"> {"Card Games!"->React.string} </div>
         <div className="flex flex-row gap-4">
-          {[Klondike, FreeCell, UpAndDown]
+          {[Klondike, FreeCell, DoubleFreeCell, UpAndDown]
           ->Array.map(v => {
             let selected = v == selectGameType
             <button
@@ -115,6 +117,27 @@ let make = () => {
             setState(state => {
               ...state,
               freeCell: state.freeCell->Common.ArrayAux.update(0, f),
+            })}
+        />
+      | DoubleFreeCell =>
+        <DoubleFreeCell.Game
+          key={"doubleFreeCell" ++ state.contents.doubleFreeCell->Array.length->Int.toString}
+          onCreateNewGame={x => {
+            setState(state => {
+              ...state,
+              doubleFreeCell: Array.concat([x], state.doubleFreeCell),
+            })
+            forceUpdate()
+          }}
+          getState={if state.contents.doubleFreeCell->Array.length == 0 {
+            None
+          } else {
+            Some(() => state.contents.doubleFreeCell->Array.getUnsafe(0))
+          }}
+          setState={f =>
+            setState(state => {
+              ...state,
+              doubleFreeCell: state.doubleFreeCell->Common.ArrayAux.update(0, f),
             })}
         />
       | UpAndDown =>
