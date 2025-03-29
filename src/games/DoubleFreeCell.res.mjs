@@ -479,7 +479,8 @@ function foundationBaseRules(i) {
         };
 }
 
-function foundationRules(game, card, i, j) {
+function foundationRules(game, foundation, card, i, j) {
+  var isLast = j === (foundation.length - 1 | 0);
   return {
           locationAdjustment: {
             x: 0,
@@ -502,7 +503,7 @@ function foundationRules(game, card, i, j) {
           droppedUpon: (function (game, dragPile) {
               var justOne = dragPile.length === 1;
               var dragPileBase = dragPile[0];
-              if (justOne && dragPileBase.suit === card.suit && Card.rankIsBelow(card, dragPileBase)) {
+              if (isLast && justOne && dragPileBase.suit === card.suit && Card.rankIsBelow(card, dragPileBase)) {
                 return {
                         piles: game.piles,
                         foundations: game.foundations.map(function (stack) {
@@ -606,7 +607,7 @@ function getRule(game, match) {
                     }, match)) {
                 result.contents = {
                   TAG: "Movable",
-                  _0: foundationRules(game, card, i, j)
+                  _0: foundationRules(game, foundation, card, i, j)
                 };
                 return ;
               }
@@ -642,6 +643,7 @@ function getRule(game, match) {
 
 function DoubleFreeCell$GameRules$Board(props) {
   var setRef = props.setRef;
+  console.log(props.game);
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
                 JsxRuntime.jsxs("div", {
