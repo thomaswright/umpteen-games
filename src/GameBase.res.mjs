@@ -644,19 +644,24 @@ function Create(GameRules) {
         var updatedGame = {
           contents: undefined
         };
+        var oldGame = getGame();
         refs.current.forEach(function (el) {
               Core__Option.mapOr(Core__Option.flatMap(Core__Option.flatMap(GameRules.getSpace(el), (function (elSpace) {
                               return GameRules.getRule(getGame(), elSpace);
                             })), (function (rule) {
                           var droppedUpon;
                           droppedUpon = rule.TAG === "Movable" ? rule._0.droppedUpon : rule._0.droppedUpon;
-                          return droppedUpon(GameRules.removeDragFromGame(getGame(), dragPile), dragPile);
+                          return droppedUpon(GameRules.removeDragFromGame(oldGame, dragPile), dragPile);
                         })), undefined, (function (newGame) {
                       var overlap = getOverlap(el, dragElement);
                       if (overlap > greatestOverlap.contents) {
                         greatestOverlap.contents = overlap;
-                        updatedGame.contents = Caml_option.some(newGame);
-                        return ;
+                        if (JSON.stringify(GameRules.game_encode(oldGame)) !== JSON.stringify(GameRules.game_encode(newGame))) {
+                          updatedGame.contents = Caml_option.some(newGame);
+                          return ;
+                        } else {
+                          return ;
+                        }
                       }
                       
                     }));
