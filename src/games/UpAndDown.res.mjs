@@ -944,12 +944,12 @@ function UpAndDown$GameRules$Board(props) {
                                 JsxRuntime.jsx("div", {
                                       children: "0",
                                       ref: Caml_option.some(setRef("TarotUp")),
-                                      className: " border border-slate-300 bg-slate-200 rounded w-14 h-20 flex \n              flex-row items-center justify-center text-xl font-bold text-slate-400"
+                                      className: " bg-white opacity-10 rounded w-14 h-20 flex \n              flex-row items-center justify-center text-xl font-bold text-black"
                                     }, JSON.stringify(space_encode("TarotUp"))),
                                 JsxRuntime.jsx("div", {
                                       children: "21",
                                       ref: Caml_option.some(setRef("TarotDown")),
-                                      className: " border border-slate-300 bg-slate-200 rounded w-14 h-20 flex \n              flex-row items-center justify-center text-xl font-bold text-slate-400"
+                                      className: " bg-white opacity-10  rounded w-14 h-20 flex \n              flex-row items-center justify-center text-xl font-bold text-black"
                                     }, JSON.stringify(space_encode("TarotDown")))
                               ],
                               className: "flex flex-row justify-between",
@@ -959,7 +959,7 @@ function UpAndDown$GameRules$Board(props) {
                             }),
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Free")),
-                              className: "outline outline-2 outline-purple-300 bg-purple-100 rounded w-14 h-20 mx-10"
+                              className: "outline outline-4 outline-black bg-black bg-opacity-20 rounded w-14 h-20 mx-10"
                             }, JSON.stringify(space_encode("Free"))),
                         JsxRuntime.jsx("div", {
                               children: [
@@ -973,7 +973,7 @@ function UpAndDown$GameRules$Board(props) {
                                                           TAG: "Foundation",
                                                           _0: i
                                                         })),
-                                                className: " border  border-slate-200 bg-slate-100 rounded w-14 h-20"
+                                                className: "  bg-white opacity-10 rounded w-14 h-20"
                                               }, JSON.stringify(space_encode({
                                                         TAG: "Foundation",
                                                         _0: i
@@ -1003,7 +1003,7 @@ function UpAndDown$GameRules$Board(props) {
                                                   TAG: "Pile",
                                                   _0: i
                                                 })),
-                                        className: " border border-slate-200 bg-slate-100  rounded w-14 h-20"
+                                        className: " bg-black opacity-20   rounded w-14 h-20"
                                       }, JSON.stringify(space_encode({
                                                 TAG: "Pile",
                                                 _0: i

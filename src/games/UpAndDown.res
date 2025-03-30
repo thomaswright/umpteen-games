@@ -443,22 +443,22 @@ module GameRules: GameBase.GameRules = {
             <div
               key={TarotUp->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(TarotUp))}
-              className=" border border-slate-300 bg-slate-200 rounded w-14 h-20 flex 
-              flex-row items-center justify-center text-xl font-bold text-slate-400">
+              className=" bg-white opacity-10 rounded w-14 h-20 flex 
+              flex-row items-center justify-center text-xl font-bold text-black">
               {"0"->React.string}
             </div>
             <div
               key={TarotDown->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(TarotDown))}
-              className=" border border-slate-300 bg-slate-200 rounded w-14 h-20 flex 
-              flex-row items-center justify-center text-xl font-bold text-slate-400">
+              className=" bg-white opacity-10  rounded w-14 h-20 flex 
+              flex-row items-center justify-center text-xl font-bold text-black">
               {"21"->React.string}
             </div>
           </div>
           <div
             key={Free->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Free))}
-            className="outline outline-2 outline-purple-300 bg-purple-100 rounded w-14 h-20 mx-10"
+            className="outline outline-4 outline-black bg-black bg-opacity-20 rounded w-14 h-20 mx-10"
           />
           <div className="flex flex-row gap-3">
             {[[], [], [], []]
@@ -466,7 +466,7 @@ module GameRules: GameBase.GameRules = {
               <div
                 key={Foundation(i)->spaceToString}
                 ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-                className=" border  border-slate-200 bg-slate-100 rounded w-14 h-20"
+                className="  bg-white opacity-10 rounded w-14 h-20"
               />
             })
             ->React.array}
@@ -478,7 +478,7 @@ module GameRules: GameBase.GameRules = {
             <div
               key={Pile(i)->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-              className=" border border-slate-200 bg-slate-100  rounded w-14 h-20"
+              className=" bg-black opacity-20   rounded w-14 h-20"
             />
           })
           ->React.array}

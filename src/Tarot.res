@@ -118,7 +118,7 @@ module Display = {
           color: "white",
         }}
         className={[
-          " border border-gray-300 rounded w-14 h-20 bg-black shadow-sm px-1 leading-none py-0.5 cursor-default",
+          " border border-gray-600 rounded w-14 h-20 bg-black shadow-sm px-1 leading-none py-0.5 cursor-default",
         ]->Array.join(" ")}>
         <span className="flex flex-col">
           <span className="flex flex-row">

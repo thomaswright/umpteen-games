@@ -366,7 +366,7 @@ module GameRules: GameBase.GameRules = {
               key={Foundation(i)->spaceToString}
               id={Foundation(i)->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-              className=" border border-slate-200 bg-slate-100 rounded w-14 h-20"
+              className=" bg-white opacity-10 rounded w-14 h-20"
             />
           })
           ->React.array}
@@ -378,7 +378,7 @@ module GameRules: GameBase.GameRules = {
               key={Pile(i)->spaceToString}
               id={Pile(i)->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-              className=" border border-slate-200 bg-slate-100  rounded w-14 h-20"
+              className=" bg-black opacity-20  rounded w-14 h-20"
             />
           })
           ->React.array}

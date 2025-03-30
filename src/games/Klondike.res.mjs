@@ -697,7 +697,7 @@ function Klondike$GameRules$Board(props) {
                                                   TAG: "Foundation",
                                                   _0: i
                                                 })),
-                                        className: " border border-slate-200 bg-slate-100 rounded w-14 h-20",
+                                        className: " bg-white opacity-10 rounded w-14 h-20",
                                         id: JSON.stringify(space_encode({
                                                   TAG: "Foundation",
                                                   _0: i
@@ -724,7 +724,7 @@ function Klondike$GameRules$Board(props) {
                                                   TAG: "Pile",
                                                   _0: i
                                                 })),
-                                        className: " border border-slate-200 bg-slate-100  rounded w-14 h-20",
+                                        className: " bg-black opacity-20  rounded w-14 h-20",
                                         id: JSON.stringify(space_encode({
                                                   TAG: "Pile",
                                                   _0: i

@@ -476,7 +476,7 @@ function Tarot$Display(props) {
                               }),
                           className: "flex flex-col"
                         }),
-                    className: [" border border-gray-300 rounded w-14 h-20 bg-black shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
+                    className: [" border border-gray-600 rounded w-14 h-20 bg-black shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
                     style: {
                       color: "white"
                     }

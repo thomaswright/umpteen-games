@@ -133,7 +133,7 @@ module Display = {
           color: multiColor ? card->multiColorHex : card->colorHex,
         }}
         className={[
-          " border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
+          "border border-gray-400 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
         ]->Array.join(" ")}>
         <span className="flex flex-col">
           <span className="flex flex-row">

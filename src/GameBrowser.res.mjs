@@ -317,10 +317,11 @@ function GameBrowser(props) {
                               className: "flex flex-row gap-4"
                             })
                       ],
-                      className: "px-5 pt-3 "
+                      className: "px-5 pt-3"
                     }),
                 tmp
-              ]
+              ],
+              className: " bg-gradient-to-tl from-green-900 to-green-700 h-dvh"
             });
 }
 

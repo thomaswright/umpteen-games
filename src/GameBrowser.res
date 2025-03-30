@@ -60,8 +60,8 @@ let make = () => {
   if !loaded {
     React.null
   } else {
-    <div>
-      <div className="px-5 pt-3 ">
+    <div className={" bg-gradient-to-tl from-green-900 to-green-700 h-dvh"}>
+      <div className="px-5 pt-3">
         <div className="font-black text-xl mb-1"> {"Card Games!"->React.string} </div>
         <div className="flex flex-row gap-4">
           {[Klondike, FreeCell, DoubleFreeCell, UpAndDown]

@@ -551,7 +551,7 @@ function Card$Display(props) {
                           ],
                           className: "flex flex-col"
                         }),
-                    className: [" border border-gray-300 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
+                    className: ["border border-gray-400 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
                     style: {
                       color: multiColor ? multiColorHex(card) : colorHex(card),
                       transform: rotation(card)

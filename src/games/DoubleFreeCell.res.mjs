@@ -661,7 +661,7 @@ function DoubleFreeCell$GameRules$Board(props) {
                                                                   TAG: "Free",
                                                                   _0: i
                                                                 })),
-                                                        className: " border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                                                        className: "   bg-black opacity-20  rounded w-14 h-20"
                                                       }, JSON.stringify(space_encode({
                                                                 TAG: "Free",
                                                                 _0: i
@@ -681,7 +681,7 @@ function DoubleFreeCell$GameRules$Board(props) {
                                                                   TAG: "Free",
                                                                   _0: i + 4 | 0
                                                                 })),
-                                                        className: " border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                                                        className: "   bg-black opacity-20  rounded w-14 h-20"
                                                       }, JSON.stringify(space_encode({
                                                                 TAG: "Free",
                                                                 _0: i + 4 | 0
@@ -706,7 +706,7 @@ function DoubleFreeCell$GameRules$Board(props) {
                                                                   TAG: "Foundation",
                                                                   _0: i
                                                                 })),
-                                                        className: " border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                                                        className: "   bg-white opacity-10  rounded w-14 h-20"
                                                       }, JSON.stringify(space_encode({
                                                                 TAG: "Free",
                                                                 _0: i
@@ -726,7 +726,7 @@ function DoubleFreeCell$GameRules$Board(props) {
                                                                   TAG: "Foundation",
                                                                   _0: i + 4 | 0
                                                                 })),
-                                                        className: " border border-slate-200 bg-slate-100 rounded w-14 h-20"
+                                                        className: "   bg-white opacity-10  rounded w-14 h-20"
                                                       }, JSON.stringify(space_encode({
                                                                 TAG: "Free",
                                                                 _0: i + 4 | 0
@@ -759,7 +759,7 @@ function DoubleFreeCell$GameRules$Board(props) {
                                                   TAG: "Pile",
                                                   _0: i
                                                 })),
-                                        className: " border border-slate-200 bg-slate-100  rounded w-14 h-20"
+                                        className: " bg-black opacity-20  rounded w-14 h-20"
                                       }, JSON.stringify(space_encode({
                                                 TAG: "Pile",
                                                 _0: i
