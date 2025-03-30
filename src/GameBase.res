@@ -276,19 +276,6 @@ module Create = (GameRules: GameRules) => {
         }
       }
 
-      let restartGame = () => {
-        setState(state => {
-          {
-            ...state,
-            history: state.history->Array.slice(~start=0, ~end=1),
-            undoStats: {
-              currentUndoDepth: 0,
-              undos: [],
-            },
-          }
-        })
-      }
-
       let refs = React.useRef([])
 
       let dragData: React.ref<option<dragData>> = React.useRef(None)
@@ -653,6 +640,21 @@ module Create = (GameRules: GameRules) => {
         }
 
         dragData.current = None
+      }
+
+      let restartGame = () => {
+        setState(state => {
+          {
+            ...state,
+            history: state.history->Array.slice(~start=0, ~end=1),
+            undoStats: {
+              currentUndoDepth: 0,
+              undos: [],
+            },
+          }
+        })
+        moveToState()
+        autoProgress()
       }
 
       React.useEffect(() => {

@@ -386,18 +386,6 @@ function Create(GameRules) {
       }
       
     };
-    var restartGame = function () {
-      setState(function (state) {
-            return {
-                    deck: state.deck,
-                    history: state.history.slice(0, 1),
-                    undoStats: {
-                      currentUndoDepth: 0,
-                      undos: []
-                    }
-                  };
-          });
-    };
     var refs = React.useRef([]);
     var dragData = React.useRef(undefined);
     var getElement = function (a) {
@@ -687,6 +675,20 @@ function Create(GameRules) {
         }
       }
       dragData.current = undefined;
+    };
+    var restartGame = function () {
+      setState(function (state) {
+            return {
+                    deck: state.deck,
+                    history: state.history.slice(0, 1),
+                    undoStats: {
+                      currentUndoDepth: 0,
+                      undos: []
+                    }
+                  };
+          });
+      moveToState();
+      autoProgress();
     };
     React.useEffect((function () {
             window.addEventListener("mousemove", onMouseMove);
