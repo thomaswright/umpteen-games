@@ -698,6 +698,13 @@ function Create(GameRules) {
     React.useEffect((function () {
             window.addEventListener("mousemove", onMouseMove);
             window.addEventListener("mouseup", onMouseUp);
+            window.addEventListener("keydown", (function ($$event) {
+                    if ($$event.key === "z") {
+                      undo();
+                      return moveToState();
+                    }
+                    
+                  }));
             moveToState();
             autoProgress();
           }), []);

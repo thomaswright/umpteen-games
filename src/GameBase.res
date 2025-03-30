@@ -666,6 +666,13 @@ module Create = (GameRules: GameRules) => {
       React.useEffect(() => {
         window->Window.addMouseMoveEventListener(onMouseMove)
         window->Window.addMouseUpEventListener(onMouseUp)
+        window->Window.addKeyDownEventListener(event => {
+          if event->KeyboardEvent.key == "z" {
+            undo()
+            moveToState()
+          }
+        })
+
         moveToState()
         autoProgress()
         None
