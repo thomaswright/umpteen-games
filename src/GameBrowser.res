@@ -36,7 +36,10 @@ let useForceUpdate = () => {
 
 @react.component
 let make = () => {
-  let (selectGameType: gameType, setSelectGameType) = React.useState(() => Klondike)
+  let (selectGameType: gameType, setSelectGameType, _) = Common.useLocalStorage(
+    "gametype",
+    Klondike,
+  )
   let forceUpdate = useForceUpdate()
   let (loaded, setLoaded) = React.useState(() => false)
 

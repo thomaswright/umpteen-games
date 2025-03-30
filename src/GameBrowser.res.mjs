@@ -140,9 +140,7 @@ function useForceUpdate() {
 }
 
 function GameBrowser(props) {
-  var match = React.useState(function () {
-        return "Klondike";
-      });
+  var match = Common.useLocalStorage("gametype", "Klondike");
   var setSelectGameType = match[1];
   var selectGameType = match[0];
   var forceUpdate = useForceUpdate();
