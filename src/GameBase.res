@@ -15,7 +15,9 @@ type pos = {
 @decco
 type stateActor = User | Auto
 
-type autoProgress<'a> = Send('a) | Seek | DoNothing
+type autoProgress<'a> = Send('a) | SendOrAccept('a) | Seek | DoNothing | Accept
+
+type autoProgressBase = Seek | DoNothing | Accept
 
 type droppedUpon<'game, 'dragPile> = ('game, 'dragPile) => option<'game>
 
@@ -30,7 +32,7 @@ type movableSpace<'game, 'space, 'dragPile> = {
 
 type staticSpace<'game, 'dragPile> = {
   droppedUpon: droppedUpon<'game, 'dragPile>,
-  autoProgress: bool,
+  autoProgress: autoProgressBase,
 }
 
 type spaceFunction<'game, 'space, 'dragPile> =
@@ -448,6 +450,76 @@ module Create = (GameRules: GameRules) => {
         overlapX *. overlapY
       }
 
+      let progressDragPiles = (dragPiles, droppedUpons) => {
+        let op = ref(None)
+
+        dragPiles->Array.forEach(dragPile => {
+          droppedUpons->Array.forEach(droppedUpon => {
+            if op.contents->Option.isNone {
+              op := droppedUpon(getGame()->GameRules.removeDragFromGame(dragPile), dragPile)
+            }
+          })
+        })
+
+        switch op.contents {
+        | Some(game) => {
+            setGame(_ => game)
+            true
+          }
+        | None => false
+        }
+      }
+
+      let autoProgress = () => {
+        condInterval(
+          () => {
+            moveToState()
+          },
+          300,
+          () => {
+            let dragPiles = refs.current->Array.filterMap(el => {
+              el
+              ->GameRules.getSpace
+              ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
+              ->Option.mapOr(None, rule => {
+                switch rule {
+                | Movable({autoProgress}) =>
+                  switch autoProgress() {
+                  | SendOrAccept(dragPile)
+                  | Send(dragPile) =>
+                    Some(dragPile)
+                  | _ => None
+                  }
+                | _ => None
+                }
+              })
+            })
+            let droppedUpons = refs.current->Array.filterMap(el => {
+              el
+              ->GameRules.getSpace
+              ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
+              ->Option.mapOr(None, rule => {
+                switch rule {
+                | Static({autoProgress, droppedUpon}) =>
+                  switch autoProgress {
+                  | Seek => Some(droppedUpon)
+                  | _ => None
+                  }
+
+                | Movable({autoProgress, droppedUpon}) =>
+                  switch autoProgress() {
+                  | Seek => Some(droppedUpon)
+                  | _ => None
+                  }
+                }
+              })
+            })
+
+            progressDragPiles(dragPiles, droppedUpons)
+          },
+        )
+      }
+
       let onMouseDown = event => {
         let dragElement =
           event
@@ -464,23 +536,60 @@ module Create = (GameRules: GameRules) => {
               dragPile()->Option.mapOr(
                 (),
                 dragPile => {
-                  let boardPos = getBoardPos()
-                  let eventPos = event->eventPosition
+                  if event->JsxEvent.Mouse.button == 2 {
+                    let droppedUpons = refs.current->Array.filterMap(
+                      el => {
+                        el
+                        ->GameRules.getSpace
+                        ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
+                        ->Option.mapOr(
+                          None,
+                          rule => {
+                            switch rule {
+                            | Static({autoProgress, droppedUpon}) =>
+                              switch autoProgress {
+                              | Seek => Some(droppedUpon)
+                              | Accept => Some(droppedUpon)
+                              | DoNothing => None
+                              }
 
-                  dragData.current = Some({
-                    dragSpace,
-                    dragPile,
-                    dragElement,
-                    offset: (
-                      event->JsxEvent.Mouse.clientX -
-                      eventPos.left->Int.fromFloat +
-                      boardPos.left->Int.fromFloat,
-                      event->JsxEvent.Mouse.clientY -
-                      eventPos.top->Int.fromFloat +
-                      boardPos.top->Int.fromFloat,
-                    ),
-                  })
-                  liftUpDragPile(dragPile)
+                            | Movable({autoProgress, droppedUpon}) =>
+                              switch autoProgress() {
+                              | SendOrAccept(_)
+                              | Accept
+                              | Seek =>
+                                Some(droppedUpon)
+                              | _ => None
+                              }
+                            }
+                          },
+                        )
+                      },
+                    )
+
+                    progressDragPiles([dragPile], droppedUpons->Array.toReversed)->ignore
+                    snapshot()
+                    moveToState()
+                    autoProgress()
+                  } else {
+                    let boardPos = getBoardPos()
+                    let eventPos = event->eventPosition
+
+                    dragData.current = Some({
+                      dragSpace,
+                      dragPile,
+                      dragElement,
+                      offset: (
+                        event->JsxEvent.Mouse.clientX -
+                        eventPos.left->Int.fromFloat +
+                        boardPos.left->Int.fromFloat,
+                        event->JsxEvent.Mouse.clientY -
+                        eventPos.top->Int.fromFloat +
+                        boardPos.top->Int.fromFloat,
+                      ),
+                    })
+                    liftUpDragPile(dragPile)
+                  }
                 },
               )
             }
@@ -505,67 +614,6 @@ module Create = (GameRules: GameRules) => {
             )
           })
         })
-      }
-
-      let autoProgress = () => {
-        condInterval(
-          () => {
-            moveToState()
-          },
-          300,
-          () => {
-            let dragPiles = refs.current->Array.filterMap(el => {
-              el
-              ->GameRules.getSpace
-              ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
-              ->Option.mapOr(None, rule => {
-                switch rule {
-                | Movable({autoProgress}) =>
-                  switch autoProgress() {
-                  | Send(dragPile) => Some(dragPile)
-                  | _ => None
-                  }
-                | _ => None
-                }
-              })
-            })
-
-            let droppedUpons = refs.current->Array.filterMap(el => {
-              el
-              ->GameRules.getSpace
-              ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
-              ->Option.mapOr(None, rule => {
-                switch rule {
-                | Static({autoProgress, droppedUpon}) if autoProgress => Some(droppedUpon)
-                | Movable({autoProgress, droppedUpon}) =>
-                  switch autoProgress() {
-                  | Seek => Some(droppedUpon)
-                  | _ => None
-                  }
-                | _ => None
-                }
-              })
-            })
-
-            let op = ref(None)
-
-            dragPiles->Array.forEach(dragPile => {
-              droppedUpons->Array.forEach(droppedUpon => {
-                if op.contents->Option.isNone {
-                  op := droppedUpon(getGame()->GameRules.removeDragFromGame(dragPile), dragPile)
-                }
-              })
-            })
-
-            switch op.contents {
-            | Some(game) => {
-                setGame(_ => game)
-                true
-              }
-            | None => false
-            }
-          },
-        )
       }
 
       let onMouseUp = _ => {
@@ -611,6 +659,7 @@ module Create = (GameRules: GameRules) => {
       React.useEffect(() => {
         window->Window.addMouseMoveEventListener(onMouseMove)
         window->Window.addMouseUpEventListener(onMouseUp)
+        window->Window.addEventListener("contextmenu", event => event->Event.preventDefault)
         moveToState()
         autoProgress()
         None

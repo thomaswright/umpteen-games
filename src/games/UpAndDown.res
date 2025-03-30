@@ -131,7 +131,7 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
-      autoProgress: false,
+      autoProgress: DoNothing,
     }
   }
 
@@ -154,7 +154,7 @@ module GameRules: GameBase.GameRules = {
       },
       autoProgress: () => {
         if isLast {
-          Send(item)
+          SendOrAccept(item)
         } else {
           DoNothing
         }
@@ -191,7 +191,7 @@ module GameRules: GameBase.GameRules = {
 
   let foundationBaseRules = (i): staticSpace => {
     {
-      autoProgress: true,
+      autoProgress: Seek,
       droppedUpon: (game, dragPile) => {
         let noChildren = game.foundations->Array.getUnsafe(i)->Array.length == 0
         switch dragPile {
@@ -241,7 +241,7 @@ module GameRules: GameBase.GameRules = {
 
   let tarotUpBaseRules = () => {
     {
-      autoProgress: true,
+      autoProgress: Seek,
       droppedUpon: (game, dragPile) => {
         let noChildren = game.tarotUp->Array.length == 0
         switch dragPile {
@@ -289,7 +289,7 @@ module GameRules: GameBase.GameRules = {
 
   let tarotDownBaseRules = () => {
     {
-      autoProgress: true,
+      autoProgress: Seek,
       droppedUpon: (game, dragPile) => {
         let noChildren = game.tarotDown->Array.length == 0
         switch dragPile {
@@ -336,7 +336,7 @@ module GameRules: GameBase.GameRules = {
   }
 
   let freeBaseRules = (): staticSpace => {
-    autoProgress: false,
+    autoProgress: DoNothing,
     droppedUpon: (game, dragPile) => {
       switch game.free {
       | Some(_) => None

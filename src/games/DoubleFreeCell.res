@@ -125,7 +125,7 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
-      autoProgress: false,
+      autoProgress: Accept,
     }
   }
 
@@ -152,7 +152,7 @@ module GameRules: GameBase.GameRules = {
       },
       autoProgress: () => {
         if isLast {
-          Send([card])
+          SendOrAccept([card])
         } else {
           DoNothing
         }
@@ -180,7 +180,7 @@ module GameRules: GameBase.GameRules = {
 
   let foundationBaseRules = (i): staticSpace => {
     {
-      autoProgress: true,
+      autoProgress: Seek,
       droppedUpon: (game, dragPile) => {
         let justOne = dragPile->Array.length == 1
         let dragPileBase = dragPile->Array.getUnsafe(0)
@@ -240,7 +240,7 @@ module GameRules: GameBase.GameRules = {
   }
 
   let freeBaseRules = (i): staticSpace => {
-    autoProgress: false,
+    autoProgress: DoNothing,
     droppedUpon: (game, dragPile) => {
       let noChildren = game.free->Array.getUnsafe(i)->Option.isNone
 
@@ -319,11 +319,10 @@ module GameRules: GameBase.GameRules = {
       ~setGame as _,
       ~moveToState as _,
       ~autoProgress as _,
-      ~game,
+      ~game as _,
       ~undo as _,
       ~isWin as _,
     ) => {
-      Console.log(game)
       <React.Fragment>
         <div className="flex flex-row">
           <div className="flex flex-col gap-3">

@@ -528,7 +528,7 @@ function pileBaseRules(i) {
               }
               
             }),
-          autoProgress: false
+          autoProgress: "DoNothing"
         };
 }
 
@@ -553,7 +553,7 @@ function pileRules(pile, item, i, j) {
           autoProgress: (function () {
               if (isLast) {
                 return {
-                        TAG: "Send",
+                        TAG: "SendOrAccept",
                         _0: item
                       };
               } else {
@@ -618,7 +618,7 @@ function foundationBaseRules(i) {
               }
               
             }),
-          autoProgress: true
+          autoProgress: "Seek"
         };
 }
 
@@ -679,7 +679,7 @@ function tarotUpBaseRules() {
               }
               
             }),
-          autoProgress: true
+          autoProgress: "Seek"
         };
 }
 
@@ -735,7 +735,7 @@ function tarotDownBaseRules() {
               }
               
             }),
-          autoProgress: true
+          autoProgress: "Seek"
         };
 }
 
@@ -788,7 +788,7 @@ function freeBaseRules() {
                       };
               }
             }),
-          autoProgress: false
+          autoProgress: "DoNothing"
         };
 }
 

@@ -393,7 +393,7 @@ function pileBaseRules(i) {
               }
               
             }),
-          autoProgress: false
+          autoProgress: "Accept"
         };
 }
 
@@ -419,7 +419,7 @@ function pileRules(pile, card, i, j) {
           autoProgress: (function () {
               if (isLast) {
                 return {
-                        TAG: "Send",
+                        TAG: "SendOrAccept",
                         _0: [card]
                       };
               } else {
@@ -461,7 +461,7 @@ function foundationBaseRules(i) {
               }
               
             }),
-          autoProgress: true
+          autoProgress: "Seek"
         };
 }
 

@@ -119,7 +119,7 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
-      autoProgress: false,
+      autoProgress: Accept,
     }
   }
 
@@ -143,7 +143,7 @@ module GameRules: GameBase.GameRules = {
       },
       autoProgress: () => {
         if isLast {
-          Send([card])
+          SendOrAccept([card])
         } else {
           DoNothing
         }
@@ -171,7 +171,7 @@ module GameRules: GameBase.GameRules = {
 
   let foundationBaseRules = (i): staticSpace => {
     {
-      autoProgress: true,
+      autoProgress: Seek,
       droppedUpon: (game, dragPile) => {
         let justOne = dragPile->Array.length == 1
         let dragPileBase = dragPile->Array.getUnsafe(0)
