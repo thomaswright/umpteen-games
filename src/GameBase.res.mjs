@@ -572,44 +572,6 @@ function Create(GameRules) {
               Core__Option.mapOr(GameRules.getRule(getGame(), dragSpace), undefined, (function (rule) {
                       if (rule.TAG === "Movable") {
                         return Core__Option.mapOr(rule._0.dragPile(), undefined, (function (dragPile) {
-                                      if ($$event.button === 2) {
-                                        var droppedUpons = Core__Array.filterMap(refs.current, (function (el) {
-                                                return Core__Option.mapOr(Core__Option.flatMap(GameRules.getSpace(el), (function (elSpace) {
-                                                                  return GameRules.getRule(getGame(), elSpace);
-                                                                })), undefined, (function (rule) {
-                                                              if (rule.TAG === "Movable") {
-                                                                var match = rule._0;
-                                                                var droppedUpon = match.droppedUpon;
-                                                                var match$1 = match.autoProgress();
-                                                                if (typeof match$1 !== "object") {
-                                                                  if (match$1 === "DoNothing") {
-                                                                    return ;
-                                                                  } else {
-                                                                    return droppedUpon;
-                                                                  }
-                                                                } else if (match$1.TAG === "Send") {
-                                                                  return ;
-                                                                } else {
-                                                                  return droppedUpon;
-                                                                }
-                                                              }
-                                                              var match$2 = rule._0;
-                                                              var droppedUpon$1 = match$2.droppedUpon;
-                                                              switch (match$2.autoProgress) {
-                                                                case "DoNothing" :
-                                                                    return ;
-                                                                case "Seek" :
-                                                                case "Accept" :
-                                                                    return droppedUpon$1;
-                                                                
-                                                              }
-                                                            }));
-                                              }));
-                                        progressDragPiles([dragPile], droppedUpons.toReversed());
-                                        snapshot();
-                                        moveToState();
-                                        return autoProgress();
-                                      }
                                       var boardPos = getBoardPos();
                                       var eventPos = elementPosition($$event.currentTarget);
                                       dragData.current = {
@@ -644,6 +606,45 @@ function Create(GameRules) {
                     }));
             }));
     };
+    var onMouseUpNone = function (dragPile) {
+      var droppedUpons = Core__Array.filterMap(refs.current, (function (el) {
+              return Core__Option.mapOr(Core__Option.flatMap(GameRules.getSpace(el), (function (elSpace) {
+                                return GameRules.getRule(getGame(), elSpace);
+                              })), undefined, (function (rule) {
+                            if (rule.TAG === "Movable") {
+                              var match = rule._0;
+                              var droppedUpon = match.droppedUpon;
+                              var match$1 = match.autoProgress();
+                              if (typeof match$1 !== "object") {
+                                if (match$1 === "DoNothing") {
+                                  return ;
+                                } else {
+                                  return droppedUpon;
+                                }
+                              } else if (match$1.TAG === "Send") {
+                                return ;
+                              } else {
+                                return droppedUpon;
+                              }
+                            }
+                            var match$2 = rule._0;
+                            var droppedUpon$1 = match$2.droppedUpon;
+                            switch (match$2.autoProgress) {
+                              case "DoNothing" :
+                                  return ;
+                              case "Seek" :
+                              case "Accept" :
+                                  return droppedUpon$1;
+                              
+                            }
+                          }));
+            }));
+      if (progressDragPiles([dragPile], droppedUpons.toReversed())) {
+        snapshot();
+      }
+      moveToState();
+      autoProgress();
+    };
     var onMouseUp = function (param) {
       var match = dragData.current;
       if (match !== undefined) {
@@ -672,23 +673,24 @@ function Create(GameRules) {
                       
                     }));
             });
-        Core__Option.mapOr(updatedGame.contents, undefined, (function (updatedGame) {
-                setGame(function (param) {
-                      return updatedGame;
-                    });
-                snapshot();
-              }));
-        moveToState();
-        autoProgress();
+        var updatedGame$1 = updatedGame.contents;
+        if (updatedGame$1 !== undefined) {
+          var updatedGame$2 = Caml_option.valFromOption(updatedGame$1);
+          setGame(function (param) {
+                return updatedGame$2;
+              });
+          snapshot();
+          moveToState();
+          autoProgress();
+        } else {
+          onMouseUpNone(dragPile);
+        }
       }
       dragData.current = undefined;
     };
     React.useEffect((function () {
             window.addEventListener("mousemove", onMouseMove);
             window.addEventListener("mouseup", onMouseUp);
-            window.addEventListener("contextmenu", (function ($$event) {
-                    $$event.preventDefault();
-                  }));
             moveToState();
             autoProgress();
           }), []);
