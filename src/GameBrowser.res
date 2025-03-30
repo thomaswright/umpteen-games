@@ -1,6 +1,10 @@
 open Webapi.Dom
 
-type gameType = Klondike | FreeCell | DoubleFreeCell | UpAndDown
+type gameType =
+  | @as("Klondike") Klondike
+  | @as("Free Cell") FreeCell
+  | @as("2 Deck Free Cell") DoubleFreeCell
+  | @as("Up & Down") UpAndDown
 
 let gameString = (a: gameType) => (a :> string)
 
@@ -62,16 +66,19 @@ let make = () => {
   } else {
     <div className={" bg-gradient-to-tl from-green-900 to-green-700 h-dvh"}>
       <div className="px-5 pt-3">
-        <div className="font-black text-xl mb-1"> {"Card Games!"->React.string} </div>
-        <div className="flex flex-row gap-4">
+        <div className="mb-1 text-white font-medium tracking-widest ">
+          {"tom & won's card games"->React.string}
+        </div>
+        <div className="flex flex-row gap-5 text-xl">
           {[Klondike, FreeCell, DoubleFreeCell, UpAndDown]
           ->Array.map(v => {
             let selected = v == selectGameType
             <button
               key={v->gameString}
-              className={[selected ? "text-blue-700 underline" : "", "font-medium"]->Array.join(
-                " ",
-              )}
+              className={[
+                selected ? "text-amber-500 underline" : "text-white",
+                "font-black",
+              ]->Array.join(" ")}
               onClick={_ => setSelectGameType(_ => v)}>
               {v->gameString->React.string}
             </button>

@@ -199,7 +199,7 @@ function GameBrowser(props) {
                 })
             }, "klondike" + state.contents.klondike.length.toString());
         break;
-    case "FreeCell" :
+    case "Free Cell" :
         tmp = JsxRuntime.jsx(FreeCell.Game.make, {
               getState: state.contents.freeCell.length === 0 ? undefined : (function () {
                     return state.contents.freeCell[0];
@@ -227,7 +227,7 @@ function GameBrowser(props) {
                 })
             }, "freeCell" + state.contents.freeCell.length.toString());
         break;
-    case "DoubleFreeCell" :
+    case "2 Deck Free Cell" :
         tmp = JsxRuntime.jsx(DoubleFreeCell.Game.make, {
               getState: state.contents.doubleFreeCell.length === 0 ? undefined : (function () {
                     return state.contents.doubleFreeCell[0];
@@ -255,7 +255,7 @@ function GameBrowser(props) {
                 })
             }, "doubleFreeCell" + state.contents.doubleFreeCell.length.toString());
         break;
-    case "UpAndDown" :
+    case "Up & Down" :
         tmp = JsxRuntime.jsx(UpAndDown.Game.make, {
               getState: state.contents.upAndDown.length === 0 ? undefined : (function () {
                     return state.contents.upAndDown[0];
@@ -290,22 +290,22 @@ function GameBrowser(props) {
                 JsxRuntime.jsxs("div", {
                       children: [
                         JsxRuntime.jsx("div", {
-                              children: "Card Games!",
-                              className: "font-black text-xl mb-1"
+                              children: "tom & won's card games",
+                              className: "mb-1 text-white font-medium tracking-widest "
                             }),
                         JsxRuntime.jsx("div", {
                               children: [
                                   "Klondike",
-                                  "FreeCell",
-                                  "DoubleFreeCell",
-                                  "UpAndDown"
+                                  "Free Cell",
+                                  "2 Deck Free Cell",
+                                  "Up & Down"
                                 ].map(function (v) {
                                     var selected = v === selectGameType;
                                     return JsxRuntime.jsx("button", {
                                                 children: v,
                                                 className: [
-                                                    selected ? "text-blue-700 underline" : "",
-                                                    "font-medium"
+                                                    selected ? "text-amber-500 underline" : "text-white",
+                                                    "font-black"
                                                   ].join(" "),
                                                 onClick: (function (param) {
                                                     setSelectGameType(function (param) {
@@ -314,7 +314,7 @@ function GameBrowser(props) {
                                                   })
                                               }, v);
                                   }),
-                              className: "flex flex-row gap-4"
+                              className: "flex flex-row gap-5 text-xl"
                             })
                       ],
                       className: "px-5 pt-3"
