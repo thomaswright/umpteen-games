@@ -518,40 +518,50 @@ function toString(card) {
 }
 
 function Card$Display(props) {
+  var __hidden = props.hidden;
   var __multiColor = props.multiColor;
   var card = props.card;
   var multiColor = __multiColor !== undefined ? __multiColor : false;
+  var hidden = __hidden !== undefined ? __hidden : false;
   var match = card.rank;
   var tmp;
   tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
   return JsxRuntime.jsx("div", {
-              children: JsxRuntime.jsx("div", {
-                    children: JsxRuntime.jsxs("span", {
-                          children: [
-                            JsxRuntime.jsxs("span", {
-                                  children: [
-                                    JsxRuntime.jsx("span", {
-                                          children: displayRank(card),
-                                          className: [
-                                              "font-medium ",
-                                              tmp
-                                            ].join(" ")
-                                        }),
-                                    JsxRuntime.jsx("span", {
-                                          children: displaySuit(card),
-                                          className: "w-3.5 flex flex-row justify-center"
-                                        })
-                                  ],
-                                  className: "flex flex-row"
-                                }),
-                            JsxRuntime.jsx("span", {
-                                  children: displaySuit(card),
-                                  className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
-                                })
-                          ],
-                          className: "flex flex-col"
-                        }),
-                    className: ["border border-gray-400 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
+              children: JsxRuntime.jsxs("div", {
+                    children: [
+                      JsxRuntime.jsx("div", {
+                            className: [
+                                "absolute bg-red-700 w-full h-full card-back",
+                                hidden ? "" : "hidden"
+                              ].join(" ")
+                          }),
+                      JsxRuntime.jsxs("span", {
+                            children: [
+                              JsxRuntime.jsxs("span", {
+                                    children: [
+                                      JsxRuntime.jsx("span", {
+                                            children: displayRank(card),
+                                            className: [
+                                                "font-medium ",
+                                                tmp
+                                              ].join(" ")
+                                          }),
+                                      JsxRuntime.jsx("span", {
+                                            children: displaySuit(card),
+                                            className: "w-3.5 flex flex-row justify-center"
+                                          })
+                                    ],
+                                    className: "flex flex-row"
+                                  }),
+                              JsxRuntime.jsx("span", {
+                                    children: displaySuit(card),
+                                    className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
+                                  })
+                            ],
+                            className: "flex flex-col py-0.5 px-1"
+                          })
+                    ],
+                    className: ["relative border border-gray-400 rounded w-14 h-20 bg-white shadow-sm leading-none  cursor-default overflow-hidden"].join(" "),
                     style: {
                       color: multiColor ? multiColorHex(card) : colorHex(card),
                       transform: rotation(card)
@@ -567,6 +577,16 @@ function Card$Display(props) {
 var Display = {
   make: Card$Display
 };
+
+function getOneSuitDeck(deck, suit) {
+  return Core__Array.reduce(allRanks, [], (function (a, rank) {
+                return a.concat([{
+                              suit: suit,
+                              rank: rank,
+                              deck: deck
+                            }]);
+              }));
+}
 
 function getDeck(deck) {
   return Core__Array.reduce(allRanks, [], (function (a, rank) {
@@ -608,6 +628,7 @@ export {
   rotation ,
   toString ,
   Display ,
+  getOneSuitDeck ,
   getDeck ,
 }
 /* react/jsx-runtime Not a pure module */

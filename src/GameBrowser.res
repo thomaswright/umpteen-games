@@ -5,6 +5,7 @@ type gameType =
   | @as("Free Cell") FreeCell
   | @as("2 Deck Free Cell") DoubleFreeCell
   | @as("Up & Down") UpAndDown
+  | @as("One Suit Spider") Spider
 
 let gameString = (a: gameType) => (a :> string)
 
@@ -14,6 +15,7 @@ type state = {
   freeCell: array<FreeCell.Game.state>,
   doubleFreeCell: array<DoubleFreeCell.Game.state>,
   upAndDown: array<UpAndDown.Game.state>,
+  spider: array<Spider.Game.state>,
 }
 
 let state: ref<state> = ref({
@@ -21,6 +23,7 @@ let state: ref<state> = ref({
   freeCell: [],
   doubleFreeCell: [],
   upAndDown: [],
+  spider: [],
 })
 
 let setState = f => {
@@ -70,7 +73,7 @@ let make = () => {
           {"tom & won's card games"->React.string}
         </div>
         <div className="flex flex-row gap-5 text-xl">
-          {[Klondike, FreeCell, DoubleFreeCell, UpAndDown]
+          {[Klondike, FreeCell, DoubleFreeCell, UpAndDown, Spider]
           ->Array.map(v => {
             let selected = v == selectGameType
             <button
@@ -169,6 +172,27 @@ let make = () => {
             setState(state => {
               ...state,
               upAndDown: state.upAndDown->Common.ArrayAux.update(0, f),
+            })}
+        />
+      | Spider =>
+        <Spider.Game
+          key={"spider" ++ state.contents.spider->Array.length->Int.toString}
+          onCreateNewGame={x => {
+            setState(state => {
+              ...state,
+              spider: Array.concat([x], state.spider),
+            })
+            forceUpdate()
+          }}
+          getState={if state.contents.spider->Array.length == 0 {
+            None
+          } else {
+            Some(() => state.contents.spider->Array.getUnsafe(0))
+          }}
+          setState={f =>
+            setState(state => {
+              ...state,
+              spider: state.spider->Common.ArrayAux.update(0, f),
             })}
         />
       }}

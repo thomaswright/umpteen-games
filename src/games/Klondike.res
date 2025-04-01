@@ -166,6 +166,7 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
+      onMove: (~hide as _, ~show as _) => (),
     }
   }
 
@@ -220,6 +221,7 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
+      onMove: (~hide as _, ~show as _) => (),
     }
   }
 
@@ -239,6 +241,7 @@ module GameRules: GameBase.GameRules = {
     },
     autoProgress: () => DoNothing,
     droppedUpon: (_, _) => None,
+    onMove: (~hide as _, ~show as _) => (),
   }
 
   let stockRules = i => {
@@ -251,6 +254,7 @@ module GameRules: GameBase.GameRules = {
     dragPile: () => None,
     autoProgress: () => DoNothing,
     droppedUpon: (_, _) => None,
+    onMove: (~hide as _, ~show as _) => (),
   }
 
   let getRule: GameBase.getRule<game, space, dragPile> = (game: game, match: space) => {

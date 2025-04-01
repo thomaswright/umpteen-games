@@ -418,9 +418,19 @@ function Create(GameRules) {
                       return ;
                     }
                     var match = rule._0;
+                    var onMove = match.onMove;
                     var locationAdjustment = match.locationAdjustment;
                     Core__Option.mapOr(getElement(match.baseSpace), undefined, (function (baseElement) {
                             var basePos = elementPosition(baseElement);
+                            onMove((function () {
+                                    Core__Option.mapOr(Caml_option.nullable_to_opt(element.querySelector(".card-back")), undefined, (function (cardBackElement) {
+                                            cardBackElement.classList.remove("hidden");
+                                          }));
+                                  }), (function () {
+                                    Core__Option.mapOr(Caml_option.nullable_to_opt(element.querySelector(".card-back")), undefined, (function (cardBackElement) {
+                                            cardBackElement.classList.add("hidden");
+                                          }));
+                                  }));
                             var targetLeft = locationAdjustment.x;
                             var targetTop = locationAdjustment.y;
                             var targetZIndex = locationAdjustment.z;
@@ -679,6 +689,7 @@ function Create(GameRules) {
           onMouseUpNone(dragPile);
         }
       }
+      console.log(getGame());
       dragData.current = undefined;
     };
     var restartGame = function () {

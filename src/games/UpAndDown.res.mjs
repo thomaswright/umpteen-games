@@ -593,6 +593,9 @@ function pileRules(pile, item, i, j) {
                       };
               }
               
+            }),
+          onMove: (function (param, param$1) {
+              
             })
         };
 }
@@ -656,6 +659,9 @@ function foundationRules(card, i, j) {
                       };
               }
               
+            }),
+          onMove: (function (param, param$1) {
+              
             })
         };
 }
@@ -711,6 +717,9 @@ function tarotUpRules(tarot, j) {
                         free: game.free
                       };
               }
+              
+            }),
+          onMove: (function (param, param$1) {
               
             })
         };
@@ -768,6 +777,9 @@ function tarotDownRules(tarot, j) {
                       };
               }
               
+            }),
+          onMove: (function (param, param$1) {
+              
             })
         };
 }
@@ -810,6 +822,9 @@ function freeRules(card) {
                     };
             }),
           droppedUpon: (function (_game, _dragPile) {
+              
+            }),
+          onMove: (function (param, param$1) {
               
             })
         };

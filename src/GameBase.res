@@ -1,6 +1,9 @@
 @@warning("-44")
 open Webapi.Dom
 
+@scope("classList") @send external classListAdd: (Element.t, string) => unit = "add"
+@scope("classList") @send external classListRemove: (Element.t, string) => unit = "remove"
+
 @val @module("./other.js")
 external condInterval: (unit => unit, int, unit => bool) => unit = "condInterval"
 
@@ -27,6 +30,7 @@ type movableSpace<'game, 'space, 'dragPile> = {
   dragPile: unit => option<'dragPile>,
   autoProgress: unit => autoProgress<'dragPile>,
   droppedUpon: droppedUpon<'game, 'dragPile>,
+  onMove: (~hide: unit => unit, ~show: unit => unit) => unit,
   // applyMoveToOthers: ('space => unit) => unit,
 }
 
@@ -377,6 +381,22 @@ module Create = (GameRules: GameRules) => {
         }
       }
 
+      let hide = element => {
+        element
+        ->Element.querySelector(".card-back")
+        ->Option.mapOr((), cardBackElement => {
+          cardBackElement->classListRemove("hidden")
+        })
+      }
+
+      let show = element => {
+        element
+        ->Element.querySelector(".card-back")
+        ->Option.mapOr((), cardBackElement => {
+          cardBackElement->classListAdd("hidden")
+        })
+      }
+
       let moveToState = () => {
         refs.current->Array.forEach(element => {
           element
@@ -385,13 +405,14 @@ module Create = (GameRules: GameRules) => {
           ->Option.mapOr((), rule => {
             switch rule {
             | Static(_) => ()
-            | Movable({locationAdjustment, baseSpace}) =>
+            | Movable({locationAdjustment, baseSpace, onMove}) =>
               baseSpace
               ->getElement
               ->Option.mapOr(
                 (),
                 baseElement => {
                   let basePos = baseElement->elementPosition
+                  onMove(~hide=() => hide(element), ~show=() => show(element))
                   moveWithTime(
                     element,
                     basePos,
@@ -644,6 +665,8 @@ module Create = (GameRules: GameRules) => {
           }
         | None => ()
         }
+
+        Console.log(getGame())
 
         dragData.current = None
       }

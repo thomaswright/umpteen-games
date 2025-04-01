@@ -124,7 +124,7 @@ let toString = card => {
 
 module Display = {
   @react.component
-  let make = (~card, ~id, ~cardRef, ~onMouseDown, ~multiColor=false) => {
+  let make = (~card, ~id, ~cardRef, ~onMouseDown, ~multiColor=false, ~hidden=false) => {
     <div id={id} ref={cardRef} onMouseDown={onMouseDown} className="absolute w-14 h-20 select-none">
       <div
         style={{
@@ -133,9 +133,15 @@ module Display = {
           color: multiColor ? card->multiColorHex : card->colorHex,
         }}
         className={[
-          "border border-gray-400 rounded w-14 h-20 bg-white shadow-sm px-1 leading-none py-0.5 cursor-default",
+          "relative border border-gray-400 rounded w-14 h-20 bg-white shadow-sm leading-none  cursor-default overflow-hidden",
         ]->Array.join(" ")}>
-        <span className="flex flex-col">
+        <div
+          className={[
+            "absolute bg-red-700 w-full h-full card-back",
+            hidden ? "" : "hidden",
+          ]->Array.join(" ")}
+        />
+        <span className="flex flex-col py-0.5 px-1">
           <span className="flex flex-row">
             <span
               className={[
@@ -158,6 +164,20 @@ module Display = {
       </div>
     </div>
   }
+}
+
+let getOneSuitDeck = (deck, suit) => {
+  allRanks->Array.reduce([], (a, rank) => {
+    a->Array.concat([
+      (
+        {
+          suit,
+          rank,
+          deck,
+        }: card
+      ),
+    ])
+  })
 }
 
 let getDeck = deck => {

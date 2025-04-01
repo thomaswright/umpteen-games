@@ -442,6 +442,9 @@ function pileRules(game, pile, card, i, j) {
                       };
               }
               
+            }),
+          onMove: (function (param, param$1) {
+              
             })
         };
 }
@@ -501,6 +504,9 @@ function foundationRules(game, foundation, card, i, j) {
                       };
               }
               
+            }),
+          onMove: (function (param, param$1) {
+              
             })
         };
 }
@@ -545,6 +551,9 @@ function freeRules(card, i) {
                     };
             }),
           droppedUpon: (function (_game, _dragPile) {
+              
+            }),
+          onMove: (function (param, param$1) {
               
             })
         };
@@ -669,7 +678,7 @@ function FreeCell$GameRules$Board(props) {
                                                         })),
                                                 className: " bg-white opacity-10  rounded w-14 h-20"
                                               }, JSON.stringify(space_encode({
-                                                        TAG: "Free",
+                                                        TAG: "Foundation",
                                                         _0: i
                                                       })));
                                   }),

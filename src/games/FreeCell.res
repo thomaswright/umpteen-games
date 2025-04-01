@@ -171,6 +171,7 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
+      onMove: (~hide as _, ~show as _) => (),
     }
   }
 
@@ -232,6 +233,7 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
+      onMove: (~hide as _, ~show as _) => (),
     }
   }
 
@@ -262,6 +264,7 @@ module GameRules: GameBase.GameRules = {
       autoProgress: () => Send([card]),
       dragPile: () => Some([card]),
       droppedUpon: (_game, _dragPile) => None,
+      onMove: (~hide as _, ~show as _) => (),
     }
   }
 
@@ -336,7 +339,7 @@ module GameRules: GameBase.GameRules = {
             {[[], [], [], []]
             ->Array.mapWithIndex((_, i) => {
               <div
-                key={Free(i)->spaceToString}
+                key={Foundation(i)->spaceToString}
                 ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
                 className=" bg-white opacity-10  rounded w-14 h-20"
               />

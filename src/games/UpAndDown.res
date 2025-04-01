@@ -186,6 +186,7 @@ module GameRules: GameBase.GameRules = {
         | _ => None
         }
       },
+      onMove: (~hide as _, ~show as _) => (),
     }
   }
 
@@ -236,6 +237,7 @@ module GameRules: GameBase.GameRules = {
         | _ => None
         }
       },
+      onMove: (~hide as _, ~show as _) => (),
     }
   }
 
@@ -284,6 +286,7 @@ module GameRules: GameBase.GameRules = {
         | _ => None
         }
       },
+      onMove: (~hide as _, ~show as _) => (),
     }
   }
 
@@ -332,6 +335,7 @@ module GameRules: GameBase.GameRules = {
         | _ => None
         }
       },
+      onMove: (~hide as _, ~show as _) => (),
     }
   }
 
@@ -356,6 +360,7 @@ module GameRules: GameBase.GameRules = {
       autoProgress: () => Send(card),
       dragPile: () => Some(card),
       droppedUpon: (_game, _dragPile) => None,
+      onMove: (~hide as _, ~show as _) => (),
     }
   }
 
