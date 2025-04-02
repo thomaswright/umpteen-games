@@ -1,3 +1,7 @@
+@scope("classList") @send external classListAdd: (Webapi.Dom.Element.t, string) => unit = "add"
+@scope("classList") @send
+external classListRemove: (Webapi.Dom.Element.t, string) => unit = "remove"
+
 @decco
 type suit =
   | Spades
@@ -169,6 +173,22 @@ module Display = {
       </div>
     </div>
   }
+}
+
+let hide = element => {
+  element
+  ->Webapi.Dom.Element.querySelector(".card-back")
+  ->Option.mapOr((), cardBackElement => {
+    cardBackElement->classListRemove("hidden")
+  })
+}
+
+let show = element => {
+  element
+  ->Webapi.Dom.Element.querySelector(".card-back")
+  ->Option.mapOr((), cardBackElement => {
+    cardBackElement->classListAdd("hidden")
+  })
 }
 
 let getOneSuitDeck = (deck, suit) => {

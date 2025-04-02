@@ -178,9 +178,9 @@ module GameRules: GameBase.GameRules = {
         }
       },
       onClick: _ => None,
-      onMove: (~hide as _, ~show) => {
+      onMove: element => {
         if isLast {
-          show()
+          Card.show(element)
         } else {
           ()
         }
@@ -223,7 +223,9 @@ module GameRules: GameBase.GameRules = {
         None
       },
       onClick: _ => None,
-      onMove: (~hide as _, ~show) => {show()},
+      onMove: element => {
+        Card.show(element)
+      },
     }
   }
 
@@ -255,8 +257,8 @@ module GameRules: GameBase.GameRules = {
           }
         })
       },
-      onMove: (~hide, ~show as _) => {
-        hide()
+      onMove: element => {
+        Card.hide(element)
       },
     }
   }

@@ -423,9 +423,9 @@ function pileRules(game, pile, card, i, j) {
               }
               
             }),
-          onMove: (function (param, show) {
+          onMove: (function (element) {
               if (isLast) {
-                return show();
+                return Card.show(element);
               }
               
             }),
@@ -476,8 +476,8 @@ function foundationRules(i, j) {
           droppedUpon: (function (game, dragPile) {
               
             }),
-          onMove: (function (param, show) {
-              show();
+          onMove: (function (element) {
+              Card.show(element);
             }),
           onClick: (function (param) {
               
@@ -502,8 +502,8 @@ function stockGroupRules(game, card, i, j) {
           droppedUpon: (function (game, dragPile) {
               
             }),
-          onMove: (function (hide, param) {
-              hide();
+          onMove: (function (element) {
+              Card.hide(element);
             }),
           onClick: (function (game) {
               return Core__Option.map(Common.ArrayAux.getLast(game.stock), (function (stockGroup) {

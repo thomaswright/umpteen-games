@@ -8,6 +8,7 @@ import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
+import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function suit_encode(value) {
@@ -579,6 +580,18 @@ var Display = {
   make: Card$Display
 };
 
+function hide(element) {
+  Core__Option.mapOr(Caml_option.nullable_to_opt(element.querySelector(".card-back")), undefined, (function (cardBackElement) {
+          cardBackElement.classList.remove("hidden");
+        }));
+}
+
+function show(element) {
+  Core__Option.mapOr(Caml_option.nullable_to_opt(element.querySelector(".card-back")), undefined, (function (cardBackElement) {
+          cardBackElement.classList.add("hidden");
+        }));
+}
+
 function getOneSuitDeck(deck, suit) {
   return Core__Array.reduce(allRanks, [], (function (a, rank) {
                 return a.concat([{
@@ -629,6 +642,8 @@ export {
   rotation ,
   toString ,
   Display ,
+  hide ,
+  show ,
   getOneSuitDeck ,
   getDeck ,
 }

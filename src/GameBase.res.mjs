@@ -422,15 +422,7 @@ function Create(GameRules) {
                     var locationAdjustment = match.locationAdjustment;
                     Core__Option.mapOr(getElement(match.baseSpace), undefined, (function (baseElement) {
                             var basePos = elementPosition(baseElement);
-                            onMove((function () {
-                                    Core__Option.mapOr(Caml_option.nullable_to_opt(element.querySelector(".card-back")), undefined, (function (cardBackElement) {
-                                            cardBackElement.classList.remove("hidden");
-                                          }));
-                                  }), (function () {
-                                    Core__Option.mapOr(Caml_option.nullable_to_opt(element.querySelector(".card-back")), undefined, (function (cardBackElement) {
-                                            cardBackElement.classList.add("hidden");
-                                          }));
-                                  }));
+                            onMove(element);
                             var targetLeft = locationAdjustment.x;
                             var targetTop = locationAdjustment.y;
                             var targetZIndex = locationAdjustment.z;
