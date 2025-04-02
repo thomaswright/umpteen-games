@@ -177,7 +177,8 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
-      onMove: (~hide, ~show) => {
+      onClick: _ => None,
+      onMove: (~hide as _, ~show) => {
         if isLast {
           show()
         } else {
@@ -221,7 +222,8 @@ module GameRules: GameBase.GameRules = {
       droppedUpon: (game, dragPile) => {
         None
       },
-      onMove: (~hide as _, ~show as _) => (),
+      onClick: _ => None,
+      onMove: (~hide as _, ~show) => {show()},
     }
   }
 
@@ -240,7 +242,22 @@ module GameRules: GameBase.GameRules = {
       droppedUpon: (game, dragPile) => {
         None
       },
-      onMove: (~hide as _, ~show as _) => (),
+      onClick: game => {
+        game.stock
+        ->Common.ArrayAux.getLast
+        ->Option.map(stockGroup => {
+          {
+            ...game,
+            piles: game.piles->Array.mapWithIndex((pile, i) => {
+              Array.concat(pile, [stockGroup->Array.getUnsafe(i)])
+            }),
+            stock: game.stock->Array.slice(~start=0, ~end=game.stock->Array.length - 1),
+          }
+        })
+      },
+      onMove: (~hide, ~show as _) => {
+        hide()
+      },
     }
   }
 
@@ -331,7 +348,7 @@ module GameRules: GameBase.GameRules = {
 
   module AllCards = {
     @react.component
-    let make = (~setRef, ~onMouseDown, ~deck) => {
+    let make = (~setRef, ~onMouseDown, ~onClick, ~deck) => {
       <React.Fragment>
         {deck
         ->Array.map(card => {
@@ -339,6 +356,7 @@ module GameRules: GameBase.GameRules = {
             card={card}
             key={Card(card)->spaceToString}
             id={Card(card)->spaceToString}
+            onClick={onClick}
             cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
             onMouseDown={onMouseDown}
             hidden={true}

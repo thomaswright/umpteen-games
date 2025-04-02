@@ -564,6 +564,26 @@ function Create(GameRules) {
               return progressDragPiles(dragPiles, droppedUpons);
             }));
     };
+    var onClick = function ($$event) {
+      Core__Option.mapOr(GameRules.getSpace($$event.currentTarget), undefined, (function (dragSpace) {
+              Core__Option.mapOr(GameRules.getRule(getGame(), dragSpace), undefined, (function (rule) {
+                      if (rule.TAG === "Movable") {
+                        return Core__Option.mapOr(rule._0.onClick(getGame()), undefined, (function (newGame) {
+                                      if (JSON.stringify(GameRules.game_encode(getGame())) !== JSON.stringify(GameRules.game_encode(newGame))) {
+                                        setGame(function (param) {
+                                              return newGame;
+                                            });
+                                        snapshot();
+                                        moveToState();
+                                        return autoProgress();
+                                      }
+                                      
+                                    }));
+                      }
+                      
+                    }));
+            }));
+    };
     var onMouseDown = function ($$event) {
       var dragElement = $$event.currentTarget;
       Core__Option.mapOr(GameRules.getSpace(dragElement), undefined, (function (dragSpace) {
@@ -736,6 +756,7 @@ function Create(GameRules) {
                   JsxRuntime.jsx(GameRules.AllCards.make, {
                         setRef: setRef,
                         onMouseDown: onMouseDown,
+                        onClick: onClick,
                         deck: getState().deck
                       })
                 ],

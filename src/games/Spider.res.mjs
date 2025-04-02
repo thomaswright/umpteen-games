@@ -13,6 +13,7 @@ import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
+import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function space_encode(value) {
@@ -422,10 +423,13 @@ function pileRules(game, pile, card, i, j) {
               }
               
             }),
-          onMove: (function (hide, show) {
+          onMove: (function (param, show) {
               if (isLast) {
                 return show();
               }
+              
+            }),
+          onClick: (function (param) {
               
             })
         };
@@ -472,7 +476,10 @@ function foundationRules(i, j) {
           droppedUpon: (function (game, dragPile) {
               
             }),
-          onMove: (function (param, param$1) {
+          onMove: (function (param, show) {
+              show();
+            }),
+          onClick: (function (param) {
               
             })
         };
@@ -495,8 +502,19 @@ function stockGroupRules(game, card, i, j) {
           droppedUpon: (function (game, dragPile) {
               
             }),
-          onMove: (function (param, param$1) {
-              
+          onMove: (function (hide, param) {
+              hide();
+            }),
+          onClick: (function (game) {
+              return Core__Option.map(Common.ArrayAux.getLast(game.stock), (function (stockGroup) {
+                            return {
+                                    piles: game.piles.map(function (pile, i) {
+                                          return pile.concat([stockGroup[i]]);
+                                        }),
+                                    foundations: game.foundations,
+                                    stock: game.stock.slice(0, game.stock.length - 1 | 0)
+                                  };
+                          }));
             })
         };
 }
@@ -644,6 +662,7 @@ var Board = {
 };
 
 function Spider$GameRules$AllCards(props) {
+  var onClick = props.onClick;
   var onMouseDown = props.onMouseDown;
   var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
@@ -659,6 +678,7 @@ function Spider$GameRules$AllCards(props) {
                                       _0: card
                                     }),
                                 onMouseDown: onMouseDown,
+                                onClick: onClick,
                                 hidden: true
                               }, JSON.stringify(space_encode({
                                         TAG: "Card",

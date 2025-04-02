@@ -31,6 +31,7 @@ type movableSpace<'game, 'space, 'dragPile> = {
   autoProgress: unit => autoProgress<'dragPile>,
   droppedUpon: droppedUpon<'game, 'dragPile>,
   onMove: (~hide: unit => unit, ~show: unit => unit) => unit,
+  onClick: 'game => option<'game>,
   // applyMoveToOthers: ('space => unit) => unit,
 }
 
@@ -97,13 +98,15 @@ module type GameRules = {
   }
 
   module AllCards: {
-    type props<'setRef, 'onMouseDown, 'deck> = {
+    type props<'setRef, 'onMouseDown, 'onClick, 'deck> = {
       setRef: 'setRef,
       onMouseDown: 'onMouseDown,
+      onClick: 'onClick,
       deck: 'deck,
     }
     let make: props<
       space => ReactDOM.Ref.callbackDomRef,
+      JsxEventU.Mouse.t => unit,
       JsxEventU.Mouse.t => unit,
       deck,
     > => React.element
@@ -528,6 +531,35 @@ module Create = (GameRules: GameRules) => {
         )
       }
 
+      let onClick = event => {
+        event
+        ->JsxEvent.Mouse.currentTarget
+        ->Obj.magic
+        ->GameRules.getSpace
+        ->Option.mapOr((), dragSpace => {
+          GameRules.getRule(getGame(), dragSpace)->Option.mapOr((), rule => {
+            switch rule {
+            | Static(_) => ()
+            | Movable({onClick}) =>
+              onClick(getGame())->Option.mapOr(
+                (),
+                newGame => {
+                  if (
+                    getGame()->GameRules.game_encode->Js.Json.stringify !=
+                      newGame->GameRules.game_encode->Js.Json.stringify
+                  ) {
+                    setGame(_ => newGame)
+                    snapshot()
+                    moveToState()
+                    autoProgress()
+                  }
+                },
+              )
+            }
+          })
+        })
+      }
+
       let onMouseDown = event => {
         let dragElement =
           event
@@ -714,7 +746,7 @@ module Create = (GameRules: GameRules) => {
           restartGame
           undo
         />
-        <GameRules.AllCards onMouseDown setRef deck={getDeck()} />
+        <GameRules.AllCards onMouseDown onClick setRef deck={getDeck()} />
       </div>
     }
   }
