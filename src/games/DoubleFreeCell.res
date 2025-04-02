@@ -175,7 +175,8 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
-      onMove: (~hide as _, ~show as _) => (),
+      onClick: _ => None,
+      onMove: _ => (),
     }
   }
 
@@ -237,7 +238,8 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
-      onMove: (~hide as _, ~show as _) => (),
+      onClick: _ => None,
+      onMove: _ => (),
     }
   }
 
@@ -268,7 +270,8 @@ module GameRules: GameBase.GameRules = {
       autoProgress: () => Send([card]),
       dragPile: () => Some([card]),
       droppedUpon: (_game, _dragPile) => None,
-      onMove: (~hide as _, ~show as _) => (),
+      onClick: _ => None,
+      onMove: _ => (),
     }
   }
 
@@ -395,7 +398,7 @@ module GameRules: GameBase.GameRules = {
 
   module AllCards = {
     @react.component
-    let make = (~setRef, ~onMouseDown, ~deck) => {
+    let make = (~setRef, ~onMouseDown, ~onClick, ~deck) => {
       <React.Fragment>
         {deck
         ->Array.map(card => {
@@ -405,6 +408,7 @@ module GameRules: GameBase.GameRules = {
             id={Card(card)->spaceToString}
             cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
             onMouseDown={onMouseDown}
+            onClick
           />
         })
         ->React.array}

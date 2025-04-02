@@ -166,7 +166,8 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
-      onMove: (~hide as _, ~show as _) => (),
+      onClick: _ => None,
+      onMove: _ => (),
     }
   }
 
@@ -221,7 +222,8 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
-      onMove: (~hide as _, ~show as _) => (),
+      onClick: _ => None,
+      onMove: _ => (),
     }
   }
 
@@ -241,7 +243,8 @@ module GameRules: GameBase.GameRules = {
     },
     autoProgress: () => DoNothing,
     droppedUpon: (_, _) => None,
-    onMove: (~hide as _, ~show as _) => (),
+    onClick: _ => None,
+    onMove: _ => (),
   }
 
   let stockRules = i => {
@@ -254,7 +257,8 @@ module GameRules: GameBase.GameRules = {
     dragPile: () => None,
     autoProgress: () => DoNothing,
     droppedUpon: (_, _) => None,
-    onMove: (~hide as _, ~show as _) => (),
+    onClick: _ => None,
+    onMove: _ => (),
   }
 
   let getRule: GameBase.getRule<game, space, dragPile> = (game: game, match: space) => {
@@ -393,7 +397,7 @@ module GameRules: GameBase.GameRules = {
 
   module AllCards = {
     @react.component
-    let make = (~setRef, ~onMouseDown, ~deck) => {
+    let make = (~setRef, ~onMouseDown, ~onClick, ~deck) => {
       <React.Fragment>
         {deck
         ->Array.map(card => {
@@ -403,6 +407,7 @@ module GameRules: GameBase.GameRules = {
             id={Card(card)->spaceToString}
             cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
             onMouseDown={onMouseDown}
+            onClick
           />
         })
         ->React.array}
