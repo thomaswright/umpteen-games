@@ -307,7 +307,8 @@ function Create(GameRules) {
                         autoProgress: props.autoProgress,
                         game: game,
                         undo: undo$1,
-                        isWin: isWin
+                        isWin: isWin,
+                        onClick: props.onClick
                       })
                 ]
               });
@@ -559,20 +560,19 @@ function Create(GameRules) {
     var onClick = function ($$event) {
       Core__Option.mapOr(GameRules.getSpace($$event.currentTarget), undefined, (function (dragSpace) {
               Core__Option.mapOr(GameRules.getRule(getGame(), dragSpace), undefined, (function (rule) {
-                      if (rule.TAG === "Movable") {
-                        return Core__Option.mapOr(rule._0.onClick(getGame()), undefined, (function (newGame) {
-                                      if (JSON.stringify(GameRules.game_encode(getGame())) !== JSON.stringify(GameRules.game_encode(newGame))) {
-                                        setGame(function (param) {
-                                              return newGame;
-                                            });
-                                        snapshot();
-                                        moveToState();
-                                        return autoProgress();
-                                      }
-                                      
-                                    }));
-                      }
-                      
+                      var onClick;
+                      onClick = rule.TAG === "Movable" ? rule._0.onClick : rule._0.onClick;
+                      Core__Option.mapOr(onClick(getGame()), undefined, (function (newGame) {
+                              if (JSON.stringify(GameRules.game_encode(getGame())) !== JSON.stringify(GameRules.game_encode(newGame))) {
+                                setGame(function (param) {
+                                      return newGame;
+                                    });
+                                snapshot();
+                                moveToState();
+                                return autoProgress();
+                              }
+                              
+                            }));
                     }));
             }));
     };
@@ -743,7 +743,8 @@ function Create(GameRules) {
                         autoProgress: autoProgress,
                         undo: undo,
                         createNewGame: props.createNewGame,
-                        restartGame: restartGame
+                        restartGame: restartGame,
+                        onClick: onClick
                       }),
                   JsxRuntime.jsx(GameRules.AllCards.make, {
                         setRef: setRef,

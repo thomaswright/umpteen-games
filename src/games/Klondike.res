@@ -43,24 +43,6 @@ module GameRules: GameBase.GameRules = {
     })
   }
 
-  let dragPileValidation = dragPile => {
-    let (dragPileIsValid, _) =
-      dragPile
-      ->Array.toReversed
-      ->Array.reduce((true, None), ((isStillValid, onTop), onBottom) => {
-        !isStillValid
-          ? (false, None)
-          : switch (onTop, onBottom) {
-            | (Some(onTop), onBottom) => (
-                Card.rankIsBelow(onTop, onBottom) && onTop->Card.color != onBottom->Card.color,
-                Some(onBottom),
-              )
-            | _ => (true, Some(onBottom))
-            }
-      })
-    dragPileIsValid
-  }
-
   let initiateGame = () => {
     let shuffledDeck = Card.getDeck(0)->Array.toShuffled
     let deckToDeal = ref(shuffledDeck)
@@ -120,6 +102,7 @@ module GameRules: GameBase.GameRules = {
         }
       },
       autoProgress: Accept,
+      onClick: _ => None,
     }
   }
 
@@ -135,7 +118,7 @@ module GameRules: GameBase.GameRules = {
       baseSpace: Pile(i),
       dragPile: () => {
         let dragPile = pile->Array.sliceToEnd(~start=j)
-        if dragPile->dragPileValidation {
+        if dragPile->GameCommons.decAndAltValidation {
           Some(dragPile)
         } else {
           None
@@ -167,7 +150,13 @@ module GameRules: GameBase.GameRules = {
         }
       },
       onClick: _ => None,
-      onMove: _ => (),
+      onMove: element => {
+        if isLast {
+          Card.show(element)
+        } else {
+          ()
+        }
+      },
     }
   }
 
@@ -188,6 +177,7 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
+      onClick: _ => None,
     }
   }
 
@@ -244,7 +234,7 @@ module GameRules: GameBase.GameRules = {
     autoProgress: () => DoNothing,
     droppedUpon: (_, _) => None,
     onClick: _ => None,
-    onMove: _ => (),
+    onMove: element => Card.show(element),
   }
 
   let stockRules = i => {
@@ -257,8 +247,30 @@ module GameRules: GameBase.GameRules = {
     dragPile: () => None,
     autoProgress: () => DoNothing,
     droppedUpon: (_, _) => None,
-    onClick: _ => None,
+    onClick: game => {
+      Some({
+        ...game,
+        stock: game.stock->Array.slice(~start=0, ~end=game.stock->Array.length - 1),
+        waste: game.waste->Array.concat(
+          game.stock->Array.sliceToEnd(~start=game.stock->Array.length - 1),
+        ),
+      })
+    },
     onMove: _ => (),
+  }
+
+  let stockBaseRules = () => {
+    autoProgress: DoNothing,
+    droppedUpon: (game, dragPile) => {
+      None
+    },
+    onClick: game => {
+      Some({
+        ...game,
+        stock: game.waste->Array.toReversed,
+        waste: [],
+      })
+    },
   }
 
   let getRule: GameBase.getRule<game, space, dragPile> = (game: game, match: space) => {
@@ -300,34 +312,11 @@ module GameRules: GameBase.GameRules = {
       }
     })
 
+    if Stock == match {
+      result := stockBaseRules()->Static->Some
+    }
+
     result.contents
-  }
-
-  module Custom = {
-    let dealToWaste = async (setGame, moveToState, autoProgress) => {
-      let f = _ => {
-        setGame(game => {
-          ...game,
-          stock: game.stock->Array.slice(~start=0, ~end=game.stock->Array.length - 1),
-          waste: game.waste->Array.concat(
-            game.stock->Array.sliceToEnd(~start=game.stock->Array.length - 1),
-          ),
-        })
-        moveToState()
-      }
-
-      await numInterval(f, 400, 3)
-      autoProgress()
-    }
-
-    let restock = (setGame, moveToState) => {
-      setGame(game => {
-        ...game,
-        stock: game.waste->Array.toReversed,
-        waste: [],
-      })
-      moveToState()
-    }
   }
 
   module Board = {
@@ -335,12 +324,13 @@ module GameRules: GameBase.GameRules = {
     let make = (
       ~setRef,
       ~onMouseDown as _,
-      ~setGame,
-      ~moveToState,
-      ~autoProgress,
-      ~game,
+      ~setGame as _,
+      ~moveToState as _,
+      ~autoProgress as _,
+      ~game as _,
       ~undo as _,
       ~isWin as _,
+      ~onClick,
     ) => {
       <React.Fragment>
         <div className="flex flex-row gap-3">
@@ -348,17 +338,8 @@ module GameRules: GameBase.GameRules = {
             key={Stock->spaceToString}
             id={Stock->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
-            onClick={_ => {
-              if game.stock->Array.length == 0 {
-                Custom.restock(setGame, moveToState)
-              } else {
-                Custom.dealToWaste(setGame, moveToState, autoProgress)->ignore
-              }
-            }}
-            className=" bg-blue-200 rounded w-14 h-20"
-            style={{
-              zIndex: "53",
-            }}
+            onClick={onClick}
+            className=" bg-black opacity-20 rounded w-14 h-20"
           />
           <div
             key={Waste->spaceToString}
@@ -408,6 +389,7 @@ module GameRules: GameBase.GameRules = {
             cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
             onMouseDown={onMouseDown}
             onClick
+            hidden={true}
           />
         })
         ->React.array}

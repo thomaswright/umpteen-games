@@ -31,21 +31,6 @@ module GameRules: GameBase.GameRules = {
   type movableSpace = GameBase.movableSpace<game, space, dragPile>
   type staticSpace = GameBase.staticSpace<game, dragPile>
 
-  let dragPileValidation = dragPile => {
-    let (dragPileIsValid, _) =
-      dragPile
-      ->Array.toReversed
-      ->Array.reduce((true, None), ((isStillValid, onTop), onBottom) => {
-        !isStillValid
-          ? (false, None)
-          : switch (onTop, onBottom) {
-            | (Some(onTop), onBottom) => (Card.rankIsBelow(onTop, onBottom), Some(onBottom))
-            | _ => (true, Some(onBottom))
-            }
-      })
-    dragPileIsValid
-  }
-
   let initiateGame = () => {
     let shuffledDeck = Array.concatMany(
       [],
@@ -135,6 +120,7 @@ module GameRules: GameBase.GameRules = {
         }
       },
       autoProgress: Accept,
+      onClick: _ => None,
     }
   }
 
@@ -150,7 +136,7 @@ module GameRules: GameBase.GameRules = {
       baseSpace: Pile(i),
       dragPile: () => {
         let dragPile = pile->Array.sliceToEnd(~start=j)
-        if dragPile->dragPileValidation {
+        if dragPile->GameCommons.decValidation {
           Some(dragPile)
         } else {
           None
@@ -194,7 +180,7 @@ module GameRules: GameBase.GameRules = {
       droppedUpon: (game, dragPile) => {
         let fullStack = dragPile->Array.length == 13
         let noChildren = game.foundations->Array.getUnsafe(i)->Array.length == 0
-        let valid = dragPile->dragPileValidation
+        let valid = dragPile->GameCommons.decValidation
         if fullStack && noChildren && valid {
           Some({
             ...game,
@@ -204,6 +190,7 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
+      onClick: _ => None,
     }
   }
 
@@ -312,6 +299,7 @@ module GameRules: GameBase.GameRules = {
       ~game as _,
       ~undo as _,
       ~isWin as _,
+      ~onClick as _,
     ) => {
       <React.Fragment>
         <div className="flex flex-row">

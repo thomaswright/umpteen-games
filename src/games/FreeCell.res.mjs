@@ -13,6 +13,7 @@ import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
+import * as GameCommons from "./GameCommons.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
@@ -266,32 +267,6 @@ function game_decode(value) {
         };
 }
 
-function dragPileValidation(dragPile) {
-  return Core__Array.reduce(dragPile.toReversed(), [
-                true,
-                undefined
-              ], (function (param, onBottom) {
-                  if (!param[0]) {
-                    return [
-                            false,
-                            undefined
-                          ];
-                  }
-                  var onTop = param[1];
-                  if (onTop !== undefined) {
-                    return [
-                            Card.rankIsBelow(onTop, onBottom) && Card.color(onTop) !== Card.color(onBottom),
-                            onBottom
-                          ];
-                  } else {
-                    return [
-                            true,
-                            onBottom
-                          ];
-                  }
-                }))[0];
-}
-
 function initiateGame() {
   var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0));
   var deckToDeal = {
@@ -394,7 +369,10 @@ function pileBaseRules(i) {
               }
               
             }),
-          autoProgress: "Accept"
+          autoProgress: "Accept",
+          onClick: (function (param) {
+              
+            })
         };
 }
 
@@ -415,7 +393,7 @@ function pileRules(game, pile, card, i, j) {
                     return pile.length === 0;
                   }).length + game.free.filter(Core__Option.isNone).length | 0;
               var dragPile = pile.slice(j);
-              if (dragPileValidation(dragPile) && freeCellCount >= (dragPile.length - 1 | 0)) {
+              if (GameCommons.decAndAltValidation(dragPile) && freeCellCount >= (dragPile.length - 1 | 0)) {
                 return dragPile;
               }
               
@@ -443,7 +421,10 @@ function pileRules(game, pile, card, i, j) {
               }
               
             }),
-          onMove: (function (param, param$1) {
+          onMove: (function (param) {
+              
+            }),
+          onClick: (function (param) {
               
             })
         };
@@ -466,7 +447,10 @@ function foundationBaseRules(i) {
               }
               
             }),
-          autoProgress: "Seek"
+          autoProgress: "Seek",
+          onClick: (function (param) {
+              
+            })
         };
 }
 
@@ -505,7 +489,10 @@ function foundationRules(game, foundation, card, i, j) {
               }
               
             }),
-          onMove: (function (param, param$1) {
+          onMove: (function (param) {
+              
+            }),
+          onClick: (function (param) {
               
             })
         };
@@ -526,7 +513,10 @@ function freeBaseRules(i) {
               }
               
             }),
-          autoProgress: "DoNothing"
+          autoProgress: "DoNothing",
+          onClick: (function (param) {
+              
+            })
         };
 }
 
@@ -553,7 +543,10 @@ function freeRules(card, i) {
           droppedUpon: (function (_game, _dragPile) {
               
             }),
-          onMove: (function (param, param$1) {
+          onMove: (function (param) {
+              
+            }),
+          onClick: (function (param) {
               
             })
         };
@@ -721,6 +714,7 @@ var Board = {
 };
 
 function FreeCell$GameRules$AllCards(props) {
+  var onClick = props.onClick;
   var onMouseDown = props.onMouseDown;
   var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
@@ -735,7 +729,8 @@ function FreeCell$GameRules$AllCards(props) {
                                       TAG: "Card",
                                       _0: card
                                     }),
-                                onMouseDown: onMouseDown
+                                onMouseDown: onMouseDown,
+                                onClick: onClick
                               }, JSON.stringify(space_encode({
                                         TAG: "Card",
                                         _0: card

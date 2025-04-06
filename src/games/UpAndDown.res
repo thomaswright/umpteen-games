@@ -132,6 +132,7 @@ module GameRules: GameBase.GameRules = {
         }
       },
       autoProgress: DoNothing,
+      onClick: _ => None,
     }
   }
 
@@ -209,6 +210,7 @@ module GameRules: GameBase.GameRules = {
         | _ => None
         }
       },
+      onClick: _ => None,
     }
   }
 
@@ -261,6 +263,7 @@ module GameRules: GameBase.GameRules = {
         | _ => None
         }
       },
+      onClick: _ => None,
     }
   }
 
@@ -311,6 +314,7 @@ module GameRules: GameBase.GameRules = {
         | _ => None
         }
       },
+      onClick: _ => None,
     }
   }
 
@@ -351,6 +355,7 @@ module GameRules: GameBase.GameRules = {
       | None => Some({...game, free: Some(dragPile)})
       }
     },
+    onClick: _ => None,
   }
 
   let freeRules = (card): movableSpace => {
@@ -442,6 +447,7 @@ module GameRules: GameBase.GameRules = {
       ~game as _,
       ~undo as _,
       ~isWin as _,
+      ~onClick as _,
     ) => {
       <React.Fragment>
         <div className="flex flex-row  ">

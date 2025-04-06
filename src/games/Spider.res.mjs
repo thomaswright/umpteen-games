@@ -13,6 +13,7 @@ import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
+import * as GameCommons from "./GameCommons.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
@@ -250,32 +251,6 @@ function game_decode(value) {
         };
 }
 
-function dragPileValidation(dragPile) {
-  return Core__Array.reduce(dragPile.toReversed(), [
-                true,
-                undefined
-              ], (function (param, onBottom) {
-                  if (!param[0]) {
-                    return [
-                            false,
-                            undefined
-                          ];
-                  }
-                  var onTop = param[1];
-                  if (onTop !== undefined) {
-                    return [
-                            Card.rankIsBelow(onTop, onBottom),
-                            onBottom
-                          ];
-                  } else {
-                    return [
-                            true,
-                            onBottom
-                          ];
-                  }
-                }))[0];
-}
-
 function initiateGame() {
   var shuffledDeck = [].concat(Core__Array.toShuffled(Card.getOneSuitDeck(0, "Spades")), Core__Array.toShuffled(Card.getOneSuitDeck(1, "Spades")), Core__Array.toShuffled(Card.getOneSuitDeck(2, "Spades")), Core__Array.toShuffled(Card.getOneSuitDeck(3, "Spades")), Core__Array.toShuffled(Card.getOneSuitDeck(4, "Spades")), Core__Array.toShuffled(Card.getOneSuitDeck(5, "Spades")), Core__Array.toShuffled(Card.getOneSuitDeck(6, "Spades")), Core__Array.toShuffled(Card.getOneSuitDeck(7, "Spades")));
   var deckToDeal = {
@@ -377,7 +352,10 @@ function pileBaseRules(i) {
               }
               
             }),
-          autoProgress: "Accept"
+          autoProgress: "Accept",
+          onClick: (function (param) {
+              
+            })
         };
 }
 
@@ -395,7 +373,7 @@ function pileRules(game, pile, card, i, j) {
           },
           dragPile: (function () {
               var dragPile = pile.slice(j);
-              if (dragPileValidation(dragPile)) {
+              if (GameCommons.decValidation(dragPile)) {
                 return dragPile;
               }
               
@@ -440,7 +418,7 @@ function foundationBaseRules(i) {
           droppedUpon: (function (game, dragPile) {
               var fullStack = dragPile.length === 13;
               var noChildren = game.foundations[i].length === 0;
-              var valid = dragPileValidation(dragPile);
+              var valid = GameCommons.decValidation(dragPile);
               if (fullStack && noChildren && valid) {
                 return {
                         piles: game.piles,
@@ -452,7 +430,10 @@ function foundationBaseRules(i) {
               }
               
             }),
-          autoProgress: "Seek"
+          autoProgress: "Seek",
+          onClick: (function (param) {
+              
+            })
         };
 }
 

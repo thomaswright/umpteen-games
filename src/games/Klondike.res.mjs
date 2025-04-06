@@ -13,6 +13,7 @@ import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
+import * as GameCommons from "./GameCommons.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function space_encode(value) {
@@ -295,32 +296,6 @@ function applyMoveToDragPile(dragPile, move) {
       });
 }
 
-function dragPileValidation(dragPile) {
-  return Core__Array.reduce(dragPile.toReversed(), [
-                true,
-                undefined
-              ], (function (param, onBottom) {
-                  if (!param[0]) {
-                    return [
-                            false,
-                            undefined
-                          ];
-                  }
-                  var onTop = param[1];
-                  if (onTop !== undefined) {
-                    return [
-                            Card.rankIsBelow(onTop, onBottom) && Card.color(onTop) !== Card.color(onBottom),
-                            onBottom
-                          ];
-                  } else {
-                    return [
-                            true,
-                            onBottom
-                          ];
-                  }
-                }))[0];
-}
-
 function initiateGame() {
   var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0));
   var deckToDeal = {
@@ -393,7 +368,10 @@ function pileBaseRules(i) {
               }
               
             }),
-          autoProgress: "Accept"
+          autoProgress: "Accept",
+          onClick: (function (param) {
+              
+            })
         };
 }
 
@@ -411,7 +389,7 @@ function pileRules(pile, card, i, j) {
           },
           dragPile: (function () {
               var dragPile = pile.slice(j);
-              if (dragPileValidation(dragPile)) {
+              if (GameCommons.decAndAltValidation(dragPile)) {
                 return dragPile;
               }
               
@@ -440,7 +418,13 @@ function pileRules(pile, card, i, j) {
               }
               
             }),
-          onMove: (function (param, param$1) {
+          onMove: (function (element) {
+              if (isLast) {
+                return Card.show(element);
+              }
+              
+            }),
+          onClick: (function (param) {
               
             })
         };
@@ -464,7 +448,10 @@ function foundationBaseRules(i) {
               }
               
             }),
-          autoProgress: "Seek"
+          autoProgress: "Seek",
+          onClick: (function (param) {
+              
+            })
         };
 }
 
@@ -503,7 +490,10 @@ function foundationRules(game, card, i, j) {
               }
               
             }),
-          onMove: (function (param, param$1) {
+          onMove: (function (param) {
+              
+            }),
+          onClick: (function (param) {
               
             })
         };
@@ -529,7 +519,10 @@ function wasteRules(game, card, i) {
           droppedUpon: (function (param, param$1) {
               
             }),
-          onMove: (function (param, param$1) {
+          onMove: (function (element) {
+              Card.show(element);
+            }),
+          onClick: (function (param) {
               
             })
         };
@@ -552,8 +545,33 @@ function stockRules(i) {
           droppedUpon: (function (param, param$1) {
               
             }),
-          onMove: (function (param, param$1) {
+          onMove: (function (param) {
               
+            }),
+          onClick: (function (game) {
+              return {
+                      piles: game.piles,
+                      foundations: game.foundations,
+                      stock: game.stock.slice(0, game.stock.length - 1 | 0),
+                      waste: game.waste.concat(game.stock.slice(game.stock.length - 1 | 0))
+                    };
+            })
+        };
+}
+
+function stockBaseRules() {
+  return {
+          droppedUpon: (function (game, dragPile) {
+              
+            }),
+          autoProgress: "DoNothing",
+          onClick: (function (game) {
+              return {
+                      piles: game.piles,
+                      foundations: game.foundations,
+                      stock: game.waste.toReversed(),
+                      waste: []
+                    };
             })
         };
 }
@@ -636,30 +654,16 @@ function getRule(game, match) {
         }
         
       });
+  if ("Stock" === match) {
+    result.contents = {
+      TAG: "Static",
+      _0: stockBaseRules()
+    };
+  }
   return result.contents;
 }
 
-async function dealToWaste(setGame, moveToState, autoProgress) {
-  var f = function (param) {
-    setGame(function (game) {
-          return {
-                  piles: game.piles,
-                  foundations: game.foundations,
-                  stock: game.stock.slice(0, game.stock.length - 1 | 0),
-                  waste: game.waste.concat(game.stock.slice(game.stock.length - 1 | 0))
-                };
-        });
-    moveToState();
-  };
-  await Common.numInterval(f, 400, 3);
-  return autoProgress();
-}
-
 function Klondike$GameRules$Board(props) {
-  var game = props.game;
-  var autoProgress = props.autoProgress;
-  var moveToState = props.moveToState;
-  var setGame = props.setGame;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
@@ -667,27 +671,9 @@ function Klondike$GameRules$Board(props) {
                       children: [
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Stock")),
-                              className: " bg-blue-200 rounded w-14 h-20",
+                              className: " bg-black opacity-20 rounded w-14 h-20",
                               id: JSON.stringify(space_encode("Stock")),
-                              style: {
-                                zIndex: "53"
-                              },
-                              onClick: (function (param) {
-                                  if (game.stock.length === 0) {
-                                    setGame(function (game) {
-                                          return {
-                                                  piles: game.piles,
-                                                  foundations: game.foundations,
-                                                  stock: game.waste.toReversed(),
-                                                  waste: []
-                                                };
-                                        });
-                                    return moveToState();
-                                  } else {
-                                    dealToWaste(setGame, moveToState, autoProgress);
-                                    return ;
-                                  }
-                                })
+                              onClick: props.onClick
                             }, JSON.stringify(space_encode("Stock"))),
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Waste")),
@@ -757,6 +743,7 @@ var Board = {
 };
 
 function Klondike$GameRules$AllCards(props) {
+  var onClick = props.onClick;
   var onMouseDown = props.onMouseDown;
   var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
@@ -771,7 +758,9 @@ function Klondike$GameRules$AllCards(props) {
                                       TAG: "Card",
                                       _0: card
                                     }),
-                                onMouseDown: onMouseDown
+                                onMouseDown: onMouseDown,
+                                onClick: onClick,
+                                hidden: true
                               }, JSON.stringify(space_encode({
                                         TAG: "Card",
                                         _0: card

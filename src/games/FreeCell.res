@@ -31,24 +31,6 @@ module GameRules: GameBase.GameRules = {
   type movableSpace = GameBase.movableSpace<game, space, dragPile>
   type staticSpace = GameBase.staticSpace<game, dragPile>
 
-  let dragPileValidation = dragPile => {
-    let (dragPileIsValid, _) =
-      dragPile
-      ->Array.toReversed
-      ->Array.reduce((true, None), ((isStillValid, onTop), onBottom) => {
-        !isStillValid
-          ? (false, None)
-          : switch (onTop, onBottom) {
-            | (Some(onTop), onBottom) => (
-                Card.rankIsBelow(onTop, onBottom) && onTop->Card.color != onBottom->Card.color,
-                Some(onBottom),
-              )
-            | _ => (true, Some(onBottom))
-            }
-      })
-    dragPileIsValid
-  }
-
   let initiateGame = () => {
     let shuffledDeck = Card.getDeck(0)->Array.toShuffled
 
@@ -122,6 +104,7 @@ module GameRules: GameBase.GameRules = {
         }
       },
       autoProgress: Accept,
+      onClick: _ => None,
     }
   }
 
@@ -140,7 +123,9 @@ module GameRules: GameBase.GameRules = {
           game.piles->Array.filter(pile => pile->Array.length == 0)->Array.length +
             game.free->Array.filter(Option.isNone)->Array.length
         let dragPile = pile->Array.sliceToEnd(~start=j)
-        if dragPile->dragPileValidation && freeCellCount >= dragPile->Array.length - 1 {
+        if (
+          dragPile->GameCommons.decAndAltValidation && freeCellCount >= dragPile->Array.length - 1
+        ) {
           Some(dragPile)
         } else {
           None
@@ -193,6 +178,7 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
+      onClick: _ => None,
     }
   }
 
@@ -253,6 +239,7 @@ module GameRules: GameBase.GameRules = {
         None
       }
     },
+    onClick: _ => None,
   }
 
   let freeRules = (card, i): movableSpace => {
@@ -324,6 +311,7 @@ module GameRules: GameBase.GameRules = {
       ~game as _,
       ~undo as _,
       ~isWin as _,
+      ~onClick as _,
     ) => {
       <React.Fragment>
         <div className="flex flex-row">

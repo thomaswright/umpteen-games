@@ -528,7 +528,10 @@ function pileBaseRules(i) {
               }
               
             }),
-          autoProgress: "DoNothing"
+          autoProgress: "DoNothing",
+          onClick: (function (param) {
+              
+            })
         };
 }
 
@@ -594,7 +597,10 @@ function pileRules(pile, item, i, j) {
               }
               
             }),
-          onMove: (function (param, param$1) {
+          onMove: (function (param) {
+              
+            }),
+          onClick: (function (param) {
               
             })
         };
@@ -621,7 +627,10 @@ function foundationBaseRules(i) {
               }
               
             }),
-          autoProgress: "Seek"
+          autoProgress: "Seek",
+          onClick: (function (param) {
+              
+            })
         };
 }
 
@@ -660,7 +669,10 @@ function foundationRules(card, i, j) {
               }
               
             }),
-          onMove: (function (param, param$1) {
+          onMove: (function (param) {
+              
+            }),
+          onClick: (function (param) {
               
             })
         };
@@ -685,7 +697,10 @@ function tarotUpBaseRules() {
               }
               
             }),
-          autoProgress: "Seek"
+          autoProgress: "Seek",
+          onClick: (function (param) {
+              
+            })
         };
 }
 
@@ -719,7 +734,10 @@ function tarotUpRules(tarot, j) {
               }
               
             }),
-          onMove: (function (param, param$1) {
+          onMove: (function (param) {
+              
+            }),
+          onClick: (function (param) {
               
             })
         };
@@ -744,7 +762,10 @@ function tarotDownBaseRules() {
               }
               
             }),
-          autoProgress: "Seek"
+          autoProgress: "Seek",
+          onClick: (function (param) {
+              
+            })
         };
 }
 
@@ -778,7 +799,10 @@ function tarotDownRules(tarot, j) {
               }
               
             }),
-          onMove: (function (param, param$1) {
+          onMove: (function (param) {
+              
+            }),
+          onClick: (function (param) {
               
             })
         };
@@ -800,7 +824,10 @@ function freeBaseRules() {
                       };
               }
             }),
-          autoProgress: "DoNothing"
+          autoProgress: "DoNothing",
+          onClick: (function (param) {
+              
+            })
         };
 }
 
@@ -824,7 +851,10 @@ function freeRules(card) {
           droppedUpon: (function (_game, _dragPile) {
               
             }),
-          onMove: (function (param, param$1) {
+          onMove: (function (param) {
+              
+            }),
+          onClick: (function (param) {
               
             })
         };
@@ -1035,6 +1065,7 @@ var Board = {
 };
 
 function UpAndDown$GameRules$AllCards(props) {
+  var onClick = props.onClick;
   var onMouseDown = props.onMouseDown;
   var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
@@ -1051,7 +1082,9 @@ function UpAndDown$GameRules$AllCards(props) {
                                         _0: item
                                       }),
                                   onMouseDown: onMouseDown,
-                                  multiColor: true
+                                  onClick: onClick,
+                                  multiColor: true,
+                                  hidden: false
                                 }, JSON.stringify(space_encode({
                                           TAG: "Item",
                                           _0: item

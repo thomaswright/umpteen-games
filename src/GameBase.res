@@ -35,6 +35,7 @@ type movableSpace<'game, 'space, 'dragPile> = {
 type staticSpace<'game, 'dragPile> = {
   droppedUpon: droppedUpon<'game, 'dragPile>,
   autoProgress: autoProgressBase,
+  onClick: 'game => option<'game>,
 }
 
 type spaceFunction<'game, 'space, 'dragPile> =
@@ -72,6 +73,7 @@ module type GameRules = {
       'game,
       'undo,
       'isWin,
+      'onClick,
     > = {
       setRef: 'setRef,
       onMouseDown: 'onMouseDown,
@@ -81,6 +83,7 @@ module type GameRules = {
       game: 'game,
       undo: 'undo,
       isWin: 'isWin,
+      onClick: 'onClick,
     }
     let make: props<
       space => ReactDOM.Ref.callbackDomRef,
@@ -91,6 +94,7 @@ module type GameRules = {
       game,
       unit => unit,
       bool,
+      JsxEventU.Mouse.t => unit,
     > => React.element
   }
 
@@ -185,6 +189,7 @@ module Create = (GameRules: GameRules) => {
       ~undo,
       ~createNewGame,
       ~restartGame,
+      ~onClick,
     ) => {
       let game = useGame(subscribe, getGame)
 
@@ -199,7 +204,9 @@ module Create = (GameRules: GameRules) => {
       let isWin = GameRules.winCheck(game)
       <React.Fragment>
         <Common.UtilBoard undo isWin createNewGame restartGame />
-        <GameRules.Board setRef onMouseDown setGame moveToState autoProgress game undo isWin />
+        <GameRules.Board
+          setRef onMouseDown setGame moveToState autoProgress game undo isWin onClick
+        />
       </React.Fragment>
     }
   }
@@ -520,7 +527,7 @@ module Create = (GameRules: GameRules) => {
         ->Option.mapOr((), dragSpace => {
           GameRules.getRule(getGame(), dragSpace)->Option.mapOr((), rule => {
             switch rule {
-            | Static(_) => ()
+            | Static({onClick})
             | Movable({onClick}) =>
               onClick(getGame())->Option.mapOr(
                 (),
@@ -726,6 +733,7 @@ module Create = (GameRules: GameRules) => {
           autoProgress
           restartGame
           undo
+          onClick
         />
         <GameRules.AllCards onMouseDown onClick setRef deck={getDeck()} />
       </div>
