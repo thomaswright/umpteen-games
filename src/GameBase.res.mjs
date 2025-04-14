@@ -667,13 +667,14 @@ function Create(GameRules) {
           contents: undefined
         };
         var oldGame = getGame();
+        var withoutDragPile = GameRules.removeDragFromGame(oldGame, dragPile);
         refs.current.forEach(function (el) {
               Core__Option.mapOr(Core__Option.flatMap(Core__Option.flatMap(GameRules.getSpace(el), (function (elSpace) {
                               return GameRules.getRule(getGame(), elSpace);
                             })), (function (rule) {
                           var droppedUpon;
                           droppedUpon = rule.TAG === "Movable" ? rule._0.droppedUpon : rule._0.droppedUpon;
-                          return droppedUpon(GameRules.removeDragFromGame(oldGame, dragPile), dragPile);
+                          return droppedUpon(withoutDragPile, dragPile);
                         })), undefined, (function (newGame) {
                       var overlap = getOverlap(el, dragElement);
                       if (overlap > greatestOverlap.contents) {
@@ -701,7 +702,6 @@ function Create(GameRules) {
           onMouseUpNone(dragPile);
         }
       }
-      console.log(getGame());
       dragData.current = undefined;
     };
     var restartGame = function () {

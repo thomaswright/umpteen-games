@@ -646,6 +646,7 @@ module Create = (GameRules: GameRules) => {
             let greatestOverlap = ref(0.)
             let updatedGame = ref(None)
             let oldGame = getGame()
+            let withoutDragPile = oldGame->GameRules.removeDragFromGame(dragPile)
 
             refs.current->Array.forEach(el => {
               el
@@ -657,7 +658,7 @@ module Create = (GameRules: GameRules) => {
                 | Movable({droppedUpon}) => droppedUpon
                 }
 
-                droppedUpon(oldGame->GameRules.removeDragFromGame(dragPile), dragPile)
+                droppedUpon(withoutDragPile, dragPile)
               })
               ->Option.mapOr((), newGame => {
                 let overlap = getOverlap(el, dragElement)
@@ -685,8 +686,6 @@ module Create = (GameRules: GameRules) => {
           }
         | None => ()
         }
-
-        Console.log(getGame())
 
         dragData.current = None
       }
