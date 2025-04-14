@@ -324,11 +324,10 @@ function winCheck(game) {
 }
 
 function removeDragFromGame(game, dragPile) {
+  var dragPileSet = new Set(dragPile);
   var removeDragPile = function (x) {
     return x.filter(function (sCard) {
-                return !dragPile.some(function (dCard) {
-                            return Caml_obj.equal(sCard, dCard);
-                          });
+                return !dragPileSet.has(sCard);
               });
   };
   return {
@@ -336,9 +335,7 @@ function removeDragFromGame(game, dragPile) {
           foundations: game.foundations.map(removeDragPile),
           free: game.free.map(function (card) {
                 return Core__Option.flatMap(card, (function (card) {
-                              if (dragPile.some(function (dCard) {
-                                      return Caml_obj.equal(card, dCard);
-                                    })) {
+                              if (dragPileSet.has(card)) {
                                 return ;
                               } else {
                                 return card;

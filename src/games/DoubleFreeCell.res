@@ -65,18 +65,17 @@ module GameRules: GameBase.GameRules = {
   }
 
   let removeDragFromGame = (game: game, dragPile: dragPile) => {
+    let dragPileSet = dragPile->Set.fromArray
     let removeDragPile = x =>
       x->Array.filter(sCard => {
-        !(dragPile->Array.some(dCard => sCard == dCard))
+        !(dragPileSet->Set.has(sCard))
       })
 
     {
       foundations: game.foundations->Array.map(removeDragPile),
       piles: game.piles->Array.map(removeDragPile),
       free: game.free->Array.map(card => {
-        card->Option.flatMap(card =>
-          dragPile->Array.some(dCard => card == dCard) ? None : Some(card)
-        )
+        card->Option.flatMap(card => dragPileSet->Set.has(card) ? None : Some(card))
       }),
     }
   }

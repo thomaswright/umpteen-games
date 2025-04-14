@@ -73,9 +73,10 @@ module GameRules: GameBase.GameRules = {
   }
 
   let removeDragFromGame = (game: game, dragPile: dragPile) => {
+    let dragPileSet = dragPile->Set.fromArray
     let removeDragPile = x =>
       x->Array.filter(sCard => {
-        !(dragPile->Array.some(dCard => sCard == dCard))
+        !(dragPileSet->Set.has(sCard))
       })
 
     {
