@@ -48,7 +48,7 @@ module UtilBoard = {
       <button className={"bg-gray-200 rounded px-4 "} onClick={_ => restartGame()}>
         {"Restart Game"->React.string}
       </button>
-      <div className="px-4 font-black text-blue-600">
+      <div className="px-4 font-black text-amber-400">
         {isWin ? "You Won!"->React.string : React.null}
       </div>
     </div>

@@ -107,7 +107,7 @@ function Common$UtilBoard(props) {
                     }),
                 JsxRuntime.jsx("div", {
                       children: props.isWin ? "You Won!" : null,
-                      className: "px-4 font-black text-blue-600"
+                      className: "px-4 font-black text-amber-400"
                     })
               ],
               className: "flex flex-row mb-5 mt-4 gap-2"
