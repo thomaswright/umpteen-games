@@ -116,7 +116,7 @@ module GameRules: GameBase.GameRules = {
         if noChildren {
           Some({
             ...game,
-            piles: game.piles->ArrayAux.update(i, _ => dragPile),
+            piles: game.piles->ArrayAux.update(i, _ => dragPile)->flipLastUp,
           })
         } else {
           None
@@ -190,6 +190,7 @@ module GameRules: GameBase.GameRules = {
           Some({
             ...game,
             foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
+            piles: game.piles->flipLastUp,
           })
         } else {
           None

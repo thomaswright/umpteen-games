@@ -353,9 +353,9 @@ function pileBaseRules(i) {
               var noChildren = game.piles[i].length === 0;
               if (noChildren) {
                 return {
-                        piles: Common.ArrayAux.update(game.piles, i, (function (param) {
-                                return dragPile;
-                              })),
+                        piles: flipLastUp(Common.ArrayAux.update(game.piles, i, (function (param) {
+                                    return dragPile;
+                                  }))),
                         foundations: game.foundations,
                         stock: game.stock
                       };
@@ -432,7 +432,7 @@ function foundationBaseRules(i) {
               var valid = GameCommons.decValidation(dragPile);
               if (fullStack && noChildren && valid) {
                 return {
-                        piles: game.piles,
+                        piles: flipLastUp(game.piles),
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                 return dragPile;
                               })),

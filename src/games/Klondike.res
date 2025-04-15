@@ -150,12 +150,8 @@ module GameRules: GameBase.GameRules = {
         }
       },
       onClick: _ => None,
-      onMove: element => {
-        if isLast {
-          Card.show(element)
-        } else {
-          ()
-        }
+      onMove: _element => {
+        ()
       },
     }
   }

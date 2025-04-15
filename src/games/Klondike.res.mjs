@@ -417,10 +417,7 @@ function pileRules(pile, card, i, j) {
               }
               
             }),
-          onMove: (function (element) {
-              if (isLast) {
-                return Card.show(element);
-              }
+          onMove: (function (_element) {
               
             }),
           onClick: (function (param) {
