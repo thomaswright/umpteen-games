@@ -493,9 +493,10 @@ function Create(GameRules) {
         contents: undefined
       };
       dragPiles.forEach(function (dragPile) {
+            var gameWithoutDragPile = GameRules.removeDragFromGame(getGame(), dragPile);
             droppedUpons.forEach(function (droppedUpon) {
                   if (Core__Option.isNone(op.contents)) {
-                    op.contents = droppedUpon(GameRules.removeDragFromGame(getGame(), dragPile), dragPile);
+                    op.contents = droppedUpon(gameWithoutDragPile, dragPile);
                     return ;
                   }
                   

@@ -453,9 +453,10 @@ module Create = (GameRules: GameRules) => {
         let op = ref(None)
 
         dragPiles->Array.forEach(dragPile => {
+          let gameWithoutDragPile = getGame()->GameRules.removeDragFromGame(dragPile)
           droppedUpons->Array.forEach(droppedUpon => {
             if op.contents->Option.isNone {
-              op := droppedUpon(getGame()->GameRules.removeDragFromGame(dragPile), dragPile)
+              op := droppedUpon(gameWithoutDragPile, dragPile)
             }
           })
         })
