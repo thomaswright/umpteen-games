@@ -581,7 +581,10 @@ function Card$Display(props) {
               children: JsxRuntime.jsxs("div", {
                     children: [
                       JsxRuntime.jsx("div", {
-                            className: ["absolute bg-red-700 w-full h-full card-back"].join(" ")
+                            className: [
+                                "absolute bg-red-700 w-full h-full card-back",
+                                card.hidden ? "" : "hidden"
+                              ].join(" ")
                           }),
                       JsxRuntime.jsxs("span", {
                             children: [

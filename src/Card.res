@@ -152,7 +152,12 @@ module Display = {
         className={[
           "relative border border-gray-400 rounded w-14 h-20 bg-white shadow-sm leading-none  cursor-default overflow-hidden",
         ]->Array.join(" ")}>
-        <div className={["absolute bg-red-700 w-full h-full card-back"]->Array.join(" ")} />
+        <div
+          className={[
+            "absolute bg-red-700 w-full h-full card-back",
+            card.hidden ? "" : "hidden",
+          ]->Array.join(" ")}
+        />
         <span className="flex flex-col py-0.5 px-1">
           <span className="flex flex-row">
             <span
