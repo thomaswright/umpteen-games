@@ -16,6 +16,7 @@
     "@rescript-labs/decco": "^2.0.4",
     "@rescript/core": "^1.6.1",
     "@rescript/react": "^0.12.1",
+    "@tsparticles/confetti": "^3.8.1",
     "react": "^18.2.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",

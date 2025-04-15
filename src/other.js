@@ -1,5 +1,32 @@
 import ReactDOM from "react-dom/client";
 
+import { confetti } from "@tsparticles/confetti";
+
+export function triggerConfetti() {
+  function shoot() {
+    confetti({
+      particleCount: 200,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0 },
+    });
+
+    confetti({
+      particleCount: 200,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1 },
+    });
+  }
+  shoot();
+  setTimeout(() => {
+    shoot();
+  }, 200);
+  setTimeout(() => {
+    shoot();
+  }, 500);
+}
+
 export function appendReactElement(element, targetId) {
   const container = document.getElementById(targetId);
   if (container) {

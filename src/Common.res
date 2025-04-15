@@ -1,6 +1,9 @@
 @val @module("./other.js")
 external numInterval: (int => unit, int, int) => promise<unit> = "numInterval"
 
+@val @module("./other.js")
+external triggerConfetti: unit => unit = "triggerConfetti"
+
 module ArrayAux = {
   let removeLast = a => a->Array.toReversed->Array.sliceToEnd(~start=1)->Array.toReversed
   let getLast = a => a->Array.toReversed->Array.get(0)
@@ -38,6 +41,12 @@ module ArrayAux = {
 module UtilBoard = {
   @react.component
   let make = (~undo, ~isWin, ~createNewGame, ~restartGame) => {
+    React.useEffect1(() => {
+      if isWin {
+        triggerConfetti()
+      }
+      None
+    }, [isWin])
     <div className="flex flex-row mb-5 mt-4 gap-2">
       <button className={"bg-gray-200 rounded px-4 "} onClick={_ => undo()}>
         {"Undo"->React.string}
@@ -48,6 +57,9 @@ module UtilBoard = {
       <button className={"bg-gray-200 rounded px-4 "} onClick={_ => restartGame()}>
         {"Restart Game"->React.string}
       </button>
+      // <button className={"bg-gray-200 rounded px-4 "} onClick={_ => triggerConfetti()}>
+      //   {"Trigger Confetti"->React.string}
+      // </button>
       <div className="px-4 font-black text-amber-400">
         {isWin ? "You Won!"->React.string : React.null}
       </div>
