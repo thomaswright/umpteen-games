@@ -333,6 +333,58 @@ function card_decode(value) {
         };
 }
 
+function sides_encode(value) {
+  return Js_dict.fromArray([
+              [
+                "card",
+                card_encode(value.card)
+              ],
+              [
+                "hidden",
+                Decco.boolToJson(value.hidden)
+              ]
+            ]);
+}
+
+function sides_decode(value) {
+  var dict = Js_json.classify(value);
+  if (typeof dict !== "object") {
+    return Decco.error(undefined, "Not an object", value);
+  }
+  if (dict.TAG !== "JSONObject") {
+    return Decco.error(undefined, "Not an object", value);
+  }
+  var dict$1 = dict._0;
+  var card = card_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "card"), null));
+  if (card.TAG === "Ok") {
+    var hidden = Decco.boolFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "hidden"), null));
+    if (hidden.TAG === "Ok") {
+      return {
+              TAG: "Ok",
+              _0: Decco.unsafeAddFieldToObject("card", card._0, Decco.unsafeAddFieldToObject("hidden", hidden._0, {}))
+            };
+    }
+    var e = hidden._0;
+    return {
+            TAG: "Error",
+            _0: {
+              path: ".hidden" + e.path,
+              message: e.message,
+              value: e.value
+            }
+          };
+  }
+  var e$1 = card._0;
+  return {
+          TAG: "Error",
+          _0: {
+            path: ".card" + e$1.path,
+            message: e$1.message,
+            value: e$1.value
+          }
+        };
+}
+
 var allRanks = [
   "R0",
   "R1",
@@ -359,22 +411,22 @@ var allRanks = [
 ];
 
 function equals(a, b) {
-  return a.rank === b.rank;
+  return a.card.rank === b.card.rank;
 }
 
 function rankIsBelow(a, b) {
   return allRanks.findIndex(function (x) {
-              return x === a.rank;
+              return x === a.card.rank;
             }) === (allRanks.findIndex(function (x) {
-                return x === b.rank;
+                return x === b.card.rank;
               }) - 1 | 0);
 }
 
 function rankIsAbove(a, b) {
   return allRanks.findIndex(function (x) {
-              return x === a.rank;
+              return x === a.card.rank;
             }) === (allRanks.findIndex(function (x) {
-                return x === b.rank;
+                return x === b.card.rank;
               }) + 1 | 0);
 }
 
@@ -387,7 +439,7 @@ function rankIsAdjacent(a, b) {
 }
 
 function rankString(card) {
-  return card.rank;
+  return card.card.rank;
 }
 
 function stringToRank(s) {
@@ -399,7 +451,7 @@ function toString(card) {
 }
 
 function displayRank(card) {
-  var match = card.rank;
+  var match = card.card.rank;
   switch (match) {
     case "R0" :
         return "0";
@@ -451,14 +503,14 @@ function displayRank(card) {
 
 function rotation(card) {
   var rankJitter = allRanks.findIndex(function (r) {
-        return r === card.rank;
+        return r === card.card.rank;
       }) % 4 - 2 | 0;
   return "rotate(" + rankJitter.toString() + "deg)";
 }
 
 function Tarot$Display(props) {
   var card = props.card;
-  var match = card.rank;
+  var match = card.card.rank;
   var tmp;
   tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
   return JsxRuntime.jsx("div", {
@@ -492,11 +544,14 @@ var Display = {
   make: Tarot$Display
 };
 
-function getDeck(deck) {
+function getDeck(deck, hidden) {
   return Core__Array.reduce(allRanks, [], (function (a, rank) {
                 return a.concat([{
-                              rank: rank,
-                              deck: deck
+                              card: {
+                                rank: rank,
+                                deck: deck
+                              },
+                              hidden: hidden
                             }]);
               }));
 }
@@ -506,6 +561,8 @@ export {
   rank_decode ,
   card_encode ,
   card_decode ,
+  sides_encode ,
+  sides_decode ,
   allRanks ,
   equals ,
   rankIsBelow ,

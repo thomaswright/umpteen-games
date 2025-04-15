@@ -1,5 +1,3 @@
-open Webapi.Dom
-
 type gameType =
   | @as("Klondike") Klondike
   | @as("Free Cell") FreeCell
@@ -37,7 +35,7 @@ let setState = f => {
 }
 
 let useForceUpdate = () => {
-  let (value, setValue) = React.useState(() => 0)
+  let (_value, setValue) = React.useState(() => 0)
   () => setValue(value => value + 1)
 }
 

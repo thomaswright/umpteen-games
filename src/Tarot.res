@@ -26,6 +26,12 @@ type rank =
 @decco
 type card = {rank: rank, deck: int}
 
+@decco
+type sides = {
+  card: card,
+  hidden: bool,
+}
+
 let allRanks = [
   R0,
   R1,
@@ -52,22 +58,24 @@ let allRanks = [
 ]
 
 let equals = (a, b) => {
-  a.rank == b.rank
+  a.card.rank == b.card.rank
 }
 
 let rankIsBelow = (a, b) => {
-  allRanks->Array.findIndex(x => x == a.rank) == allRanks->Array.findIndex(x => x == b.rank) - 1
+  allRanks->Array.findIndex(x => x == a.card.rank) ==
+    allRanks->Array.findIndex(x => x == b.card.rank) - 1
 }
 
 let rankIsAbove = (a, b) => {
-  allRanks->Array.findIndex(x => x == a.rank) == allRanks->Array.findIndex(x => x == b.rank) + 1
+  allRanks->Array.findIndex(x => x == a.card.rank) ==
+    allRanks->Array.findIndex(x => x == b.card.rank) + 1
 }
 
 let rankIsAdjacent = (a, b) => {
   rankIsBelow(a, b) || rankIsAbove(a, b)
 }
 
-let rankString = card => (card.rank :> string)
+let rankString = card => (card.card.rank :> string)
 
 let stringToRank = s => (s :> rank)
 
@@ -76,7 +84,7 @@ let toString = card => {
 }
 
 let displayRank = card =>
-  switch card.rank {
+  switch card.card.rank {
   | R0 => "0"
   | R1 => "1"
   | R2 => "2"
@@ -101,8 +109,8 @@ let displayRank = card =>
   | R21 => "21"
   }
 
-let rotation = (card: card) => {
-  let rankJitter = mod(allRanks->Array.findIndex(r => r == card.rank), 4) - 2
+let rotation = (card: sides) => {
+  let rankJitter = mod(allRanks->Array.findIndex(r => r == card.card.rank), 4) - 2
 
   `rotate(${rankJitter->Int.toString}deg)`
 }
@@ -125,7 +133,7 @@ module Display = {
             <span
               className={[
                 "font-medium ",
-                switch card.rank {
+                switch card.card.rank {
                 | R10 => "tracking-[-0.1rem] w-4"
                 | _ => "w-3.5"
                 },
@@ -139,15 +147,16 @@ module Display = {
   }
 }
 
-let getDeck = deck => {
+let getDeck = (deck, hidden) => {
   allRanks->Array.reduce([], (a, rank) => {
     a->Array.concat([
-      (
-        {
+      {
+        card: {
           rank,
           deck,
-        }: card
-      ),
+        },
+        hidden,
+      },
     ])
   })
 }

@@ -155,11 +155,11 @@ function spaceToString(space) {
 }
 
 function deck_encode(value) {
-  return Decco.arrayToJson(Card.card_encode, value);
+  return Decco.arrayToJson(Card.sides_encode, value);
 }
 
 function deck_decode(value) {
-  return Decco.arrayFromJson(Card.card_decode, value);
+  return Decco.arrayFromJson(Card.sides_decode, value);
 }
 
 function game_encode(value) {
@@ -168,7 +168,7 @@ function game_encode(value) {
                 "piles",
                 (function (extra) {
                       return Decco.arrayToJson((function (extra) {
-                                    return Decco.arrayToJson(Card.card_encode, extra);
+                                    return Decco.arrayToJson(Card.sides_encode, extra);
                                   }), extra);
                     })(value.piles)
               ],
@@ -176,7 +176,7 @@ function game_encode(value) {
                 "foundations",
                 (function (extra) {
                       return Decco.arrayToJson((function (extra) {
-                                    return Decco.arrayToJson(Card.card_encode, extra);
+                                    return Decco.arrayToJson(Card.sides_encode, extra);
                                   }), extra);
                     })(value.foundations)
               ],
@@ -184,7 +184,7 @@ function game_encode(value) {
                 "stock",
                 (function (extra) {
                       return Decco.arrayToJson((function (extra) {
-                                    return Decco.arrayToJson(Card.card_encode, extra);
+                                    return Decco.arrayToJson(Card.sides_encode, extra);
                                   }), extra);
                     })(value.stock)
               ]
@@ -202,17 +202,17 @@ function game_decode(value) {
   var dict$1 = dict._0;
   var extra = Belt_Option.getWithDefault(Js_dict.get(dict$1, "piles"), null);
   var piles = Decco.arrayFromJson((function (extra) {
-          return Decco.arrayFromJson(Card.card_decode, extra);
+          return Decco.arrayFromJson(Card.sides_decode, extra);
         }), extra);
   if (piles.TAG === "Ok") {
     var extra$1 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "foundations"), null);
     var foundations = Decco.arrayFromJson((function (extra) {
-            return Decco.arrayFromJson(Card.card_decode, extra);
+            return Decco.arrayFromJson(Card.sides_decode, extra);
           }), extra$1);
     if (foundations.TAG === "Ok") {
       var extra$2 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "stock"), null);
       var stock = Decco.arrayFromJson((function (extra) {
-              return Decco.arrayFromJson(Card.card_decode, extra);
+              return Decco.arrayFromJson(Card.sides_decode, extra);
             }), extra$2);
       if (stock.TAG === "Ok") {
         return {
@@ -251,26 +251,37 @@ function game_decode(value) {
         };
 }
 
+function flipLastUp(piles) {
+  return piles.map(function (pile) {
+              return Common.ArrayAux.updateLast(pile, (function (v) {
+                            return {
+                                    card: v.card,
+                                    hidden: false
+                                  };
+                          }));
+            });
+}
+
 function initiateGame() {
-  var shuffledDeck = [].concat(Core__Array.toShuffled(Card.getOneSuitDeck(0, "Spades")), Core__Array.toShuffled(Card.getOneSuitDeck(1, "Spades")), Core__Array.toShuffled(Card.getOneSuitDeck(2, "Spades")), Core__Array.toShuffled(Card.getOneSuitDeck(3, "Spades")), Core__Array.toShuffled(Card.getOneSuitDeck(4, "Spades")), Core__Array.toShuffled(Card.getOneSuitDeck(5, "Spades")), Core__Array.toShuffled(Card.getOneSuitDeck(6, "Spades")), Core__Array.toShuffled(Card.getOneSuitDeck(7, "Spades")));
+  var shuffledDeck = [].concat(Core__Array.toShuffled(Card.getOneSuitDeck(0, "Spades", true)), Core__Array.toShuffled(Card.getOneSuitDeck(1, "Spades", true)), Core__Array.toShuffled(Card.getOneSuitDeck(2, "Spades", true)), Core__Array.toShuffled(Card.getOneSuitDeck(3, "Spades", true)), Core__Array.toShuffled(Card.getOneSuitDeck(4, "Spades", true)), Core__Array.toShuffled(Card.getOneSuitDeck(5, "Spades", true)), Core__Array.toShuffled(Card.getOneSuitDeck(6, "Spades", true)), Core__Array.toShuffled(Card.getOneSuitDeck(7, "Spades", true)));
   var deckToDeal = {
     contents: shuffledDeck
   };
   return [
           shuffledDeck,
           {
-            piles: [
-              Common.ArrayAux.popN(deckToDeal, 6),
-              Common.ArrayAux.popN(deckToDeal, 6),
-              Common.ArrayAux.popN(deckToDeal, 6),
-              Common.ArrayAux.popN(deckToDeal, 6),
-              Common.ArrayAux.popN(deckToDeal, 5),
-              Common.ArrayAux.popN(deckToDeal, 5),
-              Common.ArrayAux.popN(deckToDeal, 5),
-              Common.ArrayAux.popN(deckToDeal, 5),
-              Common.ArrayAux.popN(deckToDeal, 5),
-              Common.ArrayAux.popN(deckToDeal, 5)
-            ],
+            piles: flipLastUp([
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5)
+                ]),
             foundations: [
               [],
               [],
@@ -322,7 +333,7 @@ function applyLiftToDragPile(dragPile, lift) {
   dragPile.forEach(function (v, j) {
         lift({
               TAG: "Card",
-              _0: v
+              _0: v.card
             }, j);
       });
 }
@@ -331,7 +342,7 @@ function applyMoveToDragPile(dragPile, move) {
   dragPile.forEach(function (v, j) {
         move({
               TAG: "Card",
-              _0: v
+              _0: v.card
             }, 0, Math.imul(j, 20));
       });
 }
@@ -358,7 +369,7 @@ function pileBaseRules(i) {
         };
 }
 
-function pileRules(game, pile, card, i, j) {
+function pileRules(_game, pile, card, i, j) {
   var isLast = j === (pile.length - 1 | 0);
   return {
           locationAdjustment: {
@@ -391,9 +402,9 @@ function pileRules(game, pile, card, i, j) {
               var dragPileBase = dragPile[0];
               if (isLast && Card.rankIsAbove(card, dragPileBase)) {
                 return {
-                        piles: game.piles.map(function (stack) {
-                              return Common.ArrayAux.insertAfter(stack, card, dragPile);
-                            }),
+                        piles: flipLastUp(game.piles.map(function (stack) {
+                                  return Common.ArrayAux.insertAfter(stack, card, dragPile);
+                                })),
                         foundations: game.foundations,
                         stock: game.stock
                       };
@@ -401,10 +412,11 @@ function pileRules(game, pile, card, i, j) {
               
             }),
           onMove: (function (element) {
-              if (isLast) {
+              if (card.hidden) {
+                return Card.hide(element);
+              } else {
                 return Card.show(element);
               }
-              
             }),
           onClick: (function (param) {
               
@@ -453,7 +465,7 @@ function foundationRules(i, j) {
           autoProgress: (function () {
               return "DoNothing";
             }),
-          droppedUpon: (function (game, dragPile) {
+          droppedUpon: (function (_game, _dragPile) {
               
             }),
           onMove: (function (element) {
@@ -465,7 +477,7 @@ function foundationRules(i, j) {
         };
 }
 
-function stockGroupRules(game, card, i, j) {
+function stockGroupRules(_game, _card, i, j) {
   return {
           locationAdjustment: {
             x: Math.imul(i, 20),
@@ -479,7 +491,7 @@ function stockGroupRules(game, card, i, j) {
           autoProgress: (function () {
               return "DoNothing";
             }),
-          droppedUpon: (function (game, dragPile) {
+          droppedUpon: (function (_game, _dragPile) {
               
             }),
           onMove: (function (element) {
@@ -488,9 +500,9 @@ function stockGroupRules(game, card, i, j) {
           onClick: (function (game) {
               return Core__Option.map(Common.ArrayAux.getLast(game.stock), (function (stockGroup) {
                             return {
-                                    piles: game.piles.map(function (pile, i) {
-                                          return pile.concat([stockGroup[i]]);
-                                        }),
+                                    piles: flipLastUp(game.piles.map(function (pile, i) {
+                                              return pile.concat([stockGroup[i]]);
+                                            })),
                                     foundations: game.foundations,
                                     stock: game.stock.slice(0, game.stock.length - 1 | 0)
                                   };
@@ -516,7 +528,7 @@ function getRule(game, match) {
         pile.forEach(function (card, j) {
               if (Caml_obj.equal({
                       TAG: "Card",
-                      _0: card
+                      _0: card.card
                     }, match)) {
                 result.contents = {
                   TAG: "Movable",
@@ -540,7 +552,7 @@ function getRule(game, match) {
         foundation.forEach(function (card, j) {
               if (Caml_obj.equal({
                       TAG: "Card",
-                      _0: card
+                      _0: card.card
                     }, match)) {
                 result.contents = {
                   TAG: "Movable",
@@ -555,7 +567,7 @@ function getRule(game, match) {
         stockGroup.forEach(function (card, j) {
               if (Caml_obj.equal({
                       TAG: "Card",
-                      _0: card
+                      _0: card.card
                     }, match)) {
                 result.contents = {
                   TAG: "Movable",
@@ -651,18 +663,17 @@ function Spider$GameRules$AllCards(props) {
                                 card: card,
                                 id: JSON.stringify(space_encode({
                                           TAG: "Card",
-                                          _0: card
+                                          _0: card.card
                                         })),
                                 cardRef: setRef({
                                       TAG: "Card",
-                                      _0: card
+                                      _0: card.card
                                     }),
                                 onMouseDown: onMouseDown,
-                                onClick: onClick,
-                                hidden: true
+                                onClick: onClick
                               }, JSON.stringify(space_encode({
                                         TAG: "Card",
-                                        _0: card
+                                        _0: card.card
                                       })));
                   })
             });

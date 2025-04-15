@@ -1,4 +1,4 @@
-let decAndAltValidation = dragPile => {
+let decAndAltValidation = (dragPile: array<Card.sides>) => {
   let (dragPileIsValid, _) =
     dragPile
     ->Array.toReversed
@@ -16,7 +16,7 @@ let decAndAltValidation = dragPile => {
   dragPileIsValid
 }
 
-let decValidation = dragPile => {
+let decValidation = (dragPile: array<Card.sides>) => {
   let (dragPileIsValid, _) =
     dragPile
     ->Array.toReversed

@@ -21,12 +21,12 @@ function item_encode(value) {
   if (value.TAG === "Card") {
     return [
             "Card",
-            Card.card_encode(value._0)
+            Card.sides_encode(value._0)
           ];
   } else {
     return [
             "Tarot",
-            Tarot.card_encode(value._0)
+            Tarot.sides_encode(value._0)
           ];
   }
 }
@@ -51,7 +51,7 @@ function item_decode(value) {
           if (tagged.length !== 2) {
             return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
           }
-          var v0 = Card.card_decode(Belt_Array.getExn(jsonArr$1, 1));
+          var v0 = Card.sides_decode(Belt_Array.getExn(jsonArr$1, 1));
           if (v0.TAG === "Ok") {
             return {
                     TAG: "Ok",
@@ -74,12 +74,95 @@ function item_decode(value) {
           if (tagged.length !== 2) {
             return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
           }
-          var v0$1 = Tarot.card_decode(Belt_Array.getExn(jsonArr$1, 1));
+          var v0$1 = Tarot.sides_decode(Belt_Array.getExn(jsonArr$1, 1));
           if (v0$1.TAG === "Ok") {
             return {
                     TAG: "Ok",
                     _0: {
                       TAG: "Tarot",
+                      _0: v0$1._0
+                    }
+                  };
+          }
+          var e$1 = v0$1._0;
+          return {
+                  TAG: "Error",
+                  _0: {
+                    path: "[0]" + e$1.path,
+                    message: e$1.message,
+                    value: e$1.value
+                  }
+                };
+      default:
+        
+    }
+  }
+  return Decco.error(undefined, "Invalid variant constructor", Belt_Array.getExn(jsonArr$1, 0));
+}
+
+function spaceItem_encode(value) {
+  if (value.TAG === "SpaceCard") {
+    return [
+            "SpaceCard",
+            Card.card_encode(value._0)
+          ];
+  } else {
+    return [
+            "SpaceTarot",
+            Tarot.card_encode(value._0)
+          ];
+  }
+}
+
+function spaceItem_decode(value) {
+  var jsonArr = Js_json.classify(value);
+  if (typeof jsonArr !== "object") {
+    return Decco.error(undefined, "Not a variant", value);
+  }
+  if (jsonArr.TAG !== "JSONArray") {
+    return Decco.error(undefined, "Not a variant", value);
+  }
+  var jsonArr$1 = jsonArr._0;
+  if (jsonArr$1.length === 0) {
+    return Decco.error(undefined, "Expected variant, found empty array", value);
+  }
+  var tagged = Js_array.map(Js_json.classify, jsonArr$1);
+  var match = Belt_Array.getExn(tagged, 0);
+  if (typeof match === "object" && match.TAG === "JSONString") {
+    switch (match._0) {
+      case "SpaceCard" :
+          if (tagged.length !== 2) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          }
+          var v0 = Card.card_decode(Belt_Array.getExn(jsonArr$1, 1));
+          if (v0.TAG === "Ok") {
+            return {
+                    TAG: "Ok",
+                    _0: {
+                      TAG: "SpaceCard",
+                      _0: v0._0
+                    }
+                  };
+          }
+          var e = v0._0;
+          return {
+                  TAG: "Error",
+                  _0: {
+                    path: "[0]" + e.path,
+                    message: e.message,
+                    value: e.value
+                  }
+                };
+      case "SpaceTarot" :
+          if (tagged.length !== 2) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          }
+          var v0$1 = Tarot.card_decode(Belt_Array.getExn(jsonArr$1, 1));
+          if (v0$1.TAG === "Ok") {
+            return {
+                    TAG: "Ok",
+                    _0: {
+                      TAG: "SpaceTarot",
                       _0: v0$1._0
                     }
                   };
@@ -116,7 +199,7 @@ function space_encode(value) {
       case "Item" :
           return [
                   "Item",
-                  item_encode(value._0)
+                  spaceItem_encode(value._0)
                 ];
       case "Foundation" :
           return [
@@ -185,7 +268,7 @@ function space_decode(value) {
           if (tagged.length !== 2) {
             return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
           }
-          var v0$1 = item_decode(Belt_Array.getExn(jsonArr$1, 1));
+          var v0$1 = spaceItem_decode(Belt_Array.getExn(jsonArr$1, 1));
           if (v0$1.TAG === "Ok") {
             return {
                     TAG: "Ok",
@@ -252,6 +335,20 @@ function space_decode(value) {
   return Decco.error(undefined, "Invalid variant constructor", Belt_Array.getExn(jsonArr$1, 0));
 }
 
+function itemToSpaceItem(space) {
+  if (space.TAG === "Card") {
+    return {
+            TAG: "SpaceCard",
+            _0: space._0.card
+          };
+  } else {
+    return {
+            TAG: "SpaceTarot",
+            _0: space._0.card
+          };
+  }
+}
+
 function getSpace(element) {
   var d = space_decode(JSON.parse(element.id));
   if (d.TAG === "Ok") {
@@ -286,20 +383,20 @@ function game_encode(value) {
                 "foundations",
                 (function (extra) {
                       return Decco.arrayToJson((function (extra) {
-                                    return Decco.arrayToJson(Card.card_encode, extra);
+                                    return Decco.arrayToJson(Card.sides_encode, extra);
                                   }), extra);
                     })(value.foundations)
               ],
               [
                 "tarotUp",
                 (function (extra) {
-                      return Decco.arrayToJson(Tarot.card_encode, extra);
+                      return Decco.arrayToJson(Tarot.sides_encode, extra);
                     })(value.tarotUp)
               ],
               [
                 "tarotDown",
                 (function (extra) {
-                      return Decco.arrayToJson(Tarot.card_encode, extra);
+                      return Decco.arrayToJson(Tarot.sides_encode, extra);
                     })(value.tarotDown)
               ],
               [
@@ -327,14 +424,14 @@ function game_decode(value) {
   if (piles.TAG === "Ok") {
     var extra$1 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "foundations"), null);
     var foundations = Decco.arrayFromJson((function (extra) {
-            return Decco.arrayFromJson(Card.card_decode, extra);
+            return Decco.arrayFromJson(Card.sides_decode, extra);
           }), extra$1);
     if (foundations.TAG === "Ok") {
       var extra$2 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "tarotUp"), null);
-      var tarotUp = Decco.arrayFromJson(Tarot.card_decode, extra$2);
+      var tarotUp = Decco.arrayFromJson(Tarot.sides_decode, extra$2);
       if (tarotUp.TAG === "Ok") {
         var extra$3 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "tarotDown"), null);
-        var tarotDown = Decco.arrayFromJson(Tarot.card_decode, extra$3);
+        var tarotDown = Decco.arrayFromJson(Tarot.sides_decode, extra$3);
         if (tarotDown.TAG === "Ok") {
           var free = Decco.optionFromJson(item_decode, Belt_Option.getWithDefault(Js_dict.get(dict$1, "free"), null));
           if (free.TAG === "Ok") {
@@ -395,20 +492,20 @@ function game_decode(value) {
 }
 
 function initiateGame() {
-  var fullDeck = Core__Array.toShuffled(Core__Array.toShuffled(Card.getDeck(0)).map(function (card) {
+  var fullDeck = Core__Array.toShuffled(Core__Array.toShuffled(Card.getDeck(0, false)).map(function (v) {
               return {
                       TAG: "Card",
-                      _0: card
+                      _0: v
                     };
-            }).concat(Core__Array.toShuffled(Tarot.getDeck(0)).map(function (card) {
+            }).concat(Core__Array.toShuffled(Tarot.getDeck(0, false)).map(function (v) {
                 return {
                         TAG: "Tarot",
-                        _0: card
+                        _0: v
                       };
               })));
   var deckWithoutAces = fullDeck.filter(function (card) {
         if (card.TAG === "Card") {
-          return card._0.rank !== "RA";
+          return card._0.card.rank !== "RA";
         } else {
           return true;
         }
@@ -434,24 +531,36 @@ function initiateGame() {
             ],
             foundations: [
               [{
-                  suit: "Clubs",
-                  rank: "RA",
-                  deck: 0
+                  card: {
+                    suit: "Clubs",
+                    rank: "RA",
+                    deck: 0
+                  },
+                  hidden: false
                 }],
               [{
-                  suit: "Diamonds",
-                  rank: "RA",
-                  deck: 0
+                  card: {
+                    suit: "Diamonds",
+                    rank: "RA",
+                    deck: 0
+                  },
+                  hidden: false
                 }],
               [{
-                  suit: "Hearts",
-                  rank: "RA",
-                  deck: 0
+                  card: {
+                    suit: "Hearts",
+                    rank: "RA",
+                    deck: 0
+                  },
+                  hidden: false
                 }],
               [{
-                  suit: "Spades",
-                  rank: "RA",
-                  deck: 0
+                  card: {
+                    suit: "Spades",
+                    rank: "RA",
+                    deck: 0
+                  },
+                  hidden: false
                 }]
             ],
             tarotUp: [],
@@ -500,14 +609,14 @@ function removeDragFromGame(game, dragPile) {
 function applyLiftToDragPile(dragPile, lift) {
   return lift({
               TAG: "Item",
-              _0: dragPile
+              _0: itemToSpaceItem(dragPile)
             }, 0);
 }
 
 function applyMoveToDragPile(dragPile, move) {
   return move({
               TAG: "Item",
-              _0: dragPile
+              _0: itemToSpaceItem(dragPile)
             }, 0, 0);
 }
 
@@ -584,7 +693,7 @@ function pileRules(pile, item, i, j) {
                 return ;
               }
               var card = item._0;
-              if (isLast && Card.rankIsAdjacent(card, dragCard) && dragCard.suit === card.suit) {
+              if (isLast && Card.rankIsAdjacent(card, dragCard) && dragCard.card.suit === card.card.suit) {
                 return {
                         piles: game.piles.map(function (stack) {
                               return Common.ArrayAux.insertAfter(stack, item, [dragPile]);
@@ -614,7 +723,7 @@ function foundationBaseRules(i) {
                 return ;
               }
               var card = dragPile._0;
-              if (noChildren && card.rank === "RA") {
+              if (noChildren && card.card.rank === "RA") {
                 return {
                         piles: game.piles,
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
@@ -656,7 +765,7 @@ function foundationRules(card, i, j) {
                 return ;
               }
               var dragCard = dragPile._0;
-              if (dragCard.suit === card.suit && Card.rankIsBelow(card, dragCard)) {
+              if (dragCard.card.suit === card.card.suit && Card.rankIsBelow(card, dragCard)) {
                 return {
                         piles: game.piles,
                         foundations: game.foundations.map(function (stack) {
@@ -686,7 +795,7 @@ function tarotUpBaseRules() {
                 return ;
               }
               var tarot = dragPile._0;
-              if (noChildren && tarot.rank === "R0") {
+              if (noChildren && tarot.card.rank === "R0") {
                 return {
                         piles: game.piles,
                         foundations: game.foundations,
@@ -751,7 +860,7 @@ function tarotDownBaseRules() {
                 return ;
               }
               var tarot = dragPile._0;
-              if (noChildren && tarot.rank === "R21") {
+              if (noChildren && tarot.card.rank === "R21") {
                 return {
                         piles: game.piles,
                         foundations: game.foundations,
@@ -877,7 +986,7 @@ function getRule(game, match) {
         pile.forEach(function (card, j) {
               if (Caml_obj.equal({
                       TAG: "Item",
-                      _0: card
+                      _0: itemToSpaceItem(card)
                     }, match)) {
                 result.contents = {
                   TAG: "Movable",
@@ -902,8 +1011,8 @@ function getRule(game, match) {
               if (Caml_obj.equal({
                       TAG: "Item",
                       _0: {
-                        TAG: "Card",
-                        _0: card
+                        TAG: "SpaceCard",
+                        _0: card.card
                       }
                     }, match)) {
                 result.contents = {
@@ -925,8 +1034,8 @@ function getRule(game, match) {
         if (Caml_obj.equal({
                 TAG: "Item",
                 _0: {
-                  TAG: "Tarot",
-                  _0: card
+                  TAG: "SpaceTarot",
+                  _0: card.card
                 }
               }, match)) {
           result.contents = {
@@ -947,8 +1056,8 @@ function getRule(game, match) {
         if (Caml_obj.equal({
                 TAG: "Item",
                 _0: {
-                  TAG: "Tarot",
-                  _0: card
+                  TAG: "SpaceTarot",
+                  _0: card.card
                 }
               }, match)) {
           result.contents = {
@@ -968,7 +1077,7 @@ function getRule(game, match) {
   var free = game.free;
   if (free !== undefined && Caml_obj.equal({
           TAG: "Item",
-          _0: free
+          _0: itemToSpaceItem(free)
         }, match)) {
     result.contents = {
       TAG: "Movable",
@@ -1071,41 +1180,43 @@ function UpAndDown$GameRules$AllCards(props) {
   return JsxRuntime.jsx(React.Fragment, {
               children: props.deck.map(function (item) {
                     if (item.TAG === "Card") {
+                      var space = {
+                        TAG: "Item",
+                        _0: itemToSpaceItem(item)
+                      };
+                      var space$1 = {
+                        TAG: "Item",
+                        _0: itemToSpaceItem(item)
+                      };
                       return JsxRuntime.jsx(Card.Display.make, {
                                   card: item._0,
-                                  id: JSON.stringify(space_encode({
-                                            TAG: "Item",
-                                            _0: item
-                                          })),
+                                  id: JSON.stringify(space_encode(space)),
                                   cardRef: setRef({
                                         TAG: "Item",
-                                        _0: item
+                                        _0: itemToSpaceItem(item)
                                       }),
                                   onMouseDown: onMouseDown,
                                   onClick: onClick,
-                                  multiColor: true,
-                                  hidden: false
-                                }, JSON.stringify(space_encode({
-                                          TAG: "Item",
-                                          _0: item
-                                        })));
-                    } else {
-                      return JsxRuntime.jsx(Tarot.Display.make, {
-                                  card: item._0,
-                                  id: JSON.stringify(space_encode({
-                                            TAG: "Item",
-                                            _0: item
-                                          })),
-                                  cardRef: setRef({
-                                        TAG: "Item",
-                                        _0: item
-                                      }),
-                                  onMouseDown: onMouseDown
-                                }, JSON.stringify(space_encode({
-                                          TAG: "Item",
-                                          _0: item
-                                        })));
+                                  multiColor: true
+                                }, JSON.stringify(space_encode(space$1)));
                     }
+                    var space$2 = {
+                      TAG: "Item",
+                      _0: itemToSpaceItem(item)
+                    };
+                    var space$3 = {
+                      TAG: "Item",
+                      _0: itemToSpaceItem(item)
+                    };
+                    return JsxRuntime.jsx(Tarot.Display.make, {
+                                card: item._0,
+                                id: JSON.stringify(space_encode(space$2)),
+                                cardRef: setRef({
+                                      TAG: "Item",
+                                      _0: itemToSpaceItem(item)
+                                    }),
+                                onMouseDown: onMouseDown
+                              }, JSON.stringify(space_encode(space$3)));
                   })
             });
 }

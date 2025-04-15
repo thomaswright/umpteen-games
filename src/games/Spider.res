@@ -1,6 +1,5 @@
 open Webapi.Dom
 open Common
-open GameBase
 
 module GameRules: GameBase.GameRules = {
   @decco
@@ -16,33 +15,36 @@ module GameRules: GameBase.GameRules = {
   let spaceToString = space => {
     space->space_encode->Js.Json.stringify
   }
-
-  type dragPile = array<Card.card>
   @decco
-  type deck = array<Card.card>
+  type deck = array<Card.sides>
+
+  type dragPile = array<Card.sides>
 
   @decco
   type game = {
-    piles: array<array<Card.card>>,
-    foundations: array<array<Card.card>>,
-    stock: array<array<Card.card>>,
+    piles: array<array<Card.sides>>,
+    foundations: array<array<Card.sides>>,
+    stock: array<array<Card.sides>>,
   }
 
   type movableSpace = GameBase.movableSpace<game, space, dragPile>
   type staticSpace = GameBase.staticSpace<game, dragPile>
 
+  let flipLastUp = (piles: array<array<Card.sides>>) =>
+    piles->Array.map(pile => pile->ArrayAux.updateLast(v => {...v, hidden: false}))
+
   let initiateGame = () => {
     let shuffledDeck = Array.concatMany(
       [],
       [
-        Card.getOneSuitDeck(0, Spades)->Array.toShuffled,
-        Card.getOneSuitDeck(1, Spades)->Array.toShuffled,
-        Card.getOneSuitDeck(2, Spades)->Array.toShuffled,
-        Card.getOneSuitDeck(3, Spades)->Array.toShuffled,
-        Card.getOneSuitDeck(4, Spades)->Array.toShuffled,
-        Card.getOneSuitDeck(5, Spades)->Array.toShuffled,
-        Card.getOneSuitDeck(6, Spades)->Array.toShuffled,
-        Card.getOneSuitDeck(7, Spades)->Array.toShuffled,
+        Card.getOneSuitDeck(0, Spades, true)->Array.toShuffled,
+        Card.getOneSuitDeck(1, Spades, true)->Array.toShuffled,
+        Card.getOneSuitDeck(2, Spades, true)->Array.toShuffled,
+        Card.getOneSuitDeck(3, Spades, true)->Array.toShuffled,
+        Card.getOneSuitDeck(4, Spades, true)->Array.toShuffled,
+        Card.getOneSuitDeck(5, Spades, true)->Array.toShuffled,
+        Card.getOneSuitDeck(6, Spades, true)->Array.toShuffled,
+        Card.getOneSuitDeck(7, Spades, true)->Array.toShuffled,
       ],
     )
 
@@ -62,7 +64,7 @@ module GameRules: GameBase.GameRules = {
           deckToDeal->ArrayAux.popN(5),
           deckToDeal->ArrayAux.popN(5),
           deckToDeal->ArrayAux.popN(5),
-        ],
+        ]->flipLastUp,
         foundations: [[], [], [], [], [], [], [], []],
         stock: [
           deckToDeal->ArrayAux.popN(10),
@@ -94,15 +96,15 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let applyLiftToDragPile = (dragPile, lift) => {
+  let applyLiftToDragPile = (dragPile: dragPile, lift) => {
     dragPile->Array.forEachWithIndex((v, j) => {
-      lift(Card(v), j)
+      lift(Card(v.card), j)
     })
   }
 
-  let applyMoveToDragPile = (dragPile, move) => {
+  let applyMoveToDragPile = (dragPile: dragPile, move) => {
     dragPile->Array.forEachWithIndex((v, j) => {
-      move(Card(v), 0, j * 20)
+      move(Card(v.card), 0, j * 20)
     })
   }
 
@@ -125,7 +127,7 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let pileRules = (game, pile, card, i, j): movableSpace => {
+  let pileRules = (_game, pile, card, i, j): movableSpace => {
     let isLast = j == pile->Array.length - 1
 
     {
@@ -156,9 +158,11 @@ module GameRules: GameBase.GameRules = {
         if isLast && Card.rankIsAbove(card, dragPileBase) {
           Some({
             ...game,
-            piles: game.piles->Array.map(stack => {
+            piles: game.piles
+            ->Array.map(stack => {
               stack->ArrayAux.insertAfter(card, dragPile)
-            }),
+            })
+            ->flipLastUp,
           })
         } else {
           None
@@ -166,10 +170,10 @@ module GameRules: GameBase.GameRules = {
       },
       onClick: _ => None,
       onMove: element => {
-        if isLast {
-          Card.show(element)
+        if card.hidden {
+          Card.hide(element)
         } else {
-          ()
+          Card.show(element)
         }
       },
     }
@@ -207,7 +211,7 @@ module GameRules: GameBase.GameRules = {
         None
       },
       autoProgress: () => DoNothing,
-      droppedUpon: (game, dragPile) => {
+      droppedUpon: (_game, _dragPile) => {
         None
       },
       onClick: _ => None,
@@ -217,7 +221,7 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let stockGroupRules = (game, card, i, j): movableSpace => {
+  let stockGroupRules = (_game, _card, i, j): movableSpace => {
     {
       locationAdjustment: {
         x: i * 20,
@@ -229,7 +233,7 @@ module GameRules: GameBase.GameRules = {
         None
       },
       autoProgress: () => DoNothing,
-      droppedUpon: (game, dragPile) => {
+      droppedUpon: (_game, _dragPile) => {
         None
       },
       onClick: game => {
@@ -238,9 +242,11 @@ module GameRules: GameBase.GameRules = {
         ->Option.map(stockGroup => {
           {
             ...game,
-            piles: game.piles->Array.mapWithIndex((pile, i) => {
+            piles: game.piles
+            ->Array.mapWithIndex((pile, i) => {
               Array.concat(pile, [stockGroup->Array.getUnsafe(i)])
-            }),
+            })
+            ->flipLastUp,
             stock: game.stock->Array.slice(~start=0, ~end=game.stock->Array.length - 1),
           }
         })
@@ -256,11 +262,11 @@ module GameRules: GameBase.GameRules = {
 
     game.piles->Array.forEachWithIndex((pile, i) => {
       if Pile(i) == match {
-        result := pileBaseRules(i)->Static->Some
+        result := pileBaseRules(i)->GameBase.Static->Some
       }
 
       pile->Array.forEachWithIndex((card, j) => {
-        if Card(card) == match {
+        if Card(card.card) == match {
           result := pileRules(game, pile, card, i, j)->Movable->Some
         }
       })
@@ -272,7 +278,7 @@ module GameRules: GameBase.GameRules = {
       }
 
       foundation->Array.forEachWithIndex((card, j) => {
-        if Card(card) == match {
+        if Card(card.card) == match {
           result := foundationRules(i, j)->Movable->Some
         }
       })
@@ -280,7 +286,7 @@ module GameRules: GameBase.GameRules = {
 
     game.stock->Array.forEachWithIndex((stockGroup, i) => {
       stockGroup->Array.forEachWithIndex((card, j) => {
-        if Card(card) == match {
+        if Card(card.card) == match {
           result := stockGroupRules(game, card, i, j)->Movable->Some
         }
       })
@@ -345,12 +351,11 @@ module GameRules: GameBase.GameRules = {
         ->Array.map(card => {
           <Card.Display
             card={card}
-            key={Card(card)->spaceToString}
-            id={Card(card)->spaceToString}
+            key={Card(card.card)->spaceToString}
+            id={Card(card.card)->spaceToString}
             onClick={onClick}
-            cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card)))}
+            cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card.card)))}
             onMouseDown={onMouseDown}
-            hidden={true}
           />
         })
         ->React.array}

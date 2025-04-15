@@ -4,16 +4,26 @@ open GameBase
 
 module GameRules: GameBase.GameRules = {
   @decco
-  type item = Card(Card.card) | Tarot(Tarot.card)
+  type item = Card(Card.sides) | Tarot(Tarot.sides)
+
+  @decco
+  type spaceItem = SpaceCard(Card.card) | SpaceTarot(Tarot.card)
 
   @decco
   type space =
-    | Item(item)
+    | Item(spaceItem)
     | TarotUp
     | TarotDown
     | Foundation(int)
     | Pile(int)
     | Free
+
+  let itemToSpaceItem = space => {
+    switch space {
+    | Card(v) => SpaceCard(v.card)
+    | Tarot(v) => SpaceTarot(v.card)
+    }
+  }
 
   let getSpace = element => {
     switch element->Element.id->Js.Json.parseExn->space_decode {
@@ -34,9 +44,9 @@ module GameRules: GameBase.GameRules = {
   @decco
   type game = {
     piles: array<array<item>>,
-    foundations: array<array<Card.card>>,
-    tarotUp: array<Tarot.card>,
-    tarotDown: array<Tarot.card>,
+    foundations: array<array<Card.sides>>,
+    tarotUp: array<Tarot.sides>,
+    tarotDown: array<Tarot.sides>,
     free: option<item>,
   }
 
@@ -46,13 +56,13 @@ module GameRules: GameBase.GameRules = {
   let initiateGame = () => {
     let fullDeck =
       Array.concat(
-        Card.getDeck(0)->Array.toShuffled->Array.map(card => Card(card)),
-        Tarot.getDeck(0)->Array.toShuffled->Array.map(card => Tarot(card)),
+        Card.getDeck(0, false)->Array.toShuffled->Array.map(v => Card(v)),
+        Tarot.getDeck(0, false)->Array.toShuffled->Array.map(v => Tarot(v)),
       )->Array.toShuffled
 
     let deckWithoutAces = fullDeck->Array.filter(card => {
       switch card {
-      | Card(card) => card.rank != RA
+      | Card(card) => card.card.rank != RA
       | _ => true
       }
     })
@@ -76,10 +86,10 @@ module GameRules: GameBase.GameRules = {
           deckToDeal->ArrayAux.popN(7),
         ],
         foundations: [
-          [{rank: RA, suit: Clubs, deck: 0}],
-          [{rank: RA, suit: Diamonds, deck: 0}],
-          [{rank: RA, suit: Hearts, deck: 0}],
-          [{rank: RA, suit: Spades, deck: 0}],
+          [{card: {rank: RA, suit: Clubs, deck: 0}, hidden: false}],
+          [{card: {rank: RA, suit: Diamonds, deck: 0}, hidden: false}],
+          [{card: {rank: RA, suit: Hearts, deck: 0}, hidden: false}],
+          [{card: {rank: RA, suit: Spades, deck: 0}, hidden: false}],
         ],
         tarotUp: [],
         tarotDown: [],
@@ -110,11 +120,11 @@ module GameRules: GameBase.GameRules = {
   }
 
   let applyLiftToDragPile = (dragPile, lift) => {
-    lift(Item(dragPile), 0)
+    lift(Item(dragPile->itemToSpaceItem), 0)
   }
 
   let applyMoveToDragPile = (dragPile, move) => {
-    move(Item(dragPile), 0, 0)
+    move(Item(dragPile->itemToSpaceItem), 0, 0)
   }
 
   let pileBaseRules = (i): staticSpace => {
@@ -163,7 +173,7 @@ module GameRules: GameBase.GameRules = {
       droppedUpon: (game, dragPile) => {
         switch (dragPile, item) {
         | (Card(dragCard), Card(card)) =>
-          if isLast && Card.rankIsAdjacent(card, dragCard) && dragCard.suit == card.suit {
+          if isLast && Card.rankIsAdjacent(card, dragCard) && dragCard.card.suit == card.card.suit {
             Some({
               ...game,
               piles: game.piles->Array.map(stack => {
@@ -199,7 +209,7 @@ module GameRules: GameBase.GameRules = {
         let noChildren = game.foundations->Array.getUnsafe(i)->Array.length == 0
         switch dragPile {
         | Card(card) =>
-          if noChildren && card.rank == RA {
+          if noChildren && card.card.rank == RA {
             Some({
               ...game,
               foundations: game.foundations->ArrayAux.update(i, _ => [card]),
@@ -214,7 +224,7 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let foundationRules = (card: Card.card, i, j): movableSpace => {
+  let foundationRules = (card: Card.sides, i, j): movableSpace => {
     {
       locationAdjustment: {
         x: 0,
@@ -227,7 +237,7 @@ module GameRules: GameBase.GameRules = {
       droppedUpon: (game, dragPile) => {
         switch dragPile {
         | Card(dragCard) =>
-          if dragCard.suit == card.suit && Card.rankIsBelow(card, dragCard) {
+          if dragCard.card.suit == card.card.suit && Card.rankIsBelow(card, dragCard) {
             Some({
               ...game,
               foundations: game.foundations->Array.map(stack => {
@@ -252,7 +262,7 @@ module GameRules: GameBase.GameRules = {
         let noChildren = game.tarotUp->Array.length == 0
         switch dragPile {
         | Tarot(tarot) =>
-          if noChildren && tarot.rank == R0 {
+          if noChildren && tarot.card.rank == R0 {
             Some({
               ...game,
               tarotUp: [tarot],
@@ -267,7 +277,7 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let tarotUpRules = (tarot: Tarot.card, j): movableSpace => {
+  let tarotUpRules = (tarot: Tarot.sides, j): movableSpace => {
     {
       locationAdjustment: {
         x: 10 * j,
@@ -303,7 +313,7 @@ module GameRules: GameBase.GameRules = {
         let noChildren = game.tarotDown->Array.length == 0
         switch dragPile {
         | Tarot(tarot) =>
-          if noChildren && tarot.rank == R21 {
+          if noChildren && tarot.card.rank == R21 {
             Some({
               ...game,
               tarotDown: [tarot],
@@ -318,7 +328,7 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let tarotDownRules = (tarot: Tarot.card, j): movableSpace => {
+  let tarotDownRules = (tarot: Tarot.sides, j): movableSpace => {
     {
       locationAdjustment: {
         x: -10 * j,
@@ -383,7 +393,7 @@ module GameRules: GameBase.GameRules = {
       }
 
       pile->Array.forEachWithIndex((card, j) => {
-        if Item(card) == match {
+        if Item(card->itemToSpaceItem) == match {
           result := pileRules(pile, card, i, j)->Movable->Some
         }
       })
@@ -395,7 +405,7 @@ module GameRules: GameBase.GameRules = {
       }
 
       foundation->Array.forEachWithIndex((card, j) => {
-        if Item(Card(card)) == match {
+        if Item(SpaceCard(card.card)) == match {
           result := foundationRules(card, i, j)->Movable->Some
         }
       })
@@ -406,7 +416,7 @@ module GameRules: GameBase.GameRules = {
     }
 
     game.tarotUp->Array.forEachWithIndex((card, i) => {
-      if Item(Tarot(card)) == match {
+      if Item(SpaceTarot(card.card)) == match {
         result := tarotUpRules(card, i)->Movable->Some
       }
     })
@@ -416,7 +426,7 @@ module GameRules: GameBase.GameRules = {
     }
 
     game.tarotDown->Array.forEachWithIndex((card, i) => {
-      if Item(Tarot(card)) == match {
+      if Item(SpaceTarot(card.card)) == match {
         result := tarotDownRules(card, i)->Movable->Some
       }
     })
@@ -427,7 +437,7 @@ module GameRules: GameBase.GameRules = {
 
     switch game.free {
     | Some(free) =>
-      if Item(free) == match {
+      if Item(free->itemToSpaceItem) == match {
         result := freeRules(free)->Movable->Some
       }
     | None => ()
@@ -514,19 +524,18 @@ module GameRules: GameBase.GameRules = {
             <Card.Display
               multiColor={true}
               card={card}
-              key={Item(item)->spaceToString}
-              id={Item(item)->spaceToString}
-              cardRef={ReactDOM.Ref.callbackDomRef(setRef(Item(item)))}
+              key={Item(item->itemToSpaceItem)->spaceToString}
+              id={Item(item->itemToSpaceItem)->spaceToString}
+              cardRef={ReactDOM.Ref.callbackDomRef(setRef(Item(item->itemToSpaceItem)))}
               onMouseDown={onMouseDown}
-              hidden={false}
               onClick={onClick}
             />
           | Tarot(tarot) =>
             <Tarot.Display
               card={tarot}
-              key={Item(item)->spaceToString}
-              id={Item(item)->spaceToString}
-              cardRef={ReactDOM.Ref.callbackDomRef(setRef(Item(item)))}
+              key={Item(item->itemToSpaceItem)->spaceToString}
+              id={Item(item->itemToSpaceItem)->spaceToString}
+              cardRef={ReactDOM.Ref.callbackDomRef(setRef(Item(item->itemToSpaceItem)))}
               onMouseDown={onMouseDown}
             />
           }

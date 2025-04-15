@@ -28,6 +28,16 @@ function update(a, i, f) {
             });
 }
 
+function updateLast(a, f) {
+  return a.map(function (el, j) {
+              if (j === (a.length - 1 | 0)) {
+                return f(el);
+              } else {
+                return el;
+              }
+            });
+}
+
 function insertAfter(arr, match, $$new) {
   return Core__Array.reduce(arr, [], (function (acc, c) {
                 if (Caml_obj.equal(c, match)) {
@@ -61,6 +71,7 @@ var ArrayAux = {
   removeLast: removeLast,
   getLast: getLast,
   update: update,
+  updateLast: updateLast,
   insertAfter: insertAfter,
   forEach2: forEach2,
   sliceBefore: sliceBefore,

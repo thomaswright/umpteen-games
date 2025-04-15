@@ -32,6 +32,12 @@ type card = {
   deck: int,
 }
 
+@decco
+type sides = {
+  card: card,
+  hidden: bool,
+}
+
 type color = Black | Red
 
 let allRanks = [RA, R2, R3, R4, R5, R6, R7, R8, R9, R10, RJ, RQ, RK]
@@ -41,31 +47,33 @@ let allSuits = [Spades, Hearts, Diamonds, Clubs]
 let equals = (a, b) => {
   a.suit == b.suit && a.rank == b.rank
 }
-let isRed = (card: card) => card.suit == Hearts || card.suit == Diamonds
-let isBlack = (card: card) => card.suit == Spades || card.suit == Clubs
+let isRed = (v: sides) => v.card.suit == Hearts || v.card.suit == Diamonds
+let isBlack = (v: sides) => v.card.suit == Spades || v.card.suit == Clubs
 
 let rankIsBelow = (a, b) => {
-  allRanks->Array.findIndex(x => x == a.rank) == allRanks->Array.findIndex(x => x == b.rank) - 1
+  allRanks->Array.findIndex(x => x == a.card.rank) ==
+    allRanks->Array.findIndex(x => x == b.card.rank) - 1
 }
 
 let rankIsAbove = (a, b) => {
-  allRanks->Array.findIndex(x => x == a.rank) == allRanks->Array.findIndex(x => x == b.rank) + 1
+  allRanks->Array.findIndex(x => x == a.card.rank) ==
+    allRanks->Array.findIndex(x => x == b.card.rank) + 1
 }
 
 let rankIsAdjacent = (a, b) => {
   rankIsBelow(a, b) || rankIsAbove(a, b)
 }
 
-let rankString = card => (card.rank :> string)
+let rankString = v => (v.card.rank :> string)
 
 let stringToRank = s => (s :> rank)
 
-let suitString = card => (card.suit :> string)
+let suitString = v => (v.card.suit :> string)
 
 let stringToSuit = s => (s :> suit)
 
-let displayRank = card =>
-  switch card.rank {
+let displayRank = v =>
+  switch v.card.rank {
   | RA => "A"
   | R2 => "2"
   | R3 => "3"
@@ -81,32 +89,32 @@ let displayRank = card =>
   | RK => "K"
   }
 
-let displaySuit = card =>
-  switch card.suit {
+let displaySuit = v =>
+  switch v.card.suit {
   | Spades => "♠"
   | Hearts => "♥"
   | Diamonds => "♦"
   | Clubs => "♣"
   }
 
-let color = card =>
-  switch card.suit {
+let color = v =>
+  switch v.card.suit {
   | Spades => Black
   | Hearts => Red
   | Diamonds => Red
   | Clubs => Black
   }
 
-let colorHex = card =>
-  switch card.suit {
+let colorHex = v =>
+  switch v.card.suit {
   | Spades => "hsl(0 0% 0%)"
   | Hearts => "hsl(0 100% 44.31%)"
   | Diamonds => "hsl(0 100% 44.31%)"
   | Clubs => "hsl(0 0% 0%)"
   }
 
-let multiColorHex = card =>
-  switch card.suit {
+let multiColorHex = v =>
+  switch v.card.suit {
   | Spades => "hsl(224 100% 40%)"
   | Hearts => "hsl(0 100% 43%)"
   | Diamonds => "hsl(39 100% 50%)"
@@ -128,7 +136,7 @@ let toString = card => {
 
 module Display = {
   @react.component
-  let make = (~card, ~id, ~cardRef, ~onMouseDown, ~onClick, ~multiColor=false, ~hidden=false) => {
+  let make = (~card, ~id, ~cardRef, ~onMouseDown, ~onClick, ~multiColor=false) => {
     <div
       id={id}
       ref={cardRef}
@@ -137,25 +145,20 @@ module Display = {
       className="absolute w-14 h-20 select-none">
       <div
         style={{
-          transform: rotation(card),
+          transform: rotation(card.card),
           // position: "relative",
           color: multiColor ? card->multiColorHex : card->colorHex,
         }}
         className={[
           "relative border border-gray-400 rounded w-14 h-20 bg-white shadow-sm leading-none  cursor-default overflow-hidden",
         ]->Array.join(" ")}>
-        <div
-          className={[
-            "absolute bg-red-700 w-full h-full card-back",
-            hidden ? "" : "hidden",
-          ]->Array.join(" ")}
-        />
+        <div className={["absolute bg-red-700 w-full h-full card-back"]->Array.join(" ")} />
         <span className="flex flex-col py-0.5 px-1">
           <span className="flex flex-row">
             <span
               className={[
                 "font-medium ",
-                switch card.rank {
+                switch card.card.rank {
                 | R10 => "tracking-[-0.1rem] w-4"
                 | _ => "w-3.5"
                 },
@@ -191,31 +194,33 @@ let show = element => {
   })
 }
 
-let getOneSuitDeck = (deck, suit) => {
+let getOneSuitDeck = (deck, suit, hidden) => {
   allRanks->Array.reduce([], (a, rank) => {
     a->Array.concat([
-      (
-        {
+      {
+        card: {
           suit,
           rank,
           deck,
-        }: card
-      ),
+        },
+        hidden,
+      },
     ])
   })
 }
 
-let getDeck = deck => {
+let getDeck = (deck, hidden) => {
   allRanks->Array.reduce([], (a, rank) => {
     allSuits->Array.reduce(a, (a2, suit) => {
       a2->Array.concat([
-        (
-          {
+        {
+          card: {
             suit,
             rank,
             deck,
-          }: card
-        ),
+          },
+          hidden,
+        },
       ])
     })
   })

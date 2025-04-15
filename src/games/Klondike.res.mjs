@@ -167,11 +167,11 @@ function spaceToString(space) {
 }
 
 function deck_encode(value) {
-  return Decco.arrayToJson(Card.card_encode, value);
+  return Decco.arrayToJson(Card.sides_encode, value);
 }
 
 function deck_decode(value) {
-  return Decco.arrayFromJson(Card.card_decode, value);
+  return Decco.arrayFromJson(Card.sides_decode, value);
 }
 
 function game_encode(value) {
@@ -180,7 +180,7 @@ function game_encode(value) {
                 "piles",
                 (function (extra) {
                       return Decco.arrayToJson((function (extra) {
-                                    return Decco.arrayToJson(Card.card_encode, extra);
+                                    return Decco.arrayToJson(Card.sides_encode, extra);
                                   }), extra);
                     })(value.piles)
               ],
@@ -188,20 +188,20 @@ function game_encode(value) {
                 "foundations",
                 (function (extra) {
                       return Decco.arrayToJson((function (extra) {
-                                    return Decco.arrayToJson(Card.card_encode, extra);
+                                    return Decco.arrayToJson(Card.sides_encode, extra);
                                   }), extra);
                     })(value.foundations)
               ],
               [
                 "stock",
                 (function (extra) {
-                      return Decco.arrayToJson(Card.card_encode, extra);
+                      return Decco.arrayToJson(Card.sides_encode, extra);
                     })(value.stock)
               ],
               [
                 "waste",
                 (function (extra) {
-                      return Decco.arrayToJson(Card.card_encode, extra);
+                      return Decco.arrayToJson(Card.sides_encode, extra);
                     })(value.waste)
               ]
             ]);
@@ -218,19 +218,19 @@ function game_decode(value) {
   var dict$1 = dict._0;
   var extra = Belt_Option.getWithDefault(Js_dict.get(dict$1, "piles"), null);
   var piles = Decco.arrayFromJson((function (extra) {
-          return Decco.arrayFromJson(Card.card_decode, extra);
+          return Decco.arrayFromJson(Card.sides_decode, extra);
         }), extra);
   if (piles.TAG === "Ok") {
     var extra$1 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "foundations"), null);
     var foundations = Decco.arrayFromJson((function (extra) {
-            return Decco.arrayFromJson(Card.card_decode, extra);
+            return Decco.arrayFromJson(Card.sides_decode, extra);
           }), extra$1);
     if (foundations.TAG === "Ok") {
       var extra$2 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "stock"), null);
-      var stock = Decco.arrayFromJson(Card.card_decode, extra$2);
+      var stock = Decco.arrayFromJson(Card.sides_decode, extra$2);
       if (stock.TAG === "Ok") {
         var extra$3 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "waste"), null);
-        var waste = Decco.arrayFromJson(Card.card_decode, extra$3);
+        var waste = Decco.arrayFromJson(Card.sides_decode, extra$3);
         if (waste.TAG === "Ok") {
           return {
                   TAG: "Ok",
@@ -282,7 +282,7 @@ function applyLiftToDragPile(dragPile, lift) {
   dragPile.forEach(function (v, j) {
         lift({
               TAG: "Card",
-              _0: v
+              _0: v.card
             }, j);
       });
 }
@@ -291,13 +291,13 @@ function applyMoveToDragPile(dragPile, move) {
   dragPile.forEach(function (v, j) {
         move({
               TAG: "Card",
-              _0: v
+              _0: v.card
             }, 0, Math.imul(j, 20));
       });
 }
 
 function initiateGame() {
-  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0));
+  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
   var deckToDeal = {
     contents: shuffledDeck
   };
@@ -355,7 +355,7 @@ function pileBaseRules(i) {
           droppedUpon: (function (game, dragPile) {
               var dragPileBase = dragPile[0];
               var noChildren = game.piles[i].length === 0;
-              if (noChildren && dragPileBase.rank === "RK") {
+              if (noChildren && dragPileBase.card.rank === "RK") {
                 return {
                         piles: Common.ArrayAux.update(game.piles, i, (function (param) {
                                 return dragPile;
@@ -435,7 +435,7 @@ function foundationBaseRules(i) {
               var justOne = dragPile.length === 1;
               var dragPileBase = dragPile[0];
               var noChildren = game.foundations[i].length === 0;
-              if (noChildren && justOne && dragPileBase.rank === "RA") {
+              if (noChildren && justOne && dragPileBase.card.rank === "RA") {
                 return {
                         piles: game.piles,
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
@@ -477,7 +477,7 @@ function foundationRules(game, card, i, j) {
           droppedUpon: (function (game, dragPile) {
               var justOne = dragPile.length === 1;
               var dragPileBase = dragPile[0];
-              if (justOne && dragPileBase.suit === card.suit && Card.rankIsBelow(card, dragPileBase)) {
+              if (justOne && dragPileBase.card.suit === card.card.suit && Card.rankIsBelow(card, dragPileBase)) {
                 return {
                         piles: game.piles,
                         foundations: game.foundations.map(function (stack) {
@@ -560,7 +560,7 @@ function stockRules(i) {
 
 function stockBaseRules() {
   return {
-          droppedUpon: (function (game, dragPile) {
+          droppedUpon: (function (_game, _dragPile) {
               
             }),
           autoProgress: "DoNothing",
@@ -592,7 +592,7 @@ function getRule(game, match) {
         pile.forEach(function (card, j) {
               if (Caml_obj.equal({
                       TAG: "Card",
-                      _0: card
+                      _0: card.card
                     }, match)) {
                 result.contents = {
                   TAG: "Movable",
@@ -616,7 +616,7 @@ function getRule(game, match) {
         foundation.forEach(function (card, j) {
               if (Caml_obj.equal({
                       TAG: "Card",
-                      _0: card
+                      _0: card.card
                     }, match)) {
                 result.contents = {
                   TAG: "Movable",
@@ -630,7 +630,7 @@ function getRule(game, match) {
   game.waste.forEach(function (card, i) {
         if (Caml_obj.equal({
                 TAG: "Card",
-                _0: card
+                _0: card.card
               }, match)) {
           result.contents = {
             TAG: "Movable",
@@ -643,7 +643,7 @@ function getRule(game, match) {
   game.stock.forEach(function (card, i) {
         if (Caml_obj.equal({
                 TAG: "Card",
-                _0: card
+                _0: card.card
               }, match)) {
           result.contents = {
             TAG: "Movable",
@@ -751,18 +751,17 @@ function Klondike$GameRules$AllCards(props) {
                                 card: card,
                                 id: JSON.stringify(space_encode({
                                           TAG: "Card",
-                                          _0: card
+                                          _0: card.card
                                         })),
                                 cardRef: setRef({
                                       TAG: "Card",
-                                      _0: card
+                                      _0: card.card
                                     }),
                                 onMouseDown: onMouseDown,
-                                onClick: onClick,
-                                hidden: true
+                                onClick: onClick
                               }, JSON.stringify(space_encode({
                                         TAG: "Card",
-                                        _0: card
+                                        _0: card.card
                                       })));
                   })
             });

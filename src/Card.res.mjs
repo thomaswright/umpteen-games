@@ -324,6 +324,58 @@ function card_decode(value) {
         };
 }
 
+function sides_encode(value) {
+  return Js_dict.fromArray([
+              [
+                "card",
+                card_encode(value.card)
+              ],
+              [
+                "hidden",
+                Decco.boolToJson(value.hidden)
+              ]
+            ]);
+}
+
+function sides_decode(value) {
+  var dict = Js_json.classify(value);
+  if (typeof dict !== "object") {
+    return Decco.error(undefined, "Not an object", value);
+  }
+  if (dict.TAG !== "JSONObject") {
+    return Decco.error(undefined, "Not an object", value);
+  }
+  var dict$1 = dict._0;
+  var card = card_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "card"), null));
+  if (card.TAG === "Ok") {
+    var hidden = Decco.boolFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "hidden"), null));
+    if (hidden.TAG === "Ok") {
+      return {
+              TAG: "Ok",
+              _0: Decco.unsafeAddFieldToObject("card", card._0, Decco.unsafeAddFieldToObject("hidden", hidden._0, {}))
+            };
+    }
+    var e = hidden._0;
+    return {
+            TAG: "Error",
+            _0: {
+              path: ".hidden" + e.path,
+              message: e.message,
+              value: e.value
+            }
+          };
+  }
+  var e$1 = card._0;
+  return {
+          TAG: "Error",
+          _0: {
+            path: ".card" + e$1.path,
+            message: e$1.message,
+            value: e$1.value
+          }
+        };
+}
+
 var allRanks = [
   "RA",
   "R2",
@@ -355,35 +407,35 @@ function equals(a, b) {
   }
 }
 
-function isRed(card) {
-  if (card.suit === "Hearts") {
+function isRed(v) {
+  if (v.card.suit === "Hearts") {
     return true;
   } else {
-    return card.suit === "Diamonds";
+    return v.card.suit === "Diamonds";
   }
 }
 
-function isBlack(card) {
-  if (card.suit === "Spades") {
+function isBlack(v) {
+  if (v.card.suit === "Spades") {
     return true;
   } else {
-    return card.suit === "Clubs";
+    return v.card.suit === "Clubs";
   }
 }
 
 function rankIsBelow(a, b) {
   return allRanks.findIndex(function (x) {
-              return x === a.rank;
+              return x === a.card.rank;
             }) === (allRanks.findIndex(function (x) {
-                return x === b.rank;
+                return x === b.card.rank;
               }) - 1 | 0);
 }
 
 function rankIsAbove(a, b) {
   return allRanks.findIndex(function (x) {
-              return x === a.rank;
+              return x === a.card.rank;
             }) === (allRanks.findIndex(function (x) {
-                return x === b.rank;
+                return x === b.card.rank;
               }) + 1 | 0);
 }
 
@@ -395,24 +447,24 @@ function rankIsAdjacent(a, b) {
   }
 }
 
-function rankString(card) {
-  return card.rank;
+function rankString(v) {
+  return v.card.rank;
 }
 
 function stringToRank(s) {
   return s;
 }
 
-function suitString(card) {
-  return card.suit;
+function suitString(v) {
+  return v.card.suit;
 }
 
 function stringToSuit(s) {
   return s;
 }
 
-function displayRank(card) {
-  var match = card.rank;
+function displayRank(v) {
+  var match = v.card.rank;
   switch (match) {
     case "RA" :
         return "A";
@@ -444,8 +496,8 @@ function displayRank(card) {
   }
 }
 
-function displaySuit(card) {
-  var match = card.suit;
+function displaySuit(v) {
+  var match = v.card.suit;
   switch (match) {
     case "Spades" :
         return "♠";
@@ -459,8 +511,8 @@ function displaySuit(card) {
   }
 }
 
-function color(card) {
-  var match = card.suit;
+function color(v) {
+  var match = v.card.suit;
   switch (match) {
     case "Hearts" :
     case "Diamonds" :
@@ -472,8 +524,8 @@ function color(card) {
   }
 }
 
-function colorHex(card) {
-  var match = card.suit;
+function colorHex(v) {
+  var match = v.card.suit;
   switch (match) {
     case "Hearts" :
     case "Diamonds" :
@@ -485,8 +537,8 @@ function colorHex(card) {
   }
 }
 
-function multiColorHex(card) {
-  var match = card.suit;
+function multiColorHex(v) {
+  var match = v.card.suit;
   switch (match) {
     case "Spades" :
         return "hsl(224 100% 40%)";
@@ -519,22 +571,17 @@ function toString(card) {
 }
 
 function Card$Display(props) {
-  var __hidden = props.hidden;
   var __multiColor = props.multiColor;
   var card = props.card;
   var multiColor = __multiColor !== undefined ? __multiColor : false;
-  var hidden = __hidden !== undefined ? __hidden : false;
-  var match = card.rank;
+  var match = card.card.rank;
   var tmp;
   tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
   return JsxRuntime.jsx("div", {
               children: JsxRuntime.jsxs("div", {
                     children: [
                       JsxRuntime.jsx("div", {
-                            className: [
-                                "absolute bg-red-700 w-full h-full card-back",
-                                hidden ? "" : "hidden"
-                              ].join(" ")
+                            className: ["absolute bg-red-700 w-full h-full card-back"].join(" ")
                           }),
                       JsxRuntime.jsxs("span", {
                             children: [
@@ -565,7 +612,7 @@ function Card$Display(props) {
                     className: ["relative border border-gray-400 rounded w-14 h-20 bg-white shadow-sm leading-none  cursor-default overflow-hidden"].join(" "),
                     style: {
                       color: multiColor ? multiColorHex(card) : colorHex(card),
-                      transform: rotation(card)
+                      transform: rotation(card.card)
                     }
                   }),
               ref: Caml_option.some(props.cardRef),
@@ -592,23 +639,29 @@ function show(element) {
         }));
 }
 
-function getOneSuitDeck(deck, suit) {
+function getOneSuitDeck(deck, suit, hidden) {
   return Core__Array.reduce(allRanks, [], (function (a, rank) {
                 return a.concat([{
-                              suit: suit,
-                              rank: rank,
-                              deck: deck
+                              card: {
+                                suit: suit,
+                                rank: rank,
+                                deck: deck
+                              },
+                              hidden: hidden
                             }]);
               }));
 }
 
-function getDeck(deck) {
+function getDeck(deck, hidden) {
   return Core__Array.reduce(allRanks, [], (function (a, rank) {
                 return Core__Array.reduce(allSuits, a, (function (a2, suit) {
                               return a2.concat([{
-                                            suit: suit,
-                                            rank: rank,
-                                            deck: deck
+                                            card: {
+                                              suit: suit,
+                                              rank: rank,
+                                              deck: deck
+                                            },
+                                            hidden: hidden
                                           }]);
                             }));
               }));
@@ -621,6 +674,8 @@ export {
   rank_decode ,
   card_encode ,
   card_decode ,
+  sides_encode ,
+  sides_decode ,
   allRanks ,
   allSuits ,
   equals ,
