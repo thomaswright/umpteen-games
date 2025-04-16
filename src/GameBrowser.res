@@ -1,9 +1,9 @@
 type gameType =
   | @as("Klondike") Klondike
   | @as("Free Cell") FreeCell
-  | @as("2 Deck Free Cell") DoubleFreeCell
+  | @as("Free Cell: 2 Deck") DoubleFreeCell
   | @as("Up & Down") UpAndDown
-  | @as("One Suit Spider") Spider
+  | @as("Spider: One Suit") Spider
 
 let gameString = (a: gameType) => (a :> string)
 
@@ -71,20 +71,20 @@ let make = () => {
           {"tom & won's card games"->React.string}
         </div>
         <div className="flex flex-row gap-5 text-xl">
-          {[Klondike, FreeCell, DoubleFreeCell, UpAndDown, Spider]
-          ->Array.map(v => {
-            let selected = v == selectGameType
-            <button
-              key={v->gameString}
-              className={[
-                selected ? "text-amber-500 underline" : "text-white",
-                "font-black",
-              ]->Array.join(" ")}
-              onClick={_ => setSelectGameType(_ => v)}>
-              {v->gameString->React.string}
-            </button>
-          })
-          ->React.array}
+          <select
+            className={"px-2 py-1 rounded text-sm"}
+            value={selectGameType->gameString}
+            onChange={event => {
+              setSelectGameType(_ => JsxEvent.Form.target(event)["value"])
+            }}>
+            {[Klondike, FreeCell, DoubleFreeCell, UpAndDown, Spider]
+            ->Array.map(v => {
+              <option key={v->gameString} value={v->gameString}>
+                {v->gameString->React.string}
+              </option>
+            })
+            ->React.array}
+          </select>
         </div>
       </div>
       {switch selectGameType {

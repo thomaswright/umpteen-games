@@ -252,7 +252,7 @@ function GameBrowser(props) {
                 })
             }, "freeCell" + state.contents.freeCell.length.toString());
         break;
-    case "2 Deck Free Cell" :
+    case "Free Cell: 2 Deck" :
         tmp = JsxRuntime.jsx(DoubleFreeCell.Game.make, {
               getState: state.contents.doubleFreeCell.length === 0 ? undefined : (function () {
                     return state.contents.doubleFreeCell[0];
@@ -312,7 +312,7 @@ function GameBrowser(props) {
                 })
             }, "upAndDown" + state.contents.upAndDown.length.toString());
         break;
-    case "One Suit Spider" :
+    case "Spider: One Suit" :
         tmp = JsxRuntime.jsx(Spider.Game.make, {
               getState: state.contents.spider.length === 0 ? undefined : (function () {
                     return state.contents.spider[0];
@@ -353,26 +353,26 @@ function GameBrowser(props) {
                               className: "mb-1 text-white font-medium tracking-widest "
                             }),
                         JsxRuntime.jsx("div", {
-                              children: [
-                                  "Klondike",
-                                  "Free Cell",
-                                  "2 Deck Free Cell",
-                                  "Up & Down",
-                                  "One Suit Spider"
-                                ].map(function (v) {
-                                    var selected = v === selectGameType;
-                                    return JsxRuntime.jsx("button", {
-                                                children: v,
-                                                className: [
-                                                    selected ? "text-amber-500 underline" : "text-white",
-                                                    "font-black"
-                                                  ].join(" "),
-                                                onClick: (function (param) {
-                                                    setSelectGameType(function (param) {
-                                                          return v;
-                                                        });
-                                                  })
-                                              }, v);
+                              children: JsxRuntime.jsx("select", {
+                                    children: [
+                                        "Klondike",
+                                        "Free Cell",
+                                        "Free Cell: 2 Deck",
+                                        "Up & Down",
+                                        "Spider: One Suit"
+                                      ].map(function (v) {
+                                          return JsxRuntime.jsx("option", {
+                                                      children: v,
+                                                      value: v
+                                                    }, v);
+                                        }),
+                                    className: "px-2 py-1 rounded text-sm",
+                                    value: selectGameType,
+                                    onChange: (function ($$event) {
+                                        setSelectGameType(function (param) {
+                                              return $$event.target.value;
+                                            });
+                                      })
                                   }),
                               className: "flex flex-row gap-5 text-xl"
                             })
