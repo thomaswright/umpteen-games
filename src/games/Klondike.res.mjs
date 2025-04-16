@@ -417,7 +417,7 @@ function pileRules(pile, card, i, j) {
               }
               
             }),
-          onMove: (function (_element) {
+          onStateChange: (function (_element) {
               
             }),
           onClick: (function (param) {
@@ -486,7 +486,7 @@ function foundationRules(game, card, i, j) {
               }
               
             }),
-          onMove: (function (param) {
+          onStateChange: (function (param) {
               
             }),
           onClick: (function (param) {
@@ -515,7 +515,7 @@ function wasteRules(game, card, i) {
           droppedUpon: (function (param, param$1) {
               
             }),
-          onMove: (function (element) {
+          onStateChange: (function (element) {
               Card.show(element);
             }),
           onClick: (function (param) {
@@ -541,7 +541,7 @@ function stockRules(i) {
           droppedUpon: (function (param, param$1) {
               
             }),
-          onMove: (function (param) {
+          onStateChange: (function (param) {
               
             }),
           onClick: (function (game) {

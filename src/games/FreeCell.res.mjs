@@ -420,7 +420,7 @@ function pileRules(game, pile, card, i, j) {
               }
               
             }),
-          onMove: (function (param) {
+          onStateChange: (function (param) {
               
             }),
           onClick: (function (param) {
@@ -488,7 +488,7 @@ function foundationRules(game, foundation, card, i, j) {
               }
               
             }),
-          onMove: (function (param) {
+          onStateChange: (function (param) {
               
             }),
           onClick: (function (param) {
@@ -542,7 +542,7 @@ function freeRules(card, i) {
           droppedUpon: (function (_game, _dragPile) {
               
             }),
-          onMove: (function (param) {
+          onStateChange: (function (param) {
               
             }),
           onClick: (function (param) {

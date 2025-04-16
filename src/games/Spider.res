@@ -169,7 +169,7 @@ module GameRules: GameBase.GameRules = {
         }
       },
       onClick: _ => None,
-      onMove: element => {
+      onStateChange: element => {
         if card.hidden {
           Card.hide(element)
         } else {
@@ -216,7 +216,7 @@ module GameRules: GameBase.GameRules = {
         None
       },
       onClick: _ => None,
-      onMove: element => {
+      onStateChange: element => {
         Card.show(element)
       },
     }
@@ -252,7 +252,7 @@ module GameRules: GameBase.GameRules = {
           }
         })
       },
-      onMove: element => {
+      onStateChange: element => {
         Card.hide(element)
       },
     }

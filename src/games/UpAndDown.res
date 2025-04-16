@@ -198,7 +198,7 @@ module GameRules: GameBase.GameRules = {
         }
       },
       onClick: _ => None,
-      onMove: _ => (),
+      onStateChange: _ => (),
     }
   }
 
@@ -251,7 +251,7 @@ module GameRules: GameBase.GameRules = {
         }
       },
       onClick: _ => None,
-      onMove: _ => (),
+      onStateChange: _ => (),
     }
   }
 
@@ -302,7 +302,7 @@ module GameRules: GameBase.GameRules = {
         }
       },
       onClick: _ => None,
-      onMove: _ => (),
+      onStateChange: _ => (),
     }
   }
 
@@ -353,7 +353,7 @@ module GameRules: GameBase.GameRules = {
         }
       },
       onClick: _ => None,
-      onMove: _ => (),
+      onStateChange: _ => (),
     }
   }
 
@@ -380,7 +380,7 @@ module GameRules: GameBase.GameRules = {
       dragPile: () => Some(card),
       droppedUpon: (_game, _dragPile) => None,
       onClick: _ => None,
-      onMove: _ => (),
+      onStateChange: _ => (),
     }
   }
 

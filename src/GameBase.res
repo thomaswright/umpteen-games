@@ -27,7 +27,7 @@ type movableSpace<'game, 'space, 'dragPile> = {
   dragPile: unit => option<'dragPile>,
   autoProgress: unit => autoProgress<'dragPile>,
   droppedUpon: droppedUpon<'game, 'dragPile>,
-  onMove: Element.t => unit,
+  onStateChange: Element.t => unit,
   onClick: 'game => option<'game>,
   // applyMoveToOthers: ('space => unit) => unit,
 }
@@ -396,14 +396,14 @@ module Create = (GameRules: GameRules) => {
           ->Option.mapOr((), rule => {
             switch rule {
             | Static(_) => ()
-            | Movable({locationAdjustment, baseSpace, onMove}) =>
+            | Movable({locationAdjustment, baseSpace, onStateChange}) =>
               baseSpace
               ->getElement
               ->Option.mapOr(
                 (),
                 baseElement => {
                   let basePos = baseElement->elementPosition
-                  onMove(element)
+                  onStateChange(element)
                   moveWithTime(
                     element,
                     basePos,

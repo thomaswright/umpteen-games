@@ -150,7 +150,7 @@ module GameRules: GameBase.GameRules = {
         }
       },
       onClick: _ => None,
-      onMove: _element => {
+      onStateChange: _element => {
         ()
       },
     }
@@ -213,7 +213,7 @@ module GameRules: GameBase.GameRules = {
         }
       },
       onClick: _ => None,
-      onMove: _ => (),
+      onStateChange: _ => (),
     }
   }
 
@@ -234,7 +234,7 @@ module GameRules: GameBase.GameRules = {
     autoProgress: () => DoNothing,
     droppedUpon: (_, _) => None,
     onClick: _ => None,
-    onMove: element => Card.show(element),
+    onStateChange: element => Card.show(element),
   }
 
   let stockRules = (i): movableSpace => {
@@ -256,7 +256,7 @@ module GameRules: GameBase.GameRules = {
         ),
       })
     },
-    onMove: _ => (),
+    onStateChange: _ => (),
   }
 
   let stockBaseRules = (): staticSpace => {

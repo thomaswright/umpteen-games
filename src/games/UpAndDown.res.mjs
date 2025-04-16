@@ -706,7 +706,7 @@ function pileRules(pile, item, i, j) {
               }
               
             }),
-          onMove: (function (param) {
+          onStateChange: (function (param) {
               
             }),
           onClick: (function (param) {
@@ -778,7 +778,7 @@ function foundationRules(card, i, j) {
               }
               
             }),
-          onMove: (function (param) {
+          onStateChange: (function (param) {
               
             }),
           onClick: (function (param) {
@@ -843,7 +843,7 @@ function tarotUpRules(tarot, j) {
               }
               
             }),
-          onMove: (function (param) {
+          onStateChange: (function (param) {
               
             }),
           onClick: (function (param) {
@@ -908,7 +908,7 @@ function tarotDownRules(tarot, j) {
               }
               
             }),
-          onMove: (function (param) {
+          onStateChange: (function (param) {
               
             }),
           onClick: (function (param) {
@@ -960,7 +960,7 @@ function freeRules(card) {
           droppedUpon: (function (_game, _dragPile) {
               
             }),
-          onMove: (function (param) {
+          onStateChange: (function (param) {
               
             }),
           onClick: (function (param) {

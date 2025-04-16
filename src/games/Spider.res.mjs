@@ -411,7 +411,7 @@ function pileRules(_game, pile, card, i, j) {
               }
               
             }),
-          onMove: (function (element) {
+          onStateChange: (function (element) {
               if (card.hidden) {
                 return Card.hide(element);
               } else {
@@ -468,7 +468,7 @@ function foundationRules(i, j) {
           droppedUpon: (function (_game, _dragPile) {
               
             }),
-          onMove: (function (element) {
+          onStateChange: (function (element) {
               Card.show(element);
             }),
           onClick: (function (param) {
@@ -494,7 +494,7 @@ function stockGroupRules(_game, _card, i, j) {
           droppedUpon: (function (_game, _dragPile) {
               
             }),
-          onMove: (function (element) {
+          onStateChange: (function (element) {
               Card.hide(element);
             }),
           onClick: (function (game) {

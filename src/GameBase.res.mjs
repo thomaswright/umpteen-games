@@ -419,11 +419,11 @@ function Create(GameRules) {
                       return ;
                     }
                     var match = rule._0;
-                    var onMove = match.onMove;
+                    var onStateChange = match.onStateChange;
                     var locationAdjustment = match.locationAdjustment;
                     Core__Option.mapOr(getElement(match.baseSpace), undefined, (function (baseElement) {
                             var basePos = elementPosition(baseElement);
-                            onMove(element);
+                            onStateChange(element);
                             var targetLeft = locationAdjustment.x;
                             var targetTop = locationAdjustment.y;
                             var targetZIndex = locationAdjustment.z;
