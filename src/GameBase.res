@@ -4,7 +4,7 @@ open Webapi.Dom
 @val @module("./other.js")
 external condInterval: (unit => unit, int, unit => bool) => unit = "condInterval"
 
-let easeOutQuad = (t: float) => 1. -. (1. -. t) *. (1. -. t)
+let easeOutQuad = (t: float) => Math.min(1., Math.max(0., 1. -. (1. -. t) *. (1. -. t)))
 
 type pos = {
   x: int,
@@ -330,30 +330,34 @@ module Create = (GameRules: GameRules) => {
         element->setStyleTop(top->Int.toString ++ "px")
       }
 
+      let getBoardPos = () => {
+        document
+        ->Document.getElementById("board")
+        ->Option.mapOr(
+          {
+            top: 0.,
+            left: 0.,
+            bottom: 0.,
+            right: 0.,
+          },
+          board => board->elementPosition,
+        )
+      }
+
+      let positionByProgress = (start, end, progress) => {
+        let easedProgress = easeOutQuad(progress)
+        start +. (end -. start) *. easedProgress
+      }
+
       let moveWithTime = (element, refPos, targetLeft, targetTop, targetZIndex, duration) => {
         let start = element->elementPosition
 
         let startZIndex = element->zIndexFromElement
 
-        let boardPos =
-          document
-          ->Document.getElementById("board")
-          ->Option.mapOr(
-            {
-              top: 0.,
-              left: 0.,
-              bottom: 0.,
-              right: 0.,
-            },
-            board => board->elementPosition,
-          )
+        let boardPos = getBoardPos()
 
-        let start = {
-          top: start.top -. boardPos.top,
-          left: start.left -. boardPos.left,
-          bottom: start.bottom -. boardPos.bottom,
-          right: start.right -. boardPos.right,
-        }
+        let startLeft = start.left -. boardPos.left
+        let startTop = start.top -. boardPos.top
 
         let adjustedTargetLeft = targetLeft +. refPos.left -. boardPos.left
         let adjustedTargetTop = targetTop +. refPos.top -. boardPos.top
@@ -363,12 +367,10 @@ module Create = (GameRules: GameRules) => {
         let rec step: float => unit = currentTime => {
           let elapsedTime = currentTime -. startTime
           let progress = Math.min(elapsedTime /. duration, 1.) // Clamp progress between 0 and 1
-          let easedProgress = easeOutQuad(progress)
-          // let easedProgress = progress
-          let leftMove = start.left +. (adjustedTargetLeft -. start.left) *. easedProgress
-          let topMove = start.top +. (adjustedTargetTop -. start.top) *. easedProgress
+          let currentLeftPos = positionByProgress(startLeft, adjustedTargetLeft, progress)
+          let currentTopPos = positionByProgress(startTop, adjustedTargetTop, progress)
 
-          move(element, leftMove->Int.fromFloat, topMove->Int.fromFloat)
+          move(element, currentLeftPos->Int.fromFloat, currentTopPos->Int.fromFloat)
 
           if progress < 1. {
             requestAnimationFrame(step)
@@ -379,8 +381,8 @@ module Create = (GameRules: GameRules) => {
         }
 
         if (
-          start.left != Math.floor(adjustedTargetLeft) ||
-          start.top != Math.floor(adjustedTargetTop) ||
+          startLeft != Math.floor(adjustedTargetLeft) ||
+          startTop != Math.floor(adjustedTargetTop) ||
           startZIndex != targetZIndex
         ) {
           liftUp(element, 1000 + targetZIndex->Option.getOr(0))
@@ -410,20 +412,6 @@ module Create = (GameRules: GameRules) => {
             }
           }
         })
-      }
-
-      let getBoardPos = () => {
-        document
-        ->Document.getElementById("board")
-        ->Option.mapOr(
-          {
-            top: 0.,
-            left: 0.,
-            bottom: 0.,
-            right: 0.,
-          },
-          board => board->elementPosition,
-        )
       }
 
       let getOverlap = (aEl, bEl) => {

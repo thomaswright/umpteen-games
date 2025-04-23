@@ -21,7 +21,7 @@ function condInterval(prim0, prim1, prim2) {
 }
 
 function easeOutQuad(t) {
-  return 1 - (1 - t) * (1 - t);
+  return Math.min(1, Math.max(0, 1 - (1 - t) * (1 - t)));
 }
 
 function stateActor_encode(value) {
@@ -409,6 +409,20 @@ function Create(GameRules) {
       element.style.left = left.toString() + "px";
       element.style.top = top.toString() + "px";
     };
+    var getBoardPos = function () {
+      return Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                  left: 0
+                }, (function (board) {
+                    return elementPosition(board);
+                  }));
+    };
+    var positionByProgress = function (start, end, progress) {
+      var easedProgress = easeOutQuad(progress);
+      return start + (end - start) * easedProgress;
+    };
     var moveToState = function () {
       GameRules.forEachSpace(getGame(), (function (space, rule) {
               if (rule.TAG !== "Movable") {
@@ -433,28 +447,18 @@ function Create(GameRules) {
               var duration = 300;
               var start = elementPosition(element);
               var startZIndex = zIndexFromElement(element);
-              var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    left: 0
-                  }, (function (board) {
-                      return elementPosition(board);
-                    }));
-              var start_top = start.top - boardPos.top;
-              var start_right = start.right - boardPos.right;
-              var start_bottom = start.bottom - boardPos.bottom;
-              var start_left = start.left - boardPos.left;
+              var boardPos = getBoardPos();
+              var startLeft = start.left - boardPos.left;
+              var startTop = start.top - boardPos.top;
               var adjustedTargetLeft = targetLeft + basePos.left - boardPos.left;
               var adjustedTargetTop = targetTop + basePos.top - boardPos.top;
               var startTime = performance.now();
               var step = function (currentTime) {
                 var elapsedTime = currentTime - startTime;
                 var progress = Math.min(elapsedTime / duration, 1);
-                var easedProgress = easeOutQuad(progress);
-                var leftMove = start_left + (adjustedTargetLeft - start_left) * easedProgress;
-                var topMove = start_top + (adjustedTargetTop - start_top) * easedProgress;
-                move(element, leftMove | 0, topMove | 0);
+                var currentLeftPos = positionByProgress(startLeft, adjustedTargetLeft, progress);
+                var currentTopPos = positionByProgress(startTop, adjustedTargetTop, progress);
+                move(element, currentLeftPos | 0, currentTopPos | 0);
                 if (progress < 1) {
                   requestAnimationFrame(step);
                   return ;
@@ -464,23 +468,13 @@ function Create(GameRules) {
                               }));
                 }
               };
-              if (start_left !== Math.floor(adjustedTargetLeft) || start_top !== Math.floor(adjustedTargetTop) || Caml_obj.notequal(startZIndex, targetZIndex)) {
+              if (startLeft !== Math.floor(adjustedTargetLeft) || startTop !== Math.floor(adjustedTargetTop) || Caml_obj.notequal(startZIndex, targetZIndex)) {
                 liftUp(element, 1000 + Core__Option.getOr(targetZIndex, 0) | 0);
                 requestAnimationFrame(step);
                 return ;
               }
               
             }));
-    };
-    var getBoardPos = function () {
-      return Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
-                  top: 0,
-                  right: 0,
-                  bottom: 0,
-                  left: 0
-                }, (function (board) {
-                    return elementPosition(board);
-                  }));
     };
     var getOverlap = function (aEl, bEl) {
       var aPos = elementPosition(aEl);
