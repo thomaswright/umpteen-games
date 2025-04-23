@@ -4,6 +4,7 @@ type gameType =
   | @as("Free Cell: 2 Deck") DoubleFreeCell
   | @as("Up & Down") UpAndDown
   | @as("Spider: One Suit") Spider
+  | @as("Spider: Two Suit") SpiderTwoSuit
 
 let gameString = (a: gameType) => (a :> string)
 
@@ -14,6 +15,7 @@ type state = {
   doubleFreeCell: array<DoubleFreeCell.Game.state>,
   upAndDown: array<UpAndDown.Game.state>,
   spider: array<Spider.Game.state>,
+  spiderTwoSuit: array<SpiderTwoSuit.Game.state>,
 }
 
 let state: ref<state> = ref({
@@ -22,6 +24,7 @@ let state: ref<state> = ref({
   doubleFreeCell: [],
   upAndDown: [],
   spider: [],
+  spiderTwoSuit: [],
 })
 
 let setState = f => {
@@ -77,7 +80,7 @@ let make = () => {
             onChange={event => {
               setSelectGameType(_ => JsxEvent.Form.target(event)["value"])
             }}>
-            {[Klondike, FreeCell, DoubleFreeCell, UpAndDown, Spider]
+            {[Klondike, FreeCell, DoubleFreeCell, UpAndDown, Spider, SpiderTwoSuit]
             ->Array.map(v => {
               <option key={v->gameString} value={v->gameString}>
                 {v->gameString->React.string}
@@ -191,6 +194,27 @@ let make = () => {
             setState(state => {
               ...state,
               spider: state.spider->Common.ArrayAux.update(0, f),
+            })}
+        />
+      | SpiderTwoSuit =>
+        <SpiderTwoSuit.Game
+          key={"spiderTwoSuit" ++ state.contents.spiderTwoSuit->Array.length->Int.toString}
+          onCreateNewGame={x => {
+            setState(state => {
+              ...state,
+              spiderTwoSuit: Array.concat([x], state.spiderTwoSuit),
+            })
+            forceUpdate()
+          }}
+          getState={if state.contents.spiderTwoSuit->Array.length == 0 {
+            None
+          } else {
+            Some(() => state.contents.spiderTwoSuit->Array.getUnsafe(0))
+          }}
+          setState={f =>
+            setState(state => {
+              ...state,
+              spiderTwoSuit: state.spiderTwoSuit->Common.ArrayAux.update(0, f),
             })}
         />
       }}

@@ -24,7 +24,10 @@ let decValidation = (dragPile: array<Card.sides>) => {
       !isStillValid
         ? (false, None)
         : switch (onTop, onBottom) {
-          | (Some(onTop), onBottom) => (Card.rankIsBelow(onTop, onBottom), Some(onBottom))
+          | (Some(onTop), onBottom) => (
+              Card.rankIsBelow(onTop, onBottom) && onTop.card.suit == onBottom.card.suit,
+              Some(onBottom),
+            )
           | _ => (true, Some(onBottom))
           }
     })

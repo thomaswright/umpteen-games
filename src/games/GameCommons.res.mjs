@@ -43,7 +43,7 @@ function decValidation(dragPile) {
                   var onTop = param[1];
                   if (onTop !== undefined) {
                     return [
-                            Card.rankIsBelow(onTop, onBottom),
+                            Card.rankIsBelow(onTop, onBottom) && onTop.card.suit === onBottom.card.suit,
                             onBottom
                           ];
                   } else {

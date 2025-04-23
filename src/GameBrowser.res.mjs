@@ -10,6 +10,7 @@ import * as FreeCell from "./games/FreeCell.res.mjs";
 import * as Klondike from "./games/Klondike.res.mjs";
 import * as UpAndDown from "./games/UpAndDown.res.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
+import * as SpiderTwoSuit from "./games/SpiderTwoSuit.res.mjs";
 import * as DoubleFreeCell from "./games/DoubleFreeCell.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
@@ -48,6 +49,12 @@ function state_encode(value) {
                 (function (extra) {
                       return Decco.arrayToJson(Spider.Game.state_encode, extra);
                     })(value.spider)
+              ],
+              [
+                "spiderTwoSuit",
+                (function (extra) {
+                      return Decco.arrayToJson(SpiderTwoSuit.Game.state_encode, extra);
+                    })(value.spiderTwoSuit)
               ]
             ]);
 }
@@ -76,58 +83,71 @@ function state_decode(value) {
           var extra$4 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "spider"), null);
           var spider = Decco.arrayFromJson(Spider.Game.state_decode, extra$4);
           if (spider.TAG === "Ok") {
+            var extra$5 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "spiderTwoSuit"), null);
+            var spiderTwoSuit = Decco.arrayFromJson(SpiderTwoSuit.Game.state_decode, extra$5);
+            if (spiderTwoSuit.TAG === "Ok") {
+              return {
+                      TAG: "Ok",
+                      _0: Decco.unsafeAddFieldToObject("klondike", klondike._0, Decco.unsafeAddFieldToObject("freeCell", freeCell._0, Decco.unsafeAddFieldToObject("doubleFreeCell", doubleFreeCell._0, Decco.unsafeAddFieldToObject("upAndDown", upAndDown._0, Decco.unsafeAddFieldToObject("spider", spider._0, Decco.unsafeAddFieldToObject("spiderTwoSuit", spiderTwoSuit._0, {}))))))
+                    };
+            }
+            var e = spiderTwoSuit._0;
             return {
-                    TAG: "Ok",
-                    _0: Decco.unsafeAddFieldToObject("klondike", klondike._0, Decco.unsafeAddFieldToObject("freeCell", freeCell._0, Decco.unsafeAddFieldToObject("doubleFreeCell", doubleFreeCell._0, Decco.unsafeAddFieldToObject("upAndDown", upAndDown._0, Decco.unsafeAddFieldToObject("spider", spider._0, {})))))
+                    TAG: "Error",
+                    _0: {
+                      path: ".spiderTwoSuit" + e.path,
+                      message: e.message,
+                      value: e.value
+                    }
                   };
           }
-          var e = spider._0;
+          var e$1 = spider._0;
           return {
                   TAG: "Error",
                   _0: {
-                    path: ".spider" + e.path,
-                    message: e.message,
-                    value: e.value
+                    path: ".spider" + e$1.path,
+                    message: e$1.message,
+                    value: e$1.value
                   }
                 };
         }
-        var e$1 = upAndDown._0;
+        var e$2 = upAndDown._0;
         return {
                 TAG: "Error",
                 _0: {
-                  path: ".upAndDown" + e$1.path,
-                  message: e$1.message,
-                  value: e$1.value
+                  path: ".upAndDown" + e$2.path,
+                  message: e$2.message,
+                  value: e$2.value
                 }
               };
       }
-      var e$2 = doubleFreeCell._0;
+      var e$3 = doubleFreeCell._0;
       return {
               TAG: "Error",
               _0: {
-                path: ".doubleFreeCell" + e$2.path,
-                message: e$2.message,
-                value: e$2.value
+                path: ".doubleFreeCell" + e$3.path,
+                message: e$3.message,
+                value: e$3.value
               }
             };
     }
-    var e$3 = freeCell._0;
+    var e$4 = freeCell._0;
     return {
             TAG: "Error",
             _0: {
-              path: ".freeCell" + e$3.path,
-              message: e$3.message,
-              value: e$3.value
+              path: ".freeCell" + e$4.path,
+              message: e$4.message,
+              value: e$4.value
             }
           };
   }
-  var e$4 = klondike._0;
+  var e$5 = klondike._0;
   return {
           TAG: "Error",
           _0: {
-            path: ".klondike" + e$4.path,
-            message: e$4.message,
-            value: e$4.value
+            path: ".klondike" + e$5.path,
+            message: e$5.message,
+            value: e$5.value
           }
         };
 }
@@ -138,7 +158,8 @@ var state = {
     freeCell: [],
     doubleFreeCell: [],
     upAndDown: [],
-    spider: []
+    spider: [],
+    spiderTwoSuit: []
   }
 };
 
@@ -204,7 +225,8 @@ function GameBrowser(props) {
                                 freeCell: state.freeCell,
                                 doubleFreeCell: state.doubleFreeCell,
                                 upAndDown: state.upAndDown,
-                                spider: state.spider
+                                spider: state.spider,
+                                spiderTwoSuit: state.spiderTwoSuit
                               };
                       });
                 }),
@@ -215,7 +237,8 @@ function GameBrowser(props) {
                                 freeCell: state.freeCell,
                                 doubleFreeCell: state.doubleFreeCell,
                                 upAndDown: state.upAndDown,
-                                spider: state.spider
+                                spider: state.spider,
+                                spiderTwoSuit: state.spiderTwoSuit
                               };
                       });
                   forceUpdate();
@@ -234,7 +257,8 @@ function GameBrowser(props) {
                                 freeCell: Common.ArrayAux.update(state.freeCell, 0, f),
                                 doubleFreeCell: state.doubleFreeCell,
                                 upAndDown: state.upAndDown,
-                                spider: state.spider
+                                spider: state.spider,
+                                spiderTwoSuit: state.spiderTwoSuit
                               };
                       });
                 }),
@@ -245,7 +269,8 @@ function GameBrowser(props) {
                                 freeCell: [x].concat(state.freeCell),
                                 doubleFreeCell: state.doubleFreeCell,
                                 upAndDown: state.upAndDown,
-                                spider: state.spider
+                                spider: state.spider,
+                                spiderTwoSuit: state.spiderTwoSuit
                               };
                       });
                   forceUpdate();
@@ -264,7 +289,8 @@ function GameBrowser(props) {
                                 freeCell: state.freeCell,
                                 doubleFreeCell: Common.ArrayAux.update(state.doubleFreeCell, 0, f),
                                 upAndDown: state.upAndDown,
-                                spider: state.spider
+                                spider: state.spider,
+                                spiderTwoSuit: state.spiderTwoSuit
                               };
                       });
                 }),
@@ -275,7 +301,8 @@ function GameBrowser(props) {
                                 freeCell: state.freeCell,
                                 doubleFreeCell: [x].concat(state.doubleFreeCell),
                                 upAndDown: state.upAndDown,
-                                spider: state.spider
+                                spider: state.spider,
+                                spiderTwoSuit: state.spiderTwoSuit
                               };
                       });
                   forceUpdate();
@@ -294,7 +321,8 @@ function GameBrowser(props) {
                                 freeCell: state.freeCell,
                                 doubleFreeCell: state.doubleFreeCell,
                                 upAndDown: Common.ArrayAux.update(state.upAndDown, 0, f),
-                                spider: state.spider
+                                spider: state.spider,
+                                spiderTwoSuit: state.spiderTwoSuit
                               };
                       });
                 }),
@@ -305,7 +333,8 @@ function GameBrowser(props) {
                                 freeCell: state.freeCell,
                                 doubleFreeCell: state.doubleFreeCell,
                                 upAndDown: [x].concat(state.upAndDown),
-                                spider: state.spider
+                                spider: state.spider,
+                                spiderTwoSuit: state.spiderTwoSuit
                               };
                       });
                   forceUpdate();
@@ -324,7 +353,8 @@ function GameBrowser(props) {
                                 freeCell: state.freeCell,
                                 doubleFreeCell: state.doubleFreeCell,
                                 upAndDown: state.upAndDown,
-                                spider: Common.ArrayAux.update(state.spider, 0, f)
+                                spider: Common.ArrayAux.update(state.spider, 0, f),
+                                spiderTwoSuit: state.spiderTwoSuit
                               };
                       });
                 }),
@@ -335,12 +365,45 @@ function GameBrowser(props) {
                                 freeCell: state.freeCell,
                                 doubleFreeCell: state.doubleFreeCell,
                                 upAndDown: state.upAndDown,
-                                spider: [x].concat(state.spider)
+                                spider: [x].concat(state.spider),
+                                spiderTwoSuit: state.spiderTwoSuit
                               };
                       });
                   forceUpdate();
                 })
             }, "spider" + state.contents.spider.length.toString());
+        break;
+    case "Spider: Two Suit" :
+        tmp = JsxRuntime.jsx(SpiderTwoSuit.Game.make, {
+              getState: state.contents.spiderTwoSuit.length === 0 ? undefined : (function () {
+                    return state.contents.spiderTwoSuit[0];
+                  }),
+              setState: (function (f) {
+                  setState(function (state) {
+                        return {
+                                klondike: state.klondike,
+                                freeCell: state.freeCell,
+                                doubleFreeCell: state.doubleFreeCell,
+                                upAndDown: state.upAndDown,
+                                spider: state.spider,
+                                spiderTwoSuit: Common.ArrayAux.update(state.spiderTwoSuit, 0, f)
+                              };
+                      });
+                }),
+              onCreateNewGame: (function (x) {
+                  setState(function (state) {
+                        return {
+                                klondike: state.klondike,
+                                freeCell: state.freeCell,
+                                doubleFreeCell: state.doubleFreeCell,
+                                upAndDown: state.upAndDown,
+                                spider: state.spider,
+                                spiderTwoSuit: [x].concat(state.spiderTwoSuit)
+                              };
+                      });
+                  forceUpdate();
+                })
+            }, "spiderTwoSuit" + state.contents.spiderTwoSuit.length.toString());
         break;
     
   }
@@ -359,7 +422,8 @@ function GameBrowser(props) {
                                         "Free Cell",
                                         "Free Cell: 2 Deck",
                                         "Up & Down",
-                                        "Spider: One Suit"
+                                        "Spider: One Suit",
+                                        "Spider: Two Suit"
                                       ].map(function (v) {
                                           return JsxRuntime.jsx("option", {
                                                       children: v,
