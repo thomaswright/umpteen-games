@@ -273,50 +273,32 @@ module GameRules: GameBase.GameRules = {
     },
   }
 
-  let getRule: GameBase.getRule<game, space, dragPile> = (game: game, match: space) => {
-    let result = ref(None)
-
+  let forEachSpace = (game: game, f) => {
     game.piles->Array.forEachWithIndex((pile, i) => {
-      if Pile(i) == match {
-        result := pileBaseRules(i)->GameBase.Static->Some
-      }
+      f(Pile(i), pileBaseRules(i)->GameBase.Static)
 
       pile->Array.forEachWithIndex((card, j) => {
-        if Card(card.card) == match {
-          result := pileRules(pile, card, i, j)->Movable->Some
-        }
+        f(Card(card.card), pileRules(pile, card, i, j)->Movable)
       })
     })
 
     game.foundations->Array.forEachWithIndex((foundation, i) => {
-      if Foundation(i) == match {
-        result := foundationBaseRules(i)->Static->Some
-      }
+      f(Foundation(i), foundationBaseRules(i)->Static)
 
       foundation->Array.forEachWithIndex((card, j) => {
-        if Card(card.card) == match {
-          result := foundationRules(game, card, i, j)->Movable->Some
-        }
+        f(Card(card.card), foundationRules(game, card, i, j)->Movable)
       })
     })
 
     game.waste->Array.forEachWithIndex((card, i) => {
-      if Card(card.card) == match {
-        result := wasteRules(game, card, i)->Movable->Some
-      }
+      f(Card(card.card), wasteRules(game, card, i)->Movable)
     })
 
     game.stock->Array.forEachWithIndex((card, i) => {
-      if Card(card.card) == match {
-        result := stockRules(i)->Movable->Some
-      }
+      f(Card(card.card), stockRules(i)->Movable)
     })
 
-    if Stock == match {
-      result := stockBaseRules()->Static->Some
-    }
-
-    result.contents
+    f(Stock, stockBaseRules()->Static)
   }
 
   module Board = {

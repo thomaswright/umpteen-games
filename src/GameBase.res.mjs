@@ -13,7 +13,6 @@ import * as OtherJs from "./other.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
-import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
@@ -411,65 +410,67 @@ function Create(GameRules) {
       element.style.top = top.toString() + "px";
     };
     var moveToState = function () {
-      refs.current.forEach(function (element) {
-            Core__Option.mapOr(Core__Option.flatMap(GameRules.getSpace(element), (function (space) {
-                        return GameRules.getRule(getGame(), space);
-                      })), undefined, (function (rule) {
-                    if (rule.TAG !== "Movable") {
-                      return ;
-                    }
-                    var match = rule._0;
-                    var onStateChange = match.onStateChange;
-                    var locationAdjustment = match.locationAdjustment;
-                    Core__Option.mapOr(getElement(match.baseSpace), undefined, (function (baseElement) {
-                            var basePos = elementPosition(baseElement);
-                            onStateChange(element);
-                            var targetLeft = locationAdjustment.x;
-                            var targetTop = locationAdjustment.y;
-                            var targetZIndex = locationAdjustment.z;
-                            var duration = 300;
-                            var start = elementPosition(element);
-                            var startZIndex = zIndexFromElement(element);
-                            var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
-                                  top: 0,
-                                  right: 0,
-                                  bottom: 0,
-                                  left: 0
-                                }, (function (board) {
-                                    return elementPosition(board);
-                                  }));
-                            var start_top = start.top - boardPos.top;
-                            var start_right = start.right - boardPos.right;
-                            var start_bottom = start.bottom - boardPos.bottom;
-                            var start_left = start.left - boardPos.left;
-                            var adjustedTargetLeft = targetLeft + basePos.left - boardPos.left;
-                            var adjustedTargetTop = targetTop + basePos.top - boardPos.top;
-                            var startTime = performance.now();
-                            var step = function (currentTime) {
-                              var elapsedTime = currentTime - startTime;
-                              var progress = Math.min(elapsedTime / duration, 1);
-                              var easedProgress = easeOutQuad(progress);
-                              var leftMove = start_left + (adjustedTargetLeft - start_left) * easedProgress;
-                              var topMove = start_top + (adjustedTargetTop - start_top) * easedProgress;
-                              move(element, leftMove | 0, topMove | 0);
-                              if (progress < 1) {
-                                requestAnimationFrame(step);
-                                return ;
-                              } else {
-                                return Core__Option.mapOr(targetZIndex, undefined, (function (zIndex) {
-                                              element.style["z-index"] = zIndex.toString();
-                                            }));
-                              }
-                            };
-                            if (start_left !== Math.floor(adjustedTargetLeft) || start_top !== Math.floor(adjustedTargetTop) || Caml_obj.notequal(startZIndex, targetZIndex)) {
-                              liftUp(element, 1000 + Core__Option.getOr(targetZIndex, 0) | 0);
-                              requestAnimationFrame(step);
-                              return ;
-                            }
-                            
-                          }));
-                  }));
-          });
+      GameRules.forEachSpace(getGame(), (function (space, rule) {
+              if (rule.TAG !== "Movable") {
+                return ;
+              }
+              var match = rule._0;
+              var locationAdjustment = match.locationAdjustment;
+              var match$1 = getElement(space);
+              var match$2 = getElement(match.baseSpace);
+              if (match$1 === undefined) {
+                return ;
+              }
+              if (match$2 === undefined) {
+                return ;
+              }
+              var element = Caml_option.valFromOption(match$1);
+              var basePos = elementPosition(Caml_option.valFromOption(match$2));
+              match.onStateChange(element);
+              var targetLeft = locationAdjustment.x;
+              var targetTop = locationAdjustment.y;
+              var targetZIndex = locationAdjustment.z;
+              var duration = 300;
+              var start = elementPosition(element);
+              var startZIndex = zIndexFromElement(element);
+              var boardPos = Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    left: 0
+                  }, (function (board) {
+                      return elementPosition(board);
+                    }));
+              var start_top = start.top - boardPos.top;
+              var start_right = start.right - boardPos.right;
+              var start_bottom = start.bottom - boardPos.bottom;
+              var start_left = start.left - boardPos.left;
+              var adjustedTargetLeft = targetLeft + basePos.left - boardPos.left;
+              var adjustedTargetTop = targetTop + basePos.top - boardPos.top;
+              var startTime = performance.now();
+              var step = function (currentTime) {
+                var elapsedTime = currentTime - startTime;
+                var progress = Math.min(elapsedTime / duration, 1);
+                var easedProgress = easeOutQuad(progress);
+                var leftMove = start_left + (adjustedTargetLeft - start_left) * easedProgress;
+                var topMove = start_top + (adjustedTargetTop - start_top) * easedProgress;
+                move(element, leftMove | 0, topMove | 0);
+                if (progress < 1) {
+                  requestAnimationFrame(step);
+                  return ;
+                } else {
+                  return Core__Option.mapOr(targetZIndex, undefined, (function (zIndex) {
+                                element.style["z-index"] = zIndex.toString();
+                              }));
+                }
+              };
+              if (start_left !== Math.floor(adjustedTargetLeft) || start_top !== Math.floor(adjustedTargetTop) || Caml_obj.notequal(startZIndex, targetZIndex)) {
+                liftUp(element, 1000 + Core__Option.getOr(targetZIndex, 0) | 0);
+                requestAnimationFrame(step);
+                return ;
+              }
+              
+            }));
     };
     var getBoardPos = function () {
       return Core__Option.mapOr(Caml_option.nullable_to_opt(document.getElementById("board")), {
@@ -516,51 +517,52 @@ function Create(GameRules) {
       condInterval((function () {
               moveToState();
             }), 300, (function () {
-              var dragPiles = Core__Array.filterMap(refs.current, (function (el) {
-                      return Core__Option.mapOr(Core__Option.flatMap(GameRules.getSpace(el), (function (elSpace) {
-                                        return GameRules.getRule(getGame(), elSpace);
-                                      })), undefined, (function (rule) {
-                                    if (rule.TAG !== "Movable") {
-                                      return ;
-                                    }
-                                    var match = rule._0.autoProgress();
-                                    if (typeof match !== "object") {
-                                      return ;
-                                    } else {
-                                      return Caml_option.some(match._0);
-                                    }
-                                  }));
-                    }));
-              var droppedUpons = Core__Array.filterMap(refs.current, (function (el) {
-                      return Core__Option.mapOr(Core__Option.flatMap(GameRules.getSpace(el), (function (elSpace) {
-                                        return GameRules.getRule(getGame(), elSpace);
-                                      })), undefined, (function (rule) {
-                                    if (rule.TAG === "Movable") {
-                                      var match = rule._0;
-                                      var match$1 = match.autoProgress();
-                                      if (typeof match$1 !== "object" && match$1 === "Seek") {
-                                        return match.droppedUpon;
-                                      } else {
-                                        return ;
-                                      }
-                                    }
-                                    var match$2 = rule._0;
-                                    switch (match$2.autoProgress) {
-                                      case "Seek" :
-                                          return match$2.droppedUpon;
-                                      case "DoNothing" :
-                                      case "Accept" :
-                                          return ;
-                                      
-                                    }
-                                  }));
+              var dragPiles = [];
+              var droppedUpons = [];
+              GameRules.forEachSpace(getGame(), (function (_space, rule) {
+                      if (rule.TAG === "Movable") {
+                        var match = rule._0;
+                        var match$1 = match.autoProgress();
+                        if (typeof match$1 !== "object") {
+                          switch (match$1) {
+                            case "Seek" :
+                                droppedUpons.push(match.droppedUpon);
+                                return ;
+                            case "DoNothing" :
+                            case "Accept" :
+                                return ;
+                            
+                          }
+                        } else {
+                          if (match$1.TAG === "Send") {
+                            dragPiles.push(match$1._0);
+                            return ;
+                          }
+                          dragPiles.push(match$1._0);
+                          return ;
+                        }
+                      } else {
+                        var match$2 = rule._0;
+                        switch (match$2.autoProgress) {
+                          case "Seek" :
+                              droppedUpons.push(match$2.droppedUpon);
+                              return ;
+                          case "DoNothing" :
+                          case "Accept" :
+                              return ;
+                          
+                        }
+                      }
                     }));
               return progressDragPiles(dragPiles, droppedUpons);
             }));
     };
     var onClick = function ($$event) {
       Core__Option.mapOr(GameRules.getSpace($$event.currentTarget), undefined, (function (dragSpace) {
-              Core__Option.mapOr(GameRules.getRule(getGame(), dragSpace), undefined, (function (rule) {
+              GameRules.forEachSpace(getGame(), (function (space, rule) {
+                      if (!Caml_obj.equal(space, dragSpace)) {
+                        return ;
+                      }
                       var onClick;
                       onClick = rule.TAG === "Movable" ? rule._0.onClick : rule._0.onClick;
                       Core__Option.mapOr(onClick(getGame()), undefined, (function (newGame) {
@@ -580,8 +582,8 @@ function Create(GameRules) {
     var onMouseDown = function ($$event) {
       var dragElement = $$event.currentTarget;
       Core__Option.mapOr(GameRules.getSpace(dragElement), undefined, (function (dragSpace) {
-              Core__Option.mapOr(GameRules.getRule(getGame(), dragSpace), undefined, (function (rule) {
-                      if (rule.TAG === "Movable") {
+              GameRules.forEachSpace(getGame(), (function (space, rule) {
+                      if (Caml_obj.equal(space, dragSpace) && rule.TAG === "Movable") {
                         return Core__Option.mapOr(rule._0.dragPile(), undefined, (function (dragPile) {
                                       var boardPos = getBoardPos();
                                       var eventPos = elementPosition($$event.currentTarget);
@@ -618,37 +620,38 @@ function Create(GameRules) {
             }));
     };
     var onMouseUpNone = function (dragPile) {
-      var droppedUpons = Core__Array.filterMap(refs.current, (function (el) {
-              return Core__Option.mapOr(Core__Option.flatMap(GameRules.getSpace(el), (function (elSpace) {
-                                return GameRules.getRule(getGame(), elSpace);
-                              })), undefined, (function (rule) {
-                            if (rule.TAG === "Movable") {
-                              var match = rule._0;
-                              var droppedUpon = match.droppedUpon;
-                              var match$1 = match.autoProgress();
-                              if (typeof match$1 !== "object") {
-                                if (match$1 === "DoNothing") {
-                                  return ;
-                                } else {
-                                  return droppedUpon;
-                                }
-                              } else if (match$1.TAG === "Send") {
-                                return ;
-                              } else {
-                                return droppedUpon;
-                              }
-                            }
-                            var match$2 = rule._0;
-                            var droppedUpon$1 = match$2.droppedUpon;
-                            switch (match$2.autoProgress) {
-                              case "DoNothing" :
-                                  return ;
-                              case "Seek" :
-                              case "Accept" :
-                                  return droppedUpon$1;
-                              
-                            }
-                          }));
+      var droppedUpons = [];
+      GameRules.forEachSpace(getGame(), (function (_space, rule) {
+              if (rule.TAG === "Movable") {
+                var match = rule._0;
+                var droppedUpon = match.droppedUpon;
+                var match$1 = match.autoProgress();
+                if (typeof match$1 !== "object") {
+                  if (match$1 === "DoNothing") {
+                    return ;
+                  }
+                  droppedUpons.push(droppedUpon);
+                  return ;
+                } else {
+                  if (match$1.TAG === "Send") {
+                    return ;
+                  }
+                  droppedUpons.push(droppedUpon);
+                  return ;
+                }
+              } else {
+                var match$2 = rule._0;
+                var droppedUpon$1 = match$2.droppedUpon;
+                switch (match$2.autoProgress) {
+                  case "DoNothing" :
+                      return ;
+                  case "Seek" :
+                  case "Accept" :
+                      droppedUpons.push(droppedUpon$1);
+                      return ;
+                  
+                }
+              }
             }));
       if (progressDragPiles([dragPile], droppedUpons.toReversed())) {
         snapshot();
@@ -669,27 +672,30 @@ function Create(GameRules) {
         };
         var oldGame = getGame();
         var withoutDragPile = GameRules.removeDragFromGame(oldGame, dragPile);
-        refs.current.forEach(function (el) {
-              Core__Option.mapOr(Core__Option.flatMap(Core__Option.flatMap(GameRules.getSpace(el), (function (elSpace) {
-                              return GameRules.getRule(getGame(), elSpace);
-                            })), (function (rule) {
-                          var droppedUpon;
-                          droppedUpon = rule.TAG === "Movable" ? rule._0.droppedUpon : rule._0.droppedUpon;
-                          return droppedUpon(withoutDragPile, dragPile);
-                        })), undefined, (function (newGame) {
-                      var overlap = getOverlap(el, dragElement);
-                      if (overlap > greatestOverlap.contents) {
-                        greatestOverlap.contents = overlap;
-                        if (JSON.stringify(GameRules.game_encode(oldGame)) !== JSON.stringify(GameRules.game_encode(newGame))) {
-                          updatedGame.contents = Caml_option.some(newGame);
-                          return ;
-                        } else {
-                          return ;
-                        }
-                      }
-                      
-                    }));
-            });
+        GameRules.forEachSpace(getGame(), (function (space, rule) {
+                var droppedUpon;
+                droppedUpon = rule.TAG === "Movable" ? rule._0.droppedUpon : rule._0.droppedUpon;
+                var match = droppedUpon(withoutDragPile, dragPile);
+                var match$1 = getElement(space);
+                if (match === undefined) {
+                  return ;
+                }
+                if (match$1 === undefined) {
+                  return ;
+                }
+                var newGame = Caml_option.valFromOption(match);
+                var overlap = getOverlap(Caml_option.valFromOption(match$1), dragElement);
+                if (overlap > greatestOverlap.contents) {
+                  greatestOverlap.contents = overlap;
+                  if (JSON.stringify(GameRules.game_encode(oldGame)) !== JSON.stringify(GameRules.game_encode(newGame))) {
+                    updatedGame.contents = Caml_option.some(newGame);
+                    return ;
+                  } else {
+                    return ;
+                  }
+                }
+                
+              }));
         var updatedGame$1 = updatedGame.contents;
         if (updatedGame$1 !== undefined) {
           var updatedGame$2 = Caml_option.valFromOption(updatedGame$1);

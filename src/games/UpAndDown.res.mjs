@@ -969,122 +969,93 @@ function freeRules(card) {
         };
 }
 
-function getRule(game, match) {
-  var result = {
-    contents: undefined
-  };
+function forEachSpace(game, f) {
   game.piles.forEach(function (pile, i) {
-        if (Caml_obj.equal({
-                TAG: "Pile",
-                _0: i
-              }, match)) {
-          result.contents = {
-            TAG: "Static",
-            _0: pileBaseRules(i)
-          };
-        }
+        f({
+              TAG: "Pile",
+              _0: i
+            }, {
+              TAG: "Static",
+              _0: pileBaseRules(i)
+            });
         pile.forEach(function (card, j) {
-              if (Caml_obj.equal({
-                      TAG: "Item",
-                      _0: itemToSpaceItem(card)
-                    }, match)) {
-                result.contents = {
-                  TAG: "Movable",
-                  _0: pileRules(pile, card, i, j)
-                };
-                return ;
-              }
-              
+              f({
+                    TAG: "Item",
+                    _0: itemToSpaceItem(card)
+                  }, {
+                    TAG: "Movable",
+                    _0: pileRules(pile, card, i, j)
+                  });
             });
       });
   game.foundations.forEach(function (foundation, i) {
-        if (Caml_obj.equal({
-                TAG: "Foundation",
-                _0: i
-              }, match)) {
-          result.contents = {
-            TAG: "Static",
-            _0: foundationBaseRules(i)
-          };
-        }
+        f({
+              TAG: "Foundation",
+              _0: i
+            }, {
+              TAG: "Static",
+              _0: foundationBaseRules(i)
+            });
         foundation.forEach(function (card, j) {
-              if (Caml_obj.equal({
-                      TAG: "Item",
-                      _0: {
-                        TAG: "SpaceCard",
-                        _0: card.card
-                      }
-                    }, match)) {
-                result.contents = {
-                  TAG: "Movable",
-                  _0: foundationRules(card, i, j)
-                };
-                return ;
-              }
-              
+              f({
+                    TAG: "Item",
+                    _0: {
+                      TAG: "SpaceCard",
+                      _0: card.card
+                    }
+                  }, {
+                    TAG: "Movable",
+                    _0: foundationRules(card, i, j)
+                  });
             });
       });
-  if ("TarotUp" === match) {
-    result.contents = {
-      TAG: "Static",
-      _0: tarotUpBaseRules()
-    };
-  }
+  f("TarotUp", {
+        TAG: "Static",
+        _0: tarotUpBaseRules()
+      });
   game.tarotUp.forEach(function (card, i) {
-        if (Caml_obj.equal({
-                TAG: "Item",
-                _0: {
-                  TAG: "SpaceTarot",
-                  _0: card.card
-                }
-              }, match)) {
-          result.contents = {
-            TAG: "Movable",
-            _0: tarotUpRules(card, i)
-          };
-          return ;
-        }
-        
+        f({
+              TAG: "Item",
+              _0: {
+                TAG: "SpaceTarot",
+                _0: card.card
+              }
+            }, {
+              TAG: "Movable",
+              _0: tarotUpRules(card, i)
+            });
       });
-  if ("TarotDown" === match) {
-    result.contents = {
-      TAG: "Static",
-      _0: tarotDownBaseRules()
-    };
-  }
+  f("TarotDown", {
+        TAG: "Static",
+        _0: tarotDownBaseRules()
+      });
   game.tarotDown.forEach(function (card, i) {
-        if (Caml_obj.equal({
-                TAG: "Item",
-                _0: {
-                  TAG: "SpaceTarot",
-                  _0: card.card
-                }
-              }, match)) {
-          result.contents = {
-            TAG: "Movable",
-            _0: tarotDownRules(card, i)
-          };
-          return ;
-        }
-        
+        f({
+              TAG: "Item",
+              _0: {
+                TAG: "SpaceTarot",
+                _0: card.card
+              }
+            }, {
+              TAG: "Movable",
+              _0: tarotDownRules(card, i)
+            });
       });
-  if ("Free" === match) {
-    result.contents = {
-      TAG: "Static",
-      _0: freeBaseRules()
-    };
-  }
+  f("Free", {
+        TAG: "Static",
+        _0: freeBaseRules()
+      });
   var free = game.free;
-  if (free !== undefined && Caml_obj.equal({
-          TAG: "Item",
-          _0: itemToSpaceItem(free)
-        }, match)) {
-    result.contents = {
-      TAG: "Movable",
-      _0: freeRules(free)
-    };
+  if (free !== undefined) {
+    return f({
+                TAG: "Item",
+                _0: itemToSpaceItem(free)
+              }, {
+                TAG: "Movable",
+                _0: freeRules(free)
+              });
   }
-  return result.contents;
+  
 }
 
 function UpAndDown$GameRules$Board(props) {
@@ -1233,7 +1204,7 @@ var GameRules = {
   getSpace: getSpace,
   spaceToString: spaceToString,
   initiateGame: initiateGame,
-  getRule: getRule,
+  forEachSpace: forEachSpace,
   removeDragFromGame: removeDragFromGame,
   winCheck: winCheck,
   applyLiftToDragPile: applyLiftToDragPile,

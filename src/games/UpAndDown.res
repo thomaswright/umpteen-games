@@ -384,66 +384,41 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let getRule: GameBase.getRule<game, space, dragPile> = (game: game, match: space) => {
-    let result = ref(None)
-
+  let forEachSpace: GameBase.forEachSpace<game, space, dragPile> = (game: game, f) => {
     game.piles->Array.forEachWithIndex((pile, i) => {
-      if Pile(i) == match {
-        result := pileBaseRules(i)->Static->Some
-      }
+      f(Pile(i), pileBaseRules(i)->Static)
 
       pile->Array.forEachWithIndex((card, j) => {
-        if Item(card->itemToSpaceItem) == match {
-          result := pileRules(pile, card, i, j)->Movable->Some
-        }
+        f(Item(card->itemToSpaceItem), pileRules(pile, card, i, j)->Movable)
       })
     })
 
     game.foundations->Array.forEachWithIndex((foundation, i) => {
-      if Foundation(i) == match {
-        result := foundationBaseRules(i)->Static->Some
-      }
+      f(Foundation(i), foundationBaseRules(i)->Static)
 
       foundation->Array.forEachWithIndex((card, j) => {
-        if Item(SpaceCard(card.card)) == match {
-          result := foundationRules(card, i, j)->Movable->Some
-        }
+        f(Item(SpaceCard(card.card)), foundationRules(card, i, j)->Movable)
       })
     })
 
-    if TarotUp == match {
-      result := tarotUpBaseRules()->Static->Some
-    }
+    f(TarotUp, tarotUpBaseRules()->Static)
 
     game.tarotUp->Array.forEachWithIndex((card, i) => {
-      if Item(SpaceTarot(card.card)) == match {
-        result := tarotUpRules(card, i)->Movable->Some
-      }
+      f(Item(SpaceTarot(card.card)), tarotUpRules(card, i)->Movable)
     })
 
-    if TarotDown == match {
-      result := tarotDownBaseRules()->Static->Some
-    }
+    f(TarotDown, tarotDownBaseRules()->Static)
 
     game.tarotDown->Array.forEachWithIndex((card, i) => {
-      if Item(SpaceTarot(card.card)) == match {
-        result := tarotDownRules(card, i)->Movable->Some
-      }
+      f(Item(SpaceTarot(card.card)), tarotDownRules(card, i)->Movable)
     })
 
-    if Free == match {
-      result := freeBaseRules()->Static->Some
-    }
+    f(Free, freeBaseRules()->Static)
 
     switch game.free {
-    | Some(free) =>
-      if Item(free->itemToSpaceItem) == match {
-        result := freeRules(free)->Movable->Some
-      }
+    | Some(free) => f(Item(free->itemToSpaceItem), freeRules(free)->Movable)
     | None => ()
     }
-
-    result.contents
   }
 
   module Board = {

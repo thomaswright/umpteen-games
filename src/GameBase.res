@@ -41,10 +41,10 @@ type staticSpace<'game, 'dragPile> = {
 type spaceFunction<'game, 'space, 'dragPile> =
   Movable(movableSpace<'game, 'space, 'dragPile>) | Static(staticSpace<'game, 'dragPile>)
 
-type getRule<'game, 'space, 'dragPile> = (
+type forEachSpace<'game, 'space, 'dragPile> = (
   'game,
-  'space,
-) => option<spaceFunction<'game, 'space, 'dragPile>>
+  ('space, spaceFunction<'game, 'space, 'dragPile>) => unit,
+) => unit
 
 module type GameRules = {
   @decco
@@ -57,7 +57,7 @@ module type GameRules = {
   let getSpace: Element.t => option<space>
   let spaceToString: space => string
   let initiateGame: unit => (deck, game)
-  let getRule: getRule<game, space, dragPile>
+  let forEachSpace: forEachSpace<game, space, dragPile>
   let removeDragFromGame: (game, dragPile) => game
   let winCheck: game => bool
   let applyLiftToDragPile: (dragPile, (space, int) => unit) => unit
@@ -389,33 +389,26 @@ module Create = (GameRules: GameRules) => {
       }
 
       let moveToState = () => {
-        refs.current->Array.forEach(element => {
-          element
-          ->GameRules.getSpace
-          ->Option.flatMap(space => GameRules.getRule(getGame(), space))
-          ->Option.mapOr((), rule => {
-            switch rule {
-            | Static(_) => ()
-            | Movable({locationAdjustment, baseSpace, onStateChange}) =>
-              baseSpace
-              ->getElement
-              ->Option.mapOr(
-                (),
-                baseElement => {
-                  let basePos = baseElement->elementPosition
-                  onStateChange(element)
-                  moveWithTime(
-                    element,
-                    basePos,
-                    locationAdjustment.x->Int.toFloat,
-                    locationAdjustment.y->Int.toFloat,
-                    Some(locationAdjustment.z),
-                    300.,
-                  )
-                },
-              )
+        GameRules.forEachSpace(getGame(), (space, rule) => {
+          switch rule {
+          | Static(_) => ()
+          | Movable({locationAdjustment, baseSpace, onStateChange}) =>
+            switch (space->getElement, baseSpace->getElement) {
+            | (Some(element), Some(baseElement)) => {
+                let basePos = baseElement->elementPosition
+                onStateChange(element)
+                moveWithTime(
+                  element,
+                  basePos,
+                  locationAdjustment.x->Int.toFloat,
+                  locationAdjustment.y->Int.toFloat,
+                  Some(locationAdjustment.z),
+                  300.,
+                )
+              }
+            | _ => ()
             }
-          })
+          }
         })
       }
 
@@ -477,42 +470,27 @@ module Create = (GameRules: GameRules) => {
           },
           300,
           () => {
-            let dragPiles = refs.current->Array.filterMap(el => {
-              el
-              ->GameRules.getSpace
-              ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
-              ->Option.mapOr(None, rule => {
-                switch rule {
-                | Movable({autoProgress}) =>
-                  switch autoProgress() {
-                  | SendOrAccept(dragPile)
-                  | Send(dragPile) =>
-                    Some(dragPile)
-                  | _ => None
-                  }
-                | _ => None
-                }
-              })
-            })
-            let droppedUpons = refs.current->Array.filterMap(el => {
-              el
-              ->GameRules.getSpace
-              ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
-              ->Option.mapOr(None, rule => {
-                switch rule {
-                | Static({autoProgress, droppedUpon}) =>
-                  switch autoProgress {
-                  | Seek => Some(droppedUpon)
-                  | _ => None
-                  }
+            let dragPiles = []
+            let droppedUpons = []
 
-                | Movable({autoProgress, droppedUpon}) =>
-                  switch autoProgress() {
-                  | Seek => Some(droppedUpon)
-                  | _ => None
-                  }
+            GameRules.forEachSpace(getGame(), (_space, rule) => {
+              switch rule {
+              | Movable({autoProgress, droppedUpon}) =>
+                switch autoProgress() {
+                | SendOrAccept(dragPile)
+                | Send(dragPile) =>
+                  dragPiles->Array.push(dragPile)
+                | Seek => droppedUpons->Array.push(droppedUpon)
+
+                | _ => ()
                 }
-              })
+              | Static({autoProgress, droppedUpon}) =>
+                switch autoProgress {
+                | Seek => droppedUpons->Array.push(droppedUpon)
+
+                | _ => ()
+                }
+              }
             })
 
             progressDragPiles(dragPiles, droppedUpons)
@@ -526,24 +504,26 @@ module Create = (GameRules: GameRules) => {
         ->Obj.magic
         ->GameRules.getSpace
         ->Option.mapOr((), dragSpace => {
-          GameRules.getRule(getGame(), dragSpace)->Option.mapOr((), rule => {
-            switch rule {
-            | Static({onClick})
-            | Movable({onClick}) =>
-              onClick(getGame())->Option.mapOr(
-                (),
-                newGame => {
-                  if (
-                    getGame()->GameRules.game_encode->Js.Json.stringify !=
-                      newGame->GameRules.game_encode->Js.Json.stringify
-                  ) {
-                    setGame(_ => newGame)
-                    snapshot()
-                    moveToState()
-                    autoProgress()
-                  }
-                },
-              )
+          GameRules.forEachSpace(getGame(), (space, rule) => {
+            if space == dragSpace {
+              switch rule {
+              | Static({onClick})
+              | Movable({onClick}) =>
+                onClick(getGame())->Option.mapOr(
+                  (),
+                  newGame => {
+                    if (
+                      getGame()->GameRules.game_encode->Js.Json.stringify !=
+                        newGame->GameRules.game_encode->Js.Json.stringify
+                    ) {
+                      setGame(_ => newGame)
+                      snapshot()
+                      moveToState()
+                      autoProgress()
+                    }
+                  },
+                )
+              }
             }
           })
         })
@@ -558,32 +538,34 @@ module Create = (GameRules: GameRules) => {
         dragElement
         ->GameRules.getSpace
         ->Option.mapOr((), dragSpace => {
-          GameRules.getRule(getGame(), dragSpace)->Option.mapOr((), rule => {
-            switch rule {
-            | Static(_) => ()
-            | Movable({dragPile}) =>
-              dragPile()->Option.mapOr(
-                (),
-                dragPile => {
-                  let boardPos = getBoardPos()
-                  let eventPos = event->eventPosition
+          GameRules.forEachSpace(getGame(), (space, rule) => {
+            if space == dragSpace {
+              switch rule {
+              | Static(_) => ()
+              | Movable({dragPile}) =>
+                dragPile()->Option.mapOr(
+                  (),
+                  dragPile => {
+                    let boardPos = getBoardPos()
+                    let eventPos = event->eventPosition
 
-                  dragData.current = Some({
-                    dragSpace,
-                    dragPile,
-                    dragElement,
-                    offset: (
-                      event->JsxEvent.Mouse.clientX -
-                      eventPos.left->Int.fromFloat +
-                      boardPos.left->Int.fromFloat,
-                      event->JsxEvent.Mouse.clientY -
-                      eventPos.top->Int.fromFloat +
-                      boardPos.top->Int.fromFloat,
-                    ),
-                  })
-                  liftUpDragPile(dragPile)
-                },
-              )
+                    dragData.current = Some({
+                      dragSpace,
+                      dragPile,
+                      dragElement,
+                      offset: (
+                        event->JsxEvent.Mouse.clientX -
+                        eventPos.left->Int.fromFloat +
+                        boardPos.left->Int.fromFloat,
+                        event->JsxEvent.Mouse.clientY -
+                        eventPos.top->Int.fromFloat +
+                        boardPos.top->Int.fromFloat,
+                      ),
+                    })
+                    liftUpDragPile(dragPile)
+                  },
+                )
+              }
             }
           })
         })
@@ -609,29 +591,26 @@ module Create = (GameRules: GameRules) => {
       }
 
       let onMouseUpNone = dragPile => {
-        let droppedUpons = refs.current->Array.filterMap(el => {
-          el
-          ->GameRules.getSpace
-          ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
-          ->Option.mapOr(None, rule => {
-            switch rule {
-            | Static({autoProgress, droppedUpon}) =>
-              switch autoProgress {
-              | Seek => Some(droppedUpon)
-              | Accept => Some(droppedUpon)
-              | DoNothing => None
-              }
+        let droppedUpons = []
 
-            | Movable({autoProgress, droppedUpon}) =>
-              switch autoProgress() {
-              | SendOrAccept(_)
-              | Accept
-              | Seek =>
-                Some(droppedUpon)
-              | _ => None
-              }
+        GameRules.forEachSpace(getGame(), (_space, rule) => {
+          switch rule {
+          | Static({autoProgress, droppedUpon}) =>
+            switch autoProgress {
+            | Seek => droppedUpons->Array.push(droppedUpon)
+            | Accept => droppedUpons->Array.push(droppedUpon)
+            | DoNothing => ()
             }
-          })
+
+          | Movable({autoProgress, droppedUpon}) =>
+            switch autoProgress() {
+            | SendOrAccept(_)
+            | Accept
+            | Seek =>
+              droppedUpons->Array.push(droppedUpon)
+            | _ => ()
+            }
+          }
         })
 
         if progressDragPiles([dragPile], droppedUpons->Array.toReversed) {
@@ -649,30 +628,27 @@ module Create = (GameRules: GameRules) => {
             let oldGame = getGame()
             let withoutDragPile = oldGame->GameRules.removeDragFromGame(dragPile)
 
-            refs.current->Array.forEach(el => {
-              el
-              ->GameRules.getSpace
-              ->Option.flatMap(elSpace => GameRules.getRule(getGame(), elSpace))
-              ->Option.flatMap(rule => {
-                let droppedUpon = switch rule {
-                | Static({droppedUpon}) => droppedUpon
-                | Movable({droppedUpon}) => droppedUpon
-                }
+            GameRules.forEachSpace(getGame(), (space, rule) => {
+              let droppedUpon = switch rule {
+              | Static({droppedUpon}) => droppedUpon
+              | Movable({droppedUpon}) => droppedUpon
+              }
 
-                droppedUpon(withoutDragPile, dragPile)
-              })
-              ->Option.mapOr((), newGame => {
-                let overlap = getOverlap(el, dragElement)
-                if overlap > greatestOverlap.contents {
-                  greatestOverlap := overlap
-                  if (
-                    oldGame->GameRules.game_encode->Js.Json.stringify !=
-                      newGame->GameRules.game_encode->Js.Json.stringify
-                  ) {
-                    updatedGame := Some(newGame)
+              switch (droppedUpon(withoutDragPile, dragPile), space->getElement) {
+              | (Some(newGame), Some(element)) => {
+                  let overlap = getOverlap(element, dragElement)
+                  if overlap > greatestOverlap.contents {
+                    greatestOverlap := overlap
+                    if (
+                      oldGame->GameRules.game_encode->Js.Json.stringify !=
+                        newGame->GameRules.game_encode->Js.Json.stringify
+                    ) {
+                      updatedGame := Some(newGame)
+                    }
                   }
                 }
-              })
+              | _ => ()
+              }
             })
 
             switch updatedGame.contents {

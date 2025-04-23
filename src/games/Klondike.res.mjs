@@ -6,7 +6,6 @@ import * as React from "react";
 import * as Common from "../Common.res.mjs";
 import * as Js_dict from "rescript/lib/es6/js_dict.js";
 import * as Js_json from "rescript/lib/es6/js_json.js";
-import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as GameBase from "../GameBase.res.mjs";
 import * as Js_array from "rescript/lib/es6/js_array.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
@@ -572,91 +571,65 @@ function stockBaseRules() {
         };
 }
 
-function getRule(game, match) {
-  var result = {
-    contents: undefined
-  };
+function forEachSpace(game, f) {
   game.piles.forEach(function (pile, i) {
-        if (Caml_obj.equal({
-                TAG: "Pile",
-                _0: i
-              }, match)) {
-          result.contents = {
-            TAG: "Static",
-            _0: pileBaseRules(i)
-          };
-        }
+        f({
+              TAG: "Pile",
+              _0: i
+            }, {
+              TAG: "Static",
+              _0: pileBaseRules(i)
+            });
         pile.forEach(function (card, j) {
-              if (Caml_obj.equal({
-                      TAG: "Card",
-                      _0: card.card
-                    }, match)) {
-                result.contents = {
-                  TAG: "Movable",
-                  _0: pileRules(pile, card, i, j)
-                };
-                return ;
-              }
-              
+              f({
+                    TAG: "Card",
+                    _0: card.card
+                  }, {
+                    TAG: "Movable",
+                    _0: pileRules(pile, card, i, j)
+                  });
             });
       });
   game.foundations.forEach(function (foundation, i) {
-        if (Caml_obj.equal({
-                TAG: "Foundation",
-                _0: i
-              }, match)) {
-          result.contents = {
-            TAG: "Static",
-            _0: foundationBaseRules(i)
-          };
-        }
+        f({
+              TAG: "Foundation",
+              _0: i
+            }, {
+              TAG: "Static",
+              _0: foundationBaseRules(i)
+            });
         foundation.forEach(function (card, j) {
-              if (Caml_obj.equal({
-                      TAG: "Card",
-                      _0: card.card
-                    }, match)) {
-                result.contents = {
-                  TAG: "Movable",
-                  _0: foundationRules(game, card, i, j)
-                };
-                return ;
-              }
-              
+              f({
+                    TAG: "Card",
+                    _0: card.card
+                  }, {
+                    TAG: "Movable",
+                    _0: foundationRules(game, card, i, j)
+                  });
             });
       });
   game.waste.forEach(function (card, i) {
-        if (Caml_obj.equal({
-                TAG: "Card",
-                _0: card.card
-              }, match)) {
-          result.contents = {
-            TAG: "Movable",
-            _0: wasteRules(game, card, i)
-          };
-          return ;
-        }
-        
+        f({
+              TAG: "Card",
+              _0: card.card
+            }, {
+              TAG: "Movable",
+              _0: wasteRules(game, card, i)
+            });
       });
   game.stock.forEach(function (card, i) {
-        if (Caml_obj.equal({
-                TAG: "Card",
-                _0: card.card
-              }, match)) {
-          result.contents = {
-            TAG: "Movable",
-            _0: stockRules(i)
-          };
-          return ;
-        }
-        
+        f({
+              TAG: "Card",
+              _0: card.card
+            }, {
+              TAG: "Movable",
+              _0: stockRules(i)
+            });
       });
-  if ("Stock" === match) {
-    result.contents = {
-      TAG: "Static",
-      _0: stockBaseRules()
-    };
-  }
-  return result.contents;
+  f("Stock", {
+        TAG: "Static",
+        _0: stockBaseRules()
+      });
 }
 
 function Klondike$GameRules$Board(props) {
@@ -776,7 +749,7 @@ var GameRules = {
   getSpace: getSpace,
   spaceToString: spaceToString,
   initiateGame: initiateGame,
-  getRule: getRule,
+  forEachSpace: forEachSpace,
   removeDragFromGame: removeDragFromGame,
   winCheck: winCheck,
   applyLiftToDragPile: applyLiftToDragPile,

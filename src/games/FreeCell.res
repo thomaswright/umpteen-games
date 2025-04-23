@@ -258,46 +258,30 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let getRule: GameBase.getRule<game, space, dragPile> = (game: game, match: space) => {
-    let result = ref(None)
-
+  let forEachSpace: GameBase.forEachSpace<game, space, dragPile> = (game: game, f) => {
     game.piles->Array.forEachWithIndex((pile, i) => {
-      if Pile(i) == match {
-        result := pileBaseRules(i)->GameBase.Static->Some
-      }
+      f(Pile(i), pileBaseRules(i)->GameBase.Static)
 
       pile->Array.forEachWithIndex((card, j) => {
-        if Card(card.card) == match {
-          result := pileRules(game, pile, card, i, j)->Movable->Some
-        }
+        f(Card(card.card), pileRules(game, pile, card, i, j)->Movable)
       })
     })
 
     game.foundations->Array.forEachWithIndex((foundation, i) => {
-      if Foundation(i) == match {
-        result := foundationBaseRules(i)->Static->Some
-      }
+      f(Foundation(i), foundationBaseRules(i)->Static)
 
       foundation->Array.forEachWithIndex((card, j) => {
-        if Card(card.card) == match {
-          result := foundationRules(game, foundation, card, i, j)->Movable->Some
-        }
+        f(Card(card.card), foundationRules(game, foundation, card, i, j)->Movable)
       })
     })
 
     game.free->Array.forEachWithIndex((card, i) => {
-      if Free(i) == match {
-        result := freeBaseRules(i)->Static->Some
-      }
+      f(Free(i), freeBaseRules(i)->Static)
 
       card->Option.mapOr((), card => {
-        if Card(card.card) == match {
-          result := freeRules(card, i)->Movable->Some
-        }
+        f(Card(card.card), freeRules(card, i)->Movable)
       })
     })
-
-    result.contents
   }
 
   module Board = {
