@@ -21,7 +21,7 @@ function condInterval(prim0, prim1, prim2) {
 }
 
 function easeOutQuad(t) {
-  return Math.min(1, Math.max(0, 1 - (1 - t) * (1 - t)));
+  return 1 - (1 - t) * (1 - t);
 }
 
 function stateActor_encode(value) {
@@ -455,7 +455,7 @@ function Create(GameRules) {
               var startTime = performance.now();
               var step = function (currentTime) {
                 var elapsedTime = currentTime - startTime;
-                var progress = Math.min(elapsedTime / duration, 1);
+                var progress = Math.max(0, Math.min(elapsedTime / duration, 1));
                 var currentLeftPos = positionByProgress(startLeft, adjustedTargetLeft, progress);
                 var currentTopPos = positionByProgress(startTop, adjustedTargetTop, progress);
                 move(element, currentLeftPos | 0, currentTopPos | 0);

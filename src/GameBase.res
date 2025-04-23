@@ -4,7 +4,7 @@ open Webapi.Dom
 @val @module("./other.js")
 external condInterval: (unit => unit, int, unit => bool) => unit = "condInterval"
 
-let easeOutQuad = (t: float) => Math.min(1., Math.max(0., 1. -. (1. -. t) *. (1. -. t)))
+let easeOutQuad = (t: float) => 1. -. (1. -. t) *. (1. -. t)
 
 type pos = {
   x: int,
@@ -366,7 +366,7 @@ module Create = (GameRules: GameRules) => {
 
         let rec step: float => unit = currentTime => {
           let elapsedTime = currentTime -. startTime
-          let progress = Math.min(elapsedTime /. duration, 1.) // Clamp progress between 0 and 1
+          let progress = Math.max(0., Math.min(elapsedTime /. duration, 1.)) // Clamp progress between 0 and 1
           let currentLeftPos = positionByProgress(startLeft, adjustedTargetLeft, progress)
           let currentTopPos = positionByProgress(startTop, adjustedTargetTop, progress)
 
