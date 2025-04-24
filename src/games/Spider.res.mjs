@@ -261,47 +261,6 @@ function flipLastUp(piles) {
             });
 }
 
-function initiateGame() {
-  var shuffledDeck = [].concat(Core__Array.toShuffled(Card.getOneSuitDeck(0, "Spades", true)), Core__Array.toShuffled(Card.getOneSuitDeck(1, "Spades", true)), Core__Array.toShuffled(Card.getOneSuitDeck(2, "Spades", true)), Core__Array.toShuffled(Card.getOneSuitDeck(3, "Spades", true)), Core__Array.toShuffled(Card.getOneSuitDeck(4, "Spades", true)), Core__Array.toShuffled(Card.getOneSuitDeck(5, "Spades", true)), Core__Array.toShuffled(Card.getOneSuitDeck(6, "Spades", true)), Core__Array.toShuffled(Card.getOneSuitDeck(7, "Spades", true)));
-  var deckToDeal = {
-    contents: shuffledDeck
-  };
-  return [
-          shuffledDeck,
-          {
-            piles: flipLastUp([
-                  Common.ArrayAux.popN(deckToDeal, 6),
-                  Common.ArrayAux.popN(deckToDeal, 6),
-                  Common.ArrayAux.popN(deckToDeal, 6),
-                  Common.ArrayAux.popN(deckToDeal, 6),
-                  Common.ArrayAux.popN(deckToDeal, 5),
-                  Common.ArrayAux.popN(deckToDeal, 5),
-                  Common.ArrayAux.popN(deckToDeal, 5),
-                  Common.ArrayAux.popN(deckToDeal, 5),
-                  Common.ArrayAux.popN(deckToDeal, 5),
-                  Common.ArrayAux.popN(deckToDeal, 5)
-                ]),
-            foundations: [
-              [],
-              [],
-              [],
-              [],
-              [],
-              [],
-              [],
-              []
-            ],
-            stock: [
-              Common.ArrayAux.popN(deckToDeal, 10),
-              Common.ArrayAux.popN(deckToDeal, 10),
-              Common.ArrayAux.popN(deckToDeal, 10),
-              Common.ArrayAux.popN(deckToDeal, 10),
-              Common.ArrayAux.popN(deckToDeal, 10)
-            ]
-          }
-        ];
-}
-
 function winCheck(game) {
   if (game.piles.every(function (pile) {
           return pile.length === 0;
@@ -560,7 +519,7 @@ function forEachSpace(game, f) {
       });
 }
 
-function Spider$GameRules$Board(props) {
+function Spider$SpiderRules$Board(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
@@ -629,10 +588,10 @@ function Spider$GameRules$Board(props) {
 }
 
 var Board = {
-  make: Spider$GameRules$Board
+  make: Spider$SpiderRules$Board
 };
 
-function Spider$GameRules$AllCards(props) {
+function Spider$SpiderRules$AllCards(props) {
   var onClick = props.onClick;
   var onMouseDown = props.onMouseDown;
   var setRef = props.setRef;
@@ -659,8 +618,73 @@ function Spider$GameRules$AllCards(props) {
 }
 
 var AllCards = {
-  make: Spider$GameRules$AllCards
+  make: Spider$SpiderRules$AllCards
 };
+
+var SpiderRules = {
+  space_encode: space_encode,
+  space_decode: space_decode,
+  getSpace: getSpace,
+  spaceToString: spaceToString,
+  deck_encode: deck_encode,
+  deck_decode: deck_decode,
+  game_encode: game_encode,
+  game_decode: game_decode,
+  flipLastUp: flipLastUp,
+  winCheck: winCheck,
+  removeDragFromGame: removeDragFromGame,
+  applyLiftToDragPile: applyLiftToDragPile,
+  applyMoveToDragPile: applyMoveToDragPile,
+  pileBaseRules: pileBaseRules,
+  pileRules: pileRules,
+  foundationBaseRules: foundationBaseRules,
+  foundationRules: foundationRules,
+  stockGroupRules: stockGroupRules,
+  forEachSpace: forEachSpace,
+  Board: Board,
+  AllCards: AllCards
+};
+
+function initiateGame() {
+  var shuffledDeck = Core__Array.toShuffled([].concat(Card.getOneSuitDeck(0, "Spades", true), Card.getOneSuitDeck(1, "Spades", true), Card.getOneSuitDeck(2, "Spades", true), Card.getOneSuitDeck(3, "Spades", true), Card.getOneSuitDeck(4, "Spades", true), Card.getOneSuitDeck(5, "Spades", true), Card.getOneSuitDeck(6, "Spades", true), Card.getOneSuitDeck(7, "Spades", true)));
+  var deckToDeal = {
+    contents: shuffledDeck
+  };
+  return [
+          shuffledDeck,
+          {
+            piles: flipLastUp([
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5)
+                ]),
+            foundations: [
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              []
+            ],
+            stock: [
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10)
+            ]
+          }
+        ];
+}
 
 var GameRules = {
   game_encode: game_encode,
@@ -682,6 +706,7 @@ var GameRules = {
 var Game = GameBase.Create(GameRules);
 
 export {
+  SpiderRules ,
   GameRules ,
   Game ,
 }

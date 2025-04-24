@@ -1,7 +1,7 @@
 open Webapi.Dom
 open Common
 
-module GameRules: GameBase.GameRules = {
+module FreeCellRules = {
   @decco
   type space = Card(Card.card) | Foundation(int) | Pile(int) | Free(int)
 
@@ -283,6 +283,10 @@ module GameRules: GameBase.GameRules = {
       })
     })
   }
+}
+
+module GameRules: GameBase.GameRules = {
+  include FreeCellRules
 
   module Board = {
     @react.component

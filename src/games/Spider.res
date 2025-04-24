@@ -1,7 +1,7 @@
 open Webapi.Dom
 open Common
 
-module GameRules: GameBase.GameRules = {
+module SpiderRules = {
   @decco
   type space = Card(Card.card) | Foundation(int) | Pile(int) | Stock
 
@@ -32,50 +32,6 @@ module GameRules: GameBase.GameRules = {
 
   let flipLastUp = (piles: array<array<Card.sides>>) =>
     piles->Array.map(pile => pile->ArrayAux.updateLast(v => {...v, hidden: false}))
-
-  let initiateGame = () => {
-    let shuffledDeck = Array.concatMany(
-      [],
-      [
-        Card.getOneSuitDeck(0, Spades, true)->Array.toShuffled,
-        Card.getOneSuitDeck(1, Spades, true)->Array.toShuffled,
-        Card.getOneSuitDeck(2, Spades, true)->Array.toShuffled,
-        Card.getOneSuitDeck(3, Spades, true)->Array.toShuffled,
-        Card.getOneSuitDeck(4, Spades, true)->Array.toShuffled,
-        Card.getOneSuitDeck(5, Spades, true)->Array.toShuffled,
-        Card.getOneSuitDeck(6, Spades, true)->Array.toShuffled,
-        Card.getOneSuitDeck(7, Spades, true)->Array.toShuffled,
-      ],
-    )
-
-    let deckToDeal = ref(shuffledDeck)
-
-    (
-      shuffledDeck,
-      {
-        piles: [
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(5),
-          deckToDeal->ArrayAux.popN(5),
-          deckToDeal->ArrayAux.popN(5),
-          deckToDeal->ArrayAux.popN(5),
-          deckToDeal->ArrayAux.popN(5),
-          deckToDeal->ArrayAux.popN(5),
-        ]->flipLastUp,
-        foundations: [[], [], [], [], [], [], [], []],
-        stock: [
-          deckToDeal->ArrayAux.popN(10),
-          deckToDeal->ArrayAux.popN(10),
-          deckToDeal->ArrayAux.popN(10),
-          deckToDeal->ArrayAux.popN(10),
-          deckToDeal->ArrayAux.popN(10),
-        ],
-      },
-    )
-  }
 
   let winCheck = (game: game) => {
     game.piles->Array.every(pile => pile->Array.length == 0) &&
@@ -348,6 +304,55 @@ module GameRules: GameBase.GameRules = {
         ->React.array}
       </React.Fragment>
     }
+  }
+}
+
+module GameRules: GameBase.GameRules = {
+  include SpiderRules
+
+  let initiateGame = () => {
+    let shuffledDeck =
+      Array.concatMany(
+        [],
+        [
+          Card.getOneSuitDeck(0, Spades, true),
+          Card.getOneSuitDeck(1, Spades, true),
+          Card.getOneSuitDeck(2, Spades, true),
+          Card.getOneSuitDeck(3, Spades, true),
+          Card.getOneSuitDeck(4, Spades, true),
+          Card.getOneSuitDeck(5, Spades, true),
+          Card.getOneSuitDeck(6, Spades, true),
+          Card.getOneSuitDeck(7, Spades, true),
+        ],
+      )->Array.toShuffled
+
+    let deckToDeal = ref(shuffledDeck)
+
+    (
+      shuffledDeck,
+      {
+        piles: [
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(5),
+        ]->flipLastUp,
+        foundations: [[], [], [], [], [], [], [], []],
+        stock: [
+          deckToDeal->ArrayAux.popN(10),
+          deckToDeal->ArrayAux.popN(10),
+          deckToDeal->ArrayAux.popN(10),
+          deckToDeal->ArrayAux.popN(10),
+          deckToDeal->ArrayAux.popN(10),
+        ],
+      },
+    )
   }
 }
 

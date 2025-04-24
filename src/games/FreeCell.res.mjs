@@ -608,6 +608,29 @@ function forEachSpace(game, f) {
       });
 }
 
+var FreeCellRules = {
+  space_encode: space_encode,
+  space_decode: space_decode,
+  getSpace: getSpace,
+  spaceToString: spaceToString,
+  deck_encode: deck_encode,
+  deck_decode: deck_decode,
+  game_encode: game_encode,
+  game_decode: game_decode,
+  initiateGame: initiateGame,
+  winCheck: winCheck,
+  removeDragFromGame: removeDragFromGame,
+  applyLiftToDragPile: applyLiftToDragPile,
+  applyMoveToDragPile: applyMoveToDragPile,
+  pileBaseRules: pileBaseRules,
+  pileRules: pileRules,
+  foundationBaseRules: foundationBaseRules,
+  foundationRules: foundationRules,
+  freeBaseRules: freeBaseRules,
+  freeRules: freeRules,
+  forEachSpace: forEachSpace
+};
+
 function FreeCell$GameRules$Board(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
@@ -740,6 +763,7 @@ var GameRules = {
 var Game = GameBase.Create(GameRules);
 
 export {
+  FreeCellRules ,
   GameRules ,
   Game ,
 }
