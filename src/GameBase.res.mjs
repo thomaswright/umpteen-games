@@ -761,9 +761,35 @@ function Create(GameRules) {
   var Main = {
     make: GameBase$Create$Main
   };
+  var account_encode = function (value) {
+    return Decco.arrayToJson(state_encode, value);
+  };
+  var account_decode = function (value) {
+    return Decco.arrayFromJson(state_decode, value);
+  };
+  var account = {
+    contents: []
+  };
   var GameBase$Create = function (props) {
-    var onCreateNewGame = props.onCreateNewGame;
-    var getState = props.getState;
+    var id = props.id;
+    var match = React.useState(function () {
+          return -1;
+        });
+    var setGameIndex = match[1];
+    var gameIndex = match[0];
+    var setAccount = function (f) {
+      var newAccount = f(account.contents);
+      account.contents = newAccount;
+      localStorage.setItem(id, JSON.stringify(account_encode(newAccount)));
+    };
+    var getState = function () {
+      return account.contents[gameIndex];
+    };
+    var setState = function (f) {
+      setAccount(function (a) {
+            return Common.ArrayAux.update(a, gameIndex, f);
+          });
+    };
     var createNewGame = function () {
       var match = GameRules.initiateGame();
       var newGame_deck = match[0];
@@ -780,22 +806,42 @@ function Create(GameRules) {
         history: newGame_history,
         undoStats: newGame_undoStats
       };
-      onCreateNewGame(newGame);
+      setAccount(function (a) {
+            return a.concat([newGame]);
+          });
+      setGameIndex(function (param) {
+            return account.contents.length - 1 | 0;
+          });
     };
     React.useEffect((function () {
-            if (Core__Option.isNone(getState)) {
-              createNewGame();
+            var s = localStorage.getItem(id);
+            if (s !== null) {
+              var d = account_decode(JSON.parse(s));
+              if (d.TAG === "Ok") {
+                account.contents = d._0;
+              }
+              
+            } else {
+              setAccount(function (x) {
+                    return x;
+                  });
             }
-            
+            if (account.contents.length === 0) {
+              createNewGame();
+            } else {
+              setGameIndex(function (param) {
+                    return account.contents.length - 1 | 0;
+                  });
+            }
           }), []);
-    if (getState !== undefined) {
+    if (gameIndex === -1) {
+      return null;
+    } else {
       return JsxRuntime.jsx(GameBase$Create$Main, {
                   getState: getState,
-                  setState: props.setState,
+                  setState: setState,
                   createNewGame: createNewGame
-                });
-    } else {
-      return null;
+                }, gameIndex.toString());
     }
   };
   return {
@@ -812,6 +858,9 @@ function Create(GameRules) {
           useGame: useGame,
           BoardWrapper: BoardWrapper,
           Main: Main,
+          account_encode: account_encode,
+          account_decode: account_decode,
+          account: account,
           make: GameBase$Create
         };
 }

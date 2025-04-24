@@ -704,12 +704,28 @@ module Create = (GameRules: GameRules) => {
     }
   }
 
+  @decco
+  type account = array<state>
+
+  let account = ref([])
+
   @react.component
-  let make = (
-    ~getState: option<unit => state>,
-    ~setState: (state => state) => unit,
-    ~onCreateNewGame: state => unit,
-  ) => {
+  let make = (~id: string) => {
+    let (gameIndex, setGameIndex) = React.useState(() => -1)
+    let setAccount = f => {
+      let newAccount = f(account.contents)
+      account := newAccount
+
+      Dom.Storage2.localStorage->Dom.Storage2.setItem(
+        id,
+        newAccount->account_encode->Js.Json.stringify,
+      )
+    }
+
+    let getState = () => account.contents->Array.getUnsafe(gameIndex)
+
+    let setState = f => setAccount(a => a->Common.ArrayAux.update(gameIndex, f))
+
     let createNewGame = () => {
       let (deck, game) = GameRules.initiateGame()
       let newGame = {
@@ -726,19 +742,31 @@ module Create = (GameRules: GameRules) => {
         },
       }
 
-      onCreateNewGame(newGame)
+      setAccount(a => Array.concat(a, [newGame]))
+      setGameIndex(_ => account.contents->Array.length - 1)
     }
 
     React.useEffect0(() => {
-      if getState->Option.isNone {
+      switch Dom.Storage2.localStorage->Dom.Storage2.getItem(id) {
+      | Some(s) =>
+        switch s->Js.Json.parseExn->account_decode {
+        | Ok(d) => account := d
+        | _ => ()
+        }
+      | None => setAccount(x => x)
+      }
+      if account.contents->Array.length == 0 {
         createNewGame()
+      } else {
+        setGameIndex(_ => account.contents->Array.length - 1)
       }
       None
     })
 
-    switch getState {
-    | None => React.null
-    | Some(getState) => <Main getState setState createNewGame />
+    if gameIndex == -1 {
+      React.null
+    } else {
+      <Main key={gameIndex->Int.toString} getState setState createNewGame />
     }
   }
 }
