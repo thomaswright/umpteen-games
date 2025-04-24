@@ -608,6 +608,36 @@ function forEachSpace(game, f) {
       });
 }
 
+function FreeCell$FreeCellRules$AllCards(props) {
+  var onClick = props.onClick;
+  var onMouseDown = props.onMouseDown;
+  var setRef = props.setRef;
+  return JsxRuntime.jsx(React.Fragment, {
+              children: props.deck.map(function (card) {
+                    return JsxRuntime.jsx(Card.Display.make, {
+                                card: card,
+                                id: JSON.stringify(space_encode({
+                                          TAG: "Card",
+                                          _0: card.card
+                                        })),
+                                cardRef: setRef({
+                                      TAG: "Card",
+                                      _0: card.card
+                                    }),
+                                onMouseDown: onMouseDown,
+                                onClick: onClick
+                              }, JSON.stringify(space_encode({
+                                        TAG: "Card",
+                                        _0: card.card
+                                      })));
+                  })
+            });
+}
+
+var AllCards = {
+  make: FreeCell$FreeCellRules$AllCards
+};
+
 var FreeCellRules = {
   space_encode: space_encode,
   space_decode: space_decode,
@@ -628,10 +658,11 @@ var FreeCellRules = {
   foundationRules: foundationRules,
   freeBaseRules: freeBaseRules,
   freeRules: freeRules,
-  forEachSpace: forEachSpace
+  forEachSpace: forEachSpace,
+  AllCards: AllCards
 };
 
-function FreeCell$GameRules$Board(props) {
+function FreeCell$OneDeck$Board(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
@@ -710,61 +741,180 @@ function FreeCell$GameRules$Board(props) {
 }
 
 var Board = {
-  make: FreeCell$GameRules$Board
+  make: FreeCell$OneDeck$Board
 };
 
-function FreeCell$GameRules$AllCards(props) {
-  var onClick = props.onClick;
-  var onMouseDown = props.onMouseDown;
+var OneDeck = GameBase.Create({
+      game_encode: game_encode,
+      game_decode: game_decode,
+      deck_encode: deck_encode,
+      deck_decode: deck_decode,
+      getSpace: getSpace,
+      spaceToString: spaceToString,
+      initiateGame: initiateGame,
+      forEachSpace: forEachSpace,
+      removeDragFromGame: removeDragFromGame,
+      winCheck: winCheck,
+      applyLiftToDragPile: applyLiftToDragPile,
+      applyMoveToDragPile: applyMoveToDragPile,
+      Board: Board,
+      AllCards: AllCards
+    });
+
+function FreeCell$TwoDeck$Board(props) {
   var setRef = props.setRef;
-  return JsxRuntime.jsx(React.Fragment, {
-              children: props.deck.map(function (card) {
-                    return JsxRuntime.jsx(Card.Display.make, {
-                                card: card,
-                                id: JSON.stringify(space_encode({
-                                          TAG: "Card",
-                                          _0: card.card
-                                        })),
-                                cardRef: setRef({
-                                      TAG: "Card",
-                                      _0: card.card
+  return JsxRuntime.jsxs(React.Fragment, {
+              children: [
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsxs("div", {
+                              children: [
+                                JsxRuntime.jsx("div", {
+                                      children: [
+                                          [],
+                                          [],
+                                          [],
+                                          []
+                                        ].map(function (param, i) {
+                                            return JsxRuntime.jsx("div", {
+                                                        ref: Caml_option.some(setRef({
+                                                                  TAG: "Free",
+                                                                  _0: i
+                                                                })),
+                                                        className: "   bg-black opacity-20  rounded w-14 h-20"
+                                                      }, JSON.stringify(space_encode({
+                                                                TAG: "Free",
+                                                                _0: i
+                                                              })));
+                                          }),
+                                      className: "flex flex-row gap-3"
                                     }),
-                                onMouseDown: onMouseDown,
-                                onClick: onClick
-                              }, JSON.stringify(space_encode({
-                                        TAG: "Card",
-                                        _0: card.card
-                                      })));
-                  })
+                                JsxRuntime.jsx("div", {
+                                      children: [
+                                          [],
+                                          [],
+                                          [],
+                                          []
+                                        ].map(function (param, i) {
+                                            return JsxRuntime.jsx("div", {
+                                                        ref: Caml_option.some(setRef({
+                                                                  TAG: "Free",
+                                                                  _0: i + 4 | 0
+                                                                })),
+                                                        className: "   bg-black opacity-20  rounded w-14 h-20"
+                                                      }, JSON.stringify(space_encode({
+                                                                TAG: "Free",
+                                                                _0: i + 4 | 0
+                                                              })));
+                                          }),
+                                      className: "flex flex-row gap-3"
+                                    })
+                              ],
+                              className: "flex flex-col gap-3"
+                            }),
+                        JsxRuntime.jsxs("div", {
+                              children: [
+                                JsxRuntime.jsx("div", {
+                                      children: [
+                                          [],
+                                          [],
+                                          [],
+                                          []
+                                        ].map(function (param, i) {
+                                            return JsxRuntime.jsx("div", {
+                                                        ref: Caml_option.some(setRef({
+                                                                  TAG: "Foundation",
+                                                                  _0: i
+                                                                })),
+                                                        className: "   bg-white opacity-10  rounded w-14 h-20"
+                                                      }, JSON.stringify(space_encode({
+                                                                TAG: "Free",
+                                                                _0: i
+                                                              })));
+                                          }),
+                                      className: "flex flex-row gap-3 ml-10"
+                                    }),
+                                JsxRuntime.jsx("div", {
+                                      children: [
+                                          [],
+                                          [],
+                                          [],
+                                          []
+                                        ].map(function (param, i) {
+                                            return JsxRuntime.jsx("div", {
+                                                        ref: Caml_option.some(setRef({
+                                                                  TAG: "Foundation",
+                                                                  _0: i + 4 | 0
+                                                                })),
+                                                        className: "   bg-white opacity-10  rounded w-14 h-20"
+                                                      }, JSON.stringify(space_encode({
+                                                                TAG: "Free",
+                                                                _0: i + 4 | 0
+                                                              })));
+                                          }),
+                                      className: "flex flex-row gap-3 ml-10"
+                                    })
+                              ],
+                              className: "flex flex-col gap-3"
+                            })
+                      ],
+                      className: "flex flex-row"
+                    }),
+                JsxRuntime.jsx("div", {}),
+                JsxRuntime.jsx("div", {
+                      children: [
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          []
+                        ].map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                })),
+                                        className: " bg-black opacity-20  rounded w-14 h-20"
+                                      }, JSON.stringify(space_encode({
+                                                TAG: "Pile",
+                                                _0: i
+                                              })));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    })
+              ]
             });
 }
 
-var AllCards = {
-  make: FreeCell$GameRules$AllCards
+var Board$1 = {
+  make: FreeCell$TwoDeck$Board
 };
 
-var GameRules = {
-  game_encode: game_encode,
-  game_decode: game_decode,
-  deck_encode: deck_encode,
-  deck_decode: deck_decode,
-  getSpace: getSpace,
-  spaceToString: spaceToString,
-  initiateGame: initiateGame,
-  forEachSpace: forEachSpace,
-  removeDragFromGame: removeDragFromGame,
-  winCheck: winCheck,
-  applyLiftToDragPile: applyLiftToDragPile,
-  applyMoveToDragPile: applyMoveToDragPile,
-  Board: Board,
-  AllCards: AllCards
-};
-
-var Game = GameBase.Create(GameRules);
+var TwoDeck = GameBase.Create({
+      game_encode: game_encode,
+      game_decode: game_decode,
+      deck_encode: deck_encode,
+      deck_decode: deck_decode,
+      getSpace: getSpace,
+      spaceToString: spaceToString,
+      initiateGame: initiateGame,
+      forEachSpace: forEachSpace,
+      removeDragFromGame: removeDragFromGame,
+      winCheck: winCheck,
+      applyLiftToDragPile: applyLiftToDragPile,
+      applyMoveToDragPile: applyMoveToDragPile,
+      Board: Board$1,
+      AllCards: AllCards
+    });
 
 export {
   FreeCellRules ,
-  GameRules ,
-  Game ,
+  OneDeck ,
+  TwoDeck ,
 }
-/* Game Not a pure module */
+/* OneDeck Not a pure module */

@@ -5,12 +5,21 @@ import * as Spider from "./games/Spider.res.mjs";
 import * as FreeCell from "./games/FreeCell.res.mjs";
 import * as Klondike from "./games/Klondike.res.mjs";
 import * as UpAndDown from "./games/UpAndDown.res.mjs";
-import * as DoubleFreeCell from "./games/DoubleFreeCell.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function gameString(a) {
   return a;
 }
+
+var allGames = [
+  "Klondike",
+  "Free Cell",
+  "Free Cell: 2 Deck",
+  "Up & Down",
+  "Spider: One Suit",
+  "Spider: Two Suit",
+  "Spider: Four Suit"
+];
 
 function GameBrowser(props) {
   var match = Common.useLocalStorage("gametype", "Klondike");
@@ -20,37 +29,37 @@ function GameBrowser(props) {
   switch (selectGameType) {
     case "Klondike" :
         tmp = JsxRuntime.jsx(Klondike.Game.make, {
-              id: "klondike"
+              id: selectGameType
             });
         break;
     case "Free Cell" :
-        tmp = JsxRuntime.jsx(FreeCell.Game.make, {
-              id: "freecell"
+        tmp = JsxRuntime.jsx(FreeCell.OneDeck.make, {
+              id: selectGameType
             });
         break;
     case "Free Cell: 2 Deck" :
-        tmp = JsxRuntime.jsx(DoubleFreeCell.Game.make, {
-              id: "freecelldouble"
+        tmp = JsxRuntime.jsx(FreeCell.TwoDeck.make, {
+              id: selectGameType
             });
         break;
     case "Up & Down" :
         tmp = JsxRuntime.jsx(UpAndDown.Game.make, {
-              id: "upanddown"
+              id: selectGameType
             });
         break;
     case "Spider: One Suit" :
         tmp = JsxRuntime.jsx(Spider.OneSuit.make, {
-              id: "spider"
+              id: selectGameType
             });
         break;
     case "Spider: Two Suit" :
         tmp = JsxRuntime.jsx(Spider.TwoSuit.make, {
-              id: "spidertwosuit"
+              id: selectGameType
             });
         break;
     case "Spider: Four Suit" :
         tmp = JsxRuntime.jsx(Spider.FourSuit.make, {
-              id: "spiderfoursuit"
+              id: selectGameType
             });
         break;
     
@@ -65,15 +74,7 @@ function GameBrowser(props) {
                             }),
                         JsxRuntime.jsx("div", {
                               children: JsxRuntime.jsx("select", {
-                                    children: [
-                                        "Klondike",
-                                        "Free Cell",
-                                        "Free Cell: 2 Deck",
-                                        "Up & Down",
-                                        "Spider: One Suit",
-                                        "Spider: Two Suit",
-                                        "Spider: Four Suit"
-                                      ].map(function (v) {
+                                    children: allGames.map(function (v) {
                                           return JsxRuntime.jsx("option", {
                                                       children: v,
                                                       value: v
@@ -102,6 +103,7 @@ var make = GameBrowser;
 
 export {
   gameString ,
+  allGames ,
   make ,
 }
 /* Common Not a pure module */
