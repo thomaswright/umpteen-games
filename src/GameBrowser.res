@@ -5,6 +5,7 @@ type gameType =
   | @as("Up & Down") UpAndDown
   | @as("Spider: One Suit") Spider
   | @as("Spider: Two Suit") SpiderTwoSuit
+  | @as("Spider: Four Suit") SpiderFourSuit
 
 let gameString = (a: gameType) => (a :> string)
 
@@ -27,7 +28,7 @@ let make = () => {
           onChange={event => {
             setSelectGameType(_ => JsxEvent.Form.target(event)["value"])
           }}>
-          {[Klondike, FreeCell, DoubleFreeCell, UpAndDown, Spider, SpiderTwoSuit]
+          {[Klondike, FreeCell, DoubleFreeCell, UpAndDown, Spider, SpiderTwoSuit, SpiderFourSuit]
           ->Array.map(v => {
             <option key={v->gameString} value={v->gameString}>
               {v->gameString->React.string}
@@ -42,8 +43,9 @@ let make = () => {
     | FreeCell => <FreeCell.Game id={"freecell"} />
     | DoubleFreeCell => <DoubleFreeCell.Game id={"freecelldouble"} />
     | UpAndDown => <UpAndDown.Game id={"upanddown"} />
-    | Spider => <Spider.Game id={"spider"} />
-    | SpiderTwoSuit => <SpiderTwoSuit.Game id={"spidertwosuit"} />
+    | Spider => <Spider.OneSuit id={"spider"} />
+    | SpiderTwoSuit => <Spider.TwoSuit id={"spidertwosuit"} />
+    | SpiderFourSuit => <Spider.FourSuit id={"spiderfoursuit"} />
     }}
   </div>
 }

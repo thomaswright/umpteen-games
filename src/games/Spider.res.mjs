@@ -686,28 +686,143 @@ function initiateGame() {
         ];
 }
 
-var GameRules = {
-  game_encode: game_encode,
-  game_decode: game_decode,
-  deck_encode: deck_encode,
-  deck_decode: deck_decode,
-  getSpace: getSpace,
-  spaceToString: spaceToString,
-  initiateGame: initiateGame,
-  forEachSpace: forEachSpace,
-  removeDragFromGame: removeDragFromGame,
-  winCheck: winCheck,
-  applyLiftToDragPile: applyLiftToDragPile,
-  applyMoveToDragPile: applyMoveToDragPile,
-  Board: Board,
-  AllCards: AllCards
-};
+var OneSuit = GameBase.Create({
+      game_encode: game_encode,
+      game_decode: game_decode,
+      deck_encode: deck_encode,
+      deck_decode: deck_decode,
+      getSpace: getSpace,
+      spaceToString: spaceToString,
+      initiateGame: initiateGame,
+      forEachSpace: forEachSpace,
+      removeDragFromGame: removeDragFromGame,
+      winCheck: winCheck,
+      applyLiftToDragPile: applyLiftToDragPile,
+      applyMoveToDragPile: applyMoveToDragPile,
+      Board: Board,
+      AllCards: AllCards
+    });
 
-var Game = GameBase.Create(GameRules);
+function initiateGame$1() {
+  var shuffledDeck = Core__Array.toShuffled([].concat(Card.getOneSuitDeck(0, "Spades", true), Card.getOneSuitDeck(1, "Spades", true), Card.getOneSuitDeck(2, "Spades", true), Card.getOneSuitDeck(3, "Spades", true), Card.getOneSuitDeck(4, "Hearts", true), Card.getOneSuitDeck(5, "Hearts", true), Card.getOneSuitDeck(6, "Hearts", true), Card.getOneSuitDeck(7, "Hearts", true)));
+  var deckToDeal = {
+    contents: shuffledDeck
+  };
+  return [
+          shuffledDeck,
+          {
+            piles: flipLastUp([
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5)
+                ]),
+            foundations: [
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              []
+            ],
+            stock: [
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10)
+            ]
+          }
+        ];
+}
+
+var TwoSuit = GameBase.Create({
+      game_encode: game_encode,
+      game_decode: game_decode,
+      deck_encode: deck_encode,
+      deck_decode: deck_decode,
+      getSpace: getSpace,
+      spaceToString: spaceToString,
+      initiateGame: initiateGame$1,
+      forEachSpace: forEachSpace,
+      removeDragFromGame: removeDragFromGame,
+      winCheck: winCheck,
+      applyLiftToDragPile: applyLiftToDragPile,
+      applyMoveToDragPile: applyMoveToDragPile,
+      Board: Board,
+      AllCards: AllCards
+    });
+
+function initiateGame$2() {
+  var shuffledDeck = Core__Array.toShuffled([].concat(Card.getOneSuitDeck(0, "Spades", true), Card.getOneSuitDeck(1, "Spades", true), Card.getOneSuitDeck(2, "Clubs", true), Card.getOneSuitDeck(3, "Clubs", true), Card.getOneSuitDeck(4, "Hearts", true), Card.getOneSuitDeck(5, "Hearts", true), Card.getOneSuitDeck(6, "Diamonds", true), Card.getOneSuitDeck(7, "Diamonds", true)));
+  var deckToDeal = {
+    contents: shuffledDeck
+  };
+  return [
+          shuffledDeck,
+          {
+            piles: flipLastUp([
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 6),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5),
+                  Common.ArrayAux.popN(deckToDeal, 5)
+                ]),
+            foundations: [
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              []
+            ],
+            stock: [
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10)
+            ]
+          }
+        ];
+}
+
+var FourSuit = GameBase.Create({
+      game_encode: game_encode,
+      game_decode: game_decode,
+      deck_encode: deck_encode,
+      deck_decode: deck_decode,
+      getSpace: getSpace,
+      spaceToString: spaceToString,
+      initiateGame: initiateGame$2,
+      forEachSpace: forEachSpace,
+      removeDragFromGame: removeDragFromGame,
+      winCheck: winCheck,
+      applyLiftToDragPile: applyLiftToDragPile,
+      applyMoveToDragPile: applyMoveToDragPile,
+      Board: Board,
+      AllCards: AllCards
+    });
 
 export {
   SpiderRules ,
-  GameRules ,
-  Game ,
+  OneSuit ,
+  TwoSuit ,
+  FourSuit ,
 }
-/* Game Not a pure module */
+/* OneSuit Not a pure module */

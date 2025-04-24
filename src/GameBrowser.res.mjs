@@ -5,7 +5,6 @@ import * as Spider from "./games/Spider.res.mjs";
 import * as FreeCell from "./games/FreeCell.res.mjs";
 import * as Klondike from "./games/Klondike.res.mjs";
 import * as UpAndDown from "./games/UpAndDown.res.mjs";
-import * as SpiderTwoSuit from "./games/SpiderTwoSuit.res.mjs";
 import * as DoubleFreeCell from "./games/DoubleFreeCell.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
@@ -40,13 +39,18 @@ function GameBrowser(props) {
             });
         break;
     case "Spider: One Suit" :
-        tmp = JsxRuntime.jsx(Spider.Game.make, {
+        tmp = JsxRuntime.jsx(Spider.OneSuit.make, {
               id: "spider"
             });
         break;
     case "Spider: Two Suit" :
-        tmp = JsxRuntime.jsx(SpiderTwoSuit.Game.make, {
+        tmp = JsxRuntime.jsx(Spider.TwoSuit.make, {
               id: "spidertwosuit"
+            });
+        break;
+    case "Spider: Four Suit" :
+        tmp = JsxRuntime.jsx(Spider.FourSuit.make, {
+              id: "spiderfoursuit"
             });
         break;
     
@@ -67,7 +71,8 @@ function GameBrowser(props) {
                                         "Free Cell: 2 Deck",
                                         "Up & Down",
                                         "Spider: One Suit",
-                                        "Spider: Two Suit"
+                                        "Spider: Two Suit",
+                                        "Spider: Four Suit"
                                       ].map(function (v) {
                                           return JsxRuntime.jsx("option", {
                                                       children: v,
