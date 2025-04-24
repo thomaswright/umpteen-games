@@ -452,6 +452,26 @@ module TwoDeck = GameBase.Create({
 module BakersGame = GameBase.Create({
   include FreeCellRules
 
+  let pileBaseRules = (i): staticSpace => {
+    {
+      droppedUpon: (game, dragPile) => {
+        let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
+        let dragPileBase = dragPile->Array.getUnsafe(0)
+
+        if noChildren && dragPileBase.card.rank == RK {
+          Some({
+            ...game,
+            piles: game.piles->ArrayAux.update(i, _ => dragPile),
+          })
+        } else {
+          None
+        }
+      },
+      autoProgress: Accept,
+      onClick: _ => None,
+    }
+  }
+
   let pileRules = (game, pile, card, i, j): movableSpace => {
     let isLast = j == pile->Array.length - 1
 

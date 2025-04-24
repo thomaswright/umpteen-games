@@ -913,6 +913,29 @@ var TwoDeck = GameBase.Create({
       AllCards: AllCards
     });
 
+function pileBaseRules$1(i) {
+  return {
+          droppedUpon: (function (game, dragPile) {
+              var noChildren = game.piles[i].length === 0;
+              var dragPileBase = dragPile[0];
+              if (noChildren && dragPileBase.card.rank === "RK") {
+                return {
+                        piles: Common.ArrayAux.update(game.piles, i, (function (param) {
+                                return dragPile;
+                              })),
+                        foundations: game.foundations,
+                        free: game.free
+                      };
+              }
+              
+            }),
+          autoProgress: "Accept",
+          onClick: (function (param) {
+              
+            })
+        };
+}
+
 function pileRules$1(game, pile, card, i, j) {
   var isLast = j === (pile.length - 1 | 0);
   return {
@@ -974,7 +997,7 @@ function forEachSpace$1(game, f) {
               _0: i
             }, {
               TAG: "Static",
-              _0: pileBaseRules(i)
+              _0: pileBaseRules$1(i)
             });
         pile.forEach(function (card, j) {
               f({
