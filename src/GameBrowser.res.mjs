@@ -19,7 +19,8 @@ var allGames = [
   "Up & Down",
   "Spider: One Suit",
   "Spider: Two Suit",
-  "Spider: Four Suit"
+  "Spider: Four Suit",
+  "Scorpion"
 ];
 
 function GameBrowser(props) {
@@ -65,6 +66,11 @@ function GameBrowser(props) {
         break;
     case "Spider: Four Suit" :
         tmp = JsxRuntime.jsx(Spider.FourSuit.make, {
+              id: selectGameType
+            });
+        break;
+    case "Scorpion" :
+        tmp = JsxRuntime.jsx(Spider.Scorpion.make, {
               id: selectGameType
             });
         break;

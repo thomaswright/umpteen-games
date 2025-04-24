@@ -7,6 +7,7 @@ type gameType =
   | @as("Spider: One Suit") SpiderOneSuit
   | @as("Spider: Two Suit") SpiderTwoSuit
   | @as("Spider: Four Suit") SpiderFourSuit
+  | @as("Scorpion") Scorpion
 
 let gameString = (a: gameType) => (a :> string)
 
@@ -19,6 +20,7 @@ let allGames = [
   SpiderOneSuit,
   SpiderTwoSuit,
   SpiderFourSuit,
+  Scorpion,
 ]
 
 @react.component
@@ -59,6 +61,7 @@ let make = () => {
     | SpiderOneSuit => <Spider.OneSuit id={selectGameType->gameString} />
     | SpiderTwoSuit => <Spider.TwoSuit id={selectGameType->gameString} />
     | SpiderFourSuit => <Spider.FourSuit id={selectGameType->gameString} />
+    | Scorpion => <Spider.Scorpion id={selectGameType->gameString} />
     }}
   </div>
 }

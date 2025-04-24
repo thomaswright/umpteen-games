@@ -459,7 +459,9 @@ function stockGroupRules(_game, _card, i, j) {
               return Core__Option.map(Common.ArrayAux.getLast(game.stock), (function (stockGroup) {
                             return {
                                     piles: flipLastUp(game.piles.map(function (pile, i) {
-                                              return pile.concat([stockGroup[i]]);
+                                              return Core__Option.mapOr(stockGroup[i], pile, (function (v) {
+                                                            return pile.concat([v]);
+                                                          }));
                                             })),
                                     foundations: game.foundations,
                                     stock: game.stock.slice(0, game.stock.length - 1 | 0)
@@ -519,7 +521,7 @@ function forEachSpace(game, f) {
       });
 }
 
-function Spider$SpiderRules$Board(props) {
+function Spider$SpiderRules$StandardBoard(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
@@ -587,8 +589,8 @@ function Spider$SpiderRules$Board(props) {
             });
 }
 
-var Board = {
-  make: Spider$SpiderRules$Board
+var StandardBoard = {
+  make: Spider$SpiderRules$StandardBoard
 };
 
 function Spider$SpiderRules$AllCards(props) {
@@ -641,7 +643,7 @@ var SpiderRules = {
   foundationRules: foundationRules,
   stockGroupRules: stockGroupRules,
   forEachSpace: forEachSpace,
-  Board: Board,
+  StandardBoard: StandardBoard,
   AllCards: AllCards
 };
 
@@ -699,7 +701,7 @@ var OneSuit = GameBase.Create({
       winCheck: winCheck,
       applyLiftToDragPile: applyLiftToDragPile,
       applyMoveToDragPile: applyMoveToDragPile,
-      Board: Board,
+      Board: StandardBoard,
       AllCards: AllCards
     });
 
@@ -757,7 +759,7 @@ var TwoSuit = GameBase.Create({
       winCheck: winCheck,
       applyLiftToDragPile: applyLiftToDragPile,
       applyMoveToDragPile: applyMoveToDragPile,
-      Board: Board,
+      Board: StandardBoard,
       AllCards: AllCards
     });
 
@@ -815,6 +817,287 @@ var FourSuit = GameBase.Create({
       winCheck: winCheck,
       applyLiftToDragPile: applyLiftToDragPile,
       applyMoveToDragPile: applyMoveToDragPile,
+      Board: StandardBoard,
+      AllCards: AllCards
+    });
+
+function initiateGame$3() {
+  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, true));
+  var deckToDeal = {
+    contents: shuffledDeck
+  };
+  return [
+          shuffledDeck,
+          {
+            piles: flipLastUp([
+                  Common.ArrayAux.popN(deckToDeal, 7).map(function (v, i) {
+                        if (i >= 3) {
+                          return {
+                                  card: v.card,
+                                  hidden: false
+                                };
+                        } else {
+                          return v;
+                        }
+                      }),
+                  Common.ArrayAux.popN(deckToDeal, 7).map(function (v, i) {
+                        if (i >= 3) {
+                          return {
+                                  card: v.card,
+                                  hidden: false
+                                };
+                        } else {
+                          return v;
+                        }
+                      }),
+                  Common.ArrayAux.popN(deckToDeal, 7).map(function (v, i) {
+                        if (i >= 3) {
+                          return {
+                                  card: v.card,
+                                  hidden: false
+                                };
+                        } else {
+                          return v;
+                        }
+                      }),
+                  Common.ArrayAux.popN(deckToDeal, 7).map(function (v) {
+                        return {
+                                card: v.card,
+                                hidden: false
+                              };
+                      }),
+                  Common.ArrayAux.popN(deckToDeal, 7).map(function (v) {
+                        return {
+                                card: v.card,
+                                hidden: false
+                              };
+                      }),
+                  Common.ArrayAux.popN(deckToDeal, 7).map(function (v) {
+                        return {
+                                card: v.card,
+                                hidden: false
+                              };
+                      }),
+                  Common.ArrayAux.popN(deckToDeal, 7).map(function (v) {
+                        return {
+                                card: v.card,
+                                hidden: false
+                              };
+                      })
+                ]),
+            foundations: [
+              [],
+              [],
+              [],
+              []
+            ],
+            stock: [Common.ArrayAux.popN(deckToDeal, 3)]
+          }
+        ];
+}
+
+function pileBaseRules$1(i) {
+  return {
+          droppedUpon: (function (game, dragPile) {
+              var noChildren = game.piles[i].length === 0;
+              var dragPileBase = dragPile[0];
+              if (noChildren && dragPileBase.card.rank === "RK") {
+                return {
+                        piles: flipLastUp(Common.ArrayAux.update(game.piles, i, (function (param) {
+                                    return dragPile;
+                                  }))),
+                        foundations: game.foundations,
+                        stock: game.stock
+                      };
+              }
+              
+            }),
+          autoProgress: "Accept",
+          onClick: (function (param) {
+              
+            })
+        };
+}
+
+function pileRules$1(_game, pile, card, i, j) {
+  var isLast = j === (pile.length - 1 | 0);
+  return {
+          locationAdjustment: {
+            x: 0,
+            y: Math.imul(j, 20),
+            z: j + 1 | 0
+          },
+          baseSpace: {
+            TAG: "Pile",
+            _0: i
+          },
+          dragPile: (function () {
+              return pile.slice(j);
+            }),
+          autoProgress: (function () {
+              if (isLast) {
+                return {
+                        TAG: "SendOrAccept",
+                        _0: [card]
+                      };
+              } else {
+                return "DoNothing";
+              }
+            }),
+          droppedUpon: (function (game, dragPile) {
+              var dragPileBase = dragPile[0];
+              if (isLast && Card.rankIsAbove(card, dragPileBase) && dragPileBase.card.suit === card.card.suit) {
+                return {
+                        piles: flipLastUp(game.piles.map(function (stack) {
+                                  return Common.ArrayAux.insertAfter(stack, card, dragPile);
+                                })),
+                        foundations: game.foundations,
+                        stock: game.stock
+                      };
+              }
+              
+            }),
+          onStateChange: (function (element) {
+              if (card.hidden) {
+                return Card.hide(element);
+              } else {
+                return Card.show(element);
+              }
+            }),
+          onClick: (function (param) {
+              
+            })
+        };
+}
+
+function forEachSpace$1(game, f) {
+  game.piles.forEach(function (pile, i) {
+        f({
+              TAG: "Pile",
+              _0: i
+            }, {
+              TAG: "Static",
+              _0: pileBaseRules$1(i)
+            });
+        pile.forEach(function (card, j) {
+              f({
+                    TAG: "Card",
+                    _0: card.card
+                  }, {
+                    TAG: "Movable",
+                    _0: pileRules$1(game, pile, card, i, j)
+                  });
+            });
+      });
+  game.foundations.forEach(function (foundation, i) {
+        f({
+              TAG: "Foundation",
+              _0: i
+            }, {
+              TAG: "Static",
+              _0: foundationBaseRules(i)
+            });
+        foundation.forEach(function (card, j) {
+              f({
+                    TAG: "Card",
+                    _0: card.card
+                  }, {
+                    TAG: "Movable",
+                    _0: foundationRules(i, j)
+                  });
+            });
+      });
+  game.stock.forEach(function (stockGroup, i) {
+        stockGroup.forEach(function (card, j) {
+              f({
+                    TAG: "Card",
+                    _0: card.card
+                  }, {
+                    TAG: "Movable",
+                    _0: stockGroupRules(game, card, i, j)
+                  });
+            });
+      });
+}
+
+function Spider$Scorpion$Board(props) {
+  var setRef = props.setRef;
+  return JsxRuntime.jsxs(React.Fragment, {
+              children: [
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("div", {
+                              ref: Caml_option.some(setRef("Stock")),
+                              className: " bg-white opacity-10  rounded w-14 h-20 mr-20"
+                            }, JSON.stringify(space_encode("Stock"))),
+                        JsxRuntime.jsx("div", {
+                              children: [
+                                  [],
+                                  [],
+                                  [],
+                                  []
+                                ].map(function (param, i) {
+                                    return JsxRuntime.jsx("div", {
+                                                ref: Caml_option.some(setRef({
+                                                          TAG: "Foundation",
+                                                          _0: i
+                                                        })),
+                                                className: " bg-white opacity-10  rounded w-14 h-20"
+                                              }, JSON.stringify(space_encode({
+                                                        TAG: "Foundation",
+                                                        _0: i
+                                                      })));
+                                  }),
+                              className: "flex flex-row gap-3 ml-10"
+                            })
+                      ],
+                      className: "flex flex-row"
+                    }),
+                JsxRuntime.jsx("div", {}),
+                JsxRuntime.jsx("div", {
+                      children: [
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          []
+                        ].map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                })),
+                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                      }, JSON.stringify(space_encode({
+                                                TAG: "Pile",
+                                                _0: i
+                                              })));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    })
+              ]
+            });
+}
+
+var Board = {
+  make: Spider$Scorpion$Board
+};
+
+var Scorpion = GameBase.Create({
+      game_encode: game_encode,
+      game_decode: game_decode,
+      deck_encode: deck_encode,
+      deck_decode: deck_decode,
+      getSpace: getSpace,
+      spaceToString: spaceToString,
+      initiateGame: initiateGame$3,
+      forEachSpace: forEachSpace$1,
+      removeDragFromGame: removeDragFromGame,
+      winCheck: winCheck,
+      applyLiftToDragPile: applyLiftToDragPile,
+      applyMoveToDragPile: applyMoveToDragPile,
       Board: Board,
       AllCards: AllCards
     });
@@ -824,5 +1107,6 @@ export {
   OneSuit ,
   TwoSuit ,
   FourSuit ,
+  Scorpion ,
 }
 /* OneSuit Not a pure module */
