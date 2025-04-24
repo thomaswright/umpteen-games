@@ -638,31 +638,7 @@ var AllCards = {
   make: FreeCell$FreeCellRules$AllCards
 };
 
-var FreeCellRules = {
-  space_encode: space_encode,
-  space_decode: space_decode,
-  getSpace: getSpace,
-  spaceToString: spaceToString,
-  deck_encode: deck_encode,
-  deck_decode: deck_decode,
-  game_encode: game_encode,
-  game_decode: game_decode,
-  initiateGame: initiateGame,
-  winCheck: winCheck,
-  removeDragFromGame: removeDragFromGame,
-  applyLiftToDragPile: applyLiftToDragPile,
-  applyMoveToDragPile: applyMoveToDragPile,
-  pileBaseRules: pileBaseRules,
-  pileRules: pileRules,
-  foundationBaseRules: foundationBaseRules,
-  foundationRules: foundationRules,
-  freeBaseRules: freeBaseRules,
-  freeRules: freeRules,
-  forEachSpace: forEachSpace,
-  AllCards: AllCards
-};
-
-function FreeCell$OneDeck$Board(props) {
+function FreeCell$FreeCellRules$StandardBoard(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
@@ -740,8 +716,33 @@ function FreeCell$OneDeck$Board(props) {
             });
 }
 
-var Board = {
-  make: FreeCell$OneDeck$Board
+var StandardBoard = {
+  make: FreeCell$FreeCellRules$StandardBoard
+};
+
+var FreeCellRules = {
+  space_encode: space_encode,
+  space_decode: space_decode,
+  getSpace: getSpace,
+  spaceToString: spaceToString,
+  deck_encode: deck_encode,
+  deck_decode: deck_decode,
+  game_encode: game_encode,
+  game_decode: game_decode,
+  initiateGame: initiateGame,
+  winCheck: winCheck,
+  removeDragFromGame: removeDragFromGame,
+  applyLiftToDragPile: applyLiftToDragPile,
+  applyMoveToDragPile: applyMoveToDragPile,
+  pileBaseRules: pileBaseRules,
+  pileRules: pileRules,
+  foundationBaseRules: foundationBaseRules,
+  foundationRules: foundationRules,
+  freeBaseRules: freeBaseRules,
+  freeRules: freeRules,
+  forEachSpace: forEachSpace,
+  AllCards: AllCards,
+  StandardBoard: StandardBoard
 };
 
 var OneDeck = GameBase.Create({
@@ -757,7 +758,7 @@ var OneDeck = GameBase.Create({
       winCheck: winCheck,
       applyLiftToDragPile: applyLiftToDragPile,
       applyMoveToDragPile: applyMoveToDragPile,
-      Board: Board,
+      Board: StandardBoard,
       AllCards: AllCards
     });
 
@@ -891,7 +892,7 @@ function FreeCell$TwoDeck$Board(props) {
             });
 }
 
-var Board$1 = {
+var Board = {
   make: FreeCell$TwoDeck$Board
 };
 
@@ -908,7 +909,135 @@ var TwoDeck = GameBase.Create({
       winCheck: winCheck,
       applyLiftToDragPile: applyLiftToDragPile,
       applyMoveToDragPile: applyMoveToDragPile,
-      Board: Board$1,
+      Board: Board,
+      AllCards: AllCards
+    });
+
+function pileRules$1(game, pile, card, i, j) {
+  var isLast = j === (pile.length - 1 | 0);
+  return {
+          locationAdjustment: {
+            x: 0,
+            y: Math.imul(j, 20),
+            z: j + 1 | 0
+          },
+          baseSpace: {
+            TAG: "Pile",
+            _0: i
+          },
+          dragPile: (function () {
+              var freeCellCount = game.piles.filter(function (pile) {
+                    return pile.length === 0;
+                  }).length + game.free.filter(Core__Option.isNone).length | 0;
+              var dragPile = pile.slice(j);
+              if (GameCommons.decValidation(dragPile) && freeCellCount >= (dragPile.length - 1 | 0)) {
+                return dragPile;
+              }
+              
+            }),
+          autoProgress: (function () {
+              if (isLast) {
+                return {
+                        TAG: "SendOrAccept",
+                        _0: [card]
+                      };
+              } else {
+                return "DoNothing";
+              }
+            }),
+          droppedUpon: (function (game, dragPile) {
+              var dragPileBase = dragPile[0];
+              if (isLast && Card.rankIsAbove(card, dragPileBase) && dragPileBase.card.suit === card.card.suit) {
+                return {
+                        piles: game.piles.map(function (stack) {
+                              return Common.ArrayAux.insertAfter(stack, card, dragPile);
+                            }),
+                        foundations: game.foundations,
+                        free: game.free
+                      };
+              }
+              
+            }),
+          onStateChange: (function (param) {
+              
+            }),
+          onClick: (function (param) {
+              
+            })
+        };
+}
+
+function forEachSpace$1(game, f) {
+  game.piles.forEach(function (pile, i) {
+        f({
+              TAG: "Pile",
+              _0: i
+            }, {
+              TAG: "Static",
+              _0: pileBaseRules(i)
+            });
+        pile.forEach(function (card, j) {
+              f({
+                    TAG: "Card",
+                    _0: card.card
+                  }, {
+                    TAG: "Movable",
+                    _0: pileRules$1(game, pile, card, i, j)
+                  });
+            });
+      });
+  game.foundations.forEach(function (foundation, i) {
+        f({
+              TAG: "Foundation",
+              _0: i
+            }, {
+              TAG: "Static",
+              _0: foundationBaseRules(i)
+            });
+        foundation.forEach(function (card, j) {
+              f({
+                    TAG: "Card",
+                    _0: card.card
+                  }, {
+                    TAG: "Movable",
+                    _0: foundationRules(game, foundation, card, i, j)
+                  });
+            });
+      });
+  game.free.forEach(function (card, i) {
+        f({
+              TAG: "Free",
+              _0: i
+            }, {
+              TAG: "Static",
+              _0: freeBaseRules(i)
+            });
+        Core__Option.mapOr(card, undefined, (function (card) {
+                f({
+                      TAG: "Card",
+                      _0: card.card
+                    }, {
+                      TAG: "Movable",
+                      _0: freeRules(card, i)
+                    });
+              }));
+      });
+}
+
+var BakersGame = GameBase.Create({
+      game_encode: game_encode,
+      game_decode: game_decode,
+      deck_encode: deck_encode,
+      deck_decode: deck_decode,
+      getSpace: getSpace,
+      spaceToString: spaceToString,
+      initiateGame: initiateGame,
+      forEachSpace: forEachSpace$1,
+      removeDragFromGame: removeDragFromGame,
+      winCheck: winCheck,
+      applyLiftToDragPile: applyLiftToDragPile,
+      applyMoveToDragPile: applyMoveToDragPile,
+      Board: StandardBoard,
       AllCards: AllCards
     });
 
@@ -916,5 +1045,6 @@ export {
   FreeCellRules ,
   OneDeck ,
   TwoDeck ,
+  BakersGame ,
 }
 /* OneDeck Not a pure module */

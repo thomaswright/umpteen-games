@@ -2,6 +2,7 @@ type gameType =
   | @as("Klondike") Klondike
   | @as("Free Cell") FreeCellOneDeck
   | @as("Free Cell: 2 Deck") FreeCellTwoDeck
+  | @as("Baker's Game") BakersGame
   | @as("Up & Down") UpAndDown
   | @as("Spider: One Suit") SpiderOneSuit
   | @as("Spider: Two Suit") SpiderTwoSuit
@@ -13,6 +14,7 @@ let allGames = [
   Klondike,
   FreeCellOneDeck,
   FreeCellTwoDeck,
+  BakersGame,
   UpAndDown,
   SpiderOneSuit,
   SpiderTwoSuit,
@@ -52,6 +54,7 @@ let make = () => {
     | Klondike => <Klondike.Game id={selectGameType->gameString} />
     | FreeCellOneDeck => <FreeCell.OneDeck id={selectGameType->gameString} />
     | FreeCellTwoDeck => <FreeCell.TwoDeck id={selectGameType->gameString} />
+    | BakersGame => <FreeCell.BakersGame id={selectGameType->gameString} />
     | UpAndDown => <UpAndDown.Game id={selectGameType->gameString} />
     | SpiderOneSuit => <Spider.OneSuit id={selectGameType->gameString} />
     | SpiderTwoSuit => <Spider.TwoSuit id={selectGameType->gameString} />

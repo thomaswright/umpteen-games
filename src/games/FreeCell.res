@@ -303,12 +303,8 @@ module FreeCellRules = {
       </React.Fragment>
     }
   }
-}
 
-module OneDeck = GameBase.Create({
-  include FreeCellRules
-
-  module Board = {
+  module StandardBoard = {
     @react.component
     let make = (
       ~setRef,
@@ -361,6 +357,12 @@ module OneDeck = GameBase.Create({
       </React.Fragment>
     }
   }
+}
+
+module OneDeck = GameBase.Create({
+  include FreeCellRules
+
+  module Board = FreeCellRules.StandardBoard
 })
 
 module TwoDeck = GameBase.Create({
@@ -445,4 +447,85 @@ module TwoDeck = GameBase.Create({
       </React.Fragment>
     }
   }
+})
+
+module BakersGame = GameBase.Create({
+  include FreeCellRules
+
+  let pileRules = (game, pile, card, i, j): movableSpace => {
+    let isLast = j == pile->Array.length - 1
+
+    {
+      locationAdjustment: {
+        x: 0,
+        y: j * 20,
+        z: j + 1,
+      },
+      baseSpace: Pile(i),
+      dragPile: () => {
+        let freeCellCount =
+          game.piles->Array.filter(pile => pile->Array.length == 0)->Array.length +
+            game.free->Array.filter(Option.isNone)->Array.length
+        let dragPile = pile->Array.sliceToEnd(~start=j)
+        if dragPile->GameCommons.decValidation && freeCellCount >= dragPile->Array.length - 1 {
+          Some(dragPile)
+        } else {
+          None
+        }
+      },
+      autoProgress: () => {
+        if isLast {
+          SendOrAccept([card])
+        } else {
+          DoNothing
+        }
+      },
+      droppedUpon: (game, dragPile) => {
+        let dragPileBase = dragPile->Array.getUnsafe(0)
+
+        if (
+          isLast && Card.rankIsAbove(card, dragPileBase) && dragPileBase.card.suit == card.card.suit
+        ) {
+          Some({
+            ...game,
+            piles: game.piles->Array.map(stack => {
+              stack->ArrayAux.insertAfter(card, dragPile)
+            }),
+          })
+        } else {
+          None
+        }
+      },
+      onClick: _ => None,
+      onStateChange: _ => (),
+    }
+  }
+
+  let forEachSpace: GameBase.forEachSpace<game, space, dragPile> = (game: game, f) => {
+    game.piles->Array.forEachWithIndex((pile, i) => {
+      f(Pile(i), pileBaseRules(i)->GameBase.Static)
+
+      pile->Array.forEachWithIndex((card, j) => {
+        f(Card(card.card), pileRules(game, pile, card, i, j)->Movable)
+      })
+    })
+
+    game.foundations->Array.forEachWithIndex((foundation, i) => {
+      f(Foundation(i), foundationBaseRules(i)->Static)
+
+      foundation->Array.forEachWithIndex((card, j) => {
+        f(Card(card.card), foundationRules(game, foundation, card, i, j)->Movable)
+      })
+    })
+
+    game.free->Array.forEachWithIndex((card, i) => {
+      f(Free(i), freeBaseRules(i)->Static)
+
+      card->Option.mapOr((), card => {
+        f(Card(card.card), freeRules(card, i)->Movable)
+      })
+    })
+  }
+
+  module Board = FreeCellRules.StandardBoard
 })
