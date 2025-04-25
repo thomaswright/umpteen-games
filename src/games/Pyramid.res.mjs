@@ -315,7 +315,9 @@ function initiateGame() {
 
 function winCheck(game) {
   if (game.piles.every(function (pile) {
-          return pile.length === 0;
+          return pile.every(function (v) {
+                      return Core__Option.isNone(v);
+                    });
         }) && game.stock.length === 0) {
     return game.waste.length === 0;
   } else {
@@ -415,6 +417,9 @@ function pileRules(game, pile, card, i, j) {
               return "DoNothing";
             }),
           droppedUpon: (function (game, dragPile) {
+              if (card.card.suit === "Clubs" && card.card.rank === "R2") {
+                console.log(game, card.card, isExposed(game, i, j), arePair(dragPile, card));
+              }
               if (isExposed(game, i, j) && arePair(dragPile, card)) {
                 return {
                         piles: Common.ArrayAux.update(game.piles, i, (function (stack) {
@@ -429,16 +434,8 @@ function pileRules(game, pile, card, i, j) {
                         stock: game.stock,
                         waste: game.waste
                       };
-              } else if (card.card.rank === "RK") {
-                return {
-                        piles: game.piles,
-                        foundations: game.foundations.concat([dragPile]),
-                        stock: game.stock,
-                        waste: game.waste
-                      };
-              } else {
-                return ;
               }
+              
             }),
           onStateChange: (function (_element) {
               
@@ -504,7 +501,18 @@ function wasteRules(game, card, i) {
           autoProgress: (function () {
               return "DoNothing";
             }),
-          droppedUpon: (function (param, param$1) {
+          droppedUpon: (function (game, dragPile) {
+              if (i === (game.waste.length - 1 | 0) && arePair(dragPile, card)) {
+                return {
+                        piles: game.piles,
+                        foundations: game.foundations.concat([
+                              card,
+                              dragPile
+                            ]),
+                        stock: game.stock,
+                        waste: game.waste.slice(0, game.waste.length - 1 | 0)
+                      };
+              }
               
             }),
           onStateChange: (function (element) {
@@ -533,7 +541,18 @@ function stockRules(game, card, i) {
           autoProgress: (function () {
               return "DoNothing";
             }),
-          droppedUpon: (function (param, param$1) {
+          droppedUpon: (function (game, dragPile) {
+              if (i === (game.stock.length - 1 | 0) && arePair(dragPile, card)) {
+                return {
+                        piles: game.piles,
+                        foundations: game.foundations.concat([
+                              card,
+                              dragPile
+                            ]),
+                        stock: game.stock.slice(0, game.stock.length - 1 | 0),
+                        waste: game.waste
+                      };
+              }
               
             }),
           onStateChange: (function (param) {
@@ -664,16 +683,19 @@ function Pyramid$GameRules$Board(props) {
                             }, JSON.stringify(space_encode("Stock"))),
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Waste")),
-                              className: " w-14 h-20",
+                              className: "bg-black opacity-20 w-14 h-20 ml-3",
                               id: JSON.stringify(space_encode("Waste"))
                             }, JSON.stringify(space_encode("Waste"))),
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Foundation")),
                               className: " border rounded w-14 h-20",
-                              id: JSON.stringify(space_encode("Foundation"))
+                              id: JSON.stringify(space_encode("Foundation")),
+                              style: {
+                                marginLeft: "280px"
+                              }
                             }, JSON.stringify(space_encode("Foundation")))
                       ],
-                      className: "flex flex-row gap-3"
+                      className: "flex flex-row "
                     }),
                 JsxRuntime.jsx("div", {
                       children: [
@@ -690,7 +712,7 @@ function Pyramid$GameRules$Board(props) {
                                                   TAG: "Pile",
                                                   _0: i
                                                 })),
-                                        className: " bg-black opacity-20  rounded w-14 h-10",
+                                        className: " w-14 h-10",
                                         id: JSON.stringify(space_encode({
                                                   TAG: "Pile",
                                                   _0: i

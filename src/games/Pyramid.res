@@ -62,7 +62,7 @@ module GameRules: GameBase.GameRules = {
   }
 
   let winCheck = (game: game) => {
-    game.piles->Array.every(pile => pile->Array.length == 0) &&
+    game.piles->Array.every(pile => pile->Array.every(v => v->Option.isNone)) &&
     game.stock->Array.length == 0 &&
     game.waste->Array.length == 0
   }
@@ -154,6 +154,9 @@ module GameRules: GameBase.GameRules = {
         // }
       },
       droppedUpon: (game, dragPile) => {
+        if card.card.suit == Clubs && card.card.rank == R2 {
+          Console.log4(game, card.card, isExposed(game, i, j), arePair(dragPile, card))
+        }
         if isExposed(game, i, j) && arePair(dragPile, card) {
           Some({
             ...game,
@@ -162,14 +165,16 @@ module GameRules: GameBase.GameRules = {
               stack->ArrayAux.update(j, _ => None)
             }),
           })
-        } else if card.card.rank == RK {
-          Some({
-            ...game,
-            foundations: Array.concat(game.foundations, [dragPile]),
-          })
         } else {
           None
         }
+
+        // else if card.card.rank == RK {
+        //   Some({
+        //     ...game,
+        //     foundations: Array.concat(game.foundations, [dragPile]),
+        //   })
+        // }
       },
       onClick: game => {
         if card.card.rank == RK {
@@ -235,7 +240,17 @@ module GameRules: GameBase.GameRules = {
       }
     },
     autoProgress: () => DoNothing,
-    droppedUpon: (_, _) => None,
+    droppedUpon: (game, dragPile) => {
+      if i == game.waste->Array.length - 1 && arePair(dragPile, card) {
+        Some({
+          ...game,
+          waste: game.waste->Array.slice(~start=0, ~end=game.waste->Array.length - 1),
+          foundations: Array.concat(game.foundations, [card, dragPile]),
+        })
+      } else {
+        None
+      }
+    },
     onClick: _ => None,
     onStateChange: element => Card.show(element),
   }
@@ -255,7 +270,17 @@ module GameRules: GameBase.GameRules = {
       }
     },
     autoProgress: () => DoNothing,
-    droppedUpon: (_, _) => None,
+    droppedUpon: (game, dragPile) => {
+      if i == game.stock->Array.length - 1 && arePair(dragPile, card) {
+        Some({
+          ...game,
+          stock: game.stock->Array.slice(~start=0, ~end=game.stock->Array.length - 1),
+          foundations: Array.concat(game.foundations, [card, dragPile]),
+        })
+      } else {
+        None
+      }
+    },
     onClick: game => {
       if card.card.rank == RK {
         Some({
@@ -333,7 +358,7 @@ module GameRules: GameBase.GameRules = {
       ~onClick,
     ) => {
       <React.Fragment>
-        <div className="flex flex-row gap-3">
+        <div className="flex flex-row ">
           <div
             key={Stock->spaceToString}
             id={Stock->spaceToString}
@@ -345,12 +370,13 @@ module GameRules: GameBase.GameRules = {
             key={Waste->spaceToString}
             id={Waste->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Waste))}
-            className=" w-14 h-20"
+            className="bg-black opacity-20 w-14 h-20 ml-3"
           />
           <div
             key={Foundation->spaceToString}
             id={Foundation->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation))}
+            style={{marginLeft: "280px"}}
             className=" border rounded w-14 h-20"
           />
         </div>
@@ -364,7 +390,7 @@ module GameRules: GameBase.GameRules = {
               style={{
                 marginLeft: ((6 - i) * 35)->Int.toString ++ "px",
               }}
-              className={" bg-black opacity-20  rounded w-14 h-10"}
+              className={" w-14 h-10"}
             />
           })
           ->React.array}
