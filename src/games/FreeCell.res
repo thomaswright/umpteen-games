@@ -286,7 +286,7 @@ module FreeCellRules = {
 
   module AllCards = {
     @react.component
-    let make = (~setRef, ~onMouseDown, ~onClick, ~deck) => {
+    let make = (~setRef, ~onMouseDown, ~deck) => {
       <React.Fragment>
         {deck
         ->Array.map(card => {
@@ -296,7 +296,6 @@ module FreeCellRules = {
             id={Card(card.card)->spaceToString}
             cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card.card)))}
             onMouseDown={onMouseDown}
-            onClick
           />
         })
         ->React.array}

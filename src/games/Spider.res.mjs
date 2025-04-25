@@ -594,7 +594,6 @@ var StandardBoard = {
 };
 
 function Spider$SpiderRules$AllCards(props) {
-  var onClick = props.onClick;
   var onMouseDown = props.onMouseDown;
   var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
@@ -609,8 +608,7 @@ function Spider$SpiderRules$AllCards(props) {
                                       TAG: "Card",
                                       _0: card.card
                                     }),
-                                onMouseDown: onMouseDown,
-                                onClick: onClick
+                                onMouseDown: onMouseDown
                               }, JSON.stringify(space_encode({
                                         TAG: "Card",
                                         _0: card.card

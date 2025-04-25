@@ -2,6 +2,7 @@
 
 import * as Common from "./Common.res.mjs";
 import * as Spider from "./games/Spider.res.mjs";
+import * as Pyramid from "./games/Pyramid.res.mjs";
 import * as FreeCell from "./games/FreeCell.res.mjs";
 import * as Klondike from "./games/Klondike.res.mjs";
 import * as UpAndDown from "./games/UpAndDown.res.mjs";
@@ -20,7 +21,8 @@ var allGames = [
   "Spider: One Suit",
   "Spider: Two Suit",
   "Spider: Four Suit",
-  "Scorpion"
+  "Scorpion",
+  "Pyramid"
 ];
 
 function GameBrowser(props) {
@@ -71,6 +73,11 @@ function GameBrowser(props) {
         break;
     case "Scorpion" :
         tmp = JsxRuntime.jsx(Spider.Scorpion.make, {
+              id: selectGameType
+            });
+        break;
+    case "Pyramid" :
+        tmp = JsxRuntime.jsx(Pyramid.Game.make, {
               id: selectGameType
             });
         break;

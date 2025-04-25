@@ -288,7 +288,7 @@ module SpiderRules = {
 
   module AllCards = {
     @react.component
-    let make = (~setRef, ~onMouseDown, ~onClick, ~deck) => {
+    let make = (~setRef, ~onMouseDown, ~deck) => {
       <React.Fragment>
         {deck
         ->Array.map(card => {
@@ -296,7 +296,6 @@ module SpiderRules = {
             card={card}
             key={Card(card.card)->spaceToString}
             id={Card(card.card)->spaceToString}
-            onClick={onClick}
             cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card.card)))}
             onMouseDown={onMouseDown}
           />

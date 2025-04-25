@@ -621,7 +621,6 @@ function Card$Display(props) {
               ref: Caml_option.some(props.cardRef),
               className: "absolute w-14 h-20 select-none",
               id: props.id,
-              onClick: props.onClick,
               onMouseDown: props.onMouseDown
             });
 }

@@ -490,7 +490,7 @@ module GameRules: GameBase.GameRules = {
 
   module AllCards = {
     @react.component
-    let make = (~setRef, ~onMouseDown, ~onClick, ~deck) => {
+    let make = (~setRef, ~onMouseDown, ~deck) => {
       <React.Fragment>
         {deck
         ->Array.map(item => {
@@ -503,7 +503,6 @@ module GameRules: GameBase.GameRules = {
               id={Item(item->itemToSpaceItem)->spaceToString}
               cardRef={ReactDOM.Ref.callbackDomRef(setRef(Item(item->itemToSpaceItem)))}
               onMouseDown={onMouseDown}
-              onClick={onClick}
             />
           | Tarot(tarot) =>
             <Tarot.Display

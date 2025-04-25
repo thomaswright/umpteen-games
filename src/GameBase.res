@@ -99,15 +99,13 @@ module type GameRules = {
   }
 
   module AllCards: {
-    type props<'setRef, 'onMouseDown, 'onClick, 'deck> = {
+    type props<'setRef, 'onMouseDown, 'deck> = {
       setRef: 'setRef,
       onMouseDown: 'onMouseDown,
-      onClick: 'onClick,
       deck: 'deck,
     }
     let make: props<
       space => ReactDOM.Ref.callbackDomRef,
-      JsxEventU.Mouse.t => unit,
       JsxEventU.Mouse.t => unit,
       deck,
     > => React.element
@@ -463,19 +461,17 @@ module Create = (GameRules: GameRules) => {
 
             GameRules.forEachSpace(getGame(), (_space, rule) => {
               switch rule {
+              | Static({autoProgress, droppedUpon}) =>
+                switch autoProgress {
+                | Seek => droppedUpons->Array.push(droppedUpon)
+                | _ => ()
+                }
               | Movable({autoProgress, droppedUpon}) =>
                 switch autoProgress() {
                 | SendOrAccept(dragPile)
                 | Send(dragPile) =>
                   dragPiles->Array.push(dragPile)
                 | Seek => droppedUpons->Array.push(droppedUpon)
-
-                | _ => ()
-                }
-              | Static({autoProgress, droppedUpon}) =>
-                switch autoProgress {
-                | Seek => droppedUpons->Array.push(droppedUpon)
-
                 | _ => ()
                 }
               }
@@ -486,10 +482,39 @@ module Create = (GameRules: GameRules) => {
         )
       }
 
-      let onClick = event => {
+      let staticOnClick = event => {
         event
         ->JsxEvent.Mouse.currentTarget
         ->Obj.magic
+        ->GameRules.getSpace
+        ->Option.mapOr((), dragSpace => {
+          GameRules.forEachSpace(getGame(), (space, rule) => {
+            if space == dragSpace {
+              switch rule {
+              | Static({onClick})
+              | Movable({onClick}) =>
+                onClick(getGame())->Option.mapOr(
+                  (),
+                  newGame => {
+                    if (
+                      getGame()->GameRules.game_encode->Js.Json.stringify !=
+                        newGame->GameRules.game_encode->Js.Json.stringify
+                    ) {
+                      setGame(_ => newGame)
+                      snapshot()
+                      moveToState()
+                      autoProgress()
+                    }
+                  },
+                )
+              }
+            }
+          })
+        })
+      }
+
+      let movableOnClick = dragElement => {
+        dragElement
         ->GameRules.getSpace
         ->Option.mapOr((), dragSpace => {
           GameRules.forEachSpace(getGame(), (space, rule) => {
@@ -578,7 +603,7 @@ module Create = (GameRules: GameRules) => {
         })
       }
 
-      let onMouseUpNone = dragPile => {
+      let onMouseUpNone = (dragElement, dragPile) => {
         let droppedUpons = []
 
         GameRules.forEachSpace(getGame(), (_space, rule) => {
@@ -603,6 +628,8 @@ module Create = (GameRules: GameRules) => {
 
         if progressDragPiles([dragPile], droppedUpons->Array.toReversed) {
           snapshot()
+        } else {
+          movableOnClick(dragElement)
         }
         moveToState()
         autoProgress()
@@ -640,7 +667,7 @@ module Create = (GameRules: GameRules) => {
             })
 
             switch updatedGame.contents {
-            | None => onMouseUpNone(dragPile)
+            | None => onMouseUpNone(dragElement, dragPile)
             | Some(updatedGame) => {
                 setGame(_ => updatedGame)
                 snapshot()
@@ -697,9 +724,9 @@ module Create = (GameRules: GameRules) => {
           autoProgress
           restartGame
           undo
-          onClick
+          onClick={staticOnClick}
         />
-        <GameRules.AllCards onMouseDown onClick setRef deck={getDeck()} />
+        <GameRules.AllCards onMouseDown setRef deck={getDeck()} />
       </div>
     }
   }

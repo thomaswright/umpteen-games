@@ -136,13 +136,8 @@ let toString = card => {
 
 module Display = {
   @react.component
-  let make = (~card, ~id, ~cardRef, ~onMouseDown, ~onClick, ~multiColor=false) => {
-    <div
-      id={id}
-      ref={cardRef}
-      onMouseDown={onMouseDown}
-      onClick={onClick}
-      className="absolute w-14 h-20 select-none">
+  let make = (~card, ~id, ~cardRef, ~onMouseDown, ~multiColor=false) => {
+    <div id={id} ref={cardRef} onMouseDown={onMouseDown} className="absolute w-14 h-20 select-none">
       <div
         style={{
           transform: rotation(card.card),

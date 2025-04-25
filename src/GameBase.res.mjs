@@ -551,8 +551,30 @@ function Create(GameRules) {
               return progressDragPiles(dragPiles, droppedUpons);
             }));
     };
-    var onClick = function ($$event) {
+    var staticOnClick = function ($$event) {
       Core__Option.mapOr(GameRules.getSpace($$event.currentTarget), undefined, (function (dragSpace) {
+              GameRules.forEachSpace(getGame(), (function (space, rule) {
+                      if (!Caml_obj.equal(space, dragSpace)) {
+                        return ;
+                      }
+                      var onClick;
+                      onClick = rule.TAG === "Movable" ? rule._0.onClick : rule._0.onClick;
+                      Core__Option.mapOr(onClick(getGame()), undefined, (function (newGame) {
+                              if (JSON.stringify(GameRules.game_encode(getGame())) !== JSON.stringify(GameRules.game_encode(newGame))) {
+                                setGame(function (param) {
+                                      return newGame;
+                                    });
+                                snapshot();
+                                moveToState();
+                                return autoProgress();
+                              }
+                              
+                            }));
+                    }));
+            }));
+    };
+    var movableOnClick = function (dragElement) {
+      Core__Option.mapOr(GameRules.getSpace(dragElement), undefined, (function (dragSpace) {
               GameRules.forEachSpace(getGame(), (function (space, rule) {
                       if (!Caml_obj.equal(space, dragSpace)) {
                         return ;
@@ -613,7 +635,7 @@ function Create(GameRules) {
                     }));
             }));
     };
-    var onMouseUpNone = function (dragPile) {
+    var onMouseUpNone = function (dragElement, dragPile) {
       var droppedUpons = [];
       GameRules.forEachSpace(getGame(), (function (_space, rule) {
               if (rule.TAG === "Movable") {
@@ -649,6 +671,8 @@ function Create(GameRules) {
             }));
       if (progressDragPiles([dragPile], droppedUpons.toReversed())) {
         snapshot();
+      } else {
+        movableOnClick(dragElement);
       }
       moveToState();
       autoProgress();
@@ -700,7 +724,7 @@ function Create(GameRules) {
           moveToState();
           autoProgress();
         } else {
-          onMouseUpNone(dragPile);
+          onMouseUpNone(dragElement, dragPile);
         }
       }
       dragData.current = undefined;
@@ -745,12 +769,11 @@ function Create(GameRules) {
                         undo: undo,
                         createNewGame: props.createNewGame,
                         restartGame: restartGame,
-                        onClick: onClick
+                        onClick: staticOnClick
                       }),
                   JsxRuntime.jsx(GameRules.AllCards.make, {
                         setRef: setRef,
                         onMouseDown: onMouseDown,
-                        onClick: onClick,
                         deck: getState().deck
                       })
                 ],

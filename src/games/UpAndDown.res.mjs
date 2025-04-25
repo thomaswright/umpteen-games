@@ -1145,7 +1145,6 @@ var Board = {
 };
 
 function UpAndDown$GameRules$AllCards(props) {
-  var onClick = props.onClick;
   var onMouseDown = props.onMouseDown;
   var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
@@ -1167,7 +1166,6 @@ function UpAndDown$GameRules$AllCards(props) {
                                         _0: itemToSpaceItem(item)
                                       }),
                                   onMouseDown: onMouseDown,
-                                  onClick: onClick,
                                   multiColor: true
                                 }, JSON.stringify(space_encode(space$1)));
                     }

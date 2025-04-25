@@ -6,39 +6,37 @@ import * as React from "react";
 import * as Common from "../Common.res.mjs";
 import * as Js_dict from "rescript/lib/es6/js_dict.js";
 import * as Js_json from "rescript/lib/es6/js_json.js";
+import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as GameBase from "../GameBase.res.mjs";
 import * as Js_array from "rescript/lib/es6/js_array.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
-import * as GameCommons from "./GameCommons.res.mjs";
+import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function space_encode(value) {
-  if (typeof value !== "object") {
-    if (value === "Waste") {
-      return ["Waste"];
+  if (typeof value === "object") {
+    if (value.TAG === "Card") {
+      return [
+              "Card",
+              Card.card_encode(value._0)
+            ];
     } else {
-      return ["Stock"];
+      return [
+              "Pile",
+              Decco.intToJson(value._0)
+            ];
     }
   }
-  switch (value.TAG) {
-    case "Card" :
-        return [
-                "Card",
-                Card.card_encode(value._0)
-              ];
+  switch (value) {
     case "Foundation" :
-        return [
-                "Foundation",
-                Decco.intToJson(value._0)
-              ];
-    case "Pile" :
-        return [
-                "Pile",
-                Decco.intToJson(value._0)
-              ];
+        return ["Foundation"];
+    case "Waste" :
+        return ["Waste"];
+    case "Stock" :
+        return ["Stock"];
     
   }
 }
@@ -83,6 +81,15 @@ function space_decode(value) {
                   }
                 };
       case "Foundation" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "Foundation"
+                  };
+          }
+      case "Pile" :
           if (tagged.length !== 2) {
             return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
           }
@@ -91,7 +98,7 @@ function space_decode(value) {
             return {
                     TAG: "Ok",
                     _0: {
-                      TAG: "Foundation",
+                      TAG: "Pile",
                       _0: v0$1._0
                     }
                   };
@@ -103,29 +110,6 @@ function space_decode(value) {
                     path: "[0]" + e$1.path,
                     message: e$1.message,
                     value: e$1.value
-                  }
-                };
-      case "Pile" :
-          if (tagged.length !== 2) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          }
-          var v0$2 = Decco.intFromJson(Belt_Array.getExn(jsonArr$1, 1));
-          if (v0$2.TAG === "Ok") {
-            return {
-                    TAG: "Ok",
-                    _0: {
-                      TAG: "Pile",
-                      _0: v0$2._0
-                    }
-                  };
-          }
-          var e$2 = v0$2._0;
-          return {
-                  TAG: "Error",
-                  _0: {
-                    path: "[0]" + e$2.path,
-                    message: e$2.message,
-                    value: e$2.value
                   }
                 };
       case "Stock" :
@@ -179,16 +163,16 @@ function game_encode(value) {
                 "piles",
                 (function (extra) {
                       return Decco.arrayToJson((function (extra) {
-                                    return Decco.arrayToJson(Card.sides_encode, extra);
+                                    return Decco.arrayToJson((function (extra) {
+                                                  return Decco.optionToJson(Card.sides_encode, extra);
+                                                }), extra);
                                   }), extra);
                     })(value.piles)
               ],
               [
                 "foundations",
                 (function (extra) {
-                      return Decco.arrayToJson((function (extra) {
-                                    return Decco.arrayToJson(Card.sides_encode, extra);
-                                  }), extra);
+                      return Decco.arrayToJson(Card.sides_encode, extra);
                     })(value.foundations)
               ],
               [
@@ -217,13 +201,13 @@ function game_decode(value) {
   var dict$1 = dict._0;
   var extra = Belt_Option.getWithDefault(Js_dict.get(dict$1, "piles"), null);
   var piles = Decco.arrayFromJson((function (extra) {
-          return Decco.arrayFromJson(Card.sides_decode, extra);
+          return Decco.arrayFromJson((function (extra) {
+                        return Decco.optionFromJson(Card.sides_decode, extra);
+                      }), extra);
         }), extra);
   if (piles.TAG === "Ok") {
     var extra$1 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "foundations"), null);
-    var foundations = Decco.arrayFromJson((function (extra) {
-            return Decco.arrayFromJson(Card.sides_decode, extra);
-          }), extra$1);
+    var foundations = Decco.arrayFromJson(Card.sides_decode, extra$1);
     if (foundations.TAG === "Ok") {
       var extra$2 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "stock"), null);
       var stock = Decco.arrayFromJson(Card.sides_decode, extra$2);
@@ -278,21 +262,17 @@ function game_decode(value) {
 }
 
 function applyLiftToDragPile(dragPile, lift) {
-  dragPile.forEach(function (v, j) {
-        lift({
+  return lift({
               TAG: "Card",
-              _0: v.card
-            }, j);
-      });
+              _0: dragPile.card
+            }, 0);
 }
 
 function applyMoveToDragPile(dragPile, move) {
-  dragPile.forEach(function (v, j) {
-        move({
+  return move({
               TAG: "Card",
-              _0: v.card
-            }, 0, Math.imul(j, 20));
-      });
+              _0: dragPile.card
+            }, 0, 0);
 }
 
 function initiateGame() {
@@ -304,20 +284,29 @@ function initiateGame() {
           shuffledDeck,
           {
             piles: [
-              Common.ArrayAux.popN(deckToDeal, 1),
-              Common.ArrayAux.popN(deckToDeal, 2),
-              Common.ArrayAux.popN(deckToDeal, 3),
-              Common.ArrayAux.popN(deckToDeal, 4),
-              Common.ArrayAux.popN(deckToDeal, 5),
-              Common.ArrayAux.popN(deckToDeal, 6),
-              Common.ArrayAux.popN(deckToDeal, 7)
+              Common.ArrayAux.popN(deckToDeal, 1).map(function (v) {
+                    return v;
+                  }),
+              Common.ArrayAux.popN(deckToDeal, 2).map(function (v) {
+                    return v;
+                  }),
+              Common.ArrayAux.popN(deckToDeal, 3).map(function (v) {
+                    return v;
+                  }),
+              Common.ArrayAux.popN(deckToDeal, 4).map(function (v) {
+                    return v;
+                  }),
+              Common.ArrayAux.popN(deckToDeal, 5).map(function (v) {
+                    return v;
+                  }),
+              Common.ArrayAux.popN(deckToDeal, 6).map(function (v) {
+                    return v;
+                  }),
+              Common.ArrayAux.popN(deckToDeal, 7).map(function (v) {
+                    return v;
+                  })
             ],
-            foundations: [
-              [],
-              [],
-              [],
-              []
-            ],
+            foundations: [],
             stock: deckToDeal.contents,
             waste: []
           }
@@ -335,50 +324,81 @@ function winCheck(game) {
 }
 
 function removeDragFromGame(game, dragPile) {
-  var dragPileSet = new Set(dragPile);
+  var removeFromPiles = function (x) {
+    return x.map(function (sCard) {
+                if (sCard !== undefined && !Caml_obj.equal(sCard, dragPile)) {
+                  return sCard;
+                }
+                
+              });
+  };
   var removeDragPile = function (x) {
     return x.filter(function (sCard) {
-                return !dragPileSet.has(sCard);
+                return Caml_obj.notequal(dragPile, sCard);
               });
   };
   return {
-          piles: game.piles.map(removeDragPile),
-          foundations: game.foundations.map(removeDragPile),
+          piles: game.piles.map(removeFromPiles),
+          foundations: removeDragPile(game.foundations),
           stock: removeDragPile(game.stock),
           waste: removeDragPile(game.waste)
         };
 }
 
-function pileBaseRules(i) {
-  return {
-          droppedUpon: (function (game, dragPile) {
-              var dragPileBase = dragPile[0];
-              var noChildren = game.piles[i].length === 0;
-              if (noChildren && dragPileBase.card.rank === "RK") {
-                return {
-                        piles: Common.ArrayAux.update(game.piles, i, (function (param) {
-                                return dragPile;
-                              })),
-                        foundations: game.foundations,
-                        stock: game.stock,
-                        waste: game.waste
-                      };
-              }
-              
-            }),
-          autoProgress: "Accept",
-          onClick: (function (param) {
-              
-            })
-        };
+function arePair(a, b) {
+  var match = a.card.rank;
+  switch (match) {
+    case "RA" :
+        return b.card.rank === "RQ";
+    case "R2" :
+        return b.card.rank === "RJ";
+    case "R3" :
+        return b.card.rank === "R10";
+    case "R4" :
+        return b.card.rank === "R9";
+    case "R5" :
+        return b.card.rank === "R8";
+    case "R6" :
+        return b.card.rank === "R7";
+    case "R7" :
+        return b.card.rank === "R6";
+    case "R8" :
+        return b.card.rank === "R5";
+    case "R9" :
+        return b.card.rank === "R4";
+    case "R10" :
+        return b.card.rank === "R3";
+    case "RJ" :
+        return b.card.rank === "R2";
+    case "RQ" :
+        return b.card.rank === "RA";
+    case "RK" :
+        return false;
+    
+  }
 }
 
-function pileRules(pile, card, i, j) {
-  var isLast = j === (pile.length - 1 | 0);
+function isExposed(game, i, j) {
+  if (i === (game.piles.length - 1 | 0)) {
+    return true;
+  } else {
+    return Core__Option.mapOr(game.piles[i + 1 | 0], false, (function (pile) {
+                  var leftEmpty = Core__Option.isNone(pile[j]);
+                  var rightEmpty = Core__Option.isNone(pile[j + 1 | 0]);
+                  if (leftEmpty) {
+                    return rightEmpty;
+                  } else {
+                    return false;
+                  }
+                }));
+  }
+}
+
+function pileRules(game, pile, card, i, j) {
   return {
           locationAdjustment: {
-            x: 0,
-            y: Math.imul(j, 20),
+            x: Math.imul(j, 70),
+            y: 0,
             z: j + 1 | 0
           },
           baseSpace: {
@@ -386,103 +406,76 @@ function pileRules(pile, card, i, j) {
             _0: i
           },
           dragPile: (function () {
-              var dragPile = pile.slice(j);
-              if (GameCommons.decAndAltValidation(dragPile)) {
-                return dragPile;
+              if (i === (game.piles.length - 1 | 0) || isExposed(game, i, j)) {
+                return card;
               }
               
             }),
           autoProgress: (function () {
-              if (isLast) {
-                return {
-                        TAG: "SendOrAccept",
-                        _0: [card]
-                      };
-              } else {
-                return "DoNothing";
-              }
+              return "DoNothing";
             }),
           droppedUpon: (function (game, dragPile) {
-              var dragPileBase = dragPile[0];
-              if (isLast && Card.rankIsAbove(card, dragPileBase) && Card.color(dragPileBase) !== Card.color(card)) {
+              if (isExposed(game, i, j) && arePair(dragPile, card)) {
                 return {
-                        piles: game.piles.map(function (stack) {
-                              return Common.ArrayAux.insertAfter(stack, card, dragPile);
-                            }),
-                        foundations: game.foundations,
+                        piles: Common.ArrayAux.update(game.piles, i, (function (stack) {
+                                return Common.ArrayAux.update(stack, j, (function (param) {
+                                              
+                                            }));
+                              })),
+                        foundations: game.foundations.concat([
+                              card,
+                              dragPile
+                            ]),
                         stock: game.stock,
                         waste: game.waste
                       };
+              } else if (card.card.rank === "RK") {
+                return {
+                        piles: game.piles,
+                        foundations: game.foundations.concat([dragPile]),
+                        stock: game.stock,
+                        waste: game.waste
+                      };
+              } else {
+                return ;
               }
-              
             }),
           onStateChange: (function (_element) {
               
             }),
-          onClick: (function (param) {
-              
-            })
-        };
-}
-
-function foundationBaseRules(i) {
-  return {
-          droppedUpon: (function (game, dragPile) {
-              var justOne = dragPile.length === 1;
-              var dragPileBase = dragPile[0];
-              var noChildren = game.foundations[i].length === 0;
-              if (noChildren && justOne && dragPileBase.card.rank === "RA") {
+          onClick: (function (game) {
+              if (card.card.rank === "RK") {
                 return {
-                        piles: game.piles,
-                        foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
-                                return dragPile;
+                        piles: Common.ArrayAux.update(game.piles, i, (function (stack) {
+                                return Common.ArrayAux.update(stack, j, (function (param) {
+                                              
+                                            }));
                               })),
+                        foundations: game.foundations.concat([card]),
                         stock: game.stock,
                         waste: game.waste
                       };
               }
               
-            }),
-          autoProgress: "Seek",
-          onClick: (function (param) {
-              
             })
         };
 }
 
-function foundationRules(game, card, i, j) {
+function foundationRules(game, card, i) {
   return {
           locationAdjustment: {
             x: 0,
             y: 0,
-            z: j + 1 | 0
+            z: i + 1 | 0
           },
-          baseSpace: {
-            TAG: "Foundation",
-            _0: i
-          },
+          baseSpace: "Foundation",
           dragPile: (function () {
-              if (j === (game.foundations.length - 1 | 0)) {
-                return [card];
-              }
               
             }),
           autoProgress: (function () {
               return "Seek";
             }),
           droppedUpon: (function (game, dragPile) {
-              var justOne = dragPile.length === 1;
-              var dragPileBase = dragPile[0];
-              if (justOne && dragPileBase.card.suit === card.card.suit && Card.rankIsBelow(card, dragPileBase)) {
-                return {
-                        piles: game.piles,
-                        foundations: game.foundations.map(function (stack) {
-                              return Common.ArrayAux.insertAfter(stack, card, dragPile);
-                            }),
-                        stock: game.stock,
-                        waste: game.waste
-                      };
-              }
               
             }),
           onStateChange: (function (param) {
@@ -497,14 +490,14 @@ function foundationRules(game, card, i, j) {
 function wasteRules(game, card, i) {
   return {
           locationAdjustment: {
-            x: Math.imul(20, i),
+            x: 0,
             y: 0,
             z: i + 1 | 0
           },
           baseSpace: "Waste",
           dragPile: (function () {
               if (i === (game.waste.length - 1 | 0)) {
-                return [card];
+                return card;
               }
               
             }),
@@ -523,7 +516,7 @@ function wasteRules(game, card, i) {
         };
 }
 
-function stockRules(i) {
+function stockRules(game, card, i) {
   return {
           locationAdjustment: {
             x: 0,
@@ -532,6 +525,9 @@ function stockRules(i) {
           },
           baseSpace: "Stock",
           dragPile: (function () {
+              if (i === (game.stock.length - 1 | 0)) {
+                return card;
+              }
               
             }),
           autoProgress: (function () {
@@ -544,12 +540,21 @@ function stockRules(i) {
               
             }),
           onClick: (function (game) {
-              return {
-                      piles: game.piles,
-                      foundations: game.foundations,
-                      stock: game.stock.slice(0, game.stock.length - 1 | 0),
-                      waste: game.waste.concat(game.stock.slice(game.stock.length - 1 | 0))
-                    };
+              if (card.card.rank === "RK") {
+                return {
+                        piles: game.piles,
+                        foundations: game.foundations.concat([card]),
+                        stock: game.stock.slice(0, game.stock.length - 1 | 0),
+                        waste: game.waste
+                      };
+              } else {
+                return {
+                        piles: game.piles,
+                        foundations: game.foundations,
+                        stock: game.stock.slice(0, game.stock.length - 1 | 0),
+                        waste: game.waste.concat(game.stock.slice(game.stock.length - 1 | 0))
+                      };
+              }
             })
         };
 }
@@ -578,34 +583,47 @@ function forEachSpace(game, f) {
               _0: i
             }, {
               TAG: "Static",
-              _0: pileBaseRules(i)
+              _0: {
+                droppedUpon: (function (_game, _dragPile) {
+                    
+                  }),
+                autoProgress: "DoNothing",
+                onClick: (function (param) {
+                    
+                  })
+              }
             });
         pile.forEach(function (card, j) {
-              f({
-                    TAG: "Card",
-                    _0: card.card
-                  }, {
-                    TAG: "Movable",
-                    _0: pileRules(pile, card, i, j)
-                  });
+              Core__Option.mapOr(card, undefined, (function (card) {
+                      f({
+                            TAG: "Card",
+                            _0: card.card
+                          }, {
+                            TAG: "Movable",
+                            _0: pileRules(game, pile, card, i, j)
+                          });
+                    }));
             });
       });
-  game.foundations.forEach(function (foundation, i) {
-        f({
-              TAG: "Foundation",
-              _0: i
-            }, {
+  game.foundations.forEach(function (card, i) {
+        f("Foundation", {
               TAG: "Static",
-              _0: foundationBaseRules(i)
+              _0: {
+                droppedUpon: (function (game, dragPile) {
+                    
+                  }),
+                autoProgress: "DoNothing",
+                onClick: (function (param) {
+                    
+                  })
+              }
             });
-        foundation.forEach(function (card, j) {
-              f({
-                    TAG: "Card",
-                    _0: card.card
-                  }, {
-                    TAG: "Movable",
-                    _0: foundationRules(game, card, i, j)
-                  });
+        f({
+              TAG: "Card",
+              _0: card.card
+            }, {
+              TAG: "Movable",
+              _0: foundationRules(game, card, i)
             });
       });
   game.waste.forEach(function (card, i) {
@@ -623,7 +641,7 @@ function forEachSpace(game, f) {
               _0: card.card
             }, {
               TAG: "Movable",
-              _0: stockRules(i)
+              _0: stockRules(game, card, i)
             });
       });
   f("Stock", {
@@ -632,7 +650,7 @@ function forEachSpace(game, f) {
       });
 }
 
-function Klondike$GameRules$Board(props) {
+function Pyramid$GameRules$Board(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
@@ -648,7 +666,12 @@ function Klondike$GameRules$Board(props) {
                               ref: Caml_option.some(setRef("Waste")),
                               className: " w-14 h-20",
                               id: JSON.stringify(space_encode("Waste"))
-                            }, JSON.stringify(space_encode("Waste")))
+                            }, JSON.stringify(space_encode("Waste"))),
+                        JsxRuntime.jsx("div", {
+                              ref: Caml_option.some(setRef("Foundation")),
+                              className: " border rounded w-14 h-20",
+                              id: JSON.stringify(space_encode("Foundation"))
+                            }, JSON.stringify(space_encode("Foundation")))
                       ],
                       className: "flex flex-row gap-3"
                     }),
@@ -657,30 +680,6 @@ function Klondike$GameRules$Board(props) {
                           [],
                           [],
                           [],
-                          []
-                        ].map(function (param, i) {
-                            return JsxRuntime.jsx("div", {
-                                        ref: Caml_option.some(setRef({
-                                                  TAG: "Foundation",
-                                                  _0: i
-                                                })),
-                                        className: " bg-white opacity-10 rounded w-14 h-20",
-                                        id: JSON.stringify(space_encode({
-                                                  TAG: "Foundation",
-                                                  _0: i
-                                                }))
-                                      }, JSON.stringify(space_encode({
-                                                TAG: "Foundation",
-                                                _0: i
-                                              })));
-                          }),
-                      className: "flex flex-row gap-3 mt-5"
-                    }),
-                JsxRuntime.jsx("div", {
-                      children: [
-                          [],
-                          [],
-                          [],
                           [],
                           [],
                           [],
@@ -691,27 +690,30 @@ function Klondike$GameRules$Board(props) {
                                                   TAG: "Pile",
                                                   _0: i
                                                 })),
-                                        className: " bg-black opacity-20  rounded w-14 h-20",
+                                        className: " bg-black opacity-20  rounded w-14 h-10",
                                         id: JSON.stringify(space_encode({
                                                   TAG: "Pile",
                                                   _0: i
-                                                }))
+                                                })),
+                                        style: {
+                                          marginLeft: Math.imul(6 - i | 0, 35).toString() + "px"
+                                        }
                                       }, JSON.stringify(space_encode({
                                                 TAG: "Pile",
                                                 _0: i
                                               })));
                           }),
-                      className: "flex flex-row gap-3 mt-5"
+                      className: "flex flex-col gap-3 mt-5"
                     })
               ]
             });
 }
 
 var Board = {
-  make: Klondike$GameRules$Board
+  make: Pyramid$GameRules$Board
 };
 
-function Klondike$GameRules$AllCards(props) {
+function Pyramid$GameRules$AllCards(props) {
   var onMouseDown = props.onMouseDown;
   var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
@@ -736,7 +738,7 @@ function Klondike$GameRules$AllCards(props) {
 }
 
 var AllCards = {
-  make: Klondike$GameRules$AllCards
+  make: Pyramid$GameRules$AllCards
 };
 
 var GameRules = {
