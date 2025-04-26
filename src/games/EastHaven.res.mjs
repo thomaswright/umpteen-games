@@ -319,9 +319,8 @@ function applyMoveToDragPile(dragPile, move) {
 function pileBaseRules(i) {
   return {
           droppedUpon: (function (game, dragPile) {
-              var dragPileBase = dragPile[0];
               var noChildren = game.piles[i].length === 0;
-              if (noChildren && dragPileBase.card.rank === "RK") {
+              if (noChildren) {
                 return {
                         piles: flipLastUp$1(Common.ArrayAux.update(game.piles, i, (function (param) {
                                     return dragPile;
@@ -402,7 +401,7 @@ function foundationBaseRules(i) {
               var noChildren = game.foundations[i].length === 0;
               if (noChildren && justOne && dragPileBase.card.rank === "RA") {
                 return {
-                        piles: game.piles,
+                        piles: flipLastUp$1(game.piles),
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                 return dragPile;
                               })),
@@ -443,7 +442,7 @@ function foundationRules(game, card, i, j) {
               var dragPileBase = dragPile[0];
               if (justOne && dragPileBase.card.suit === card.card.suit && Card.rankIsBelow(card, dragPileBase)) {
                 return {
-                        piles: game.piles,
+                        piles: flipLastUp$1(game.piles),
                         foundations: game.foundations.map(function (stack) {
                               return Common.ArrayAux.insertAfter(stack, card, dragPile);
                             }),

@@ -70,10 +70,9 @@ module EastHavenRules = {
   let pileBaseRules = (i): staticSpace => {
     {
       droppedUpon: (game, dragPile) => {
-        let dragPileBase = dragPile->Array.getUnsafe(0)
         let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
 
-        if noChildren && dragPileBase.card.rank == RK {
+        if noChildren {
           Some({
             ...game,
             piles: game.piles->ArrayAux.update(i, _ => dragPile)->flipLastUp,
@@ -155,6 +154,7 @@ module EastHavenRules = {
           Some({
             ...game,
             foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
+            piles: game.piles->flipLastUp,
           })
         } else {
           None
@@ -194,6 +194,7 @@ module EastHavenRules = {
             foundations: game.foundations->Array.map(stack => {
               stack->ArrayAux.insertAfter(card, dragPile)
             }),
+            piles: game.piles->flipLastUp,
           })
         } else {
           None
