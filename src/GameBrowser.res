@@ -9,6 +9,7 @@ type gameType =
   | @as("Spider: Four Suit") SpiderFourSuit
   | @as("Scorpion") Scorpion
   | @as("Pyramid") Pyramid
+  | @as("Simple Simon") SimpleSimon
 
 let gameString = (a: gameType) => (a :> string)
 
@@ -22,6 +23,7 @@ let allGames = [
   SpiderTwoSuit,
   SpiderFourSuit,
   Scorpion,
+  SimpleSimon,
   Pyramid,
 ]
 
@@ -65,6 +67,7 @@ let make = () => {
     | SpiderFourSuit => <Spider.FourSuit id={selectGameType->gameString} />
     | Scorpion => <Spider.Scorpion id={selectGameType->gameString} />
     | Pyramid => <Pyramid.Game id={selectGameType->gameString} />
+    | SimpleSimon => <SimpleSimon.Game id={selectGameType->gameString} />
     }}
   </div>
 }
