@@ -5,6 +5,7 @@ import * as Spider from "./games/Spider.res.mjs";
 import * as Pyramid from "./games/Pyramid.res.mjs";
 import * as FreeCell from "./games/FreeCell.res.mjs";
 import * as Klondike from "./games/Klondike.res.mjs";
+import * as EastHaven from "./games/EastHaven.res.mjs";
 import * as UpAndDown from "./games/UpAndDown.res.mjs";
 import * as SimpleSimon from "./games/SimpleSimon.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
@@ -24,7 +25,8 @@ var allGames = [
   "Spider: Four Suit",
   "Scorpion",
   "Simple Simon",
-  "Pyramid"
+  "Pyramid",
+  "EastHaven"
 ];
 
 function GameBrowser(props) {
@@ -85,6 +87,11 @@ function GameBrowser(props) {
         break;
     case "Simple Simon" :
         tmp = JsxRuntime.jsx(SimpleSimon.Game.make, {
+              id: selectGameType
+            });
+        break;
+    case "EastHaven" :
+        tmp = JsxRuntime.jsx(EastHaven.EastHaven.make, {
               id: selectGameType
             });
         break;

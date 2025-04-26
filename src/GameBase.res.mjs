@@ -318,6 +318,9 @@ function Create(GameRules) {
   var GameBase$Create$Main = function (props) {
     var setState = props.setState;
     var getState = props.getState;
+    var cancelOnClick = {
+      contents: false
+    };
     var listeners = {
       contents: new Set()
     };
@@ -392,15 +395,6 @@ function Create(GameRules) {
       return refs.current.find(function (el) {
                   return Caml_obj.equal(GameRules.getSpace(el), Caml_option.some(a));
                 });
-    };
-    var setRef = function (card) {
-      return function (element) {
-        if (element === null || element === undefined) {
-          return ;
-        }
-        element.id = GameRules.spaceToString(card);
-        refs.current.push(element);
-      };
     };
     var liftUp = function (element, zIndex) {
       element.style["z-index"] = zIndex.toString();
@@ -551,8 +545,8 @@ function Create(GameRules) {
               return progressDragPiles(dragPiles, droppedUpons);
             }));
     };
-    var staticOnClick = function ($$event) {
-      Core__Option.mapOr(GameRules.getSpace($$event.currentTarget), undefined, (function (dragSpace) {
+    var onClick = function (element) {
+      Core__Option.mapOr(GameRules.getSpace(element), undefined, (function (dragSpace) {
               GameRules.forEachSpace(getGame(), (function (space, rule) {
                       if (!Caml_obj.equal(space, dragSpace)) {
                         return ;
@@ -573,27 +567,14 @@ function Create(GameRules) {
                     }));
             }));
     };
-    var movableOnClick = function (dragElement) {
-      Core__Option.mapOr(GameRules.getSpace(dragElement), undefined, (function (dragSpace) {
-              GameRules.forEachSpace(getGame(), (function (space, rule) {
-                      if (!Caml_obj.equal(space, dragSpace)) {
-                        return ;
-                      }
-                      var onClick;
-                      onClick = rule.TAG === "Movable" ? rule._0.onClick : rule._0.onClick;
-                      Core__Option.mapOr(onClick(getGame()), undefined, (function (newGame) {
-                              if (JSON.stringify(GameRules.game_encode(getGame())) !== JSON.stringify(GameRules.game_encode(newGame))) {
-                                setGame(function (param) {
-                                      return newGame;
-                                    });
-                                snapshot();
-                                moveToState();
-                                return autoProgress();
-                              }
-                              
-                            }));
-                    }));
-            }));
+    var standardOnClick = function ($$event) {
+      if (!cancelOnClick.contents) {
+        onClick($$event.currentTarget);
+      }
+      cancelOnClick.contents = false;
+    };
+    var staticOnClick = function ($$event) {
+      onClick($$event.currentTarget);
     };
     var onMouseDown = function ($$event) {
       var dragElement = $$event.currentTarget;
@@ -672,7 +653,7 @@ function Create(GameRules) {
       if (progressDragPiles([dragPile], droppedUpons.toReversed())) {
         snapshot();
       } else {
-        movableOnClick(dragElement);
+        onClick(dragElement);
       }
       moveToState();
       autoProgress();
@@ -726,6 +707,7 @@ function Create(GameRules) {
         } else {
           onMouseUpNone(dragElement, dragPile);
         }
+        cancelOnClick.contents = true;
       }
       dragData.current = undefined;
     };
@@ -756,6 +738,16 @@ function Create(GameRules) {
             moveToState();
             autoProgress();
           }), []);
+    var setRef = function (card) {
+      return function (element) {
+        if (element === null || element === undefined) {
+          return ;
+        }
+        element.id = GameRules.spaceToString(card);
+        element.onclick = standardOnClick;
+        refs.current.push(element);
+      };
+    };
     return JsxRuntime.jsxs("div", {
                 children: [
                   JsxRuntime.jsx(GameBase$Create$BoardWrapper, {

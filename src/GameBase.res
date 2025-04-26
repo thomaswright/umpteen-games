@@ -223,6 +223,7 @@ module Create = (GameRules: GameRules) => {
       ~setState: (state => state) => unit,
       ~createNewGame: unit => unit,
     ) => {
+      let cancelOnClick = ref(false)
       let listeners = ref(Set.make())
 
       let subscribe = listener => {
@@ -290,18 +291,6 @@ module Create = (GameRules: GameRules) => {
       let dragData: React.ref<option<dragData>> = React.useRef(None)
 
       let getElement = a => refs.current->Array.find(el => el->GameRules.getSpace == Some(a))
-
-      let setRef = card => (element: Js.Nullable.t<Dom.element>) => {
-        switch element {
-        | Value(a) => {
-            a->Element.setId(card->GameRules.spaceToString)
-
-            refs.current->Array.push(a)
-          }
-        | Null => ()
-        | Undefined => ()
-        }
-      }
 
       let liftUpDragPile = dragPile => {
         GameRules.applyLiftToDragPile(dragPile, (space, zIndex) => {
@@ -482,10 +471,8 @@ module Create = (GameRules: GameRules) => {
         )
       }
 
-      let staticOnClick = event => {
-        event
-        ->JsxEvent.Mouse.currentTarget
-        ->Obj.magic
+      let onClick = element => {
+        element
         ->GameRules.getSpace
         ->Option.mapOr((), dragSpace => {
           GameRules.forEachSpace(getGame(), (space, rule) => {
@@ -513,33 +500,27 @@ module Create = (GameRules: GameRules) => {
         })
       }
 
+      let standardOnClick = event => {
+        // will be canceled in the event a dragPile forms
+        if !cancelOnClick.contents {
+          event
+          ->MouseEvent.currentTarget
+          ->Obj.magic
+          ->onClick
+        }
+
+        cancelOnClick := false
+      }
+
+      let staticOnClick = event => {
+        event
+        ->JsxEvent.Mouse.currentTarget
+        ->Obj.magic
+        ->onClick
+      }
+
       let movableOnClick = dragElement => {
-        dragElement
-        ->GameRules.getSpace
-        ->Option.mapOr((), dragSpace => {
-          GameRules.forEachSpace(getGame(), (space, rule) => {
-            if space == dragSpace {
-              switch rule {
-              | Static({onClick})
-              | Movable({onClick}) =>
-                onClick(getGame())->Option.mapOr(
-                  (),
-                  newGame => {
-                    if (
-                      getGame()->GameRules.game_encode->Js.Json.stringify !=
-                        newGame->GameRules.game_encode->Js.Json.stringify
-                    ) {
-                      setGame(_ => newGame)
-                      snapshot()
-                      moveToState()
-                      autoProgress()
-                    }
-                  },
-                )
-              }
-            }
-          })
-        })
+        dragElement->onClick
       }
 
       let onMouseDown = event => {
@@ -675,6 +656,9 @@ module Create = (GameRules: GameRules) => {
                 autoProgress()
               }
             }
+
+            // cancelOnClick
+            cancelOnClick := true
           }
         | None => ()
         }
@@ -711,6 +695,18 @@ module Create = (GameRules: GameRules) => {
         autoProgress()
         None
       }, [])
+
+      let setRef = card => (element: Js.Nullable.t<Dom.element>) => {
+        switch element {
+        | Value(a) => {
+            a->Element.setId(card->GameRules.spaceToString)
+            a->Element.setOnClick(standardOnClick)
+            refs.current->Array.push(a)
+          }
+        | Null => ()
+        | Undefined => ()
+        }
+      }
 
       <div id={"board"} className="relative m-5 mt-0">
         <BoardWrapper
