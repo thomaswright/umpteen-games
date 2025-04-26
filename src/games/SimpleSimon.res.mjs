@@ -287,10 +287,10 @@ function pileBaseRules(game, i) {
               var noChildren = game.piles[i].length === 0;
               if (noChildren) {
                 return {
-                        piles: Common.ArrayAux.update(game.piles, i, (function (param) {
+                        piles: Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
                                 return dragPile;
                               })),
-                        foundations: game.foundations
+                        foundations: gameRemoved.foundations
                       };
               }
               

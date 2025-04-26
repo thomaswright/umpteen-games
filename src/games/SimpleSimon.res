@@ -88,8 +88,8 @@ module GameRules: GameBase.GameRules = {
 
         if noChildren {
           Some({
-            ...game,
-            piles: game.piles->ArrayAux.update(i, _ => dragPile),
+            ...gameRemoved,
+            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile),
           })
         } else {
           None
