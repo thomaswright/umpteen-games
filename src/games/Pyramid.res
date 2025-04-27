@@ -147,16 +147,8 @@ module GameRules: GameBase.GameRules = {
       },
       autoProgress: () => {
         DoNothing
-        // if isLast {
-        //   SendOrAccept(card)
-        // } else {
-        //   DoNothing
-        // }
       },
       droppedUpon: (game, dragPile) => {
-        if card.card.suit == Clubs && card.card.rank == R2 {
-          Console.log4(game, card.card, isExposed(game, i, j), arePair(dragPile, card))
-        }
         if isExposed(game, i, j) && arePair(dragPile, card) {
           Some({
             ...game,
@@ -168,13 +160,6 @@ module GameRules: GameBase.GameRules = {
         } else {
           None
         }
-
-        // else if card.card.rank == RK {
-        //   Some({
-        //     ...game,
-        //     foundations: Array.concat(game.foundations, [dragPile]),
-        //   })
-        // }
       },
       onClick: game => {
         if card.card.rank == RK {

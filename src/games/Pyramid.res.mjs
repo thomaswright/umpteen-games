@@ -417,9 +417,6 @@ function pileRules(game, pile, card, i, j) {
               return "DoNothing";
             }),
           droppedUpon: (function (game, dragPile) {
-              if (card.card.suit === "Clubs" && card.card.rank === "R2") {
-                console.log(game, card.card, isExposed(game, i, j), arePair(dragPile, card));
-              }
               if (isExposed(game, i, j) && arePair(dragPile, card)) {
                 return {
                         piles: Common.ArrayAux.update(game.piles, i, (function (stack) {
