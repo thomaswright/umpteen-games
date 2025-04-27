@@ -194,6 +194,14 @@ let show = element => {
   })
 }
 
+let showOrHide = (card: sides, element) => {
+  if card.hidden {
+    hide(element)
+  } else {
+    show(element)
+  }
+}
+
 let getOneSuitDeck = (deck, suit, hidden) => {
   allRanks->Array.reduce([], (a, rank) => {
     a->Array.concat([

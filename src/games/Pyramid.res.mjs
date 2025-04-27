@@ -437,8 +437,8 @@ function pileRules(game, pile, card, i, j) {
               }
               
             }),
-          onStateChange: (function (_element) {
-              
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
             }),
           onClick: (function (game) {
               if (card.card.rank === "RK") {
@@ -475,8 +475,8 @@ function foundationRules(game, card, i) {
           droppedUpon: (function (game, dragPile) {
               
             }),
-          onStateChange: (function (param) {
-              
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
             }),
           onClick: (function (param) {
               
@@ -516,7 +516,7 @@ function wasteRules(game, card, i) {
               
             }),
           onStateChange: (function (element) {
-              Card.show(element);
+              Card.showOrHide(card, element);
             }),
           onClick: (function (param) {
               
@@ -555,8 +555,8 @@ function stockRules(game, card, i) {
               }
               
             }),
-          onStateChange: (function (param) {
-              
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
             }),
           onClick: (function (game) {
               if (card.card.rank === "RK") {

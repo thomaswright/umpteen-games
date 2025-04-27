@@ -189,9 +189,7 @@ module GameRules: GameBase.GameRules = {
           None
         }
       },
-      onStateChange: _element => {
-        ()
-      },
+      onStateChange: element => Card.showOrHide(card, element),
     }
   }
 
@@ -221,7 +219,7 @@ module GameRules: GameBase.GameRules = {
         None
       },
       onClick: _ => None,
-      onStateChange: _ => (),
+      onStateChange: element => Card.showOrHide(card, element),
     }
   }
 
@@ -252,7 +250,7 @@ module GameRules: GameBase.GameRules = {
       }
     },
     onClick: _ => None,
-    onStateChange: element => Card.show(element),
+    onStateChange: element => Card.showOrHide(card, element),
   }
 
   let stockRules = (game, card, i): movableSpace => {
@@ -298,7 +296,7 @@ module GameRules: GameBase.GameRules = {
         })
       }
     },
-    onStateChange: _ => (),
+    onStateChange: element => Card.showOrHide(card, element),
   }
 
   let stockBaseRules = (): staticSpace => {

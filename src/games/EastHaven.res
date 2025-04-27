@@ -132,13 +132,7 @@ module EastHavenRules = {
         }
       },
       onClick: _ => None,
-      onStateChange: element => {
-        if card.hidden {
-          Card.hide(element)
-        } else {
-          Card.show(element)
-        }
-      },
+      onStateChange: element => Card.showOrHide(card, element),
     }
   }
 
@@ -201,11 +195,11 @@ module EastHavenRules = {
         }
       },
       onClick: _ => None,
-      onStateChange: _ => (),
+      onStateChange: element => Card.showOrHide(card, element),
     }
   }
 
-  let stockGroupRules = (_game, _card, i, j): movableSpace => {
+  let stockGroupRules = (_game, card, i, j): movableSpace => {
     {
       locationAdjustment: {
         x: i * 20,
@@ -235,9 +229,7 @@ module EastHavenRules = {
           }
         })
       },
-      onStateChange: element => {
-        Card.hide(element)
-      },
+      onStateChange: element => Card.showOrHide(card, element),
     }
   }
 

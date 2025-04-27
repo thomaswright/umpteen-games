@@ -641,6 +641,14 @@ function show(element) {
         }));
 }
 
+function showOrHide(card, element) {
+  if (card.hidden) {
+    return hide(element);
+  } else {
+    return show(element);
+  }
+}
+
 function getOneSuitDeck(deck, suit, hidden) {
   return Core__Array.reduce(allRanks, [], (function (a, rank) {
                 return a.concat([{
@@ -701,6 +709,7 @@ export {
   Display ,
   hide ,
   show ,
+  showOrHide ,
   getOneSuitDeck ,
   getDeck ,
 }

@@ -370,11 +370,7 @@ function pileRules(_game, pile, card, i, j) {
               
             }),
           onStateChange: (function (element) {
-              if (card.hidden) {
-                return Card.hide(element);
-              } else {
-                return Card.show(element);
-              }
+              Card.showOrHide(card, element);
             }),
           onClick: (function (param) {
               
@@ -406,7 +402,7 @@ function foundationBaseRules(i) {
         };
 }
 
-function foundationRules(i, j) {
+function foundationRules(card, i, j) {
   return {
           locationAdjustment: {
             x: 0,
@@ -427,7 +423,7 @@ function foundationRules(i, j) {
               
             }),
           onStateChange: (function (element) {
-              Card.show(element);
+              Card.showOrHide(card, element);
             }),
           onClick: (function (param) {
               
@@ -504,7 +500,7 @@ function forEachSpace(game, f) {
                     _0: card.card
                   }, {
                     TAG: "Movable",
-                    _0: foundationRules(i, j)
+                    _0: foundationRules(card, i, j)
                   });
             });
       });
@@ -1001,7 +997,7 @@ function forEachSpace$1(game, f) {
                     _0: card.card
                   }, {
                     TAG: "Movable",
-                    _0: foundationRules(i, j)
+                    _0: foundationRules(card, i, j)
                   });
             });
       });

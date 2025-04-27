@@ -416,8 +416,8 @@ function pileRules(pile, card, i, j) {
               }
               
             }),
-          onStateChange: (function (_element) {
-              
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
             }),
           onClick: (function (param) {
               
@@ -485,8 +485,8 @@ function foundationRules(game, card, i, j) {
               }
               
             }),
-          onStateChange: (function (param) {
-              
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
             }),
           onClick: (function (param) {
               
@@ -515,7 +515,7 @@ function wasteRules(game, card, i) {
               
             }),
           onStateChange: (function (element) {
-              Card.show(element);
+              Card.showOrHide(card, element);
             }),
           onClick: (function (param) {
               
@@ -523,7 +523,7 @@ function wasteRules(game, card, i) {
         };
 }
 
-function stockRules(i) {
+function stockRules(card, i) {
   return {
           locationAdjustment: {
             x: 0,
@@ -540,8 +540,8 @@ function stockRules(i) {
           droppedUpon: (function (param, param$1) {
               
             }),
-          onStateChange: (function (param) {
-              
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
             }),
           onClick: (function (game) {
               return {
@@ -623,7 +623,7 @@ function forEachSpace(game, f) {
               _0: card.card
             }, {
               TAG: "Movable",
-              _0: stockRules(i)
+              _0: stockRules(card, i)
             });
       });
   f("Stock", {

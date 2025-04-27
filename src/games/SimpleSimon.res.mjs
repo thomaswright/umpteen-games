@@ -343,8 +343,8 @@ function pileRules(pile, card, i, j) {
               }
               
             }),
-          onStateChange: (function (_element) {
-              
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
             }),
           onClick: (function (param) {
               
@@ -375,7 +375,7 @@ function foundationBaseRules(i) {
         };
 }
 
-function foundationRules(_game, _card, i, j) {
+function foundationRules(_game, card, i, j) {
   return {
           locationAdjustment: {
             x: 0,
@@ -395,8 +395,8 @@ function foundationRules(_game, _card, i, j) {
           droppedUpon: (function (_game, _dragPile) {
               
             }),
-          onStateChange: (function (param) {
-              
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
             }),
           onClick: (function (param) {
               

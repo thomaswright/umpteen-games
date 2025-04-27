@@ -125,13 +125,7 @@ module SpiderRules = {
         }
       },
       onClick: _ => None,
-      onStateChange: element => {
-        if card.hidden {
-          Card.hide(element)
-        } else {
-          Card.show(element)
-        }
-      },
+      onStateChange: element => Card.showOrHide(card, element),
     }
   }
 
@@ -156,7 +150,7 @@ module SpiderRules = {
     }
   }
 
-  let foundationRules = (i, j): movableSpace => {
+  let foundationRules = (card, i, j): movableSpace => {
     {
       locationAdjustment: {
         x: 0,
@@ -172,9 +166,7 @@ module SpiderRules = {
         None
       },
       onClick: _ => None,
-      onStateChange: element => {
-        Card.show(element)
-      },
+      onStateChange: element => Card.showOrHide(card, element),
     }
   }
 
@@ -227,7 +219,7 @@ module SpiderRules = {
       f(Foundation(i), foundationBaseRules(i)->Static)
 
       foundation->Array.forEachWithIndex((card, j) => {
-        f(Card(card.card), foundationRules(i, j)->Movable)
+        f(Card(card.card), foundationRules(card, i, j)->Movable)
       })
     })
 
@@ -590,7 +582,7 @@ module Scorpion = GameBase.Create({
       f(Foundation(i), foundationBaseRules(i)->Static)
 
       foundation->Array.forEachWithIndex((card, j) => {
-        f(Card(card.card), foundationRules(i, j)->Movable)
+        f(Card(card.card), foundationRules(card, i, j)->Movable)
       })
     })
 

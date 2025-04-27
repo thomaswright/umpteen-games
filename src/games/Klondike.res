@@ -150,9 +150,7 @@ module GameRules: GameBase.GameRules = {
         }
       },
       onClick: _ => None,
-      onStateChange: _element => {
-        ()
-      },
+      onStateChange: element => Card.showOrHide(card, element),
     }
   }
 
@@ -213,7 +211,7 @@ module GameRules: GameBase.GameRules = {
         }
       },
       onClick: _ => None,
-      onStateChange: _ => (),
+      onStateChange: element => Card.showOrHide(card, element),
     }
   }
 
@@ -234,10 +232,10 @@ module GameRules: GameBase.GameRules = {
     autoProgress: () => DoNothing,
     droppedUpon: (_, _) => None,
     onClick: _ => None,
-    onStateChange: element => Card.show(element),
+    onStateChange: element => Card.showOrHide(card, element),
   }
 
-  let stockRules = (i): movableSpace => {
+  let stockRules = (card, i): movableSpace => {
     baseSpace: Stock,
     locationAdjustment: {
       x: 0,
@@ -256,7 +254,7 @@ module GameRules: GameBase.GameRules = {
         ),
       })
     },
-    onStateChange: _ => (),
+    onStateChange: element => Card.showOrHide(card, element),
   }
 
   let stockBaseRules = (): staticSpace => {
@@ -295,7 +293,7 @@ module GameRules: GameBase.GameRules = {
     })
 
     game.stock->Array.forEachWithIndex((card, i) => {
-      f(Card(card.card), stockRules(i)->Movable)
+      f(Card(card.card), stockRules(card, i)->Movable)
     })
 
     f(Stock, stockBaseRules()->Static)

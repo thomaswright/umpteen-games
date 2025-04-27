@@ -140,9 +140,7 @@ module GameRules: GameBase.GameRules = {
         }
       },
       onClick: _ => None,
-      onStateChange: _element => {
-        ()
-      },
+      onStateChange: element => Card.showOrHide(card, element),
     }
   }
 
@@ -166,7 +164,7 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let foundationRules = (_game, _card, i, j): movableSpace => {
+  let foundationRules = (_game, card, i, j): movableSpace => {
     {
       locationAdjustment: {
         x: 0,
@@ -178,7 +176,7 @@ module GameRules: GameBase.GameRules = {
       autoProgress: () => Seek,
       droppedUpon: (_game, _dragPile) => None,
       onClick: _ => None,
-      onStateChange: _ => (),
+      onStateChange: element => Card.showOrHide(card, element),
     }
   }
 

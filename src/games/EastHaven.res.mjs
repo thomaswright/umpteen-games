@@ -381,11 +381,7 @@ function pileRules(pile, card, i, j) {
               
             }),
           onStateChange: (function (element) {
-              if (card.hidden) {
-                return Card.hide(element);
-              } else {
-                return Card.show(element);
-              }
+              Card.showOrHide(card, element);
             }),
           onClick: (function (param) {
               
@@ -451,8 +447,8 @@ function foundationRules(game, card, i, j) {
               }
               
             }),
-          onStateChange: (function (param) {
-              
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
             }),
           onClick: (function (param) {
               
@@ -460,7 +456,7 @@ function foundationRules(game, card, i, j) {
         };
 }
 
-function stockGroupRules(_game, _card, i, j) {
+function stockGroupRules(_game, card, i, j) {
   return {
           locationAdjustment: {
             x: Math.imul(i, 20),
@@ -478,7 +474,7 @@ function stockGroupRules(_game, _card, i, j) {
               
             }),
           onStateChange: (function (element) {
-              Card.hide(element);
+              Card.showOrHide(card, element);
             }),
           onClick: (function (game) {
               return Core__Option.map(Common.ArrayAux.getLast(game.stock), (function (stockGroup) {
