@@ -10,7 +10,7 @@ type gameType =
   | @as("Scorpion") Scorpion
   | @as("Pyramid") Pyramid
   | @as("Simple Simon") SimpleSimon
-  | @as("EastHaven") EastHaven
+  | @as("East Haven") EastHaven
 
 let gameString = (a: gameType) => (a :> string)
 
