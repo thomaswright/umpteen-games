@@ -305,17 +305,17 @@ function applyMoveToDragPile(dragPile, move) {
       });
 }
 
-function pileBaseRules(i) {
+function pileBaseRules(game, i) {
   return {
-          droppedUpon: (function (game, dragPile) {
+          droppedUpon: (function (gameRemoved, dragPile) {
               var noChildren = game.piles[i].length === 0;
               if (noChildren) {
                 return {
-                        piles: flipLastUp(Common.ArrayAux.update(game.piles, i, (function (param) {
+                        piles: flipLastUp(Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
                                     return dragPile;
                                   }))),
-                        foundations: game.foundations,
-                        stock: game.stock
+                        foundations: gameRemoved.foundations,
+                        stock: gameRemoved.stock
                       };
               }
               
@@ -474,7 +474,7 @@ function forEachSpace(game, f) {
               _0: i
             }, {
               TAG: "Static",
-              _0: pileBaseRules(i)
+              _0: pileBaseRules(game, i)
             });
         pile.forEach(function (card, j) {
               f({
@@ -890,18 +890,18 @@ function initiateGame$3() {
         ];
 }
 
-function pileBaseRules$1(i) {
+function pileBaseRules$1(game, i) {
   return {
-          droppedUpon: (function (game, dragPile) {
+          droppedUpon: (function (gameRemoved, dragPile) {
               var noChildren = game.piles[i].length === 0;
               var dragPileBase = dragPile[0];
               if (noChildren && dragPileBase.card.rank === "RK") {
                 return {
-                        piles: flipLastUp(Common.ArrayAux.update(game.piles, i, (function (param) {
+                        piles: flipLastUp(Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
                                     return dragPile;
                                   }))),
-                        foundations: game.foundations,
-                        stock: game.stock
+                        foundations: gameRemoved.foundations,
+                        stock: gameRemoved.stock
                       };
               }
               
@@ -971,7 +971,7 @@ function forEachSpace$1(game, f) {
               _0: i
             }, {
               TAG: "Static",
-              _0: pileBaseRules$1(i)
+              _0: pileBaseRules$1(game, i)
             });
         pile.forEach(function (card, j) {
               f({

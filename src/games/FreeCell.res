@@ -89,15 +89,15 @@ module FreeCellRules = {
     })
   }
 
-  let pileBaseRules = (i): staticSpace => {
+  let pileBaseRules = (game, i): staticSpace => {
     {
-      droppedUpon: (game, dragPile) => {
+      droppedUpon: (gameRemoved, dragPile) => {
         let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
 
         if noChildren {
           Some({
-            ...game,
-            piles: game.piles->ArrayAux.update(i, _ => dragPile),
+            ...gameRemoved,
+            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile),
           })
         } else {
           None
@@ -260,7 +260,7 @@ module FreeCellRules = {
 
   let forEachSpace: GameBase.forEachSpace<game, space, dragPile> = (game: game, f) => {
     game.piles->Array.forEachWithIndex((pile, i) => {
-      f(Pile(i), pileBaseRules(i)->GameBase.Static)
+      f(Pile(i), pileBaseRules(game, i)->GameBase.Static)
 
       pile->Array.forEachWithIndex((card, j) => {
         f(Card(card.card), pileRules(game, pile, card, i, j)->Movable)
@@ -451,16 +451,16 @@ module TwoDeck = GameBase.Create({
 module BakersGame = GameBase.Create({
   include FreeCellRules
 
-  let pileBaseRules = (i): staticSpace => {
+  let pileBaseRules = (game, i): staticSpace => {
     {
-      droppedUpon: (game, dragPile) => {
+      droppedUpon: (gameRemoved, dragPile) => {
         let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
         let dragPileBase = dragPile->Array.getUnsafe(0)
 
         if noChildren && dragPileBase.card.rank == RK {
           Some({
-            ...game,
-            piles: game.piles->ArrayAux.update(i, _ => dragPile),
+            ...gameRemoved,
+            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile),
           })
         } else {
           None
@@ -522,7 +522,7 @@ module BakersGame = GameBase.Create({
 
   let forEachSpace: GameBase.forEachSpace<game, space, dragPile> = (game: game, f) => {
     game.piles->Array.forEachWithIndex((pile, i) => {
-      f(Pile(i), pileBaseRules(i)->GameBase.Static)
+      f(Pile(i), pileBaseRules(game, i)->GameBase.Static)
 
       pile->Array.forEachWithIndex((card, j) => {
         f(Card(card.card), pileRules(game, pile, card, i, j)->Movable)

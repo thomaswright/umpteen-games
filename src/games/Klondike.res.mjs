@@ -349,19 +349,19 @@ function removeDragFromGame(game, dragPile) {
         };
 }
 
-function pileBaseRules(i) {
+function pileBaseRules(game, i) {
   return {
-          droppedUpon: (function (game, dragPile) {
+          droppedUpon: (function (gameRemoved, dragPile) {
               var dragPileBase = dragPile[0];
               var noChildren = game.piles[i].length === 0;
               if (noChildren && dragPileBase.card.rank === "RK") {
                 return {
-                        piles: Common.ArrayAux.update(game.piles, i, (function (param) {
+                        piles: Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
                                 return dragPile;
                               })),
-                        foundations: game.foundations,
-                        stock: game.stock,
-                        waste: game.waste
+                        foundations: gameRemoved.foundations,
+                        stock: gameRemoved.stock,
+                        waste: gameRemoved.waste
                       };
               }
               
@@ -578,7 +578,7 @@ function forEachSpace(game, f) {
               _0: i
             }, {
               TAG: "Static",
-              _0: pileBaseRules(i)
+              _0: pileBaseRules(game, i)
             });
         pile.forEach(function (card, j) {
               f({

@@ -620,19 +620,19 @@ function applyMoveToDragPile(dragPile, move) {
             }, 0, 0);
 }
 
-function pileBaseRules(i) {
+function pileBaseRules(game, i) {
   return {
-          droppedUpon: (function (game, dragPile) {
+          droppedUpon: (function (gameRemoved, dragPile) {
               var noChildren = game.piles[i].length === 0;
               if (noChildren) {
                 return {
-                        piles: Common.ArrayAux.update(game.piles, i, (function (param) {
+                        piles: Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
                                 return [dragPile];
                               })),
-                        foundations: game.foundations,
-                        tarotUp: game.tarotUp,
-                        tarotDown: game.tarotDown,
-                        free: game.free
+                        foundations: gameRemoved.foundations,
+                        tarotUp: gameRemoved.tarotUp,
+                        tarotDown: gameRemoved.tarotDown,
+                        free: gameRemoved.free
                       };
               }
               
@@ -976,7 +976,7 @@ function forEachSpace(game, f) {
               _0: i
             }, {
               TAG: "Static",
-              _0: pileBaseRules(i)
+              _0: pileBaseRules(game, i)
             });
         pile.forEach(function (card, j) {
               f({

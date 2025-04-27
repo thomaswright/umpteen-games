@@ -67,15 +67,15 @@ module EastHavenRules = {
     })
   }
 
-  let pileBaseRules = (i): staticSpace => {
+  let pileBaseRules = (game, i): staticSpace => {
     {
-      droppedUpon: (game, dragPile) => {
+      droppedUpon: (gameRemoved, dragPile) => {
         let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
 
         if noChildren {
           Some({
-            ...game,
-            piles: game.piles->ArrayAux.update(i, _ => dragPile)->flipLastUp,
+            ...gameRemoved,
+            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->flipLastUp,
           })
         } else {
           None
@@ -235,7 +235,7 @@ module EastHavenRules = {
 
   let forEachSpace: GameBase.forEachSpace<game, space, dragPile> = (game: game, f) => {
     game.piles->Array.forEachWithIndex((pile, i) => {
-      f(Pile(i), pileBaseRules(i)->GameBase.Static)
+      f(Pile(i), pileBaseRules(game, i)->GameBase.Static)
 
       pile->Array.forEachWithIndex((card, j) => {
         f(Card(card.card), pileRules(pile, card, i, j)->Movable)

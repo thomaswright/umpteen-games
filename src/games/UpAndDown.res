@@ -127,15 +127,15 @@ module GameRules: GameBase.GameRules = {
     move(Item(dragPile->itemToSpaceItem), 0, 0)
   }
 
-  let pileBaseRules = (i): staticSpace => {
+  let pileBaseRules = (game, i): staticSpace => {
     {
-      droppedUpon: (game, dragPile) => {
+      droppedUpon: (gameRemoved, dragPile) => {
         let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
 
         if noChildren {
           Some({
-            ...game,
-            piles: game.piles->ArrayAux.update(i, _ => [dragPile]),
+            ...gameRemoved,
+            piles: gameRemoved.piles->ArrayAux.update(i, _ => [dragPile]),
           })
         } else {
           None
@@ -386,7 +386,7 @@ module GameRules: GameBase.GameRules = {
 
   let forEachSpace: GameBase.forEachSpace<game, space, dragPile> = (game: game, f) => {
     game.piles->Array.forEachWithIndex((pile, i) => {
-      f(Pile(i), pileBaseRules(i)->Static)
+      f(Pile(i), pileBaseRules(game, i)->Static)
 
       pile->Array.forEachWithIndex((card, j) => {
         f(Item(card->itemToSpaceItem), pileRules(pile, card, i, j)->Movable)
