@@ -209,7 +209,6 @@ module GameRules: GameBase.GameRules = {
       ~game as _,
       ~undo as _,
       ~isWin as _,
-      ~onClick as _,
     ) => {
       <React.Fragment>
         <div className="flex flex-row gap-3 mt-5">

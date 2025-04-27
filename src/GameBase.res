@@ -73,7 +73,6 @@ module type GameRules = {
       'game,
       'undo,
       'isWin,
-      'onClick,
     > = {
       setRef: 'setRef,
       onMouseDown: 'onMouseDown,
@@ -83,7 +82,6 @@ module type GameRules = {
       game: 'game,
       undo: 'undo,
       isWin: 'isWin,
-      onClick: 'onClick,
     }
     let make: props<
       space => ReactDOM.Ref.callbackDomRef,
@@ -94,7 +92,6 @@ module type GameRules = {
       game,
       unit => unit,
       bool,
-      JsxEventU.Mouse.t => unit,
     > => React.element
   }
 
@@ -187,7 +184,6 @@ module Create = (GameRules: GameRules) => {
       ~undo,
       ~createNewGame,
       ~restartGame,
-      ~onClick,
     ) => {
       let game = useGame(subscribe, getGame)
 
@@ -202,9 +198,7 @@ module Create = (GameRules: GameRules) => {
       let isWin = GameRules.winCheck(game)
       <React.Fragment>
         <Common.UtilBoard undo isWin createNewGame restartGame />
-        <GameRules.Board
-          setRef onMouseDown setGame moveToState autoProgress game undo isWin onClick
-        />
+        <GameRules.Board setRef onMouseDown setGame moveToState autoProgress game undo isWin />
       </React.Fragment>
     }
   }
@@ -512,13 +506,6 @@ module Create = (GameRules: GameRules) => {
         cancelOnClick := false
       }
 
-      let staticOnClick = event => {
-        event
-        ->JsxEvent.Mouse.currentTarget
-        ->Obj.magic
-        ->onClick
-      }
-
       let movableOnClick = dragElement => {
         dragElement->onClick
       }
@@ -656,7 +643,6 @@ module Create = (GameRules: GameRules) => {
                 autoProgress()
               }
             }
-
             // cancelOnClick
             cancelOnClick := true
           }
@@ -720,7 +706,6 @@ module Create = (GameRules: GameRules) => {
           autoProgress
           restartGame
           undo
-          onClick={staticOnClick}
         />
         <GameRules.AllCards onMouseDown setRef deck={getDeck()} />
       </div>

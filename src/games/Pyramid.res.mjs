@@ -678,8 +678,7 @@ function Pyramid$GameRules$Board(props) {
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Stock")),
                               className: " bg-black opacity-20 rounded w-14 h-20",
-                              id: JSON.stringify(space_encode("Stock")),
-                              onClick: props.onClick
+                              id: JSON.stringify(space_encode("Stock"))
                             }, JSON.stringify(space_encode("Stock"))),
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Waste")),

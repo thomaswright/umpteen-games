@@ -314,7 +314,6 @@ module FreeCellRules = {
       ~game as _,
       ~undo as _,
       ~isWin as _,
-      ~onClick as _,
     ) => {
       <React.Fragment>
         <div className="flex flex-row">
@@ -378,7 +377,6 @@ module TwoDeck = GameBase.Create({
       ~game as _,
       ~undo as _,
       ~isWin as _,
-      ~onClick as _,
     ) => {
       <React.Fragment>
         <div className="flex flex-row">

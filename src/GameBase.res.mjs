@@ -306,8 +306,7 @@ function Create(GameRules) {
                         autoProgress: props.autoProgress,
                         game: game,
                         undo: undo$1,
-                        isWin: isWin,
-                        onClick: props.onClick
+                        isWin: isWin
                       })
                 ]
               });
@@ -573,9 +572,6 @@ function Create(GameRules) {
       }
       cancelOnClick.contents = false;
     };
-    var staticOnClick = function ($$event) {
-      onClick($$event.currentTarget);
-    };
     var onMouseDown = function ($$event) {
       var dragElement = $$event.currentTarget;
       Core__Option.mapOr(GameRules.getSpace(dragElement), undefined, (function (dragSpace) {
@@ -760,8 +756,7 @@ function Create(GameRules) {
                         autoProgress: autoProgress,
                         undo: undo,
                         createNewGame: props.createNewGame,
-                        restartGame: restartGame,
-                        onClick: staticOnClick
+                        restartGame: restartGame
                       }),
                   JsxRuntime.jsx(GameRules.AllCards.make, {
                         setRef: setRef,

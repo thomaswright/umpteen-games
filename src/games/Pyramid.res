@@ -353,7 +353,6 @@ module GameRules: GameBase.GameRules = {
       ~game as _,
       ~undo as _,
       ~isWin as _,
-      ~onClick,
     ) => {
       <React.Fragment>
         <div className="flex flex-row ">
@@ -361,7 +360,6 @@ module GameRules: GameBase.GameRules = {
             key={Stock->spaceToString}
             id={Stock->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
-            onClick={onClick}
             className=" bg-black opacity-20 rounded w-14 h-20"
           />
           <div
