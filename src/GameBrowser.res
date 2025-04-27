@@ -36,6 +36,8 @@ let make = () => {
     Klondike,
   )
 
+  let id = selectGameType->gameString
+
   <div className={" bg-gradient-to-tl from-green-900 to-green-700 h-dvh"}>
     <div className="px-5 pt-3">
       <div className="mb-1 text-white font-medium tracking-widest ">
@@ -44,7 +46,7 @@ let make = () => {
       <div className="flex flex-row gap-5 text-xl">
         <select
           className={"px-2 py-1 rounded text-sm"}
-          value={selectGameType->gameString}
+          value={id}
           onChange={event => {
             setSelectGameType(_ => JsxEvent.Form.target(event)["value"])
           }}>
@@ -59,18 +61,18 @@ let make = () => {
       </div>
     </div>
     {switch selectGameType {
-    | Klondike => <Klondike.Game id={selectGameType->gameString} />
-    | FreeCellOneDeck => <FreeCell.OneDeck id={selectGameType->gameString} />
-    | FreeCellTwoDeck => <FreeCell.TwoDeck id={selectGameType->gameString} />
-    | BakersGame => <FreeCell.BakersGame id={selectGameType->gameString} />
-    | UpAndDown => <UpAndDown.Game id={selectGameType->gameString} />
-    | SpiderOneSuit => <Spider.OneSuit id={selectGameType->gameString} />
-    | SpiderTwoSuit => <Spider.TwoSuit id={selectGameType->gameString} />
-    | SpiderFourSuit => <Spider.FourSuit id={selectGameType->gameString} />
-    | Scorpion => <Spider.Scorpion id={selectGameType->gameString} />
-    | Pyramid => <Pyramid.Game id={selectGameType->gameString} />
-    | SimpleSimon => <SimpleSimon.Game id={selectGameType->gameString} />
-    | EastHaven => <EastHaven.EastHaven id={selectGameType->gameString} />
+    | Klondike => <Klondike.Game id />
+    | FreeCellOneDeck => <FreeCell.OneDeck id />
+    | FreeCellTwoDeck => <FreeCell.TwoDeck id />
+    | BakersGame => <FreeCell.BakersGame id />
+    | UpAndDown => <UpAndDown.Game id />
+    | SpiderOneSuit => <Spider.OneSuit id />
+    | SpiderTwoSuit => <Spider.TwoSuit id />
+    | SpiderFourSuit => <Spider.FourSuit id />
+    | Scorpion => <Spider.Scorpion id />
+    | Pyramid => <Pyramid.Game id />
+    | SimpleSimon => <SimpleSimon.Game id />
+    | EastHaven => <EastHaven.EastHaven id />
     }}
   </div>
 }
