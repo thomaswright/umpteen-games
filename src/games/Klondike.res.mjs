@@ -21,14 +21,6 @@ var KlondikeBase = Packer.Make({
 
 var spaceToString = KlondikeBase.spaceToString;
 
-var pileBaseRules = KlondikeBase.pileBaseRules;
-
-var pileRules = KlondikeBase.pileRules;
-
-var foundationBaseRules = KlondikeBase.foundationBaseRules;
-
-var foundationRules = KlondikeBase.foundationRules;
-
 function initiateGame() {
   var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
   var deckToDeal = {
@@ -151,66 +143,7 @@ function stockBaseRules() {
         };
 }
 
-function forEachSpace(game, f) {
-  game.piles.forEach(function (pile, i) {
-        f({
-              TAG: "Pile",
-              _0: i
-            }, {
-              TAG: "Static",
-              _0: pileBaseRules(game, i)
-            });
-        pile.forEach(function (card, j) {
-              f({
-                    TAG: "Card",
-                    _0: card.card
-                  }, {
-                    TAG: "Movable",
-                    _0: pileRules(pile, card, i, j)
-                  });
-            });
-      });
-  game.foundations.forEach(function (foundation, i) {
-        f({
-              TAG: "Foundation",
-              _0: i
-            }, {
-              TAG: "Static",
-              _0: foundationBaseRules(i)
-            });
-        foundation.forEach(function (card, j) {
-              f({
-                    TAG: "Card",
-                    _0: card.card
-                  }, {
-                    TAG: "Movable",
-                    _0: foundationRules(game, card, i, j)
-                  });
-            });
-      });
-  game.waste.forEach(function (card, i) {
-        f({
-              TAG: "Card",
-              _0: card.card
-            }, {
-              TAG: "Movable",
-              _0: wasteRules(game, card, i)
-            });
-      });
-  game.stock[0].forEach(function (card, i) {
-        f({
-              TAG: "Card",
-              _0: card.card
-            }, {
-              TAG: "Movable",
-              _0: stockRules(card, i)
-            });
-      });
-  f("Stock", {
-        TAG: "Static",
-        _0: stockBaseRules()
-      });
-}
+var forEachSpace = KlondikeBase.makeForEachSpace(undefined, undefined, undefined, undefined, wasteRules, stockBaseRules, stockRules, undefined, undefined);
 
 function Klondike$GameRules$Board(props) {
   var setRef = props.setRef;

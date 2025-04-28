@@ -14,7 +14,7 @@ module type PackerRules = {
 
 module Make = (PackerRules: PackerRules) => {
   @decco
-  type space = Card(Card.card) | Foundation(int) | Pile(int) | Waste | Stock
+  type space = Card(Card.card) | Foundation(int) | Pile(int) | Waste | Stock | Free(int)
 
   let getSpace = element => {
     switch element->Element.id->Js.Json.parseExn->space_decode {
@@ -92,7 +92,7 @@ module Make = (PackerRules: PackerRules) => {
     }
   }
 
-  let foundationCheck = (game: game, dragPile: dragPile, card: Card.sides, i) => {
+  let foundationCheck = (dragPile: dragPile, card: Card.sides, i) => {
     let justOne = dragPile->Array.length == 1
     let dragPileBase = dragPile->Array.getUnsafe(0)
 
@@ -181,8 +181,6 @@ module Make = (PackerRules: PackerRules) => {
         }
       },
       droppedUpon: (game, dragPile) => {
-        let dragPileBase = dragPile->Array.getUnsafe(0)
-
         if dropCheck(isLast, dragPile, card) {
           Some({
             ...game,
@@ -246,6 +244,110 @@ module Make = (PackerRules: PackerRules) => {
       },
       onClick: _ => None,
       onStateChange: element => Card.showOrHide(card, element),
+    }
+  }
+
+  let wasteRules = (game, card, i): movableSpace => {
+    baseSpace: Waste,
+    locationAdjustment: {
+      x: 20 * i,
+      y: 0,
+      z: i + 1,
+    },
+    dragPile: () => None,
+    autoProgress: () => DoNothing,
+    droppedUpon: (_, _) => None,
+    onClick: _ => None,
+    onStateChange: _ => (),
+  }
+
+  let stockRules = (card, i): movableSpace => {
+    baseSpace: Stock,
+    locationAdjustment: {
+      x: 0,
+      y: 0,
+      z: i + 1,
+    },
+    dragPile: () => None,
+    autoProgress: () => DoNothing,
+    droppedUpon: (_, _) => None,
+    onClick: _ => None,
+    onStateChange: _ => (),
+  }
+
+  let stockBaseRules = (): staticSpace => {
+    autoProgress: DoNothing,
+    droppedUpon: (_, _) => None,
+    onClick: _ => None,
+  }
+
+  let freeRules = (card, i): movableSpace => {
+    baseSpace: Stock,
+    locationAdjustment: {
+      x: 0,
+      y: 0,
+      z: i + 1,
+    },
+    dragPile: () => None,
+    autoProgress: () => DoNothing,
+    droppedUpon: (_, _) => None,
+    onClick: _ => None,
+    onStateChange: _ => (),
+  }
+
+  let freeBaseRules = (_): staticSpace => {
+    autoProgress: DoNothing,
+    droppedUpon: (_, _) => None,
+    onClick: _ => None,
+  }
+
+  let makeForEachSpace = (
+    ~pileBaseRules=pileBaseRules,
+    ~pileRules=pileRules,
+    ~foundationBaseRules=foundationBaseRules,
+    ~foundationRules=foundationRules,
+    ~wasteRules=wasteRules,
+    ~stockBaseRules=stockBaseRules,
+    ~stockRules=stockRules,
+    ~freeBaseRules=freeBaseRules,
+    ~freeRules=freeRules,
+  ) => {
+    (game: game, f) => {
+      game.piles->Array.forEachWithIndex((pile, i) => {
+        f(Pile(i), pileBaseRules(game, i)->GameBase.Static)
+
+        pile->Array.forEachWithIndex((card, j) => {
+          f(Card(card.card), pileRules(pile, card, i, j)->Movable)
+        })
+      })
+
+      game.foundations->Array.forEachWithIndex((foundation, i) => {
+        f(Foundation(i), foundationBaseRules(i)->Static)
+
+        foundation->Array.forEachWithIndex((card, j) => {
+          f(Card(card.card), foundationRules(game, card, i, j)->Movable)
+        })
+      })
+
+      game.waste->Array.forEachWithIndex((card, i) => {
+        f(Card(card.card), wasteRules(game, card, i)->Movable)
+      })
+
+      game.stock
+      ->Array.getUnsafe(0)
+      ->Array.forEachWithIndex((card, i) => {
+        f(Card(card.card), stockRules(card, i)->Movable)
+      })
+
+      f(Stock, stockBaseRules()->Static)
+
+      game.free->Array.forEachWithIndex((card, i) => {
+        f(Free(i), freeBaseRules(i)->Static)
+
+        card->Option.mapOr((), card => {
+          f(Card(card.card), freeRules(card, i)->Movable)
+        })
+      })
     }
   }
 

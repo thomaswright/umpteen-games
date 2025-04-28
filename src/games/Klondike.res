@@ -103,35 +103,7 @@ module GameRules: GameBase.GameRules = {
     },
   }
 
-  let forEachSpace = (game: game, f) => {
-    game.piles->Array.forEachWithIndex((pile, i) => {
-      f(Pile(i), pileBaseRules(game, i)->GameBase.Static)
-
-      pile->Array.forEachWithIndex((card, j) => {
-        f(Card(card.card), pileRules(pile, card, i, j)->Movable)
-      })
-    })
-
-    game.foundations->Array.forEachWithIndex((foundation, i) => {
-      f(Foundation(i), foundationBaseRules(i)->Static)
-
-      foundation->Array.forEachWithIndex((card, j) => {
-        f(Card(card.card), foundationRules(game, card, i, j)->Movable)
-      })
-    })
-
-    game.waste->Array.forEachWithIndex((card, i) => {
-      f(Card(card.card), wasteRules(game, card, i)->Movable)
-    })
-
-    game.stock
-    ->Array.getUnsafe(0)
-    ->Array.forEachWithIndex((card, i) => {
-      f(Card(card.card), stockRules(card, i)->Movable)
-    })
-
-    f(Stock, stockBaseRules()->Static)
-  }
+  let forEachSpace = KlondikeBase.makeForEachSpace(~wasteRules, ~stockRules, ~stockBaseRules)
 
   module Board = {
     @react.component

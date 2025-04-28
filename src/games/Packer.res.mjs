@@ -39,6 +39,11 @@ function Make(PackerRules) {
                   "Pile",
                   Decco.intToJson(value._0)
                 ];
+      case "Free" :
+          return [
+                  "Free",
+                  Decco.intToJson(value._0)
+                ];
       
     }
   };
@@ -104,7 +109,7 @@ function Make(PackerRules) {
                       value: e$1.value
                     }
                   };
-        case "Pile" :
+        case "Free" :
             if (tagged.length !== 2) {
               return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
             }
@@ -113,7 +118,7 @@ function Make(PackerRules) {
               return {
                       TAG: "Ok",
                       _0: {
-                        TAG: "Pile",
+                        TAG: "Free",
                         _0: v0$2._0
                       }
                     };
@@ -125,6 +130,29 @@ function Make(PackerRules) {
                       path: "[0]" + e$2.path,
                       message: e$2.message,
                       value: e$2.value
+                    }
+                  };
+        case "Pile" :
+            if (tagged.length !== 2) {
+              return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+            }
+            var v0$3 = Decco.intFromJson(Belt_Array.getExn(jsonArr$1, 1));
+            if (v0$3.TAG === "Ok") {
+              return {
+                      TAG: "Ok",
+                      _0: {
+                        TAG: "Pile",
+                        _0: v0$3._0
+                      }
+                    };
+            }
+            var e$3 = v0$3._0;
+            return {
+                    TAG: "Error",
+                    _0: {
+                      path: "[0]" + e$3.path,
+                      message: e$3.message,
+                      value: e$3.value
                     }
                   };
         case "Stock" :
@@ -377,7 +405,7 @@ function Make(PackerRules) {
       return false;
     }
   };
-  var foundationCheck = function (game, dragPile, card, i) {
+  var foundationCheck = function (dragPile, card, i) {
     var justOne = dragPile.length === 1;
     var dragPileBase = dragPile[0];
     var match = PackerRules.spec.foundation;
@@ -565,6 +593,192 @@ function Make(PackerRules) {
               })
           };
   };
+  var wasteRules = function (game, card, i) {
+    return {
+            locationAdjustment: {
+              x: Math.imul(20, i),
+              y: 0,
+              z: i + 1 | 0
+            },
+            baseSpace: "Waste",
+            dragPile: (function () {
+                
+              }),
+            autoProgress: (function () {
+                return "DoNothing";
+              }),
+            droppedUpon: (function (param, param$1) {
+                
+              }),
+            onStateChange: (function (param) {
+                
+              }),
+            onClick: (function (param) {
+                
+              })
+          };
+  };
+  var stockRules = function (card, i) {
+    return {
+            locationAdjustment: {
+              x: 0,
+              y: 0,
+              z: i + 1 | 0
+            },
+            baseSpace: "Stock",
+            dragPile: (function () {
+                
+              }),
+            autoProgress: (function () {
+                return "DoNothing";
+              }),
+            droppedUpon: (function (param, param$1) {
+                
+              }),
+            onStateChange: (function (param) {
+                
+              }),
+            onClick: (function (param) {
+                
+              })
+          };
+  };
+  var stockBaseRules = function () {
+    return {
+            droppedUpon: (function (param, param$1) {
+                
+              }),
+            autoProgress: "DoNothing",
+            onClick: (function (param) {
+                
+              })
+          };
+  };
+  var freeRules = function (card, i) {
+    return {
+            locationAdjustment: {
+              x: 0,
+              y: 0,
+              z: i + 1 | 0
+            },
+            baseSpace: "Stock",
+            dragPile: (function () {
+                
+              }),
+            autoProgress: (function () {
+                return "DoNothing";
+              }),
+            droppedUpon: (function (param, param$1) {
+                
+              }),
+            onStateChange: (function (param) {
+                
+              }),
+            onClick: (function (param) {
+                
+              })
+          };
+  };
+  var freeBaseRules = function (param) {
+    return {
+            droppedUpon: (function (param, param$1) {
+                
+              }),
+            autoProgress: "DoNothing",
+            onClick: (function (param) {
+                
+              })
+          };
+  };
+  var makeForEachSpace = function (pileBaseRulesOpt, pileRulesOpt, foundationBaseRulesOpt, foundationRulesOpt, wasteRulesOpt, stockBaseRulesOpt, stockRulesOpt, freeBaseRulesOpt, freeRulesOpt) {
+    var pileBaseRules$1 = pileBaseRulesOpt !== undefined ? pileBaseRulesOpt : pileBaseRules;
+    var pileRules$1 = pileRulesOpt !== undefined ? pileRulesOpt : pileRules;
+    var foundationBaseRules$1 = foundationBaseRulesOpt !== undefined ? foundationBaseRulesOpt : foundationBaseRules;
+    var foundationRules$1 = foundationRulesOpt !== undefined ? foundationRulesOpt : foundationRules;
+    var wasteRules$1 = wasteRulesOpt !== undefined ? wasteRulesOpt : wasteRules;
+    var stockBaseRules$1 = stockBaseRulesOpt !== undefined ? stockBaseRulesOpt : stockBaseRules;
+    var stockRules$1 = stockRulesOpt !== undefined ? stockRulesOpt : stockRules;
+    var freeBaseRules$1 = freeBaseRulesOpt !== undefined ? freeBaseRulesOpt : freeBaseRules;
+    var freeRules$1 = freeRulesOpt !== undefined ? freeRulesOpt : freeRules;
+    return function (game, f) {
+      game.piles.forEach(function (pile, i) {
+            f({
+                  TAG: "Pile",
+                  _0: i
+                }, {
+                  TAG: "Static",
+                  _0: pileBaseRules$1(game, i)
+                });
+            pile.forEach(function (card, j) {
+                  f({
+                        TAG: "Card",
+                        _0: card.card
+                      }, {
+                        TAG: "Movable",
+                        _0: pileRules$1(pile, card, i, j)
+                      });
+                });
+          });
+      game.foundations.forEach(function (foundation, i) {
+            f({
+                  TAG: "Foundation",
+                  _0: i
+                }, {
+                  TAG: "Static",
+                  _0: foundationBaseRules$1(i)
+                });
+            foundation.forEach(function (card, j) {
+                  f({
+                        TAG: "Card",
+                        _0: card.card
+                      }, {
+                        TAG: "Movable",
+                        _0: foundationRules$1(game, card, i, j)
+                      });
+                });
+          });
+      game.waste.forEach(function (card, i) {
+            f({
+                  TAG: "Card",
+                  _0: card.card
+                }, {
+                  TAG: "Movable",
+                  _0: wasteRules$1(game, card, i)
+                });
+          });
+      game.stock[0].forEach(function (card, i) {
+            f({
+                  TAG: "Card",
+                  _0: card.card
+                }, {
+                  TAG: "Movable",
+                  _0: stockRules$1(card, i)
+                });
+          });
+      f("Stock", {
+            TAG: "Static",
+            _0: stockBaseRules$1()
+          });
+      game.free.forEach(function (card, i) {
+            f({
+                  TAG: "Free",
+                  _0: i
+                }, {
+                  TAG: "Static",
+                  _0: freeBaseRules$1(i)
+                });
+            Core__Option.mapOr(card, undefined, (function (card) {
+                    f({
+                          TAG: "Card",
+                          _0: card.card
+                        }, {
+                          TAG: "Movable",
+                          _0: freeRules$1(card, i)
+                        });
+                  }));
+          });
+    };
+  };
   var Packer$Make$AllCards = function (props) {
     var onMouseDown = props.onMouseDown;
     var setRef = props.setRef;
@@ -613,6 +827,12 @@ function Make(PackerRules) {
           pileRules: pileRules,
           foundationBaseRules: foundationBaseRules,
           foundationRules: foundationRules,
+          wasteRules: wasteRules,
+          stockRules: stockRules,
+          stockBaseRules: stockBaseRules,
+          freeRules: freeRules,
+          freeBaseRules: freeBaseRules,
+          makeForEachSpace: makeForEachSpace,
           AllCards: AllCards
         };
 }
