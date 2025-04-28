@@ -20,7 +20,7 @@ module SpiderRules = {
       game.stock->Array.every(stockGroup => stockGroup->Array.length == 0)
   }
 
-  let stockGroupRules = (_game, _card, i, j): movableSpace => {
+  let stockRules = (_game, _card, i, j): movableSpace => {
     {
       locationAdjustment: {
         x: i * 20,
@@ -56,7 +56,7 @@ module SpiderRules = {
     }
   }
 
-  let forEachSpace = SpiderBase.makeForEachSpace(~stockBaseRules)
+  let forEachSpace = SpiderBase.makeForEachSpace(~stockRules)
 
   module StandardBoard = {
     @react.component

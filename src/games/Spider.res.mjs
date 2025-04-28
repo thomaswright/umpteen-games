@@ -49,8 +49,6 @@ var applyMoveToDragPile = SpiderBase.applyMoveToDragPile;
 
 var removeDragFromGame = SpiderBase.removeDragFromGame;
 
-var stockBaseRules = SpiderBase.stockBaseRules;
-
 var AllCards = SpiderBase.AllCards;
 
 function winCheck(game) {
@@ -65,7 +63,7 @@ function winCheck(game) {
   }
 }
 
-function stockGroupRules(_game, _card, i, j) {
+function stockRules(_game, _card, i, j) {
   return {
           locationAdjustment: {
             x: Math.imul(i, 20),
@@ -103,7 +101,7 @@ function stockGroupRules(_game, _card, i, j) {
         };
 }
 
-var forEachSpace = SpiderBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, stockBaseRules, undefined, undefined, undefined);
+var forEachSpace = SpiderBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, stockRules, undefined, undefined);
 
 function Spider$SpiderRules$StandardBoard(props) {
   var setRef = props.setRef;
@@ -203,7 +201,7 @@ var SpiderRules_foundationRules = SpiderBase.foundationRules;
 
 var SpiderRules_wasteRules = SpiderBase.wasteRules;
 
-var SpiderRules_stockRules = SpiderBase.stockRules;
+var SpiderRules_stockBaseRules = SpiderBase.stockBaseRules;
 
 var SpiderRules_freeRules = SpiderBase.freeRules;
 
@@ -234,14 +232,13 @@ var SpiderRules = {
   foundationBaseRules: SpiderRules_foundationBaseRules,
   foundationRules: SpiderRules_foundationRules,
   wasteRules: SpiderRules_wasteRules,
-  stockRules: SpiderRules_stockRules,
-  stockBaseRules: stockBaseRules,
+  stockBaseRules: SpiderRules_stockBaseRules,
   freeRules: SpiderRules_freeRules,
   freeBaseRules: SpiderRules_freeBaseRules,
   makeForEachSpace: SpiderRules_makeForEachSpace,
   AllCards: AllCards,
   winCheck: winCheck,
-  stockGroupRules: stockGroupRules,
+  stockRules: stockRules,
   forEachSpace: forEachSpace,
   StandardBoard: StandardBoard
 };
@@ -653,7 +650,7 @@ function winCheck$2(game) {
   }
 }
 
-function stockRules(_game, _card, i, j) {
+function stockRules$1(_game, _card, i, j) {
   return {
           locationAdjustment: {
             x: Math.imul(i, 20),
@@ -691,7 +688,7 @@ function stockRules(_game, _card, i, j) {
         };
 }
 
-var forEachSpace$2 = ScorpionBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, stockRules, undefined, undefined);
+var forEachSpace$2 = ScorpionBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, stockRules$1, undefined, undefined);
 
 function Spider$Scorpion$Board(props) {
   var setRef = props.setRef;
