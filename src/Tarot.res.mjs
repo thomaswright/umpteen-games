@@ -528,8 +528,10 @@ function Tarot$Display(props) {
                               }),
                           className: "flex flex-col"
                         }),
-                    className: [" border border-gray-600 rounded w-14 h-20 bg-black shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
+                    className: [" border rounded w-14 h-20  shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
                     style: {
+                      backgroundColor: "hsl(250 67% 17%)",
+                      borderColor: "hsl(250 20% 43%)",
                       color: "white"
                     }
                   }),

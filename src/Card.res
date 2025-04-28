@@ -121,6 +121,14 @@ let multiColorHex = v =>
   | Clubs => "hsl(130 100% 25%)"
   }
 
+let multiColorPastel = v =>
+  switch v.card.suit {
+  | Spades => "hsl(224 100% 97%)"
+  | Hearts => "hsl(0 100% 97%)"
+  | Diamonds => "hsl(48 100% 97%)"
+  | Clubs => "hsl(130 100% 97%)"
+  }
+
 let isOppositeColor = (a, b) => isRed(a) != isRed(b)
 
 let rotation = (card: card) => {
@@ -149,12 +157,15 @@ module Display = {
         ]->Array.join(" ")}>
         <div
           className={[
-            "absolute bg-red-700 border border-red-900 w-full h-full card-back",
+            "absolute bg-red-800 border border-red-950 w-full h-full card-back",
             card.hidden ? "" : "hidden",
           ]->Array.join(" ")}
         />
         <span
-          className="flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-gray-400 rounded">
+          className="flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-gray-400 rounded"
+          style={{
+            backgroundColor: multiColor ? multiColorPastel(card) : "white",
+          }}>
           <span className="flex flex-row">
             <span
               className={[

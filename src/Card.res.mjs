@@ -552,6 +552,21 @@ function multiColorHex(v) {
   }
 }
 
+function multiColorPastel(v) {
+  var match = v.card.suit;
+  switch (match) {
+    case "Spades" :
+        return "hsl(224 100% 97%)";
+    case "Hearts" :
+        return "hsl(0 100% 97%)";
+    case "Diamonds" :
+        return "hsl(48 100% 97%)";
+    case "Clubs" :
+        return "hsl(130 100% 97%)";
+    
+  }
+}
+
 function isOppositeColor(a, b) {
   return isRed(a) !== isRed(b);
 }
@@ -582,7 +597,7 @@ function Card$Display(props) {
                     children: [
                       JsxRuntime.jsx("div", {
                             className: [
-                                "absolute bg-red-700 border border-red-900 w-full h-full card-back",
+                                "absolute bg-red-800 border border-red-950 w-full h-full card-back",
                                 card.hidden ? "" : "hidden"
                               ].join(" ")
                           }),
@@ -609,7 +624,10 @@ function Card$Display(props) {
                                     className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
                                   })
                             ],
-                            className: "flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-gray-400 rounded"
+                            className: "flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-gray-400 rounded",
+                            style: {
+                              backgroundColor: multiColor ? multiColorPastel(card) : "white"
+                            }
                           })
                     ],
                     className: ["relative rounded w-14 h-20  shadow-sm leading-none  cursor-default overflow-hidden"].join(" "),
@@ -703,6 +721,7 @@ export {
   color ,
   colorHex ,
   multiColorHex ,
+  multiColorPastel ,
   isOppositeColor ,
   rotation ,
   toString ,

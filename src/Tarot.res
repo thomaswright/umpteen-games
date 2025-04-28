@@ -123,10 +123,12 @@ module Display = {
         style={{
           // transform: rotation(card),
           // position: "relative",
+          backgroundColor: "hsl(250 67% 17%)",
+          borderColor: "hsl(250 20% 43%)",
           color: "white",
         }}
         className={[
-          " border border-gray-600 rounded w-14 h-20 bg-black shadow-sm px-1 leading-none py-0.5 cursor-default",
+          " border rounded w-14 h-20  shadow-sm px-1 leading-none py-0.5 cursor-default",
         ]->Array.join(" ")}>
         <span className="flex flex-col">
           <span className="flex flex-row">
