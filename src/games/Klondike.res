@@ -64,12 +64,12 @@ module GameRules: GameBase.GameRules = {
     onStateChange: element => Card.showOrHide(card, element),
   }
 
-  let stockRules = (card, i): movableSpace => {
+  let stockRules = (_game, card, _i, j): movableSpace => {
     baseSpace: Stock,
     locationAdjustment: {
       x: 0,
       y: 0,
-      z: i + 1,
+      z: j + 1,
     },
     dragPile: () => None,
     autoProgress: () => DoNothing,

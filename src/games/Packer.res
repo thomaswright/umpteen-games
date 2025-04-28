@@ -8,6 +8,10 @@ type foundation = ByOne | ByAll
 
 type spec = {drop: stack, drag: stack, size: size, depot: depot, foundation: foundation}
 
+// TODO
+let flipLastUp = (piles: array<array<Card.sides>>) =>
+  piles->Array.map(pile => pile->ArrayAux.updateLast(v => {...v, hidden: false}))
+
 module type PackerRules = {
   let spec: spec
 }
@@ -144,7 +148,7 @@ module Make = (PackerRules: PackerRules) => {
         if pileBaseCheck(game, dragPile, i) {
           Some({
             ...gameRemoved,
-            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile),
+            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->flipLastUp,
           })
         } else {
           None
@@ -184,9 +188,11 @@ module Make = (PackerRules: PackerRules) => {
         if dropCheck(isLast, dragPile, card) {
           Some({
             ...game,
-            piles: game.piles->Array.map(stack => {
+            piles: game.piles
+            ->Array.map(stack => {
               stack->ArrayAux.insertAfter(card, dragPile)
-            }),
+            })
+            ->flipLastUp,
           })
         } else {
           None
@@ -261,12 +267,12 @@ module Make = (PackerRules: PackerRules) => {
     onStateChange: _ => (),
   }
 
-  let stockRules = (_card, i): movableSpace => {
+  let stockRules = (_game, _card, _i, j): movableSpace => {
     baseSpace: Stock,
     locationAdjustment: {
       x: 0,
       y: 0,
-      z: i + 1,
+      z: j + 1,
     },
     dragPile: () => None,
     autoProgress: () => DoNothing,
@@ -333,13 +339,11 @@ module Make = (PackerRules: PackerRules) => {
         f(Card(card.card), wasteRules(game, card, i)->Movable)
       })
 
-      game.stock
-      ->Array.get(0)
-      ->Option.mapOr((), v =>
-        v->Array.forEachWithIndex((card, i) => {
-          f(Card(card.card), stockRules(card, i)->Movable)
+      game.stock->Array.forEachWithIndex((group, i) => {
+        group->Array.forEachWithIndex((card, j) => {
+          f(Card(card.card), stockRules(game, card, i, j)->Movable)
         })
-      )
+      })
 
       f(Stock, stockBaseRules()->Static)
 

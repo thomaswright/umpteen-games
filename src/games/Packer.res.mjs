@@ -14,6 +14,17 @@ import * as GameCommons from "./GameCommons.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
+function flipLastUp(piles) {
+  return piles.map(function (pile) {
+              return Common.ArrayAux.updateLast(pile, (function (v) {
+                            return {
+                                    card: v.card,
+                                    hidden: false
+                                  };
+                          }));
+            });
+}
+
 function Make(PackerRules) {
   var space_encode = function (value) {
     if (typeof value !== "object") {
@@ -461,9 +472,9 @@ function Make(PackerRules) {
             droppedUpon: (function (gameRemoved, dragPile) {
                 if (pileBaseCheck(game, dragPile, i)) {
                   return {
-                          piles: Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
-                                  return dragPile;
-                                })),
+                          piles: flipLastUp(Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
+                                      return dragPile;
+                                    }))),
                           foundations: gameRemoved.foundations,
                           stock: gameRemoved.stock,
                           waste: gameRemoved.waste,
@@ -510,9 +521,9 @@ function Make(PackerRules) {
             droppedUpon: (function (game, dragPile) {
                 if (dropCheck(isLast, dragPile, card)) {
                   return {
-                          piles: game.piles.map(function (stack) {
-                                return Common.ArrayAux.insertAfter(stack, card, dragPile);
-                              }),
+                          piles: flipLastUp(game.piles.map(function (stack) {
+                                    return Common.ArrayAux.insertAfter(stack, card, dragPile);
+                                  })),
                           foundations: game.foundations,
                           stock: game.stock,
                           waste: game.waste,
@@ -618,12 +629,12 @@ function Make(PackerRules) {
               })
           };
   };
-  var stockRules = function (_card, i) {
+  var stockRules = function (_game, _card, _i, j) {
     return {
             locationAdjustment: {
               x: 0,
               y: 0,
-              z: i + 1 | 0
+              z: j + 1 | 0
             },
             baseSpace: "Stock",
             dragPile: (function () {
@@ -746,17 +757,17 @@ function Make(PackerRules) {
                   _0: wasteRules$1(game, card, i)
                 });
           });
-      Core__Option.mapOr(game.stock[0], undefined, (function (v) {
-              v.forEach(function (card, i) {
-                    f({
-                          TAG: "Card",
-                          _0: card.card
-                        }, {
-                          TAG: "Movable",
-                          _0: stockRules$1(card, i)
-                        });
-                  });
-            }));
+      game.stock.forEach(function (group, i) {
+            group.forEach(function (card, j) {
+                  f({
+                        TAG: "Card",
+                        _0: card.card
+                      }, {
+                        TAG: "Movable",
+                        _0: stockRules$1(game, card, i, j)
+                      });
+                });
+          });
       f("Stock", {
             TAG: "Static",
             _0: stockBaseRules$1()
@@ -840,6 +851,7 @@ function Make(PackerRules) {
 }
 
 export {
+  flipLastUp ,
   Make ,
 }
 /* Card Not a pure module */

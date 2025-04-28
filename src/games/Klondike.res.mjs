@@ -90,12 +90,12 @@ function wasteRules(game, card, i) {
         };
 }
 
-function stockRules(card, i) {
+function stockRules(_game, card, _i, j) {
   return {
           locationAdjustment: {
             x: 0,
             y: 0,
-            z: i + 1 | 0
+            z: j + 1 | 0
           },
           baseSpace: "Stock",
           dragPile: (function () {

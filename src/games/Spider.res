@@ -1,173 +1,24 @@
 open Webapi.Dom
 open Common
 
+let flipLastUp = (piles: array<array<Card.sides>>) =>
+  piles->Array.map(pile => pile->ArrayAux.updateLast(v => {...v, hidden: false}))
+
+module SpiderBase = Packer.Make({
+  let spec: Packer.spec = {
+    drop: AnySuit,
+    drag: OneSuit,
+    size: AnySize,
+    depot: AnyDepot,
+    foundation: ByAll,
+  }
+})
+
 module SpiderRules = {
-  @decco
-  type space = Card(Card.card) | Foundation(int) | Pile(int) | Stock
-
-  let getSpace = element => {
-    switch element->Element.id->Js.Json.parseExn->space_decode {
-    | Ok(d) => Some(d)
-    | _ => None
-    }
-  }
-
-  let spaceToString = space => {
-    space->space_encode->Js.Json.stringify
-  }
-  @decco
-  type deck = array<Card.sides>
-
-  type dragPile = array<Card.sides>
-
-  @decco
-  type game = {
-    piles: array<array<Card.sides>>,
-    foundations: array<array<Card.sides>>,
-    stock: array<array<Card.sides>>,
-  }
-
-  type movableSpace = GameBase.movableSpace<game, space, dragPile>
-  type staticSpace = GameBase.staticSpace<game, dragPile>
-
-  let flipLastUp = (piles: array<array<Card.sides>>) =>
-    piles->Array.map(pile => pile->ArrayAux.updateLast(v => {...v, hidden: false}))
-
-  let winCheck = (game: game) => {
+  include SpiderBase
+  let winCheck = game => {
     game.piles->Array.every(pile => pile->Array.length == 0) &&
       game.stock->Array.every(stockGroup => stockGroup->Array.length == 0)
-  }
-
-  let removeDragFromGame = (game: game, dragPile: dragPile) => {
-    let dragPileSet = dragPile->Set.fromArray
-    let removeDragPile = x =>
-      x->Array.filter(sCard => {
-        !(dragPileSet->Set.has(sCard))
-      })
-
-    {
-      foundations: game.foundations->Array.map(removeDragPile),
-      piles: game.piles->Array.map(removeDragPile),
-      stock: game.stock->Array.map(removeDragPile),
-    }
-  }
-
-  let applyLiftToDragPile = (dragPile: dragPile, lift) => {
-    dragPile->Array.forEachWithIndex((v, j) => {
-      lift(Card(v.card), j)
-    })
-  }
-
-  let applyMoveToDragPile = (dragPile: dragPile, move) => {
-    dragPile->Array.forEachWithIndex((v, j) => {
-      move(Card(v.card), 0, j * 20)
-    })
-  }
-
-  let pileBaseRules = (game, i): staticSpace => {
-    {
-      droppedUpon: (gameRemoved, dragPile) => {
-        let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
-
-        if noChildren {
-          Some({
-            ...gameRemoved,
-            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->flipLastUp,
-          })
-        } else {
-          None
-        }
-      },
-      autoProgress: Accept,
-      onClick: _ => None,
-    }
-  }
-
-  let pileRules = (_game, pile, card, i, j): movableSpace => {
-    let isLast = j == pile->Array.length - 1
-
-    {
-      locationAdjustment: {
-        x: 0,
-        y: j * 20,
-        z: j + 1,
-      },
-      baseSpace: Pile(i),
-      dragPile: () => {
-        let dragPile = pile->Array.sliceToEnd(~start=j)
-        if dragPile->GameCommons.decValidation {
-          Some(dragPile)
-        } else {
-          None
-        }
-      },
-      autoProgress: () => {
-        if isLast {
-          SendOrAccept([card])
-        } else {
-          DoNothing
-        }
-      },
-      droppedUpon: (game, dragPile) => {
-        let dragPileBase = dragPile->Array.getUnsafe(0)
-
-        if isLast && Card.rankIsAbove(card, dragPileBase) {
-          Some({
-            ...game,
-            piles: game.piles
-            ->Array.map(stack => {
-              stack->ArrayAux.insertAfter(card, dragPile)
-            })
-            ->flipLastUp,
-          })
-        } else {
-          None
-        }
-      },
-      onClick: _ => None,
-      onStateChange: element => Card.showOrHide(card, element),
-    }
-  }
-
-  let foundationBaseRules = (i): staticSpace => {
-    {
-      autoProgress: Seek,
-      droppedUpon: (game, dragPile) => {
-        let fullStack = dragPile->Array.length == 13
-        let noChildren = game.foundations->Array.getUnsafe(i)->Array.length == 0
-        let valid = dragPile->GameCommons.decValidation
-        if fullStack && noChildren && valid {
-          Some({
-            ...game,
-            foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
-            piles: game.piles->flipLastUp,
-          })
-        } else {
-          None
-        }
-      },
-      onClick: _ => None,
-    }
-  }
-
-  let foundationRules = (card, i, j): movableSpace => {
-    {
-      locationAdjustment: {
-        x: 0,
-        y: 0,
-        z: j + 1,
-      },
-      baseSpace: Foundation(i),
-      dragPile: () => {
-        None
-      },
-      autoProgress: () => DoNothing,
-      droppedUpon: (_game, _dragPile) => {
-        None
-      },
-      onClick: _ => None,
-      onStateChange: element => Card.showOrHide(card, element),
-    }
   }
 
   let stockGroupRules = (_game, _card, i, j): movableSpace => {
@@ -206,29 +57,7 @@ module SpiderRules = {
     }
   }
 
-  let forEachSpace: GameBase.forEachSpace<game, space, dragPile> = (game: game, f) => {
-    game.piles->Array.forEachWithIndex((pile, i) => {
-      f(Pile(i), pileBaseRules(game, i)->GameBase.Static)
-
-      pile->Array.forEachWithIndex((card, j) => {
-        f(Card(card.card), pileRules(game, pile, card, i, j)->Movable)
-      })
-    })
-
-    game.foundations->Array.forEachWithIndex((foundation, i) => {
-      f(Foundation(i), foundationBaseRules(i)->Static)
-
-      foundation->Array.forEachWithIndex((card, j) => {
-        f(Card(card.card), foundationRules(card, i, j)->Movable)
-      })
-    })
-
-    game.stock->Array.forEachWithIndex((stockGroup, i) => {
-      stockGroup->Array.forEachWithIndex((card, j) => {
-        f(Card(card.card), stockGroupRules(game, card, i, j)->Movable)
-      })
-    })
-  }
+  let forEachSpace = SpiderBase.makeForEachSpace(~stockBaseRules)
 
   module StandardBoard = {
     @react.component
@@ -273,25 +102,6 @@ module SpiderRules = {
           })
           ->React.array}
         </div>
-      </React.Fragment>
-    }
-  }
-
-  module AllCards = {
-    @react.component
-    let make = (~setRef, ~onMouseDown, ~deck) => {
-      <React.Fragment>
-        {deck
-        ->Array.map(card => {
-          <Card.Display
-            card={card}
-            key={Card(card.card)->spaceToString}
-            id={Card(card.card)->spaceToString}
-            cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card.card)))}
-            onMouseDown={onMouseDown}
-          />
-        })
-        ->React.array}
       </React.Fragment>
     }
   }
@@ -341,6 +151,8 @@ module OneSuit = GameBase.Create({
           deckToDeal->ArrayAux.popN(10),
           deckToDeal->ArrayAux.popN(10),
         ],
+        waste: [],
+        free: [],
       },
     )
   }
@@ -392,6 +204,8 @@ module TwoSuit = GameBase.Create({
           deckToDeal->ArrayAux.popN(10),
           deckToDeal->ArrayAux.popN(10),
         ],
+        waste: [],
+        free: [],
       },
     )
   }
@@ -442,14 +256,26 @@ module FourSuit = GameBase.Create({
           deckToDeal->ArrayAux.popN(10),
           deckToDeal->ArrayAux.popN(10),
         ],
+        waste: [],
+        free: [],
       },
     )
   }
   module Board = SpiderRules.StandardBoard
 })
 
+module ScorpionBase = Packer.Make({
+  let spec: Packer.spec = {
+    drop: OneSuit,
+    drag: AnySuit,
+    size: AnySize,
+    depot: KingDepot,
+    foundation: ByAll,
+  }
+})
+
 module Scorpion = GameBase.Create({
-  include SpiderRules
+  include ScorpionBase
 
   let initiateGame = () => {
     let shuffledDeck = Card.getDeck(0, true)->Array.toShuffled
@@ -494,103 +320,54 @@ module Scorpion = GameBase.Create({
         ]->flipLastUp,
         foundations: [[], [], [], []],
         stock: [deckToDeal->ArrayAux.popN(3)],
+        waste: [],
+        free: [],
       },
     )
   }
 
-  let pileBaseRules = (game, i): staticSpace => {
-    {
-      droppedUpon: (gameRemoved, dragPile) => {
-        let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
-        let dragPileBase = dragPile->Array.getUnsafe(0)
-
-        if noChildren && dragPileBase.card.rank == RK {
-          Some({
-            ...gameRemoved,
-            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->flipLastUp,
-          })
-        } else {
-          None
-        }
-      },
-      autoProgress: Accept,
-      onClick: _ => None,
-    }
+  let winCheck = game => {
+    game.piles->Array.every(pile => pile->Array.length == 0) &&
+      game.stock->Array.every(stockGroup => stockGroup->Array.length == 0)
   }
 
-  let pileRules = (_game, pile, card, i, j): movableSpace => {
-    let isLast = j == pile->Array.length - 1
-
+  let stockRules = (_game, _card, i, j): movableSpace => {
     {
       locationAdjustment: {
-        x: 0,
-        y: j * 20,
-        z: j + 1,
+        x: i * 20,
+        y: 0,
+        z: i * 10 + j + 1,
       },
-      baseSpace: Pile(i),
+      baseSpace: Stock,
       dragPile: () => {
-        let dragPile = pile->Array.sliceToEnd(~start=j)
-        Some(dragPile)
+        None
       },
-      autoProgress: () => {
-        if isLast {
-          SendOrAccept([card])
-        } else {
-          DoNothing
-        }
+      autoProgress: () => DoNothing,
+      droppedUpon: (_game, _dragPile) => {
+        None
       },
-      droppedUpon: (game, dragPile) => {
-        let dragPileBase = dragPile->Array.getUnsafe(0)
-
-        if (
-          isLast && Card.rankIsAbove(card, dragPileBase) && dragPileBase.card.suit == card.card.suit
-        ) {
-          Some({
+      onClick: game => {
+        game.stock
+        ->Common.ArrayAux.getLast
+        ->Option.map(stockGroup => {
+          {
             ...game,
             piles: game.piles
-            ->Array.map(stack => {
-              stack->ArrayAux.insertAfter(card, dragPile)
+            ->Array.mapWithIndex((pile, i) => {
+              stockGroup->Array.get(i)->Option.mapOr(pile, v => Array.concat(pile, [v]))
             })
             ->flipLastUp,
-          })
-        } else {
-          None
-        }
+            stock: game.stock->Array.slice(~start=0, ~end=game.stock->Array.length - 1),
+          }
+        })
       },
-      onClick: _ => None,
       onStateChange: element => {
-        if card.hidden {
-          Card.hide(element)
-        } else {
-          Card.show(element)
-        }
+        Card.hide(element)
       },
     }
   }
 
-  let forEachSpace: GameBase.forEachSpace<game, space, dragPile> = (game: game, f) => {
-    game.piles->Array.forEachWithIndex((pile, i) => {
-      f(Pile(i), pileBaseRules(game, i)->GameBase.Static)
-
-      pile->Array.forEachWithIndex((card, j) => {
-        f(Card(card.card), pileRules(game, pile, card, i, j)->Movable)
-      })
-    })
-
-    game.foundations->Array.forEachWithIndex((foundation, i) => {
-      f(Foundation(i), foundationBaseRules(i)->Static)
-
-      foundation->Array.forEachWithIndex((card, j) => {
-        f(Card(card.card), foundationRules(card, i, j)->Movable)
-      })
-    })
-
-    game.stock->Array.forEachWithIndex((stockGroup, i) => {
-      stockGroup->Array.forEachWithIndex((card, j) => {
-        f(Card(card.card), stockGroupRules(game, card, i, j)->Movable)
-      })
-    })
-  }
+  let forEachSpace = ScorpionBase.makeForEachSpace(~stockRules)
 
   module Board = {
     @react.component
