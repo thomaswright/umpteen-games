@@ -90,7 +90,7 @@ function GameBrowser(props) {
             });
         break;
     case "East Haven" :
-        tmp = JsxRuntime.jsx(EastHaven.EastHaven.make, {
+        tmp = JsxRuntime.jsx(EastHaven.Game.make, {
               id: selectGameType
             });
         break;

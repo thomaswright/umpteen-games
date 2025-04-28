@@ -4,6 +4,7 @@ import * as Card from "../Card.res.mjs";
 import * as React from "react";
 import * as Common from "../Common.res.mjs";
 import * as Packer from "./Packer.res.mjs";
+import * as GameBase from "../GameBase.res.mjs";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
@@ -120,7 +121,7 @@ function initiateGame() {
         ];
 }
 
-function EastHaven$EastHavenRules$StandardBoard(props) {
+function EastHaven$Game$StandardBoard(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
@@ -182,100 +183,29 @@ function EastHaven$EastHavenRules$StandardBoard(props) {
 }
 
 var StandardBoard = {
-  make: EastHaven$EastHavenRules$StandardBoard
+  make: EastHaven$Game$StandardBoard
 };
 
-var EastHavenRules_space_encode = Base.space_encode;
-
-var EastHavenRules_space_decode = Base.space_decode;
-
-var EastHavenRules_getSpace = Base.getSpace;
-
-var EastHavenRules_deck_encode = Base.deck_encode;
-
-var EastHavenRules_deck_decode = Base.deck_decode;
-
-var EastHavenRules_game_encode = Base.game_encode;
-
-var EastHavenRules_game_decode = Base.game_decode;
-
-var EastHavenRules_dropCheck = Base.dropCheck;
-
-var EastHavenRules_dragCheck = Base.dragCheck;
-
-var EastHavenRules_dragSizeCheck = Base.dragSizeCheck;
-
-var EastHavenRules_pileBaseCheck = Base.pileBaseCheck;
-
-var EastHavenRules_foundationBaseCheck = Base.foundationBaseCheck;
-
-var EastHavenRules_foundationCheck = Base.foundationCheck;
-
-var EastHavenRules_applyLiftToDragPile = Base.applyLiftToDragPile;
-
-var EastHavenRules_applyMoveToDragPile = Base.applyMoveToDragPile;
-
-var EastHavenRules_removeDragFromGame = Base.removeDragFromGame;
-
-var EastHavenRules_pileBaseRules = Base.pileBaseRules;
-
-var EastHavenRules_pileRules = Base.pileRules;
-
-var EastHavenRules_foundationBaseRules = Base.foundationBaseRules;
-
-var EastHavenRules_foundationRules = Base.foundationRules;
-
-var EastHavenRules_wasteRules = Base.wasteRules;
-
-var EastHavenRules_stockBaseRules = Base.stockBaseRules;
-
-var EastHavenRules_freeRules = Base.freeRules;
-
-var EastHavenRules_freeBaseRules = Base.freeBaseRules;
-
-var EastHavenRules_makeForEachSpace = Base.makeForEachSpace;
-
-var EastHavenRules_AllCards = Base.AllCards;
-
-var EastHavenRules = {
-  space_encode: EastHavenRules_space_encode,
-  space_decode: EastHavenRules_space_decode,
-  getSpace: EastHavenRules_getSpace,
-  spaceToString: spaceToString,
-  deck_encode: EastHavenRules_deck_encode,
-  deck_decode: EastHavenRules_deck_decode,
-  game_encode: EastHavenRules_game_encode,
-  game_decode: EastHavenRules_game_decode,
-  dropCheck: EastHavenRules_dropCheck,
-  dragCheck: EastHavenRules_dragCheck,
-  dragSizeCheck: EastHavenRules_dragSizeCheck,
-  pileBaseCheck: EastHavenRules_pileBaseCheck,
-  foundationBaseCheck: EastHavenRules_foundationBaseCheck,
-  foundationCheck: EastHavenRules_foundationCheck,
-  applyLiftToDragPile: EastHavenRules_applyLiftToDragPile,
-  applyMoveToDragPile: EastHavenRules_applyMoveToDragPile,
-  removeDragFromGame: EastHavenRules_removeDragFromGame,
-  pileBaseRules: EastHavenRules_pileBaseRules,
-  pileRules: EastHavenRules_pileRules,
-  foundationBaseRules: EastHavenRules_foundationBaseRules,
-  foundationRules: EastHavenRules_foundationRules,
-  wasteRules: EastHavenRules_wasteRules,
-  stockBaseRules: EastHavenRules_stockBaseRules,
-  freeRules: EastHavenRules_freeRules,
-  freeBaseRules: EastHavenRules_freeBaseRules,
-  makeForEachSpace: EastHavenRules_makeForEachSpace,
-  AllCards: EastHavenRules_AllCards,
-  winCheck: winCheck,
-  stockRules: stockRules,
-  forEachSpace: forEachSpace,
-  initiateGame: initiateGame,
-  StandardBoard: StandardBoard,
-  Board: undefined
-};
+var Game = GameBase.Create({
+      game_encode: Base.game_encode,
+      game_decode: Base.game_decode,
+      deck_encode: Base.deck_encode,
+      deck_decode: Base.deck_decode,
+      getSpace: Base.getSpace,
+      spaceToString: spaceToString,
+      initiateGame: initiateGame,
+      forEachSpace: forEachSpace,
+      removeDragFromGame: Base.removeDragFromGame,
+      winCheck: winCheck,
+      applyLiftToDragPile: Base.applyLiftToDragPile,
+      applyMoveToDragPile: Base.applyMoveToDragPile,
+      Board: StandardBoard,
+      AllCards: Base.AllCards
+    });
 
 export {
   Base ,
   flipLastUp ,
-  EastHavenRules ,
+  Game ,
 }
 /* Base Not a pure module */

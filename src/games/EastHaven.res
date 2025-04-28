@@ -13,7 +13,7 @@ module Base = Packer.Make({
 let flipLastUp = (piles: array<array<Card.sides>>) =>
   piles->Array.map(pile => pile->ArrayAux.updateLast(v => {...v, hidden: false}))
 
-module EastHavenRules = {
+module Game = GameBase.Create({
   include Base
 
   let winCheck = (game: game) => {
@@ -136,4 +136,4 @@ module EastHavenRules = {
   }
 
   module Board = StandardBoard
-}
+})
