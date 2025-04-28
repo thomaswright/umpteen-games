@@ -405,7 +405,7 @@ function Make(PackerRules) {
       return false;
     }
   };
-  var foundationCheck = function (dragPile, card, i) {
+  var foundationCheck = function (dragPile, card) {
     var justOne = dragPile.length === 1;
     var dragPileBase = dragPile[0];
     var match = PackerRules.spec.foundation;
@@ -572,7 +572,7 @@ function Make(PackerRules) {
                 return "Seek";
               }),
             droppedUpon: (function (game, dragPile) {
-                if (foundationBaseCheck(game, dragPile, i)) {
+                if (foundationCheck(dragPile, card)) {
                   return {
                           piles: game.piles,
                           foundations: game.foundations.map(function (stack) {
@@ -593,7 +593,7 @@ function Make(PackerRules) {
               })
           };
   };
-  var wasteRules = function (game, card, i) {
+  var wasteRules = function (_game, _card, i) {
     return {
             locationAdjustment: {
               x: Math.imul(20, i),
@@ -618,7 +618,7 @@ function Make(PackerRules) {
               })
           };
   };
-  var stockRules = function (card, i) {
+  var stockRules = function (_card, i) {
     return {
             locationAdjustment: {
               x: 0,
@@ -654,7 +654,7 @@ function Make(PackerRules) {
               })
           };
   };
-  var freeRules = function (card, i) {
+  var freeRules = function (_card, i) {
     return {
             locationAdjustment: {
               x: 0,
@@ -746,15 +746,17 @@ function Make(PackerRules) {
                   _0: wasteRules$1(game, card, i)
                 });
           });
-      game.stock[0].forEach(function (card, i) {
-            f({
-                  TAG: "Card",
-                  _0: card.card
-                }, {
-                  TAG: "Movable",
-                  _0: stockRules$1(card, i)
-                });
-          });
+      Core__Option.mapOr(game.stock[0], undefined, (function (v) {
+              v.forEach(function (card, i) {
+                    f({
+                          TAG: "Card",
+                          _0: card.card
+                        }, {
+                          TAG: "Movable",
+                          _0: stockRules$1(card, i)
+                        });
+                  });
+            }));
       f("Stock", {
             TAG: "Static",
             _0: stockBaseRules$1()

@@ -92,7 +92,7 @@ module Make = (PackerRules: PackerRules) => {
     }
   }
 
-  let foundationCheck = (dragPile: dragPile, card: Card.sides, i) => {
+  let foundationCheck = (dragPile: dragPile, card: Card.sides) => {
     let justOne = dragPile->Array.length == 1
     let dragPileBase = dragPile->Array.getUnsafe(0)
 
@@ -231,7 +231,7 @@ module Make = (PackerRules: PackerRules) => {
       },
       autoProgress: () => Seek,
       droppedUpon: (game, dragPile) => {
-        if foundationBaseCheck(game, dragPile, i) {
+        if foundationCheck(dragPile, card) {
           Some({
             ...game,
             foundations: game.foundations->Array.map(stack => {
@@ -247,7 +247,7 @@ module Make = (PackerRules: PackerRules) => {
     }
   }
 
-  let wasteRules = (game, card, i): movableSpace => {
+  let wasteRules = (_game, _card, i): movableSpace => {
     baseSpace: Waste,
     locationAdjustment: {
       x: 20 * i,
@@ -261,7 +261,7 @@ module Make = (PackerRules: PackerRules) => {
     onStateChange: _ => (),
   }
 
-  let stockRules = (card, i): movableSpace => {
+  let stockRules = (_card, i): movableSpace => {
     baseSpace: Stock,
     locationAdjustment: {
       x: 0,
@@ -281,7 +281,7 @@ module Make = (PackerRules: PackerRules) => {
     onClick: _ => None,
   }
 
-  let freeRules = (card, i): movableSpace => {
+  let freeRules = (_card, i): movableSpace => {
     baseSpace: Stock,
     locationAdjustment: {
       x: 0,
@@ -334,10 +334,12 @@ module Make = (PackerRules: PackerRules) => {
       })
 
       game.stock
-      ->Array.getUnsafe(0)
-      ->Array.forEachWithIndex((card, i) => {
-        f(Card(card.card), stockRules(card, i)->Movable)
-      })
+      ->Array.get(0)
+      ->Option.mapOr((), v =>
+        v->Array.forEachWithIndex((card, i) => {
+          f(Card(card.card), stockRules(card, i)->Movable)
+        })
+      )
 
       f(Stock, stockBaseRules()->Static)
 

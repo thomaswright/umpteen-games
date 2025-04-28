@@ -9,7 +9,7 @@ import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
-var KlondikeBase = Packer.Make({
+var Base = Packer.Make({
       spec: {
         drop: "AltSuit",
         drag: "AltSuit",
@@ -19,7 +19,7 @@ var KlondikeBase = Packer.Make({
       }
     });
 
-var spaceToString = KlondikeBase.spaceToString;
+var spaceToString = Base.spaceToString;
 
 function initiateGame() {
   var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
@@ -143,7 +143,7 @@ function stockBaseRules() {
         };
 }
 
-var forEachSpace = KlondikeBase.makeForEachSpace(undefined, undefined, undefined, undefined, wasteRules, stockBaseRules, stockRules, undefined, undefined);
+var forEachSpace = Base.makeForEachSpace(undefined, undefined, undefined, undefined, wasteRules, stockBaseRules, stockRules, undefined, undefined);
 
 function Klondike$GameRules$Board(props) {
   var setRef = props.setRef;
@@ -223,23 +223,23 @@ var Board = {
   make: Klondike$GameRules$Board
 };
 
-var GameRules_game_encode = KlondikeBase.game_encode;
+var GameRules_game_encode = Base.game_encode;
 
-var GameRules_game_decode = KlondikeBase.game_decode;
+var GameRules_game_decode = Base.game_decode;
 
-var GameRules_deck_encode = KlondikeBase.deck_encode;
+var GameRules_deck_encode = Base.deck_encode;
 
-var GameRules_deck_decode = KlondikeBase.deck_decode;
+var GameRules_deck_decode = Base.deck_decode;
 
-var GameRules_getSpace = KlondikeBase.getSpace;
+var GameRules_getSpace = Base.getSpace;
 
-var GameRules_removeDragFromGame = KlondikeBase.removeDragFromGame;
+var GameRules_removeDragFromGame = Base.removeDragFromGame;
 
-var GameRules_applyLiftToDragPile = KlondikeBase.applyLiftToDragPile;
+var GameRules_applyLiftToDragPile = Base.applyLiftToDragPile;
 
-var GameRules_applyMoveToDragPile = KlondikeBase.applyMoveToDragPile;
+var GameRules_applyMoveToDragPile = Base.applyMoveToDragPile;
 
-var GameRules_AllCards = KlondikeBase.AllCards;
+var GameRules_AllCards = Base.AllCards;
 
 var GameRules = {
   game_encode: GameRules_game_encode,
@@ -261,8 +261,8 @@ var GameRules = {
 var Game = GameBase.Create(GameRules);
 
 export {
-  KlondikeBase ,
+  Base ,
   GameRules ,
   Game ,
 }
-/* KlondikeBase Not a pure module */
+/* Base Not a pure module */

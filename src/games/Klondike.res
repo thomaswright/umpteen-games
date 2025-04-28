@@ -1,7 +1,7 @@
 open Webapi.Dom
 open Common
 
-module KlondikeBase = Packer.Make({
+module Base = Packer.Make({
   let spec: Packer.spec = {
     drop: AltSuit,
     drag: AltSuit,
@@ -12,7 +12,7 @@ module KlondikeBase = Packer.Make({
 })
 
 module GameRules: GameBase.GameRules = {
-  include KlondikeBase
+  include Base
 
   let initiateGame = () => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
@@ -103,7 +103,7 @@ module GameRules: GameBase.GameRules = {
     },
   }
 
-  let forEachSpace = KlondikeBase.makeForEachSpace(~wasteRules, ~stockRules, ~stockBaseRules)
+  let forEachSpace = Base.makeForEachSpace(~wasteRules, ~stockRules, ~stockBaseRules)
 
   module Board = {
     @react.component
