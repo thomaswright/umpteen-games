@@ -582,7 +582,7 @@ function Card$Display(props) {
                     children: [
                       JsxRuntime.jsx("div", {
                             className: [
-                                "absolute bg-red-700 w-full h-full card-back",
+                                "absolute bg-red-700 border border-red-900 w-full h-full card-back",
                                 card.hidden ? "" : "hidden"
                               ].join(" ")
                           }),
@@ -609,10 +609,10 @@ function Card$Display(props) {
                                     className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
                                   })
                             ],
-                            className: "flex flex-col py-0.5 px-1"
+                            className: "flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-gray-400 rounded"
                           })
                     ],
-                    className: ["relative border border-gray-400 rounded w-14 h-20 bg-white shadow-sm leading-none  cursor-default overflow-hidden"].join(" "),
+                    className: ["relative rounded w-14 h-20  shadow-sm leading-none  cursor-default overflow-hidden"].join(" "),
                     style: {
                       color: multiColor ? multiColorHex(card) : colorHex(card),
                       transform: rotation(card.card)

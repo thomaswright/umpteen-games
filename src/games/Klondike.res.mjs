@@ -44,7 +44,12 @@ function initiateGame() {
               [],
               []
             ],
-            stock: [deckToDeal.contents],
+            stock: [deckToDeal.contents.map(function (v) {
+                    return {
+                            card: v.card,
+                            hidden: true
+                          };
+                  })],
             waste: [],
             free: []
           }
@@ -118,7 +123,12 @@ function stockRules(_game, card, _i, j) {
                       stock: Common.ArrayAux.update(game.stock, 0, (function (v) {
                               return v.slice(0, realStock.length - 1 | 0);
                             })),
-                      waste: game.waste.concat(realStock.slice(realStock.length - 1 | 0)),
+                      waste: game.waste.concat(realStock.slice(realStock.length - 1 | 0).map(function (v) {
+                                return {
+                                        card: v.card,
+                                        hidden: false
+                                      };
+                              })),
                       free: game.free
                     };
             })
@@ -135,7 +145,12 @@ function stockBaseRules() {
               return {
                       piles: game.piles,
                       foundations: game.foundations,
-                      stock: [game.waste.toReversed()],
+                      stock: [game.waste.toReversed().map(function (v) {
+                              return {
+                                      card: v.card,
+                                      hidden: true
+                                    };
+                            })],
                       waste: [],
                       free: game.free
                     };

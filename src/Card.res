@@ -145,15 +145,16 @@ module Display = {
           color: multiColor ? card->multiColorHex : card->colorHex,
         }}
         className={[
-          "relative border border-gray-400 rounded w-14 h-20 bg-white shadow-sm leading-none  cursor-default overflow-hidden",
+          "relative rounded w-14 h-20  shadow-sm leading-none  cursor-default overflow-hidden",
         ]->Array.join(" ")}>
         <div
           className={[
-            "absolute bg-red-700 w-full h-full card-back",
+            "absolute bg-red-700 border border-red-900 w-full h-full card-back",
             card.hidden ? "" : "hidden",
           ]->Array.join(" ")}
         />
-        <span className="flex flex-col py-0.5 px-1">
+        <span
+          className="flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-gray-400 rounded">
           <span className="flex flex-row">
             <span
               className={[
