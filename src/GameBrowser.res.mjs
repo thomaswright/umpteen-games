@@ -7,7 +7,6 @@ import * as FreeCell from "./games/FreeCell.res.mjs";
 import * as Klondike from "./games/Klondike.res.mjs";
 import * as EastHaven from "./games/EastHaven.res.mjs";
 import * as UpAndDown from "./games/UpAndDown.res.mjs";
-import * as SimpleSimon from "./games/SimpleSimon.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function gameString(a) {
@@ -86,7 +85,7 @@ function GameBrowser(props) {
             });
         break;
     case "Simple Simon" :
-        tmp = JsxRuntime.jsx(SimpleSimon.Game.make, {
+        tmp = JsxRuntime.jsx(Spider.SimpleSimon.make, {
               id: selectGameType
             });
         break;

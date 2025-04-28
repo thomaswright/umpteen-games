@@ -12,7 +12,7 @@ import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
-import * as GameCommons from "./GameCommons.res.mjs";
+import * as GameCommons from "../games/GameCommons.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function space_encode(value) {
@@ -443,7 +443,7 @@ function forEachSpace(game, f) {
       });
 }
 
-function SimpleSimon$GameRules$Board(props) {
+function OldSimpleSimon$GameRules$Board(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
@@ -506,10 +506,10 @@ function SimpleSimon$GameRules$Board(props) {
 }
 
 var Board = {
-  make: SimpleSimon$GameRules$Board
+  make: OldSimpleSimon$GameRules$Board
 };
 
-function SimpleSimon$GameRules$AllCards(props) {
+function OldSimpleSimon$GameRules$AllCards(props) {
   var onMouseDown = props.onMouseDown;
   var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
@@ -534,7 +534,7 @@ function SimpleSimon$GameRules$AllCards(props) {
 }
 
 var AllCards = {
-  make: SimpleSimon$GameRules$AllCards
+  make: OldSimpleSimon$GameRules$AllCards
 };
 
 var GameRules = {

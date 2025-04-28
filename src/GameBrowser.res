@@ -70,8 +70,8 @@ let make = () => {
     | SpiderTwoSuit => <Spider.TwoSuit id />
     | SpiderFourSuit => <Spider.FourSuit id />
     | Scorpion => <Spider.Scorpion id />
+    | SimpleSimon => <Spider.SimpleSimon id />
     | Pyramid => <Pyramid.Game id />
-    | SimpleSimon => <SimpleSimon.Game id />
     | EastHaven => <EastHaven.EastHaven id />
     }}
   </div>

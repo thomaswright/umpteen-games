@@ -264,6 +264,84 @@ module FourSuit = GameBase.Create({
   module Board = SpiderRules.StandardBoard
 })
 
+module SimpleSimon = GameBase.Create({
+  include SpiderBase
+
+  let initiateGame = () => {
+    let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
+    let deckToDeal = ref(shuffledDeck)
+
+    (
+      shuffledDeck,
+      {
+        piles: [
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(4),
+          deckToDeal->ArrayAux.popN(3),
+          deckToDeal->ArrayAux.popN(2),
+          deckToDeal->ArrayAux.popN(1),
+        ],
+        foundations: [[], [], [], []],
+        free: [],
+        waste: [],
+        stock: [],
+      },
+    )
+  }
+
+  let winCheck = (game: game) => {
+    game.piles->Array.every(pile => pile->Array.length == 0)
+  }
+
+  let forEachSpace = SpiderBase.makeForEachSpace()
+
+  module Board = {
+    @react.component
+    let make = (
+      ~setRef,
+      ~onMouseDown as _,
+      ~setGame as _,
+      ~moveToState as _,
+      ~autoProgress as _,
+      ~game as _,
+      ~undo as _,
+      ~isWin as _,
+    ) => {
+      <React.Fragment>
+        <div className="flex flex-row gap-3 mt-5">
+          {[[], [], [], []]
+          ->Array.mapWithIndex((_, i) => {
+            <div
+              key={Foundation(i)->spaceToString}
+              id={Foundation(i)->spaceToString}
+              ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
+              className=" bg-white opacity-10 rounded w-14 h-20"
+            />
+          })
+          ->React.array}
+        </div>
+        <div className="flex flex-row gap-3 mt-5">
+          {[[], [], [], [], [], [], [], [], [], []]
+          ->Array.mapWithIndex((_, i) => {
+            <div
+              key={Pile(i)->spaceToString}
+              id={Pile(i)->spaceToString}
+              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+              className=" bg-black opacity-20  rounded w-14 h-20"
+            />
+          })
+          ->React.array}
+        </div>
+      </React.Fragment>
+    }
+  }
+})
+
 module ScorpionBase = Packer.Make({
   let spec: Packer.spec = {
     drop: OneSuit,

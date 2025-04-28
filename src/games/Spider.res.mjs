@@ -426,6 +426,132 @@ var FourSuit = GameBase.Create({
       AllCards: AllCards
     });
 
+var spaceToString$1 = SpiderBase.spaceToString;
+
+function initiateGame$3() {
+  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
+  var deckToDeal = {
+    contents: shuffledDeck
+  };
+  return [
+          shuffledDeck,
+          {
+            piles: [
+              Common.ArrayAux.popN(deckToDeal, 8),
+              Common.ArrayAux.popN(deckToDeal, 8),
+              Common.ArrayAux.popN(deckToDeal, 8),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 5),
+              Common.ArrayAux.popN(deckToDeal, 4),
+              Common.ArrayAux.popN(deckToDeal, 3),
+              Common.ArrayAux.popN(deckToDeal, 2),
+              Common.ArrayAux.popN(deckToDeal, 1)
+            ],
+            foundations: [
+              [],
+              [],
+              [],
+              []
+            ],
+            stock: [],
+            waste: [],
+            free: []
+          }
+        ];
+}
+
+function winCheck$1(game) {
+  return game.piles.every(function (pile) {
+              return pile.length === 0;
+            });
+}
+
+var forEachSpace$1 = SpiderBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+
+function Spider$SimpleSimon$Board(props) {
+  var setRef = props.setRef;
+  return JsxRuntime.jsxs(React.Fragment, {
+              children: [
+                JsxRuntime.jsx("div", {
+                      children: [
+                          [],
+                          [],
+                          [],
+                          []
+                        ].map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Foundation",
+                                                  _0: i
+                                                })),
+                                        className: " bg-white opacity-10 rounded w-14 h-20",
+                                        id: spaceToString$1({
+                                              TAG: "Foundation",
+                                              _0: i
+                                            })
+                                      }, spaceToString$1({
+                                            TAG: "Foundation",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    }),
+                JsxRuntime.jsx("div", {
+                      children: [
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          []
+                        ].map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                })),
+                                        className: " bg-black opacity-20  rounded w-14 h-20",
+                                        id: spaceToString$1({
+                                              TAG: "Pile",
+                                              _0: i
+                                            })
+                                      }, spaceToString$1({
+                                            TAG: "Pile",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    })
+              ]
+            });
+}
+
+var Board = {
+  make: Spider$SimpleSimon$Board
+};
+
+var SimpleSimon = GameBase.Create({
+      game_encode: SpiderBase.game_encode,
+      game_decode: SpiderBase.game_decode,
+      deck_encode: SpiderBase.deck_encode,
+      deck_decode: SpiderBase.deck_decode,
+      getSpace: SpiderBase.getSpace,
+      spaceToString: spaceToString$1,
+      initiateGame: initiateGame$3,
+      forEachSpace: forEachSpace$1,
+      removeDragFromGame: SpiderBase.removeDragFromGame,
+      winCheck: winCheck$1,
+      applyLiftToDragPile: SpiderBase.applyLiftToDragPile,
+      applyMoveToDragPile: SpiderBase.applyMoveToDragPile,
+      Board: Board,
+      AllCards: SpiderBase.AllCards
+    });
+
 var ScorpionBase = Packer.Make({
       spec: {
         drop: "OneSuit",
@@ -436,9 +562,9 @@ var ScorpionBase = Packer.Make({
       }
     });
 
-var spaceToString$1 = ScorpionBase.spaceToString;
+var spaceToString$2 = ScorpionBase.spaceToString;
 
-function initiateGame$3() {
+function initiateGame$4() {
   var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, true));
   var deckToDeal = {
     contents: shuffledDeck
@@ -515,7 +641,7 @@ function initiateGame$3() {
         ];
 }
 
-function winCheck$1(game) {
+function winCheck$2(game) {
   if (game.piles.every(function (pile) {
           return pile.length === 0;
         })) {
@@ -565,7 +691,7 @@ function stockRules(_game, _card, i, j) {
         };
 }
 
-var forEachSpace$1 = ScorpionBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, stockRules, undefined, undefined);
+var forEachSpace$2 = ScorpionBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, stockRules, undefined, undefined);
 
 function Spider$Scorpion$Board(props) {
   var setRef = props.setRef;
@@ -576,7 +702,7 @@ function Spider$Scorpion$Board(props) {
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Stock")),
                               className: " bg-white opacity-10  rounded w-14 h-20 mr-20"
-                            }, spaceToString$1("Stock")),
+                            }, spaceToString$2("Stock")),
                         JsxRuntime.jsx("div", {
                               children: [
                                   [],
@@ -590,7 +716,7 @@ function Spider$Scorpion$Board(props) {
                                                           _0: i
                                                         })),
                                                 className: " bg-white opacity-10  rounded w-14 h-20"
-                                              }, spaceToString$1({
+                                              }, spaceToString$2({
                                                     TAG: "Foundation",
                                                     _0: i
                                                   }));
@@ -617,7 +743,7 @@ function Spider$Scorpion$Board(props) {
                                                   _0: i
                                                 })),
                                         className: " bg-black opacity-20   rounded w-14 h-20"
-                                      }, spaceToString$1({
+                                      }, spaceToString$2({
                                             TAG: "Pile",
                                             _0: i
                                           }));
@@ -628,7 +754,7 @@ function Spider$Scorpion$Board(props) {
             });
 }
 
-var Board = {
+var Board$1 = {
   make: Spider$Scorpion$Board
 };
 
@@ -638,14 +764,14 @@ var Scorpion = GameBase.Create({
       deck_encode: ScorpionBase.deck_encode,
       deck_decode: ScorpionBase.deck_decode,
       getSpace: ScorpionBase.getSpace,
-      spaceToString: spaceToString$1,
-      initiateGame: initiateGame$3,
-      forEachSpace: forEachSpace$1,
+      spaceToString: spaceToString$2,
+      initiateGame: initiateGame$4,
+      forEachSpace: forEachSpace$2,
       removeDragFromGame: ScorpionBase.removeDragFromGame,
-      winCheck: winCheck$1,
+      winCheck: winCheck$2,
       applyLiftToDragPile: ScorpionBase.applyLiftToDragPile,
       applyMoveToDragPile: ScorpionBase.applyMoveToDragPile,
-      Board: Board,
+      Board: Board$1,
       AllCards: ScorpionBase.AllCards
     });
 
@@ -656,6 +782,7 @@ export {
   OneSuit ,
   TwoSuit ,
   FourSuit ,
+  SimpleSimon ,
   ScorpionBase ,
   Scorpion ,
 }
