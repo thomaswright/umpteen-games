@@ -40,42 +40,6 @@ var removeDragFromGame = FreeCellBase.removeDragFromGame;
 
 var AllCards = FreeCellBase.AllCards;
 
-function initiateGame() {
-  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
-  var deckToDeal = {
-    contents: shuffledDeck
-  };
-  return [
-          shuffledDeck,
-          {
-            piles: [
-              Common.ArrayAux.popN(deckToDeal, 7),
-              Common.ArrayAux.popN(deckToDeal, 7),
-              Common.ArrayAux.popN(deckToDeal, 7),
-              Common.ArrayAux.popN(deckToDeal, 7),
-              Common.ArrayAux.popN(deckToDeal, 6),
-              Common.ArrayAux.popN(deckToDeal, 6),
-              Common.ArrayAux.popN(deckToDeal, 6),
-              Common.ArrayAux.popN(deckToDeal, 6)
-            ],
-            foundations: [
-              [],
-              [],
-              [],
-              []
-            ],
-            stock: [],
-            waste: [],
-            free: [
-              undefined,
-              undefined,
-              undefined,
-              undefined
-            ]
-          }
-        ];
-}
-
 function winCheck(game) {
   if (game.piles.every(function (pile) {
           return pile.length === 0;
@@ -285,13 +249,48 @@ var FreeCellRules = {
   stockBaseRules: FreeCellRules_stockBaseRules,
   makeForEachSpace: FreeCellRules_makeForEachSpace,
   AllCards: AllCards,
-  initiateGame: initiateGame,
   winCheck: winCheck,
   freeBaseRules: freeBaseRules,
   freeRules: freeRules,
   forEachSpace: forEachSpace,
   StandardBoard: StandardBoard
 };
+
+function initiateGame() {
+  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
+  var deckToDeal = {
+    contents: shuffledDeck
+  };
+  return [
+          shuffledDeck,
+          {
+            piles: [
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6)
+            ],
+            foundations: [
+              [],
+              [],
+              [],
+              []
+            ],
+            stock: [],
+            waste: [],
+            free: [
+              undefined,
+              undefined,
+              undefined,
+              undefined
+            ]
+          }
+        ];
+}
 
 var OneDeck = GameBase.Create({
       game_encode: game_encode,
@@ -310,101 +309,101 @@ var OneDeck = GameBase.Create({
       AllCards: AllCards
     });
 
+function initiateGame$1() {
+  var shuffledDeck = Core__Array.toShuffled([].concat(Card.getDeck(0, false), Card.getDeck(1, false)));
+  var deckToDeal = {
+    contents: shuffledDeck
+  };
+  return [
+          shuffledDeck,
+          {
+            piles: [
+              Common.ArrayAux.popN(deckToDeal, 11),
+              Common.ArrayAux.popN(deckToDeal, 11),
+              Common.ArrayAux.popN(deckToDeal, 11),
+              Common.ArrayAux.popN(deckToDeal, 11),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10),
+              Common.ArrayAux.popN(deckToDeal, 10)
+            ],
+            foundations: [
+              [],
+              [],
+              [],
+              []
+            ],
+            stock: [],
+            waste: [],
+            free: [
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined
+            ]
+          }
+        ];
+}
+
 function FreeCell$TwoDeck$Board(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
                 JsxRuntime.jsxs("div", {
                       children: [
-                        JsxRuntime.jsxs("div", {
+                        JsxRuntime.jsx("div", {
                               children: [
-                                JsxRuntime.jsx("div", {
-                                      children: [
-                                          [],
-                                          [],
-                                          [],
-                                          []
-                                        ].map(function (param, i) {
-                                            return JsxRuntime.jsx("div", {
-                                                        ref: Caml_option.some(setRef({
-                                                                  TAG: "Free",
-                                                                  _0: i
-                                                                })),
-                                                        className: "   bg-black opacity-20  rounded w-14 h-20"
-                                                      }, spaceToString({
-                                                            TAG: "Free",
-                                                            _0: i
-                                                          }));
-                                          }),
-                                      className: "flex flex-row gap-3"
-                                    }),
-                                JsxRuntime.jsx("div", {
-                                      children: [
-                                          [],
-                                          [],
-                                          [],
-                                          []
-                                        ].map(function (param, i) {
-                                            return JsxRuntime.jsx("div", {
-                                                        ref: Caml_option.some(setRef({
-                                                                  TAG: "Free",
-                                                                  _0: i + 4 | 0
-                                                                })),
-                                                        className: "   bg-black opacity-20  rounded w-14 h-20"
-                                                      }, spaceToString({
-                                                            TAG: "Free",
-                                                            _0: i + 4 | 0
-                                                          }));
-                                          }),
-                                      className: "flex flex-row gap-3"
-                                    })
-                              ],
-                              className: "flex flex-col gap-3"
+                                  [],
+                                  [],
+                                  [],
+                                  [],
+                                  [],
+                                  [],
+                                  [],
+                                  []
+                                ].map(function (param, i) {
+                                    return JsxRuntime.jsx("div", {
+                                                ref: Caml_option.some(setRef({
+                                                          TAG: "Free",
+                                                          _0: i
+                                                        })),
+                                                className: "   bg-black opacity-20  rounded w-14 h-20"
+                                              }, spaceToString({
+                                                    TAG: "Free",
+                                                    _0: i
+                                                  }));
+                                  }),
+                              className: "grid grid-cols-4 gap-3"
                             }),
-                        JsxRuntime.jsxs("div", {
+                        JsxRuntime.jsx("div", {
                               children: [
-                                JsxRuntime.jsx("div", {
-                                      children: [
-                                          [],
-                                          [],
-                                          [],
-                                          []
-                                        ].map(function (param, i) {
-                                            return JsxRuntime.jsx("div", {
-                                                        ref: Caml_option.some(setRef({
-                                                                  TAG: "Foundation",
-                                                                  _0: i
-                                                                })),
-                                                        className: "   bg-white opacity-10  rounded w-14 h-20"
-                                                      }, spaceToString({
-                                                            TAG: "Free",
-                                                            _0: i
-                                                          }));
-                                          }),
-                                      className: "flex flex-row gap-3 ml-10"
-                                    }),
-                                JsxRuntime.jsx("div", {
-                                      children: [
-                                          [],
-                                          [],
-                                          [],
-                                          []
-                                        ].map(function (param, i) {
-                                            return JsxRuntime.jsx("div", {
-                                                        ref: Caml_option.some(setRef({
-                                                                  TAG: "Foundation",
-                                                                  _0: i + 4 | 0
-                                                                })),
-                                                        className: "   bg-white opacity-10  rounded w-14 h-20"
-                                                      }, spaceToString({
-                                                            TAG: "Free",
-                                                            _0: i + 4 | 0
-                                                          }));
-                                          }),
-                                      className: "flex flex-row gap-3 ml-10"
-                                    })
-                              ],
-                              className: "flex flex-col gap-3"
+                                  [],
+                                  [],
+                                  [],
+                                  [],
+                                  [],
+                                  [],
+                                  [],
+                                  []
+                                ].map(function (param, i) {
+                                    return JsxRuntime.jsx("div", {
+                                                ref: Caml_option.some(setRef({
+                                                          TAG: "Foundation",
+                                                          _0: i
+                                                        })),
+                                                className: "   bg-white opacity-10  rounded w-14 h-20"
+                                              }, spaceToString({
+                                                    TAG: "Foundation",
+                                                    _0: i
+                                                  }));
+                                  }),
+                              className: "grid grid-cols-4 gap-3 ml-20"
                             })
                       ],
                       className: "flex flex-row"
@@ -451,7 +450,7 @@ var TwoDeck = GameBase.Create({
       deck_decode: deck_decode,
       getSpace: getSpace,
       spaceToString: spaceToString,
-      initiateGame: initiateGame,
+      initiateGame: initiateGame$1,
       forEachSpace: forEachSpace,
       removeDragFromGame: removeDragFromGame,
       winCheck: winCheck,
@@ -473,7 +472,7 @@ var BakersGameBase = Packer.Make({
 
 var spaceToString$1 = BakersGameBase.spaceToString;
 
-function initiateGame$1() {
+function initiateGame$2() {
   var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
   var deckToDeal = {
     contents: shuffledDeck
@@ -666,7 +665,7 @@ var BakersGame = GameBase.Create({
       deck_decode: BakersGameBase.deck_decode,
       getSpace: BakersGameBase.getSpace,
       spaceToString: spaceToString$1,
-      initiateGame: initiateGame$1,
+      initiateGame: initiateGame$2,
       forEachSpace: forEachSpace$1,
       removeDragFromGame: BakersGameBase.removeDragFromGame,
       winCheck: winCheck$1,

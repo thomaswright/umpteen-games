@@ -13,32 +13,6 @@ module FreeCellBase = Packer.Make({
 module FreeCellRules = {
   include FreeCellBase
 
-  let initiateGame = () => {
-    let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
-
-    let deckToDeal = ref(shuffledDeck)
-
-    (
-      shuffledDeck,
-      {
-        piles: [
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-        ],
-        foundations: [[], [], [], []],
-        free: [None, None, None, None],
-        stock: [],
-        waste: [],
-      },
-    )
-  }
-
   let winCheck = (game: game) => {
     game.piles->Array.every(pile => pile->Array.length == 0) &&
       game.free->Array.every(Option.isNone)
@@ -136,11 +110,65 @@ module FreeCellRules = {
 module OneDeck = GameBase.Create({
   include FreeCellRules
 
+  let initiateGame = () => {
+    let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
+
+    let deckToDeal = ref(shuffledDeck)
+
+    (
+      shuffledDeck,
+      {
+        piles: [
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+        ],
+        foundations: [[], [], [], []],
+        free: [None, None, None, None],
+        stock: [],
+        waste: [],
+      },
+    )
+  }
   module Board = FreeCellRules.StandardBoard
 })
 
 module TwoDeck = GameBase.Create({
   include FreeCellRules
+
+  let initiateGame = () => {
+    let shuffledDeck =
+      Array.concatMany([], [Card.getDeck(0, false), Card.getDeck(1, false)])->Array.toShuffled
+
+    let deckToDeal = ref(shuffledDeck)
+
+    (
+      shuffledDeck,
+      {
+        piles: [
+          deckToDeal->ArrayAux.popN(11),
+          deckToDeal->ArrayAux.popN(11),
+          deckToDeal->ArrayAux.popN(11),
+          deckToDeal->ArrayAux.popN(11),
+          deckToDeal->ArrayAux.popN(10),
+          deckToDeal->ArrayAux.popN(10),
+          deckToDeal->ArrayAux.popN(10),
+          deckToDeal->ArrayAux.popN(10),
+          deckToDeal->ArrayAux.popN(10),
+          deckToDeal->ArrayAux.popN(10),
+        ],
+        foundations: [[], [], [], []],
+        free: [None, None, None, None, None, None, None, None],
+        stock: [],
+        waste: [],
+      },
+    )
+  }
 
   module Board = {
     @react.component
@@ -156,53 +184,27 @@ module TwoDeck = GameBase.Create({
     ) => {
       <React.Fragment>
         <div className="flex flex-row">
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-row gap-3">
-              {[[], [], [], []]
-              ->Array.mapWithIndex((_, i) => {
-                <div
-                  key={Free(i)->spaceToString}
-                  ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
-                  className="   bg-black opacity-20  rounded w-14 h-20"
-                />
-              })
-              ->React.array}
-            </div>
-            <div className="flex flex-row gap-3">
-              {[[], [], [], []]
-              ->Array.mapWithIndex((_, i) => {
-                <div
-                  key={Free(i + 4)->spaceToString}
-                  ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i + 4)))}
-                  className="   bg-black opacity-20  rounded w-14 h-20"
-                />
-              })
-              ->React.array}
-            </div>
+          <div className="grid grid-cols-4 gap-3">
+            {[[], [], [], [], [], [], [], []]
+            ->Array.mapWithIndex((_, i) => {
+              <div
+                key={Free(i)->spaceToString}
+                ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
+                className="   bg-black opacity-20  rounded w-14 h-20"
+              />
+            })
+            ->React.array}
           </div>
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-row gap-3 ml-10">
-              {[[], [], [], []]
-              ->Array.mapWithIndex((_, i) => {
-                <div
-                  key={Free(i)->spaceToString}
-                  ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-                  className="   bg-white opacity-10  rounded w-14 h-20"
-                />
-              })
-              ->React.array}
-            </div>
-            <div className="flex flex-row gap-3 ml-10">
-              {[[], [], [], []]
-              ->Array.mapWithIndex((_, i) => {
-                <div
-                  key={Free(i + 4)->spaceToString}
-                  ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i + 4)))}
-                  className="   bg-white opacity-10  rounded w-14 h-20"
-                />
-              })
-              ->React.array}
-            </div>
+          <div className="grid grid-cols-4 gap-3 ml-20">
+            {[[], [], [], [], [], [], [], []]
+            ->Array.mapWithIndex((_, i) => {
+              <div
+                key={Foundation(i)->spaceToString}
+                ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
+                className="   bg-white opacity-10  rounded w-14 h-20"
+              />
+            })
+            ->React.array}
           </div>
         </div>
         <div />
