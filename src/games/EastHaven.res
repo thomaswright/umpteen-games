@@ -1,205 +1,27 @@
-open Webapi.Dom
 open Common
+
+module Base = Packer.Make({
+  let spec: Packer.spec = {
+    drop: AltSuit,
+    drag: AltSuit,
+    size: AnySize,
+    depot: AnyDepot,
+    foundation: ByOne,
+  }
+})
 
 let flipLastUp = (piles: array<array<Card.sides>>) =>
   piles->Array.map(pile => pile->ArrayAux.updateLast(v => {...v, hidden: false}))
 
 module EastHavenRules = {
-  @decco
-  type space = Card(Card.card) | Foundation(int) | Pile(int) | Stock
-
-  let getSpace = element => {
-    switch element->Element.id->Js.Json.parseExn->space_decode {
-    | Ok(d) => Some(d)
-    | _ => None
-    }
-  }
-
-  let spaceToString = space => {
-    space->space_encode->Js.Json.stringify
-  }
-  @decco
-  type deck = array<Card.sides>
-
-  type dragPile = array<Card.sides>
-
-  @decco
-  type game = {
-    piles: array<array<Card.sides>>,
-    foundations: array<array<Card.sides>>,
-    stock: array<array<Card.sides>>,
-  }
-
-  type movableSpace = GameBase.movableSpace<game, space, dragPile>
-  type staticSpace = GameBase.staticSpace<game, dragPile>
-
-  let flipLastUp = (piles: array<array<Card.sides>>) =>
-    piles->Array.map(pile => pile->ArrayAux.updateLast(v => {...v, hidden: false}))
+  include Base
 
   let winCheck = (game: game) => {
     game.piles->Array.every(pile => pile->Array.length == 0) &&
       game.stock->Array.every(stockGroup => stockGroup->Array.length == 0)
   }
 
-  let removeDragFromGame = (game: game, dragPile: dragPile) => {
-    let dragPileSet = dragPile->Set.fromArray
-    let removeDragPile = x =>
-      x->Array.filter(sCard => {
-        !(dragPileSet->Set.has(sCard))
-      })
-
-    {
-      foundations: game.foundations->Array.map(removeDragPile),
-      piles: game.piles->Array.map(removeDragPile),
-      stock: game.stock->Array.map(removeDragPile),
-    }
-  }
-
-  let applyLiftToDragPile = (dragPile: dragPile, lift) => {
-    dragPile->Array.forEachWithIndex((v, j) => {
-      lift(Card(v.card), j)
-    })
-  }
-
-  let applyMoveToDragPile = (dragPile: dragPile, move) => {
-    dragPile->Array.forEachWithIndex((v, j) => {
-      move(Card(v.card), 0, j * 20)
-    })
-  }
-
-  let pileBaseRules = (game, i): staticSpace => {
-    {
-      droppedUpon: (gameRemoved, dragPile) => {
-        let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
-
-        if noChildren {
-          Some({
-            ...gameRemoved,
-            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->flipLastUp,
-          })
-        } else {
-          None
-        }
-      },
-      autoProgress: Accept,
-      onClick: _ => None,
-    }
-  }
-
-  let pileRules = (pile, card, i, j): movableSpace => {
-    let isLast = j == pile->Array.length - 1
-
-    {
-      locationAdjustment: {
-        x: 0,
-        y: j * 20,
-        z: j + 1,
-      },
-      baseSpace: Pile(i),
-      dragPile: () => {
-        let dragPile = pile->Array.sliceToEnd(~start=j)
-        if dragPile->GameCommons.decAndAltValidation {
-          Some(dragPile)
-        } else {
-          None
-        }
-      },
-      autoProgress: () => {
-        if isLast {
-          SendOrAccept([card])
-        } else {
-          DoNothing
-        }
-      },
-      droppedUpon: (game, dragPile) => {
-        let dragPileBase = dragPile->Array.getUnsafe(0)
-
-        if (
-          isLast &&
-          Card.rankIsAbove(card, dragPileBase) &&
-          dragPileBase->Card.color != card->Card.color
-        ) {
-          Some({
-            ...game,
-            piles: game.piles
-            ->Array.map(stack => {
-              stack->ArrayAux.insertAfter(card, dragPile)
-            })
-            ->flipLastUp,
-          })
-        } else {
-          None
-        }
-      },
-      onClick: _ => None,
-      onStateChange: element => Card.showOrHide(card, element),
-    }
-  }
-
-  let foundationBaseRules = (i): staticSpace => {
-    {
-      autoProgress: Seek,
-      droppedUpon: (game, dragPile) => {
-        let justOne = dragPile->Array.length == 1
-        let dragPileBase = dragPile->Array.getUnsafe(0)
-        let noChildren = game.foundations->Array.getUnsafe(i)->Array.length == 0
-
-        if noChildren && justOne && dragPileBase.card.rank == RA {
-          Some({
-            ...game,
-            foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
-            piles: game.piles->flipLastUp,
-          })
-        } else {
-          None
-        }
-      },
-      onClick: _ => None,
-    }
-  }
-
-  let foundationRules = (game, card, i, j): movableSpace => {
-    {
-      locationAdjustment: {
-        x: 0,
-        y: 0,
-        z: j + 1,
-      },
-      baseSpace: Foundation(i),
-      dragPile: () => {
-        if j == game.foundations->Array.length - 1 {
-          Some([card])
-        } else {
-          None
-        }
-      },
-      autoProgress: () => Seek,
-      droppedUpon: (game, dragPile) => {
-        let justOne = dragPile->Array.length == 1
-        let dragPileBase = dragPile->Array.getUnsafe(0)
-
-        if (
-          justOne &&
-          dragPileBase.card.suit == card.card.suit &&
-          Card.rankIsBelow(card, dragPileBase)
-        ) {
-          Some({
-            ...game,
-            foundations: game.foundations->Array.map(stack => {
-              stack->ArrayAux.insertAfter(card, dragPile)
-            }),
-            piles: game.piles->flipLastUp,
-          })
-        } else {
-          None
-        }
-      },
-      onClick: _ => None,
-      onStateChange: element => Card.showOrHide(card, element),
-    }
-  }
-
-  let stockGroupRules = (_game, card, i, j): movableSpace => {
+  let stockRules = (_game, card, i, j): movableSpace => {
     {
       locationAdjustment: {
         x: i * 20,
@@ -233,28 +55,37 @@ module EastHavenRules = {
     }
   }
 
-  let forEachSpace: GameBase.forEachSpace<game, space, dragPile> = (game: game, f) => {
-    game.piles->Array.forEachWithIndex((pile, i) => {
-      f(Pile(i), pileBaseRules(game, i)->GameBase.Static)
+  let forEachSpace = Base.makeForEachSpace(~stockRules)
 
-      pile->Array.forEachWithIndex((card, j) => {
-        f(Card(card.card), pileRules(pile, card, i, j)->Movable)
-      })
-    })
+  let initiateGame = () => {
+    let shuffledDeck = Card.getDeck(0, true)->Array.toShuffled
 
-    game.foundations->Array.forEachWithIndex((foundation, i) => {
-      f(Foundation(i), foundationBaseRules(i)->Static)
+    let deckToDeal = ref(shuffledDeck)
 
-      foundation->Array.forEachWithIndex((card, j) => {
-        f(Card(card.card), foundationRules(game, card, i, j)->Movable)
-      })
-    })
-
-    game.stock->Array.forEachWithIndex((stockGroup, i) => {
-      stockGroup->Array.forEachWithIndex((card, j) => {
-        f(Card(card.card), stockGroupRules(game, card, i, j)->Movable)
-      })
-    })
+    (
+      shuffledDeck,
+      {
+        piles: [
+          deckToDeal->ArrayAux.popN(3),
+          deckToDeal->ArrayAux.popN(3),
+          deckToDeal->ArrayAux.popN(3),
+          deckToDeal->ArrayAux.popN(3),
+          deckToDeal->ArrayAux.popN(3),
+          deckToDeal->ArrayAux.popN(3),
+          deckToDeal->ArrayAux.popN(3),
+        ]->flipLastUp,
+        foundations: [[], [], [], []],
+        stock: [
+          deckToDeal->ArrayAux.popN(3),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+        ],
+        free: [],
+        waste: [],
+      },
+    )
   }
 
   module StandardBoard = {
@@ -304,57 +135,5 @@ module EastHavenRules = {
     }
   }
 
-  module AllCards = {
-    @react.component
-    let make = (~setRef, ~onMouseDown, ~deck) => {
-      <React.Fragment>
-        {deck
-        ->Array.map(card => {
-          <Card.Display
-            card={card}
-            key={Card(card.card)->spaceToString}
-            id={Card(card.card)->spaceToString}
-            cardRef={ReactDOM.Ref.callbackDomRef(setRef(Card(card.card)))}
-            onMouseDown={onMouseDown}
-          />
-        })
-        ->React.array}
-      </React.Fragment>
-    }
-  }
+  module Board = StandardBoard
 }
-
-module EastHaven = GameBase.Create({
-  include EastHavenRules
-
-  let initiateGame = () => {
-    let shuffledDeck = Card.getDeck(0, true)->Array.toShuffled
-
-    let deckToDeal = ref(shuffledDeck)
-
-    (
-      shuffledDeck,
-      {
-        piles: [
-          deckToDeal->ArrayAux.popN(3),
-          deckToDeal->ArrayAux.popN(3),
-          deckToDeal->ArrayAux.popN(3),
-          deckToDeal->ArrayAux.popN(3),
-          deckToDeal->ArrayAux.popN(3),
-          deckToDeal->ArrayAux.popN(3),
-          deckToDeal->ArrayAux.popN(3),
-        ]->flipLastUp,
-        foundations: [[], [], [], []],
-        stock: [
-          deckToDeal->ArrayAux.popN(3),
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(7),
-        ],
-      },
-    )
-  }
-
-  module Board = EastHavenRules.StandardBoard
-})

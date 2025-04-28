@@ -396,7 +396,7 @@ function isExposed(game, i, j) {
   }
 }
 
-function pileRules(game, pile, card, i, j) {
+function pileRules(game, _pile, card, i, j) {
   return {
           locationAdjustment: {
             x: Math.imul(j, 70),
@@ -455,7 +455,7 @@ function pileRules(game, pile, card, i, j) {
         };
 }
 
-function foundationRules(game, card, i) {
+function foundationRules(_game, card, i) {
   return {
           locationAdjustment: {
             x: 0,
@@ -469,7 +469,7 @@ function foundationRules(game, card, i) {
           autoProgress: (function () {
               return "Seek";
             }),
-          droppedUpon: (function (game, dragPile) {
+          droppedUpon: (function (_game, _dragPile) {
               
             }),
           onStateChange: (function (element) {
@@ -625,7 +625,7 @@ function forEachSpace(game, f) {
         f("Foundation", {
               TAG: "Static",
               _0: {
-                droppedUpon: (function (game, dragPile) {
+                droppedUpon: (function (_game, _dragPile) {
                     
                   }),
                 autoProgress: "DoNothing",

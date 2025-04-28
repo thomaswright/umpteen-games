@@ -1,4 +1,3 @@
-open Webapi.Dom
 open Common
 
 module Base = Packer.Make({

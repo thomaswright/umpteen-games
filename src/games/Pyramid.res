@@ -91,7 +91,7 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let pileBaseRules = (i): staticSpace => {
+  let pileBaseRules = (): staticSpace => {
     {
       droppedUpon: (_game, _dragPile) => None,
       autoProgress: DoNothing,
@@ -128,7 +128,7 @@ module GameRules: GameBase.GameRules = {
       })
   }
 
-  let pileRules = (game, pile, card, i, j): movableSpace => {
+  let pileRules = (game, _pile, card, i, j): movableSpace => {
     {
       locationAdjustment: {
         x: j * 70,
@@ -181,14 +181,14 @@ module GameRules: GameBase.GameRules = {
   let foundationBaseRule = (): staticSpace => {
     {
       autoProgress: DoNothing,
-      droppedUpon: (game, dragPile) => {
+      droppedUpon: (_game, _dragPile) => {
         None
       },
       onClick: _ => None,
     }
   }
 
-  let foundationRules = (game, card, i): movableSpace => {
+  let foundationRules = (_game, card, i): movableSpace => {
     {
       locationAdjustment: {
         x: 0,
@@ -200,7 +200,7 @@ module GameRules: GameBase.GameRules = {
         None
       },
       autoProgress: () => Seek,
-      droppedUpon: (game, dragPile) => {
+      droppedUpon: (_game, _dragPile) => {
         None
       },
       onClick: _ => None,
@@ -300,7 +300,7 @@ module GameRules: GameBase.GameRules = {
 
   let forEachSpace = (game: game, f) => {
     game.piles->Array.forEachWithIndex((pile, i) => {
-      f(Pile(i), pileBaseRules(i)->GameBase.Static)
+      f(Pile(i), pileBaseRules()->GameBase.Static)
 
       pile->Array.forEachWithIndex((card, j) => {
         card->Option.mapOr(
