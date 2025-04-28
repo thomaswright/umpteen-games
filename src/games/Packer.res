@@ -210,6 +210,7 @@ module Make = (PackerRules: PackerRules) => {
         if foundationBaseCheck(game, dragPile, i) {
           Some({
             ...game,
+            piles: game.piles->flipLastUp,
             foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
           })
         } else {
@@ -240,6 +241,7 @@ module Make = (PackerRules: PackerRules) => {
         if foundationCheck(dragPile, card) {
           Some({
             ...game,
+            piles: game.piles->flipLastUp,
             foundations: game.foundations->Array.map(stack => {
               stack->ArrayAux.insertAfter(card, dragPile)
             }),

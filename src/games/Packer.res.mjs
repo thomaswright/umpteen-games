@@ -545,7 +545,7 @@ function Make(PackerRules) {
             droppedUpon: (function (game, dragPile) {
                 if (foundationBaseCheck(game, dragPile, i)) {
                   return {
-                          piles: game.piles,
+                          piles: flipLastUp(game.piles),
                           foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                   return dragPile;
                                 })),
@@ -585,7 +585,7 @@ function Make(PackerRules) {
             droppedUpon: (function (game, dragPile) {
                 if (foundationCheck(dragPile, card)) {
                   return {
-                          piles: game.piles,
+                          piles: flipLastUp(game.piles),
                           foundations: game.foundations.map(function (stack) {
                                 return Common.ArrayAux.insertAfter(stack, card, dragPile);
                               }),
