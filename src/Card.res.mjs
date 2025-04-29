@@ -667,6 +667,32 @@ function showOrHide(card, element) {
   }
 }
 
+function showAfter(a, n) {
+  return a.map(function (v, i) {
+              if (i >= n) {
+                return {
+                        card: v.card,
+                        hidden: false
+                      };
+              } else {
+                return v;
+              }
+            });
+}
+
+function hideAfter(a, n) {
+  return a.map(function (v, i) {
+              if (i >= n) {
+                return {
+                        card: v.card,
+                        hidden: true
+                      };
+              } else {
+                return v;
+              }
+            });
+}
+
 function getOneSuitDeck(deck, suit, hidden) {
   return Core__Array.reduce(allRanks, [], (function (a, rank) {
                 return a.concat([{
@@ -729,6 +755,8 @@ export {
   hide ,
   show ,
   showOrHide ,
+  showAfter ,
+  hideAfter ,
   getOneSuitDeck ,
   getDeck ,
 }

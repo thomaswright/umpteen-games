@@ -214,6 +214,24 @@ let showOrHide = (card: sides, element) => {
   }
 }
 
+let showAfter = (a, n) =>
+  a->Array.mapWithIndex((v, i) => {
+    if i >= n {
+      {...v, hidden: false}
+    } else {
+      v
+    }
+  })
+
+let hideAfter = (a, n) =>
+  a->Array.mapWithIndex((v, i) => {
+    if i >= n {
+      {...v, hidden: true}
+    } else {
+      v
+    }
+  })
+
 let getOneSuitDeck = (deck, suit, hidden) => {
   allRanks->Array.reduce([], (a, rank) => {
     a->Array.concat([

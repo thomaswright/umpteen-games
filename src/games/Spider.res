@@ -346,37 +346,13 @@ module Scorpion = GameBase.Create({
       shuffledDeck,
       {
         piles: [
-          deckToDeal
-          ->ArrayAux.popN(7)
-          ->Array.mapWithIndex((v, i) => {
-            if i >= 3 {
-              {...v, hidden: false}
-            } else {
-              v
-            }
-          }),
-          deckToDeal
-          ->ArrayAux.popN(7)
-          ->Array.mapWithIndex((v, i) => {
-            if i >= 3 {
-              {...v, hidden: false}
-            } else {
-              v
-            }
-          }),
-          deckToDeal
-          ->ArrayAux.popN(7)
-          ->Array.mapWithIndex((v, i) => {
-            if i >= 3 {
-              {...v, hidden: false}
-            } else {
-              v
-            }
-          }),
-          deckToDeal->ArrayAux.popN(7)->Array.map(v => {...v, hidden: false}),
-          deckToDeal->ArrayAux.popN(7)->Array.map(v => {...v, hidden: false}),
-          deckToDeal->ArrayAux.popN(7)->Array.map(v => {...v, hidden: false}),
-          deckToDeal->ArrayAux.popN(7)->Array.map(v => {...v, hidden: false}),
+          deckToDeal->ArrayAux.popN(7)->Card.showAfter(3),
+          deckToDeal->ArrayAux.popN(7)->Card.showAfter(3),
+          deckToDeal->ArrayAux.popN(7)->Card.showAfter(3),
+          deckToDeal->ArrayAux.popN(7)->Card.showAfter(0),
+          deckToDeal->ArrayAux.popN(7)->Card.showAfter(0),
+          deckToDeal->ArrayAux.popN(7)->Card.showAfter(0),
+          deckToDeal->ArrayAux.popN(7)->Card.showAfter(0),
         ]->flipLastUp,
         foundations: [[], [], [], []],
         stock: [deckToDeal->ArrayAux.popN(3)],

@@ -30,7 +30,7 @@ module GameRules: GameBase.GameRules = {
           deckToDeal->ArrayAux.popN(7),
         ],
         foundations: [[], [], [], []],
-        stock: [deckToDeal.contents->Array.map(v => {...v, hidden: true})],
+        stock: [deckToDeal.contents->Card.hideAfter(0)],
         waste: [],
         free: [],
       },
@@ -83,7 +83,7 @@ module GameRules: GameBase.GameRules = {
         waste: game.waste->Array.concat(
           realStock
           ->Array.sliceToEnd(~start=realStock->Array.length - 1)
-          ->Array.map(v => {...v, hidden: false}),
+          ->Card.showAfter(0),
         ),
       })
     },
@@ -98,7 +98,7 @@ module GameRules: GameBase.GameRules = {
     onClick: game => {
       Some({
         ...game,
-        stock: [game.waste->Array.toReversed->Array.map(v => {...v, hidden: true})],
+        stock: [game.waste->Array.toReversed->Card.hideAfter(0)],
         waste: [],
       })
     },

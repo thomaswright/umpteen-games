@@ -564,60 +564,13 @@ function initiateGame$4() {
           shuffledDeck,
           {
             piles: flipLastUp([
-                  Common.ArrayAux.popN(deckToDeal, 7).map(function (v, i) {
-                        if (i >= 3) {
-                          return {
-                                  card: v.card,
-                                  hidden: false
-                                };
-                        } else {
-                          return v;
-                        }
-                      }),
-                  Common.ArrayAux.popN(deckToDeal, 7).map(function (v, i) {
-                        if (i >= 3) {
-                          return {
-                                  card: v.card,
-                                  hidden: false
-                                };
-                        } else {
-                          return v;
-                        }
-                      }),
-                  Common.ArrayAux.popN(deckToDeal, 7).map(function (v, i) {
-                        if (i >= 3) {
-                          return {
-                                  card: v.card,
-                                  hidden: false
-                                };
-                        } else {
-                          return v;
-                        }
-                      }),
-                  Common.ArrayAux.popN(deckToDeal, 7).map(function (v) {
-                        return {
-                                card: v.card,
-                                hidden: false
-                              };
-                      }),
-                  Common.ArrayAux.popN(deckToDeal, 7).map(function (v) {
-                        return {
-                                card: v.card,
-                                hidden: false
-                              };
-                      }),
-                  Common.ArrayAux.popN(deckToDeal, 7).map(function (v) {
-                        return {
-                                card: v.card,
-                                hidden: false
-                              };
-                      }),
-                  Common.ArrayAux.popN(deckToDeal, 7).map(function (v) {
-                        return {
-                                card: v.card,
-                                hidden: false
-                              };
-                      })
+                  Card.showAfter(Common.ArrayAux.popN(deckToDeal, 7), 3),
+                  Card.showAfter(Common.ArrayAux.popN(deckToDeal, 7), 3),
+                  Card.showAfter(Common.ArrayAux.popN(deckToDeal, 7), 3),
+                  Card.showAfter(Common.ArrayAux.popN(deckToDeal, 7), 0),
+                  Card.showAfter(Common.ArrayAux.popN(deckToDeal, 7), 0),
+                  Card.showAfter(Common.ArrayAux.popN(deckToDeal, 7), 0),
+                  Card.showAfter(Common.ArrayAux.popN(deckToDeal, 7), 0)
                 ]),
             foundations: [
               [],
