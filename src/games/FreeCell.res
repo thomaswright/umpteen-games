@@ -447,10 +447,10 @@ module SeahavenTowers = GameBase.Create({
 module PenguinBase = Packer.Make({
   let spec: Packer.spec = {
     drop: CyclicOneSuit,
-    drag: OneSuit,
+    drag: CyclicOneSuit,
     size: AnySize,
     depot: AnyDepot, // will override
-    foundation: ByOne,
+    foundation: ByOneCyclic,
   }
 })
 
@@ -503,6 +503,30 @@ module Penguin = GameBase.Create({
 
   let winCheck = FreeCellRules.winCheck
 
+  let foundationBaseRules = (i): staticSpace => {
+    {
+      autoProgress: Seek,
+      droppedUpon: (game, dragPile) => {
+        let justOne = dragPile->Array.length == 1
+
+        let dragPileBase = dragPile->Array.getUnsafe(0)
+        let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
+        let second = game.foundations->Array.getUnsafe(1)->Array.getUnsafe(0)
+
+        if noChildren && justOne && dragPileBase.card.rank == second.card.rank {
+          Some({
+            ...game,
+            piles: game.piles->Packer.flipLastUp,
+            foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
+          })
+        } else {
+          None
+        }
+      },
+      onClick: _ => None,
+    }
+  }
+
   let pileBaseRules = (game: Packer.game, i): staticSpace => {
     {
       droppedUpon: (gameRemoved, dragPile) => {
@@ -510,7 +534,7 @@ module Penguin = GameBase.Create({
         let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
         let second = game.foundations->Array.getUnsafe(1)->Array.getUnsafe(0)
 
-        if noChildren && dragPileBase.card.rank == second.card.rank {
+        if noChildren && Card.rankIsAbove(second, dragPileBase) {
           Some({
             ...gameRemoved,
             piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->Packer.flipLastUp,
@@ -524,10 +548,11 @@ module Penguin = GameBase.Create({
     }
   }
 
-  let forEachSpace = SeahavenTowersBase.makeForEachSpace(
+  let forEachSpace = PenguinBase.makeForEachSpace(
     ~pileBaseRules,
     ~freeBaseRules=FreeCellRules.freeBaseRules,
     ~freeRules=FreeCellRules.freeRules,
+    ~foundationBaseRules,
   )
 
   module Board = EightOffRules.Board

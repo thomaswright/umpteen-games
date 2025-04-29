@@ -859,10 +859,10 @@ var SeahavenTowers = GameBase.Create({
 var PenguinBase = Packer.Make({
       spec: {
         drop: "CyclicOneSuit",
-        drag: "OneSuit",
+        drag: "CyclicOneSuit",
         size: "AnySize",
         depot: "AnyDepot",
-        foundation: "ByOne"
+        foundation: "ByOneCyclic"
       }
     });
 
@@ -914,13 +914,40 @@ function initiateGame$5() {
         ];
 }
 
+function foundationBaseRules$1(i) {
+  return {
+          droppedUpon: (function (game, dragPile) {
+              var justOne = dragPile.length === 1;
+              var dragPileBase = dragPile[0];
+              var noChildren = game.piles[i].length === 0;
+              var second = game.foundations[1][0];
+              if (noChildren && justOne && dragPileBase.card.rank === second.card.rank) {
+                return {
+                        piles: Packer.flipLastUp(game.piles),
+                        foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
+                                return dragPile;
+                              })),
+                        stock: game.stock,
+                        waste: game.waste,
+                        free: game.free
+                      };
+              }
+              
+            }),
+          autoProgress: "Seek",
+          onClick: (function (param) {
+              
+            })
+        };
+}
+
 function pileBaseRules$1(game, i) {
   return {
           droppedUpon: (function (gameRemoved, dragPile) {
               var dragPileBase = dragPile[0];
               var noChildren = game.piles[i].length === 0;
               var second = game.foundations[1][0];
-              if (noChildren && dragPileBase.card.rank === second.card.rank) {
+              if (noChildren && Card.rankIsAbove(second, dragPileBase)) {
                 return {
                         piles: Packer.flipLastUp(Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
                                     return dragPile;
@@ -940,7 +967,7 @@ function pileBaseRules$1(game, i) {
         };
 }
 
-var forEachSpace$3 = SeahavenTowersBase.makeForEachSpace(pileBaseRules$1, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
+var forEachSpace$3 = PenguinBase.makeForEachSpace(pileBaseRules$1, undefined, foundationBaseRules$1, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
 
 var Penguin = GameBase.Create({
       game_encode: PenguinBase.game_encode,

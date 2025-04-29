@@ -432,8 +432,8 @@ function rankIsAbove(a, b) {
 }
 
 function rankIsAboveCyclic(a, b) {
-  if (a.card.rank === "RK") {
-    return b.card.rank === "RA";
+  if (a.card.rank === "RA") {
+    return b.card.rank === "RK";
   } else {
     return allRanks.findIndex(function (x) {
                 return x === a.card.rank;

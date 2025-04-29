@@ -16,7 +16,7 @@ type game = {
 type stack = AltSuit | AnySuit | OneSuit | CyclicOneSuit
 type size = AnySize | FreeSize
 type depot = SpecificDepot(Card.rank) | AnyDepot
-type foundation = ByOne | ByAll
+type foundation = ByOne | ByAll | ByOneCyclic
 
 type spec = {drop: stack, drag: stack, size: size, depot: depot, foundation: foundation}
 
@@ -50,7 +50,6 @@ module Make = (PackerRules: PackerRules) => {
 
   let dropCheck = (isLast, dragPile, card) => {
     let dragPileBase = dragPile->Array.getUnsafe(0)
-
     switch PackerRules.spec.drop {
     | AltSuit =>
       isLast && Card.rankIsAbove(card, dragPileBase) && dragPileBase->Card.color != card->Card.color
@@ -111,6 +110,11 @@ module Make = (PackerRules: PackerRules) => {
     let dragPileBase = dragPile->Array.getUnsafe(0)
 
     switch PackerRules.spec.foundation {
+    | ByOneCyclic =>
+      justOne &&
+      dragPileBase.card.suit == card.card.suit &&
+      Card.rankIsAboveCyclic(dragPileBase, card)
+
     | ByOne =>
       justOne && dragPileBase.card.suit == card.card.suit && Card.rankIsAbove(dragPileBase, card)
     | ByAll => false

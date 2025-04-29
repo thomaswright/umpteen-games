@@ -56,8 +56,8 @@ let rankIsAbove = (a, b) => {
 }
 
 let rankIsAboveCyclic = (a, b) => {
-  if a.card.rank == RK {
-    b.card.rank == RA
+  if a.card.rank == RA {
+    b.card.rank == RK
   } else {
     allRanks->Array.findIndex(x => x == a.card.rank) ==
       allRanks->Array.findIndex(x => x == b.card.rank) + 1

@@ -420,26 +420,52 @@ function Make(PackerRules) {
     var valid = GameCommons.decValidation(dragPile);
     var dragPileBase = dragPile[0];
     var match = PackerRules.spec.foundation;
-    if (match === "ByOne") {
-      if (noChildren && justOne) {
-        return dragPileBase.card.rank === "RA";
-      } else {
-        return false;
-      }
-    } else if (noChildren && fullStack) {
-      return valid;
-    } else {
-      return false;
+    switch (match) {
+      case "ByOne" :
+          if (noChildren && justOne) {
+            return dragPileBase.card.rank === "RA";
+          } else {
+            return false;
+          }
+      case "ByAll" :
+          if (noChildren && fullStack) {
+            return valid;
+          } else {
+            return false;
+          }
+      case "ByOneCyclic" :
+          throw {
+                RE_EXN_ID: "Match_failure",
+                _1: [
+                  "Packer.res",
+                  102,
+                  4
+                ],
+                Error: new Error()
+              };
+      
     }
   };
   var foundationCheck = function (dragPile, card) {
     var justOne = dragPile.length === 1;
     var dragPileBase = dragPile[0];
     var match = PackerRules.spec.foundation;
-    if (match === "ByOne" && justOne && dragPileBase.card.suit === card.card.suit) {
-      return Card.rankIsAbove(dragPileBase, card);
-    } else {
-      return false;
+    switch (match) {
+      case "ByOne" :
+          if (justOne && dragPileBase.card.suit === card.card.suit) {
+            return Card.rankIsAbove(dragPileBase, card);
+          } else {
+            return false;
+          }
+      case "ByAll" :
+          return false;
+      case "ByOneCyclic" :
+          if (justOne && dragPileBase.card.suit === card.card.suit) {
+            return Card.rankIsAboveCyclic(dragPileBase, card);
+          } else {
+            return false;
+          }
+      
     }
   };
   var applyLiftToDragPile = function (dragPile, lift) {

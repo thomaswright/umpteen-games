@@ -30,7 +30,7 @@ function pileValidation(dragPile, f) {
 }
 
 function decAndAltValidation(dragPile) {
-  return pileValidation(dragPile, (function (onTop, onBottom) {
+  return pileValidation(dragPile, (function (onBottom, onTop) {
                 if (Card.rankIsAbove(onBottom, onTop)) {
                   return Card.color(onTop) !== Card.color(onBottom);
                 } else {
@@ -40,7 +40,7 @@ function decAndAltValidation(dragPile) {
 }
 
 function decValidation(dragPile) {
-  return pileValidation(dragPile, (function (onTop, onBottom) {
+  return pileValidation(dragPile, (function (onBottom, onTop) {
                 if (Card.rankIsAbove(onBottom, onTop)) {
                   return onTop.card.suit === onBottom.card.suit;
                 } else {
@@ -50,7 +50,8 @@ function decValidation(dragPile) {
 }
 
 function decCyclicValidation(dragPile) {
-  return pileValidation(dragPile, (function (onTop, onBottom) {
+  return pileValidation(dragPile, (function (onBottom, onTop) {
+                console.log(Card.rankIsAboveCyclic(onBottom, onTop));
                 if (Card.rankIsAboveCyclic(onBottom, onTop)) {
                   return onTop.card.suit === onBottom.card.suit;
                 } else {

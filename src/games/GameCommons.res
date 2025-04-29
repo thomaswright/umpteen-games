@@ -14,19 +14,20 @@ let pileValidation = (dragPile: array<Card.sides>, f) => {
 }
 
 let decAndAltValidation = (dragPile: array<Card.sides>) => {
-  dragPile->pileValidation((onTop, onBottom) =>
+  dragPile->pileValidation((onBottom, onTop) =>
     Card.rankIsAbove(onBottom, onTop) && onTop->Card.color != onBottom->Card.color
   )
 }
 
 let decValidation = (dragPile: array<Card.sides>) => {
-  dragPile->pileValidation((onTop, onBottom) =>
+  dragPile->pileValidation((onBottom, onTop) =>
     Card.rankIsAbove(onBottom, onTop) && onTop.card.suit == onBottom.card.suit
   )
 }
 
 let decCyclicValidation = (dragPile: array<Card.sides>) => {
-  dragPile->pileValidation((onTop, onBottom) =>
+  dragPile->pileValidation((onBottom, onTop) => {
+    Console.log(Card.rankIsAboveCyclic(onBottom, onTop))
     Card.rankIsAboveCyclic(onBottom, onTop) && onTop.card.suit == onBottom.card.suit
-  )
+  })
 }
