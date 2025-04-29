@@ -408,7 +408,7 @@ module SeahavenTowers = GameBase.Create({
             ->Array.mapWithIndex((_, i) => {
               <div
                 key={Free(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
+                ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Free(i)))}
                 className=" bg-black opacity-20   rounded w-14 h-20"
               />
             })

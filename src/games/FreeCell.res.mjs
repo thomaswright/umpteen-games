@@ -760,6 +760,8 @@ var SeahavenTowersBase = Packer.Make({
       }
     });
 
+var spaceToString$2 = SeahavenTowersBase.spaceToString;
+
 function initiateGame$4() {
   var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
   var deckToDeal = {
@@ -800,20 +802,104 @@ function initiateGame$4() {
 
 var forEachSpace$2 = SeahavenTowersBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
 
+function FreeCell$SeahavenTowers$Board(props) {
+  var setRef = props.setRef;
+  return JsxRuntime.jsxs(React.Fragment, {
+              children: [
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("div", {
+                              children: [
+                                  [],
+                                  [],
+                                  [],
+                                  []
+                                ].map(function (param, i) {
+                                    return JsxRuntime.jsx("div", {
+                                                ref: Caml_option.some(setRef({
+                                                          TAG: "Free",
+                                                          _0: i
+                                                        })),
+                                                className: " bg-black opacity-20   rounded w-14 h-20"
+                                              }, spaceToString$2({
+                                                    TAG: "Free",
+                                                    _0: i
+                                                  }));
+                                  }),
+                              className: "flex flex-row gap-3"
+                            }),
+                        JsxRuntime.jsx("div", {
+                              children: [
+                                  [],
+                                  [],
+                                  [],
+                                  []
+                                ].map(function (param, i) {
+                                    return JsxRuntime.jsx("div", {
+                                                ref: Caml_option.some(setRef({
+                                                          TAG: "Foundation",
+                                                          _0: i
+                                                        })),
+                                                className: " bg-white opacity-10  rounded w-14 h-20"
+                                              }, spaceToString$2({
+                                                    TAG: "Foundation",
+                                                    _0: i
+                                                  }));
+                                  }),
+                              className: "flex flex-row gap-3 ml-10"
+                            })
+                      ],
+                      className: "flex flex-row"
+                    }),
+                JsxRuntime.jsx("div", {}),
+                JsxRuntime.jsx("div", {
+                      children: [
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          []
+                        ].map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                })),
+                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                      }, spaceToString$2({
+                                            TAG: "Pile",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    })
+              ]
+            });
+}
+
+var Board$2 = {
+  make: FreeCell$SeahavenTowers$Board
+};
+
 var SeahavenTowers = GameBase.Create({
       game_encode: SeahavenTowersBase.game_encode,
       game_decode: SeahavenTowersBase.game_decode,
       deck_encode: SeahavenTowersBase.deck_encode,
       deck_decode: SeahavenTowersBase.deck_decode,
       getSpace: SeahavenTowersBase.getSpace,
-      spaceToString: SeahavenTowersBase.spaceToString,
+      spaceToString: spaceToString$2,
       initiateGame: initiateGame$4,
       forEachSpace: forEachSpace$2,
       removeDragFromGame: SeahavenTowersBase.removeDragFromGame,
       winCheck: winCheck,
       applyLiftToDragPile: SeahavenTowersBase.applyLiftToDragPile,
       applyMoveToDragPile: SeahavenTowersBase.applyMoveToDragPile,
-      Board: StandardBoard,
+      Board: Board$2,
       AllCards: SeahavenTowersBase.AllCards
     });
 
