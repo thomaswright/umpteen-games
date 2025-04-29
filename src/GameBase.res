@@ -64,35 +64,8 @@ module type GameRules = {
   let applyMoveToDragPile: (dragPile, (space, int, int) => unit) => unit
 
   module Board: {
-    type props<
-      'setRef,
-      'onMouseDown,
-      'setGame,
-      'moveToState,
-      'autoProgress,
-      'game,
-      'undo,
-      'isWin,
-    > = {
-      setRef: 'setRef,
-      onMouseDown: 'onMouseDown,
-      setGame: 'setGame,
-      moveToState: 'moveToState,
-      autoProgress: 'autoProgress,
-      game: 'game,
-      undo: 'undo,
-      isWin: 'isWin,
-    }
-    let make: props<
-      space => ReactDOM.Ref.callbackDomRef,
-      'a,
-      (game => game) => unit,
-      unit => unit,
-      unit => 'b,
-      game,
-      unit => unit,
-      bool,
-    > => React.element
+    type props<'setRef> = {setRef: 'setRef}
+    let make: props<space => ReactDOM.Ref.callbackDomRef> => React.element
   }
 
   module AllCards: {
@@ -177,10 +150,7 @@ module Create = (GameRules: GameRules) => {
       ~subscribe,
       ~getGame,
       ~setRef,
-      ~onMouseDown,
-      ~setGame,
       ~moveToState,
-      ~autoProgress,
       ~undo,
       ~createNewGame,
       ~restartGame,
@@ -198,7 +168,7 @@ module Create = (GameRules: GameRules) => {
       let isWin = GameRules.winCheck(game)
       <React.Fragment>
         <Common.UtilBoard undo isWin createNewGame restartGame />
-        <GameRules.Board setRef onMouseDown setGame moveToState autoProgress game undo isWin />
+        <GameRules.Board setRef />
       </React.Fragment>
     }
   }
@@ -695,18 +665,7 @@ module Create = (GameRules: GameRules) => {
       }
 
       <div id={"board"} className="relative m-5 mt-0">
-        <BoardWrapper
-          createNewGame
-          subscribe
-          getGame
-          onMouseDown
-          setRef
-          setGame
-          moveToState
-          autoProgress
-          restartGame
-          undo
-        />
+        <BoardWrapper subscribe getGame setRef moveToState undo createNewGame restartGame />
         <GameRules.AllCards onMouseDown setRef deck={getDeck()} />
       </div>
     }

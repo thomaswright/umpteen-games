@@ -423,16 +423,7 @@ module GameRules: GameBase.GameRules = {
 
   module Board = {
     @react.component
-    let make = (
-      ~setRef,
-      ~onMouseDown as _,
-      ~setGame as _,
-      ~moveToState as _,
-      ~autoProgress as _,
-      ~game as _,
-      ~undo as _,
-      ~isWin as _,
-    ) => {
+    let make = (~setRef) => {
       <React.Fragment>
         <div className="flex flex-row  ">
           <div

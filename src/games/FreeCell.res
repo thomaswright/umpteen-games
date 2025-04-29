@@ -55,16 +55,7 @@ module FreeCellRules = {
 
   module StandardBoard = {
     @react.component
-    let make = (
-      ~setRef,
-      ~onMouseDown as _,
-      ~setGame as _,
-      ~moveToState as _,
-      ~autoProgress as _,
-      ~game as _,
-      ~undo as _,
-      ~isWin as _,
-    ) => {
+    let make = (~setRef) => {
       <React.Fragment>
         <div className="flex flex-row">
           <div className="flex flex-row gap-3">
@@ -172,16 +163,7 @@ module TwoDeck = GameBase.Create({
 
   module Board = {
     @react.component
-    let make = (
-      ~setRef,
-      ~onMouseDown as _,
-      ~setGame as _,
-      ~moveToState as _,
-      ~autoProgress as _,
-      ~game as _,
-      ~undo as _,
-      ~isWin as _,
-    ) => {
+    let make = (~setRef) => {
       <React.Fragment>
         <div className="flex flex-row">
           <div className="grid grid-cols-4 gap-3">
@@ -279,16 +261,7 @@ module BakersGameRules = {
 
   module StandardBoard = {
     @react.component
-    let make = (
-      ~setRef,
-      ~onMouseDown as _,
-      ~setGame as _,
-      ~moveToState as _,
-      ~autoProgress as _,
-      ~game as _,
-      ~undo as _,
-      ~isWin as _,
-    ) => {
+    let make = (~setRef) => {
       <React.Fragment>
         <div className="flex flex-row">
           <div className="flex flex-row gap-3">
@@ -402,16 +375,7 @@ module EightOff = GameBase.Create({
 
   module Board = {
     @react.component
-    let make = (
-      ~setRef,
-      ~onMouseDown as _,
-      ~setGame as _,
-      ~moveToState as _,
-      ~autoProgress as _,
-      ~game as _,
-      ~undo as _,
-      ~isWin as _,
-    ) => {
+    let make = (~setRef) => {
       <React.Fragment>
         <div className="flex flex-row">
           <div className="flex flex-col gap-3 mr-5">
@@ -546,16 +510,7 @@ module SeahavenTowers = GameBase.Create({
 
   module Board = {
     @react.component
-    let make = (
-      ~setRef,
-      ~onMouseDown as _,
-      ~setGame as _,
-      ~moveToState as _,
-      ~autoProgress as _,
-      ~game as _,
-      ~undo as _,
-      ~isWin as _,
-    ) => {
+    let make = (~setRef) => {
       <React.Fragment>
         <div className="flex flex-row">
           <div className="flex flex-row gap-3">

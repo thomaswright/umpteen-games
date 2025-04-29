@@ -299,14 +299,7 @@ function Create(GameRules) {
                         restartGame: restartGame$1
                       }),
                   JsxRuntime.jsx(GameRules.Board.make, {
-                        setRef: props.setRef,
-                        onMouseDown: props.onMouseDown,
-                        setGame: props.setGame,
-                        moveToState: moveToState,
-                        autoProgress: props.autoProgress,
-                        game: game,
-                        undo: undo$1,
-                        isWin: isWin
+                        setRef: props.setRef
                       })
                 ]
               });
@@ -750,10 +743,7 @@ function Create(GameRules) {
                         subscribe: subscribe,
                         getGame: getGame,
                         setRef: setRef,
-                        onMouseDown: onMouseDown,
-                        setGame: setGame,
                         moveToState: moveToState,
-                        autoProgress: autoProgress,
                         undo: undo,
                         createNewGame: props.createNewGame,
                         restartGame: restartGame
