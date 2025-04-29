@@ -75,7 +75,6 @@ module Make = (PackerRules: PackerRules) => {
     let freeCellCount =
       game.piles->Array.filter(pile => pile->Array.length == 0)->Array.length +
         game.free->Array.filter(Option.isNone)->Array.length
-
     switch PackerRules.spec.size {
     | AnySize => true
     | FreeSize => freeCellCount >= dragPile->Array.length - 1
@@ -102,6 +101,7 @@ module Make = (PackerRules: PackerRules) => {
     switch PackerRules.spec.foundation {
     | ByOne => noChildren && justOne && dragPileBase.card.rank == RA
     | ByAll => noChildren && fullStack && valid
+    | ByOneCyclic => noChildren && justOne && dragPileBase.card.rank == RA
     }
   }
 

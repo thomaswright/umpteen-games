@@ -421,29 +421,21 @@ function Make(PackerRules) {
     var dragPileBase = dragPile[0];
     var match = PackerRules.spec.foundation;
     switch (match) {
-      case "ByOne" :
-          if (noChildren && justOne) {
-            return dragPileBase.card.rank === "RA";
-          } else {
-            return false;
-          }
       case "ByAll" :
           if (noChildren && fullStack) {
             return valid;
           } else {
             return false;
           }
+      case "ByOne" :
       case "ByOneCyclic" :
-          throw {
-                RE_EXN_ID: "Match_failure",
-                _1: [
-                  "Packer.res",
-                  102,
-                  4
-                ],
-                Error: new Error()
-              };
+          break;
       
+    }
+    if (noChildren && justOne) {
+      return dragPileBase.card.rank === "RA";
+    } else {
+      return false;
     }
   };
   var foundationCheck = function (dragPile, card) {
