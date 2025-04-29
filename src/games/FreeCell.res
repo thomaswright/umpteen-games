@@ -258,7 +258,7 @@ module BakersGame = GameBase.Create({
   module Board = FreeCellRules.StandardBoard
 })
 
-module EightOff = GameBase.Create({
+module EightOffRules = {
   include BakersGameRules
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
@@ -343,7 +343,8 @@ module EightOff = GameBase.Create({
       </React.Fragment>
     }
   }
-})
+}
+module EightOff = GameBase.Create(EightOffRules)
 
 module SeahavenTowersBase = Packer.Make({
   let spec: Packer.spec = {
@@ -441,4 +442,93 @@ module SeahavenTowers = GameBase.Create({
       </React.Fragment>
     }
   }
+})
+
+module PenguinBase = Packer.Make({
+  let spec: Packer.spec = {
+    drop: CyclicOneSuit,
+    drag: OneSuit,
+    size: AnySize,
+    depot: AnyDepot, // will override
+    foundation: ByOne,
+  }
+})
+
+module Penguin = GameBase.Create({
+  include PenguinBase
+
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
+    let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
+
+    let deckToDeal = ref(shuffledDeck)
+
+    let beak = deckToDeal.contents->Array.getUnsafe(0)
+
+    let otherBeaks = []
+
+    deckToDeal :=
+      deckToDeal.contents->Array.filterMap(v => {
+        if v.card.rank == beak.card.rank && v != beak {
+          otherBeaks->Array.push(v)
+          None
+        } else {
+          Some(v)
+        }
+      })
+
+    (
+      shuffledDeck,
+      {
+        piles: [
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(7),
+        ],
+        foundations: [
+          [],
+          [otherBeaks->Array.getUnsafe(0)],
+          [otherBeaks->Array.getUnsafe(1)],
+          [otherBeaks->Array.getUnsafe(2)],
+        ],
+        free: [None, None, None, None, None, None, None],
+        stock: [],
+        waste: [],
+      },
+    )
+  }
+
+  let winCheck = FreeCellRules.winCheck
+
+  let pileBaseRules = (game: Packer.game, i): staticSpace => {
+    {
+      droppedUpon: (gameRemoved, dragPile) => {
+        let dragPileBase = dragPile->Array.getUnsafe(0)
+        let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
+        let second = game.foundations->Array.getUnsafe(1)->Array.getUnsafe(0)
+
+        if noChildren && dragPileBase.card.rank == second.card.rank {
+          Some({
+            ...gameRemoved,
+            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->Packer.flipLastUp,
+          })
+        } else {
+          None
+        }
+      },
+      autoProgress: Accept,
+      onClick: _ => None,
+    }
+  }
+
+  let forEachSpace = SeahavenTowersBase.makeForEachSpace(
+    ~pileBaseRules,
+    ~freeBaseRules=FreeCellRules.freeBaseRules,
+    ~freeRules=FreeCellRules.freeRules,
+  )
+
+  module Board = EightOffRules.Board
 })

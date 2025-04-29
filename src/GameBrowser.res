@@ -5,6 +5,7 @@ type gameType =
   | @as("Baker's Game") BakersGame
   | @as("Eight Off") EightOff
   | @as("Seahaven Towers") SeahavenTowers
+  | @as("Penguin") Penguin
   | @as("Up & Down") UpAndDown
   | @as("Spider: One Suit") SpiderOneSuit
   | @as("Spider: Two Suit") SpiderTwoSuit
@@ -23,6 +24,7 @@ let allGames = [
   BakersGame,
   EightOff,
   SeahavenTowers,
+  Penguin,
   UpAndDown,
   SpiderOneSuit,
   SpiderTwoSuit,
@@ -71,6 +73,7 @@ let make = () => {
     | BakersGame => <FreeCell.BakersGame id />
     | EightOff => <FreeCell.EightOff id />
     | SeahavenTowers => <FreeCell.SeahavenTowers id />
+    | Penguin => <FreeCell.Penguin id />
     | UpAndDown => <UpAndDown.Game id />
     | SpiderOneSuit => <Spider.OneSuit id />
     | SpiderTwoSuit => <Spider.TwoSuit id />

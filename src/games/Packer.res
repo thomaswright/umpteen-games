@@ -1,6 +1,18 @@
 open Webapi.Dom
 open Common
 
+@decco
+type space = Card(Card.card) | Foundation(int) | Pile(int) | Waste | Stock | Free(int)
+
+@decco
+type game = {
+  piles: array<array<Card.sides>>,
+  foundations: array<array<Card.sides>>,
+  stock: array<array<Card.sides>>,
+  waste: array<Card.sides>,
+  free: array<option<Card.sides>>,
+}
+
 type stack = AltSuit | AnySuit | OneSuit | CyclicOneSuit
 type size = AnySize | FreeSize
 type depot = SpecificDepot(Card.rank) | AnyDepot
@@ -14,17 +26,6 @@ let flipLastUp = (piles: array<array<Card.sides>>) =>
 
 module type PackerRules = {
   let spec: spec
-}
-@decco
-type space = Card(Card.card) | Foundation(int) | Pile(int) | Waste | Stock | Free(int)
-
-@decco
-type game = {
-  piles: array<array<Card.sides>>,
-  foundations: array<array<Card.sides>>,
-  stock: array<array<Card.sides>>,
-  waste: array<Card.sides>,
-  free: array<option<Card.sides>>,
 }
 
 module Make = (PackerRules: PackerRules) => {

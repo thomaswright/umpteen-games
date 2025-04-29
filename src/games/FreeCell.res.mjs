@@ -4,6 +4,7 @@ import * as Card from "../Card.res.mjs";
 import * as React from "react";
 import * as Common from "../Common.res.mjs";
 import * as Packer from "./Packer.res.mjs";
+import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as GameBase from "../GameBase.res.mjs";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
@@ -434,47 +435,47 @@ var deck_encode$1 = BakersGameBase.deck_encode;
 
 var deck_decode$1 = BakersGameBase.deck_decode;
 
+var dropCheck = BakersGameBase.dropCheck;
+
+var dragCheck = BakersGameBase.dragCheck;
+
+var dragSizeCheck = BakersGameBase.dragSizeCheck;
+
+var pileBaseCheck = BakersGameBase.pileBaseCheck;
+
+var foundationBaseCheck = BakersGameBase.foundationBaseCheck;
+
+var foundationCheck = BakersGameBase.foundationCheck;
+
 var applyLiftToDragPile$1 = BakersGameBase.applyLiftToDragPile;
 
 var applyMoveToDragPile$1 = BakersGameBase.applyMoveToDragPile;
 
 var removeDragFromGame$1 = BakersGameBase.removeDragFromGame;
 
+var pileBaseRules = BakersGameBase.pileBaseRules;
+
+var pileRules = BakersGameBase.pileRules;
+
+var foundationBaseRules = BakersGameBase.foundationBaseRules;
+
+var foundationRules = BakersGameBase.foundationRules;
+
+var wasteRules = BakersGameBase.wasteRules;
+
+var stockRules = BakersGameBase.stockRules;
+
+var stockBaseRules = BakersGameBase.stockBaseRules;
+
+var freeRules$1 = BakersGameBase.freeRules;
+
+var freeBaseRules$1 = BakersGameBase.freeBaseRules;
+
+var makeForEachSpace = BakersGameBase.makeForEachSpace;
+
 var AllCards$1 = BakersGameBase.AllCards;
 
 var forEachSpace$1 = BakersGameBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
-
-var BakersGameRules_dropCheck = BakersGameBase.dropCheck;
-
-var BakersGameRules_dragCheck = BakersGameBase.dragCheck;
-
-var BakersGameRules_dragSizeCheck = BakersGameBase.dragSizeCheck;
-
-var BakersGameRules_pileBaseCheck = BakersGameBase.pileBaseCheck;
-
-var BakersGameRules_foundationBaseCheck = BakersGameBase.foundationBaseCheck;
-
-var BakersGameRules_foundationCheck = BakersGameBase.foundationCheck;
-
-var BakersGameRules_pileBaseRules = BakersGameBase.pileBaseRules;
-
-var BakersGameRules_pileRules = BakersGameBase.pileRules;
-
-var BakersGameRules_foundationBaseRules = BakersGameBase.foundationBaseRules;
-
-var BakersGameRules_foundationRules = BakersGameBase.foundationRules;
-
-var BakersGameRules_wasteRules = BakersGameBase.wasteRules;
-
-var BakersGameRules_stockRules = BakersGameBase.stockRules;
-
-var BakersGameRules_stockBaseRules = BakersGameBase.stockBaseRules;
-
-var BakersGameRules_freeRules = BakersGameBase.freeRules;
-
-var BakersGameRules_freeBaseRules = BakersGameBase.freeBaseRules;
-
-var BakersGameRules_makeForEachSpace = BakersGameBase.makeForEachSpace;
 
 var BakersGameRules = {
   game_encode: game_encode$1,
@@ -483,25 +484,25 @@ var BakersGameRules = {
   spaceToString: spaceToString$1,
   deck_encode: deck_encode$1,
   deck_decode: deck_decode$1,
-  dropCheck: BakersGameRules_dropCheck,
-  dragCheck: BakersGameRules_dragCheck,
-  dragSizeCheck: BakersGameRules_dragSizeCheck,
-  pileBaseCheck: BakersGameRules_pileBaseCheck,
-  foundationBaseCheck: BakersGameRules_foundationBaseCheck,
-  foundationCheck: BakersGameRules_foundationCheck,
+  dropCheck: dropCheck,
+  dragCheck: dragCheck,
+  dragSizeCheck: dragSizeCheck,
+  pileBaseCheck: pileBaseCheck,
+  foundationBaseCheck: foundationBaseCheck,
+  foundationCheck: foundationCheck,
   applyLiftToDragPile: applyLiftToDragPile$1,
   applyMoveToDragPile: applyMoveToDragPile$1,
   removeDragFromGame: removeDragFromGame$1,
-  pileBaseRules: BakersGameRules_pileBaseRules,
-  pileRules: BakersGameRules_pileRules,
-  foundationBaseRules: BakersGameRules_foundationBaseRules,
-  foundationRules: BakersGameRules_foundationRules,
-  wasteRules: BakersGameRules_wasteRules,
-  stockRules: BakersGameRules_stockRules,
-  stockBaseRules: BakersGameRules_stockBaseRules,
-  freeRules: BakersGameRules_freeRules,
-  freeBaseRules: BakersGameRules_freeBaseRules,
-  makeForEachSpace: BakersGameRules_makeForEachSpace,
+  pileBaseRules: pileBaseRules,
+  pileRules: pileRules,
+  foundationBaseRules: foundationBaseRules,
+  foundationRules: foundationRules,
+  wasteRules: wasteRules,
+  stockRules: stockRules,
+  stockBaseRules: stockBaseRules,
+  freeRules: freeRules$1,
+  freeBaseRules: freeBaseRules$1,
+  makeForEachSpace: makeForEachSpace,
   AllCards: AllCards$1,
   winCheck: winCheck,
   forEachSpace: forEachSpace$1
@@ -600,7 +601,7 @@ function initiateGame$3() {
         ];
 }
 
-function FreeCell$EightOff$Board(props) {
+function FreeCell$EightOffRules$Board(props) {
   var initialGame = props.initialGame;
   var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
@@ -666,7 +667,40 @@ function FreeCell$EightOff$Board(props) {
 }
 
 var Board$1 = {
-  make: FreeCell$EightOff$Board
+  make: FreeCell$EightOffRules$Board
+};
+
+var EightOffRules = {
+  game_encode: game_encode$1,
+  game_decode: game_decode$1,
+  getSpace: getSpace$1,
+  spaceToString: spaceToString$1,
+  deck_encode: deck_encode$1,
+  deck_decode: deck_decode$1,
+  dropCheck: dropCheck,
+  dragCheck: dragCheck,
+  dragSizeCheck: dragSizeCheck,
+  pileBaseCheck: pileBaseCheck,
+  foundationBaseCheck: foundationBaseCheck,
+  foundationCheck: foundationCheck,
+  applyLiftToDragPile: applyLiftToDragPile$1,
+  applyMoveToDragPile: applyMoveToDragPile$1,
+  removeDragFromGame: removeDragFromGame$1,
+  pileBaseRules: pileBaseRules,
+  pileRules: pileRules,
+  foundationBaseRules: foundationBaseRules,
+  foundationRules: foundationRules,
+  wasteRules: wasteRules,
+  stockRules: stockRules,
+  stockBaseRules: stockBaseRules,
+  freeRules: freeRules$1,
+  freeBaseRules: freeBaseRules$1,
+  makeForEachSpace: makeForEachSpace,
+  AllCards: AllCards$1,
+  winCheck: winCheck,
+  forEachSpace: forEachSpace$1,
+  initiateGame: initiateGame$3,
+  Board: Board$1
 };
 
 var EightOff = GameBase.Create({
@@ -822,6 +856,109 @@ var SeahavenTowers = GameBase.Create({
       AllCards: SeahavenTowersBase.AllCards
     });
 
+var PenguinBase = Packer.Make({
+      spec: {
+        drop: "CyclicOneSuit",
+        drag: "OneSuit",
+        size: "AnySize",
+        depot: "AnyDepot",
+        foundation: "ByOne"
+      }
+    });
+
+function initiateGame$5() {
+  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
+  var deckToDeal = {
+    contents: shuffledDeck
+  };
+  var beak = deckToDeal.contents[0];
+  var otherBeaks = [];
+  deckToDeal.contents = Core__Array.filterMap(deckToDeal.contents, (function (v) {
+          if (v.card.rank === beak.card.rank && Caml_obj.notequal(v, beak)) {
+            otherBeaks.push(v);
+            return ;
+          } else {
+            return v;
+          }
+        }));
+  return [
+          shuffledDeck,
+          {
+            piles: [
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7)
+            ],
+            foundations: [
+              [],
+              [otherBeaks[0]],
+              [otherBeaks[1]],
+              [otherBeaks[2]]
+            ],
+            stock: [],
+            waste: [],
+            free: [
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined
+            ]
+          }
+        ];
+}
+
+function pileBaseRules$1(game, i) {
+  return {
+          droppedUpon: (function (gameRemoved, dragPile) {
+              var dragPileBase = dragPile[0];
+              var noChildren = game.piles[i].length === 0;
+              var second = game.foundations[1][0];
+              if (noChildren && dragPileBase.card.rank === second.card.rank) {
+                return {
+                        piles: Packer.flipLastUp(Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
+                                    return dragPile;
+                                  }))),
+                        foundations: gameRemoved.foundations,
+                        stock: gameRemoved.stock,
+                        waste: gameRemoved.waste,
+                        free: gameRemoved.free
+                      };
+              }
+              
+            }),
+          autoProgress: "Accept",
+          onClick: (function (param) {
+              
+            })
+        };
+}
+
+var forEachSpace$3 = SeahavenTowersBase.makeForEachSpace(pileBaseRules$1, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
+
+var Penguin = GameBase.Create({
+      game_encode: PenguinBase.game_encode,
+      game_decode: PenguinBase.game_decode,
+      deck_encode: PenguinBase.deck_encode,
+      deck_decode: PenguinBase.deck_decode,
+      getSpace: PenguinBase.getSpace,
+      spaceToString: PenguinBase.spaceToString,
+      initiateGame: initiateGame$5,
+      forEachSpace: forEachSpace$3,
+      removeDragFromGame: PenguinBase.removeDragFromGame,
+      winCheck: winCheck,
+      applyLiftToDragPile: PenguinBase.applyLiftToDragPile,
+      applyMoveToDragPile: PenguinBase.applyMoveToDragPile,
+      Board: Board$1,
+      AllCards: PenguinBase.AllCards
+    });
+
 export {
   FreeCellBase ,
   FreeCellRules ,
@@ -830,8 +967,11 @@ export {
   BakersGameBase ,
   BakersGameRules ,
   BakersGame ,
+  EightOffRules ,
   EightOff ,
   SeahavenTowersBase ,
   SeahavenTowers ,
+  PenguinBase ,
+  Penguin ,
 }
 /* FreeCellBase Not a pure module */

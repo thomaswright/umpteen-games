@@ -20,6 +20,7 @@ var allGames = [
   "Baker's Game",
   "Eight Off",
   "Seahaven Towers",
+  "Penguin",
   "Up & Down",
   "Spider: One Suit",
   "Spider: Two Suit",
@@ -63,6 +64,11 @@ function GameBrowser(props) {
         break;
     case "Seahaven Towers" :
         tmp = JsxRuntime.jsx(FreeCell.SeahavenTowers.make, {
+              id: selectGameType
+            });
+        break;
+    case "Penguin" :
+        tmp = JsxRuntime.jsx(FreeCell.Penguin.make, {
               id: selectGameType
             });
         break;

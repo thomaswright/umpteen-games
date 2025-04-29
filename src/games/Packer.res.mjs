@@ -14,17 +14,6 @@ import * as GameCommons from "./GameCommons.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
-function flipLastUp(piles) {
-  return piles.map(function (pile) {
-              return Common.ArrayAux.updateLast(pile, (function (v) {
-                            return {
-                                    card: v.card,
-                                    hidden: false
-                                  };
-                          }));
-            });
-}
-
 function space_encode(value) {
   if (typeof value !== "object") {
     if (value === "Waste") {
@@ -320,6 +309,17 @@ function game_decode(value) {
             value: e$4.value
           }
         };
+}
+
+function flipLastUp(piles) {
+  return piles.map(function (pile) {
+              return Common.ArrayAux.updateLast(pile, (function (v) {
+                            return {
+                                    card: v.card,
+                                    hidden: false
+                                  };
+                          }));
+            });
 }
 
 function Make(PackerRules) {
@@ -865,11 +865,11 @@ function Make(PackerRules) {
 }
 
 export {
-  flipLastUp ,
   space_encode ,
   space_decode ,
   game_encode ,
   game_decode ,
+  flipLastUp ,
   Make ,
 }
 /* Card Not a pure module */
