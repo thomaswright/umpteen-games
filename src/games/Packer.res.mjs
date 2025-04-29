@@ -197,15 +197,6 @@ function Make(PackerRules) {
     }
     
   };
-  var spaceToString = function (space) {
-    return JSON.stringify(space_encode(space));
-  };
-  var deck_encode = function (value) {
-    return Decco.arrayToJson(Card.sides_encode, value);
-  };
-  var deck_decode = function (value) {
-    return Decco.arrayFromJson(Card.sides_decode, value);
-  };
   var game_encode = function (value) {
     return Js_dict.fromArray([
                 [
@@ -334,6 +325,15 @@ function Make(PackerRules) {
               value: e$4.value
             }
           };
+  };
+  var spaceToString = function (space) {
+    return JSON.stringify(space_encode(space));
+  };
+  var deck_encode = function (value) {
+    return Decco.arrayToJson(Card.sides_encode, value);
+  };
+  var deck_decode = function (value) {
+    return Decco.arrayFromJson(Card.sides_decode, value);
   };
   var dropCheck = function (isLast, dragPile, card) {
     var dragPileBase = dragPile[0];
@@ -822,11 +822,11 @@ function Make(PackerRules) {
           space_encode: space_encode,
           space_decode: space_decode,
           getSpace: getSpace,
+          game_encode: game_encode,
+          game_decode: game_decode,
           spaceToString: spaceToString,
           deck_encode: deck_encode,
           deck_decode: deck_decode,
-          game_encode: game_encode,
-          game_decode: game_decode,
           dropCheck: dropCheck,
           dragCheck: dragCheck,
           dragSizeCheck: dragSizeCheck,

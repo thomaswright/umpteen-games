@@ -19,6 +19,7 @@ var allGames = [
   "Free Cell: 2 Deck",
   "Baker's Game",
   "Eight Off",
+  "Seahaven Towers",
   "Up & Down",
   "Spider: One Suit",
   "Spider: Two Suit",
@@ -57,6 +58,11 @@ function GameBrowser(props) {
         break;
     case "Eight Off" :
         tmp = JsxRuntime.jsx(FreeCell.EightOff.make, {
+              id: selectGameType
+            });
+        break;
+    case "Seahaven Towers" :
+        tmp = JsxRuntime.jsx(FreeCell.SeahavenTowers.make, {
               id: selectGameType
             });
         break;

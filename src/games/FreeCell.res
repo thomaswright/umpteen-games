@@ -457,3 +457,143 @@ module EightOff = GameBase.Create({
     }
   }
 })
+
+module SeahavenTowersBase = Packer.Make({
+  let spec: Packer.spec = {
+    drop: OneSuit,
+    drag: OneSuit,
+    size: FreeSize,
+    depot: KingDepot,
+    foundation: ByOne,
+  }
+})
+
+module SeahavenTowers = GameBase.Create({
+  include SeahavenTowersBase
+
+  let initiateGame = () => {
+    let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
+
+    let deckToDeal = ref(shuffledDeck)
+
+    (
+      shuffledDeck,
+      {
+        piles: [
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(5),
+          deckToDeal->ArrayAux.popN(5),
+        ],
+        foundations: [[], [], [], []],
+        free: [
+          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
+          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
+          None,
+          None,
+        ],
+        stock: [],
+        waste: [],
+      },
+    )
+  }
+
+  let winCheck = (game: game) => {
+    game.piles->Array.every(pile => pile->Array.length == 0) &&
+      game.free->Array.every(Option.isNone)
+  }
+
+  let freeBaseRules = (i): staticSpace => {
+    autoProgress: DoNothing,
+    droppedUpon: (game, dragPile) => {
+      let noChildren = game.free->Array.getUnsafe(i)->Option.isNone
+
+      if noChildren && dragPile->Array.length == 1 {
+        Some({
+          ...game,
+          free: game.free->ArrayAux.update(i, _ => dragPile->Array.get(0)),
+        })
+      } else {
+        None
+      }
+    },
+    onClick: _ => None,
+  }
+
+  let freeRules = (card, i): movableSpace => {
+    {
+      locationAdjustment: {
+        x: 0,
+        y: 0,
+        z: 1,
+      },
+      baseSpace: Free(i),
+      autoProgress: () => Send([card]),
+      dragPile: () => Some([card]),
+      droppedUpon: (_game, _dragPile) => None,
+      onClick: _ => None,
+      onStateChange: _ => (),
+    }
+  }
+
+  let forEachSpace = SeahavenTowersBase.makeForEachSpace(~freeBaseRules, ~freeRules)
+
+  module Board = {
+    @react.component
+    let make = (
+      ~setRef,
+      ~onMouseDown as _,
+      ~setGame as _,
+      ~moveToState as _,
+      ~autoProgress as _,
+      ~game as _,
+      ~undo as _,
+      ~isWin as _,
+    ) => {
+      <React.Fragment>
+        <div className="flex flex-row">
+          <div className="flex flex-row gap-3">
+            {[[], [], [], []]
+            ->Array.mapWithIndex((_, i) => {
+              <div
+                key={Free(i)->spaceToString}
+                ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
+                className=" bg-black opacity-20   rounded w-14 h-20"
+              />
+            })
+            ->React.array}
+          </div>
+          <div className="flex flex-row gap-3 ml-10">
+            {[[], [], [], []]
+            ->Array.mapWithIndex((_, i) => {
+              <div
+                key={Foundation(i)->spaceToString}
+                ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
+                className=" bg-white opacity-10  rounded w-14 h-20"
+              />
+            })
+            ->React.array}
+          </div>
+        </div>
+        <div />
+        <div className="flex flex-row gap-3 mt-5">
+          {[[], [], [], [], [], [], [], [], [], []]
+          ->Array.mapWithIndex((_, i) => {
+            <div
+              key={Pile(i)->spaceToString}
+              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+              className=" bg-black opacity-20   rounded w-14 h-20"
+            />
+          })
+          ->React.array}
+        </div>
+      </React.Fragment>
+    }
+  }
+})

@@ -27,13 +27,6 @@ module Make = (PackerRules: PackerRules) => {
     }
   }
 
-  let spaceToString = space => {
-    space->space_encode->Js.Json.stringify
-  }
-
-  type dragPile = array<Card.sides>
-  @decco
-  type deck = array<Card.sides>
   @decco
   type game = {
     piles: array<array<Card.sides>>,
@@ -42,6 +35,14 @@ module Make = (PackerRules: PackerRules) => {
     waste: array<Card.sides>,
     free: array<option<Card.sides>>,
   }
+
+  let spaceToString = space => {
+    space->space_encode->Js.Json.stringify
+  }
+
+  type dragPile = array<Card.sides>
+  @decco
+  type deck = array<Card.sides>
 
   let dropCheck = (isLast, dragPile, card) => {
     let dragPileBase = dragPile->Array.getUnsafe(0)

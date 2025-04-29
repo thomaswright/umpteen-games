@@ -22,15 +22,15 @@ var FreeCellBase = Packer.Make({
 
 var getSpace = FreeCellBase.getSpace;
 
+var game_encode = FreeCellBase.game_encode;
+
+var game_decode = FreeCellBase.game_decode;
+
 var spaceToString = FreeCellBase.spaceToString;
 
 var deck_encode = FreeCellBase.deck_encode;
 
 var deck_decode = FreeCellBase.deck_decode;
-
-var game_encode = FreeCellBase.game_encode;
-
-var game_decode = FreeCellBase.game_decode;
 
 var applyLiftToDragPile = FreeCellBase.applyLiftToDragPile;
 
@@ -226,11 +226,11 @@ var FreeCellRules = {
   space_encode: FreeCellRules_space_encode,
   space_decode: FreeCellRules_space_decode,
   getSpace: getSpace,
+  game_encode: game_encode,
+  game_decode: game_decode,
   spaceToString: spaceToString,
   deck_encode: deck_encode,
   deck_decode: deck_decode,
-  game_encode: game_encode,
-  game_decode: game_decode,
   dropCheck: FreeCellRules_dropCheck,
   dragCheck: FreeCellRules_dragCheck,
   dragSizeCheck: FreeCellRules_dragSizeCheck,
@@ -472,15 +472,15 @@ var BakersGameBase = Packer.Make({
 
 var getSpace$1 = BakersGameBase.getSpace;
 
+var game_encode$1 = BakersGameBase.game_encode;
+
+var game_decode$1 = BakersGameBase.game_decode;
+
 var spaceToString$1 = BakersGameBase.spaceToString;
 
 var deck_encode$1 = BakersGameBase.deck_encode;
 
 var deck_decode$1 = BakersGameBase.deck_decode;
-
-var game_encode$1 = BakersGameBase.game_encode;
-
-var game_decode$1 = BakersGameBase.game_decode;
 
 var applyLiftToDragPile$1 = BakersGameBase.applyLiftToDragPile;
 
@@ -676,11 +676,11 @@ var BakersGameRules = {
   space_encode: BakersGameRules_space_encode,
   space_decode: BakersGameRules_space_decode,
   getSpace: getSpace$1,
+  game_encode: game_encode$1,
+  game_decode: game_decode$1,
   spaceToString: spaceToString$1,
   deck_encode: deck_encode$1,
   deck_decode: deck_decode$1,
-  game_encode: game_encode$1,
-  game_decode: game_decode$1,
   dropCheck: BakersGameRules_dropCheck,
   dragCheck: BakersGameRules_dragCheck,
   dragSizeCheck: BakersGameRules_dragSizeCheck,
@@ -907,6 +907,225 @@ var EightOff = GameBase.Create({
       AllCards: AllCards$1
     });
 
+var SeahavenTowersBase = Packer.Make({
+      spec: {
+        drop: "OneSuit",
+        drag: "OneSuit",
+        size: "FreeSize",
+        depot: "KingDepot",
+        foundation: "ByOne"
+      }
+    });
+
+var spaceToString$2 = SeahavenTowersBase.spaceToString;
+
+function initiateGame$4() {
+  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
+  var deckToDeal = {
+    contents: shuffledDeck
+  };
+  return [
+          shuffledDeck,
+          {
+            piles: [
+              Common.ArrayAux.popN(deckToDeal, 5),
+              Common.ArrayAux.popN(deckToDeal, 5),
+              Common.ArrayAux.popN(deckToDeal, 5),
+              Common.ArrayAux.popN(deckToDeal, 5),
+              Common.ArrayAux.popN(deckToDeal, 5),
+              Common.ArrayAux.popN(deckToDeal, 5),
+              Common.ArrayAux.popN(deckToDeal, 5),
+              Common.ArrayAux.popN(deckToDeal, 5),
+              Common.ArrayAux.popN(deckToDeal, 5),
+              Common.ArrayAux.popN(deckToDeal, 5)
+            ],
+            foundations: [
+              [],
+              [],
+              [],
+              []
+            ],
+            stock: [],
+            waste: [],
+            free: [
+              Common.ArrayAux.popN(deckToDeal, 1)[0],
+              Common.ArrayAux.popN(deckToDeal, 1)[0],
+              undefined,
+              undefined
+            ]
+          }
+        ];
+}
+
+function winCheck$2(game) {
+  if (game.piles.every(function (pile) {
+          return pile.length === 0;
+        })) {
+    return game.free.every(Core__Option.isNone);
+  } else {
+    return false;
+  }
+}
+
+function freeBaseRules$2(i) {
+  return {
+          droppedUpon: (function (game, dragPile) {
+              var noChildren = Core__Option.isNone(game.free[i]);
+              if (noChildren && dragPile.length === 1) {
+                return {
+                        piles: game.piles,
+                        foundations: game.foundations,
+                        stock: game.stock,
+                        waste: game.waste,
+                        free: Common.ArrayAux.update(game.free, i, (function (param) {
+                                return dragPile[0];
+                              }))
+                      };
+              }
+              
+            }),
+          autoProgress: "DoNothing",
+          onClick: (function (param) {
+              
+            })
+        };
+}
+
+function freeRules$2(card, i) {
+  return {
+          locationAdjustment: {
+            x: 0,
+            y: 0,
+            z: 1
+          },
+          baseSpace: {
+            TAG: "Free",
+            _0: i
+          },
+          dragPile: (function () {
+              return [card];
+            }),
+          autoProgress: (function () {
+              return {
+                      TAG: "Send",
+                      _0: [card]
+                    };
+            }),
+          droppedUpon: (function (_game, _dragPile) {
+              
+            }),
+          onStateChange: (function (param) {
+              
+            }),
+          onClick: (function (param) {
+              
+            })
+        };
+}
+
+var forEachSpace$2 = SeahavenTowersBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules$2, freeRules$2);
+
+function FreeCell$SeahavenTowers$Board(props) {
+  var setRef = props.setRef;
+  return JsxRuntime.jsxs(React.Fragment, {
+              children: [
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("div", {
+                              children: [
+                                  [],
+                                  [],
+                                  [],
+                                  []
+                                ].map(function (param, i) {
+                                    return JsxRuntime.jsx("div", {
+                                                ref: Caml_option.some(setRef({
+                                                          TAG: "Free",
+                                                          _0: i
+                                                        })),
+                                                className: " bg-black opacity-20   rounded w-14 h-20"
+                                              }, spaceToString$2({
+                                                    TAG: "Free",
+                                                    _0: i
+                                                  }));
+                                  }),
+                              className: "flex flex-row gap-3"
+                            }),
+                        JsxRuntime.jsx("div", {
+                              children: [
+                                  [],
+                                  [],
+                                  [],
+                                  []
+                                ].map(function (param, i) {
+                                    return JsxRuntime.jsx("div", {
+                                                ref: Caml_option.some(setRef({
+                                                          TAG: "Foundation",
+                                                          _0: i
+                                                        })),
+                                                className: " bg-white opacity-10  rounded w-14 h-20"
+                                              }, spaceToString$2({
+                                                    TAG: "Foundation",
+                                                    _0: i
+                                                  }));
+                                  }),
+                              className: "flex flex-row gap-3 ml-10"
+                            })
+                      ],
+                      className: "flex flex-row"
+                    }),
+                JsxRuntime.jsx("div", {}),
+                JsxRuntime.jsx("div", {
+                      children: [
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          [],
+                          []
+                        ].map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                })),
+                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                      }, spaceToString$2({
+                                            TAG: "Pile",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    })
+              ]
+            });
+}
+
+var Board$2 = {
+  make: FreeCell$SeahavenTowers$Board
+};
+
+var SeahavenTowers = GameBase.Create({
+      game_encode: SeahavenTowersBase.game_encode,
+      game_decode: SeahavenTowersBase.game_decode,
+      deck_encode: SeahavenTowersBase.deck_encode,
+      deck_decode: SeahavenTowersBase.deck_decode,
+      getSpace: SeahavenTowersBase.getSpace,
+      spaceToString: spaceToString$2,
+      initiateGame: initiateGame$4,
+      forEachSpace: forEachSpace$2,
+      removeDragFromGame: SeahavenTowersBase.removeDragFromGame,
+      winCheck: winCheck$2,
+      applyLiftToDragPile: SeahavenTowersBase.applyLiftToDragPile,
+      applyMoveToDragPile: SeahavenTowersBase.applyMoveToDragPile,
+      Board: Board$2,
+      AllCards: SeahavenTowersBase.AllCards
+    });
+
 export {
   FreeCellBase ,
   FreeCellRules ,
@@ -916,5 +1135,7 @@ export {
   BakersGameRules ,
   BakersGame ,
   EightOff ,
+  SeahavenTowersBase ,
+  SeahavenTowers ,
 }
 /* FreeCellBase Not a pure module */

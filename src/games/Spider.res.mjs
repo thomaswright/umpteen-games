@@ -33,15 +33,15 @@ var SpiderBase = Packer.Make({
 
 var getSpace = SpiderBase.getSpace;
 
+var game_encode = SpiderBase.game_encode;
+
+var game_decode = SpiderBase.game_decode;
+
 var spaceToString = SpiderBase.spaceToString;
 
 var deck_encode = SpiderBase.deck_encode;
 
 var deck_decode = SpiderBase.deck_decode;
-
-var game_encode = SpiderBase.game_encode;
-
-var game_decode = SpiderBase.game_decode;
 
 var applyLiftToDragPile = SpiderBase.applyLiftToDragPile;
 
@@ -213,11 +213,11 @@ var SpiderRules = {
   space_encode: SpiderRules_space_encode,
   space_decode: SpiderRules_space_decode,
   getSpace: getSpace,
+  game_encode: game_encode,
+  game_decode: game_decode,
   spaceToString: spaceToString,
   deck_encode: deck_encode,
   deck_decode: deck_decode,
-  game_encode: game_encode,
-  game_decode: game_decode,
   dropCheck: SpiderRules_dropCheck,
   dragCheck: SpiderRules_dragCheck,
   dragSizeCheck: SpiderRules_dragSizeCheck,
