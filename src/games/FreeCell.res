@@ -55,11 +55,11 @@ module FreeCellRules = {
 
   module StandardBoard = {
     @react.component
-    let make = (~setRef) => {
+    let make = (~setRef, ~initialGame: Packer.game) => {
       <React.Fragment>
         <div className="flex flex-row">
           <div className="flex flex-row gap-3">
-            {[[], [], [], []]
+            {Array.make(~length=initialGame.free->Array.length, [])
             ->Array.mapWithIndex((_, i) => {
               <div
                 key={Free(i)->spaceToString}
@@ -70,7 +70,7 @@ module FreeCellRules = {
             ->React.array}
           </div>
           <div className="flex flex-row gap-3 ml-10">
-            {[[], [], [], []]
+            {Array.make(~length=initialGame.foundations->Array.length, [])
             ->Array.mapWithIndex((_, i) => {
               <div
                 key={Foundation(i)->spaceToString}
@@ -83,7 +83,7 @@ module FreeCellRules = {
         </div>
         <div />
         <div className="flex flex-row gap-3 mt-5">
-          {[[], [], [], [], [], [], [], []]
+          {Array.make(~length=initialGame.piles->Array.length, [])
           ->Array.mapWithIndex((_, i) => {
             <div
               key={Pile(i)->spaceToString}
@@ -153,7 +153,7 @@ module TwoDeck = GameBase.Create({
           deckToDeal->ArrayAux.popN(10),
           deckToDeal->ArrayAux.popN(10),
         ],
-        foundations: [[], [], [], []],
+        foundations: [[], [], [], [], [], [], [], []],
         free: [None, None, None, None, None, None, None, None],
         stock: [],
         waste: [],
@@ -163,11 +163,11 @@ module TwoDeck = GameBase.Create({
 
   module Board = {
     @react.component
-    let make = (~setRef) => {
+    let make = (~setRef, ~initialGame: Packer.game) => {
       <React.Fragment>
         <div className="flex flex-row">
           <div className="grid grid-cols-4 gap-3">
-            {[[], [], [], [], [], [], [], []]
+            {Array.make(~length=initialGame.free->Array.length, [])
             ->Array.mapWithIndex((_, i) => {
               <div
                 key={Free(i)->spaceToString}
@@ -178,7 +178,7 @@ module TwoDeck = GameBase.Create({
             ->React.array}
           </div>
           <div className="grid grid-cols-4 gap-3 ml-20">
-            {[[], [], [], [], [], [], [], []]
+            {Array.make(~length=initialGame.foundations->Array.length, [])
             ->Array.mapWithIndex((_, i) => {
               <div
                 key={Foundation(i)->spaceToString}
@@ -191,7 +191,7 @@ module TwoDeck = GameBase.Create({
         </div>
         <div />
         <div className="flex flex-row gap-3 mt-5">
-          {[[], [], [], [], [], [], [], [], [], []]
+          {Array.make(~length=initialGame.piles->Array.length, [])
           ->Array.mapWithIndex((_, i) => {
             <div
               key={Pile(i)->spaceToString}
@@ -298,11 +298,11 @@ module EightOff = GameBase.Create({
 
   module Board = {
     @react.component
-    let make = (~setRef) => {
+    let make = (~setRef, ~initialGame: Packer.game) => {
       <React.Fragment>
         <div className="flex flex-row">
           <div className="flex flex-col gap-3 mr-5">
-            {[[], [], [], []]
+            {Array.make(~length=initialGame.foundations->Array.length, [])
             ->Array.mapWithIndex((_, i) => {
               <div
                 key={Foundation(i)->spaceToString}
@@ -315,7 +315,7 @@ module EightOff = GameBase.Create({
           <div>
             <div className="flex flex-row">
               <div className="flex flex-row gap-3">
-                {[[], [], [], [], [], [], [], []]
+                {Array.make(~length=initialGame.free->Array.length, [])
                 ->Array.mapWithIndex((_, i) => {
                   <div
                     key={Free(i)->spaceToString}
@@ -328,7 +328,7 @@ module EightOff = GameBase.Create({
             </div>
             <div />
             <div className="flex flex-row gap-3 mt-5">
-              {[[], [], [], [], [], [], [], []]
+              {Array.make(~length=initialGame.piles->Array.length, [])
               ->Array.mapWithIndex((_, i) => {
                 <div
                   key={Pile(i)->spaceToString}
@@ -400,11 +400,11 @@ module SeahavenTowers = GameBase.Create({
 
   module Board = {
     @react.component
-    let make = (~setRef) => {
+    let make = (~setRef, ~initialGame: Packer.game) => {
       <React.Fragment>
         <div className="flex flex-row">
           <div className="flex flex-row gap-3">
-            {[[], [], [], []]
+            {Array.make(~length=initialGame.free->Array.length, [])
             ->Array.mapWithIndex((_, i) => {
               <div
                 key={Free(i)->spaceToString}
@@ -415,7 +415,7 @@ module SeahavenTowers = GameBase.Create({
             ->React.array}
           </div>
           <div className="flex flex-row gap-3 ml-10">
-            {[[], [], [], []]
+            {Array.make(~length=initialGame.foundations->Array.length, [])
             ->Array.mapWithIndex((_, i) => {
               <div
                 key={Foundation(i)->spaceToString}
@@ -428,7 +428,7 @@ module SeahavenTowers = GameBase.Create({
         </div>
         <div />
         <div className="flex flex-row gap-3 mt-5">
-          {[[], [], [], [], [], [], [], [], [], []]
+          {Array.make(~length=initialGame.piles->Array.length, [])
           ->Array.mapWithIndex((_, i) => {
             <div
               key={Pile(i)->spaceToString}

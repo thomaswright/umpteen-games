@@ -146,6 +146,7 @@ function stockBaseRules() {
 var forEachSpace = Base.makeForEachSpace(undefined, undefined, undefined, undefined, wasteRules, stockBaseRules, stockRules, undefined, undefined);
 
 function Klondike$GameRules$Board(props) {
+  var initialGame = props.initialGame;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
@@ -165,12 +166,7 @@ function Klondike$GameRules$Board(props) {
                       className: "flex flex-row gap-3"
                     }),
                 JsxRuntime.jsx("div", {
-                      children: [
-                          [],
-                          [],
-                          [],
-                          []
-                        ].map(function (param, i) {
+                      children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
                                                   TAG: "Foundation",
@@ -189,15 +185,7 @@ function Klondike$GameRules$Board(props) {
                       className: "flex flex-row gap-3 mt-5"
                     }),
                 JsxRuntime.jsx("div", {
-                      children: [
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          []
-                        ].map(function (param, i) {
+                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
                                                   TAG: "Pile",

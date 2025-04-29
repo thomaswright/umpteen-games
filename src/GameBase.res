@@ -64,8 +64,8 @@ module type GameRules = {
   let applyMoveToDragPile: (dragPile, (space, int, int) => unit) => unit
 
   module Board: {
-    type props<'setRef> = {setRef: 'setRef}
-    let make: props<space => ReactDOM.Ref.callbackDomRef> => React.element
+    type props<'setRef, 'initialGame> = {setRef: 'setRef, initialGame: 'initialGame}
+    let make: props<space => ReactDOM.Ref.callbackDomRef, game> => React.element
   }
 
   module AllCards: {
@@ -168,7 +168,7 @@ module Create = (GameRules: GameRules) => {
       let isWin = GameRules.winCheck(game)
       <React.Fragment>
         <Common.UtilBoard undo isWin createNewGame restartGame />
-        <GameRules.Board setRef />
+        <GameRules.Board setRef initialGame={getGame()} />
       </React.Fragment>
     }
   }

@@ -109,18 +109,14 @@ function freeRules(card, i) {
 var forEachSpace = FreeCellBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
 
 function FreeCell$FreeCellRules$StandardBoard(props) {
+  var initialGame = props.initialGame;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
                 JsxRuntime.jsxs("div", {
                       children: [
                         JsxRuntime.jsx("div", {
-                              children: [
-                                  [],
-                                  [],
-                                  [],
-                                  []
-                                ].map(function (param, i) {
+                              children: Core__Array.make(initialGame.free.length, []).map(function (param, i) {
                                     return JsxRuntime.jsx("div", {
                                                 ref: Caml_option.some(setRef({
                                                           TAG: "Free",
@@ -135,12 +131,7 @@ function FreeCell$FreeCellRules$StandardBoard(props) {
                               className: "flex flex-row gap-3"
                             }),
                         JsxRuntime.jsx("div", {
-                              children: [
-                                  [],
-                                  [],
-                                  [],
-                                  []
-                                ].map(function (param, i) {
+                              children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
                                     return JsxRuntime.jsx("div", {
                                                 ref: Caml_option.some(setRef({
                                                           TAG: "Foundation",
@@ -159,16 +150,7 @@ function FreeCell$FreeCellRules$StandardBoard(props) {
                     }),
                 JsxRuntime.jsx("div", {}),
                 JsxRuntime.jsx("div", {
-                      children: [
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          []
-                        ].map(function (param, i) {
+                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
                                                   TAG: "Pile",
@@ -327,6 +309,10 @@ function initiateGame$1() {
               [],
               [],
               [],
+              [],
+              [],
+              [],
+              [],
               []
             ],
             stock: [],
@@ -346,22 +332,14 @@ function initiateGame$1() {
 }
 
 function FreeCell$TwoDeck$Board(props) {
+  var initialGame = props.initialGame;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
                 JsxRuntime.jsxs("div", {
                       children: [
                         JsxRuntime.jsx("div", {
-                              children: [
-                                  [],
-                                  [],
-                                  [],
-                                  [],
-                                  [],
-                                  [],
-                                  [],
-                                  []
-                                ].map(function (param, i) {
+                              children: Core__Array.make(initialGame.free.length, []).map(function (param, i) {
                                     return JsxRuntime.jsx("div", {
                                                 ref: Caml_option.some(setRef({
                                                           TAG: "Free",
@@ -376,16 +354,7 @@ function FreeCell$TwoDeck$Board(props) {
                               className: "grid grid-cols-4 gap-3"
                             }),
                         JsxRuntime.jsx("div", {
-                              children: [
-                                  [],
-                                  [],
-                                  [],
-                                  [],
-                                  [],
-                                  [],
-                                  [],
-                                  []
-                                ].map(function (param, i) {
+                              children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
                                     return JsxRuntime.jsx("div", {
                                                 ref: Caml_option.some(setRef({
                                                           TAG: "Foundation",
@@ -404,18 +373,7 @@ function FreeCell$TwoDeck$Board(props) {
                     }),
                 JsxRuntime.jsx("div", {}),
                 JsxRuntime.jsx("div", {
-                      children: [
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          []
-                        ].map(function (param, i) {
+                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
                                                   TAG: "Pile",
@@ -643,17 +601,13 @@ function initiateGame$3() {
 }
 
 function FreeCell$EightOff$Board(props) {
+  var initialGame = props.initialGame;
   var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
               children: JsxRuntime.jsxs("div", {
                     children: [
                       JsxRuntime.jsx("div", {
-                            children: [
-                                [],
-                                [],
-                                [],
-                                []
-                              ].map(function (param, i) {
+                            children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
                                   return JsxRuntime.jsx("div", {
                                               ref: Caml_option.some(setRef({
                                                         TAG: "Foundation",
@@ -671,16 +625,7 @@ function FreeCell$EightOff$Board(props) {
                             children: [
                               JsxRuntime.jsx("div", {
                                     children: JsxRuntime.jsx("div", {
-                                          children: [
-                                              [],
-                                              [],
-                                              [],
-                                              [],
-                                              [],
-                                              [],
-                                              [],
-                                              []
-                                            ].map(function (param, i) {
+                                          children: Core__Array.make(initialGame.free.length, []).map(function (param, i) {
                                                 return JsxRuntime.jsx("div", {
                                                             ref: Caml_option.some(setRef({
                                                                       TAG: "Free",
@@ -698,16 +643,7 @@ function FreeCell$EightOff$Board(props) {
                                   }),
                               JsxRuntime.jsx("div", {}),
                               JsxRuntime.jsx("div", {
-                                    children: [
-                                        [],
-                                        [],
-                                        [],
-                                        [],
-                                        [],
-                                        [],
-                                        [],
-                                        []
-                                      ].map(function (param, i) {
+                                    children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
                                           return JsxRuntime.jsx("div", {
                                                       ref: Caml_option.some(setRef({
                                                                 TAG: "Pile",
@@ -803,18 +739,14 @@ function initiateGame$4() {
 var forEachSpace$2 = SeahavenTowersBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
 
 function FreeCell$SeahavenTowers$Board(props) {
+  var initialGame = props.initialGame;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
                 JsxRuntime.jsxs("div", {
                       children: [
                         JsxRuntime.jsx("div", {
-                              children: [
-                                  [],
-                                  [],
-                                  [],
-                                  []
-                                ].map(function (param, i) {
+                              children: Core__Array.make(initialGame.free.length, []).map(function (param, i) {
                                     return JsxRuntime.jsx("div", {
                                                 ref: Caml_option.some(setRef({
                                                           TAG: "Free",
@@ -829,12 +761,7 @@ function FreeCell$SeahavenTowers$Board(props) {
                               className: "flex flex-row gap-3"
                             }),
                         JsxRuntime.jsx("div", {
-                              children: [
-                                  [],
-                                  [],
-                                  [],
-                                  []
-                                ].map(function (param, i) {
+                              children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
                                     return JsxRuntime.jsx("div", {
                                                 ref: Caml_option.some(setRef({
                                                           TAG: "Foundation",
@@ -853,18 +780,7 @@ function FreeCell$SeahavenTowers$Board(props) {
                     }),
                 JsxRuntime.jsx("div", {}),
                 JsxRuntime.jsx("div", {
-                      children: [
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          [],
-                          []
-                        ].map(function (param, i) {
+                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
                                                   TAG: "Pile",

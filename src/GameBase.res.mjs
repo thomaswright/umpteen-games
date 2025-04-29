@@ -280,7 +280,8 @@ function Create(GameRules) {
     var restartGame = props.restartGame;
     var undo = props.undo;
     var moveToState = props.moveToState;
-    var game = useGame(props.subscribe, props.getGame);
+    var getGame = props.getGame;
+    var game = useGame(props.subscribe, getGame);
     var undo$1 = function () {
       undo();
       moveToState();
@@ -299,7 +300,8 @@ function Create(GameRules) {
                         restartGame: restartGame$1
                       }),
                   JsxRuntime.jsx(GameRules.Board.make, {
-                        setRef: props.setRef
+                        setRef: props.setRef,
+                        initialGame: getGame()
                       })
                 ]
               });

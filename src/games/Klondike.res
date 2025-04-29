@@ -108,7 +108,7 @@ module GameRules: GameBase.GameRules = {
 
   module Board = {
     @react.component
-    let make = (~setRef) => {
+    let make = (~setRef, ~initialGame: Packer.game) => {
       <React.Fragment>
         <div className="flex flex-row gap-3">
           <div
@@ -125,7 +125,7 @@ module GameRules: GameBase.GameRules = {
           />
         </div>
         <div className="flex flex-row gap-3 mt-5">
-          {[[], [], [], []]
+          {Array.make(~length=initialGame.foundations->Array.length, [])
           ->Array.mapWithIndex((_, i) => {
             <div
               key={Foundation(i)->spaceToString}
@@ -137,7 +137,7 @@ module GameRules: GameBase.GameRules = {
           ->React.array}
         </div>
         <div className="flex flex-row gap-3 mt-5">
-          {[[], [], [], [], [], [], []]
+          {Array.make(~length=initialGame.piles->Array.length, [])
           ->Array.mapWithIndex((_, i) => {
             <div
               key={Pile(i)->spaceToString}
