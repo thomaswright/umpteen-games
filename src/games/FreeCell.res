@@ -398,5 +398,47 @@ module SeahavenTowers = GameBase.Create({
     ~freeRules=FreeCellRules.freeRules,
   )
 
-  module Board = FreeCellRules.StandardBoard
+  module Board = {
+    @react.component
+    let make = (~setRef) => {
+      <React.Fragment>
+        <div className="flex flex-row">
+          <div className="flex flex-row gap-3">
+            {[[], [], [], []]
+            ->Array.mapWithIndex((_, i) => {
+              <div
+                key={Free(i)->spaceToString}
+                ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
+                className=" bg-black opacity-20   rounded w-14 h-20"
+              />
+            })
+            ->React.array}
+          </div>
+          <div className="flex flex-row gap-3 ml-10">
+            {[[], [], [], []]
+            ->Array.mapWithIndex((_, i) => {
+              <div
+                key={Foundation(i)->spaceToString}
+                ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
+                className=" bg-white opacity-10  rounded w-14 h-20"
+              />
+            })
+            ->React.array}
+          </div>
+        </div>
+        <div />
+        <div className="flex flex-row gap-3 mt-5">
+          {[[], [], [], [], [], [], [], [], [], []]
+          ->Array.mapWithIndex((_, i) => {
+            <div
+              key={Pile(i)->spaceToString}
+              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+              className=" bg-black opacity-20   rounded w-14 h-20"
+            />
+          })
+          ->React.array}
+        </div>
+      </React.Fragment>
+    }
+  }
 })
