@@ -173,7 +173,7 @@ module Make = (PackerRules: PackerRules) => {
     }
   }
 
-  let pileRules = (pile, card, i, j): movableSpace => {
+  let pileRules = (game, pile, card, i, j): movableSpace => {
     let isLast = j == pile->Array.length - 1
 
     {
@@ -185,7 +185,7 @@ module Make = (PackerRules: PackerRules) => {
       baseSpace: Pile(i),
       dragPile: () => {
         let dragPile = pile->Array.sliceToEnd(~start=j)
-        if dragCheck(dragPile) {
+        if dragCheck(dragPile) && dragSizeCheck(game, dragPile) {
           Some(dragPile)
         } else {
           None
@@ -339,7 +339,7 @@ module Make = (PackerRules: PackerRules) => {
         f(Pile(i), pileBaseRules(game, i)->GameBase.Static)
 
         pile->Array.forEachWithIndex((card, j) => {
-          f(Card(card.card), pileRules(pile, card, i, j)->Movable)
+          f(Card(card.card), pileRules(game, pile, card, i, j)->Movable)
         })
       })
 

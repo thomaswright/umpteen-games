@@ -523,7 +523,7 @@ function Make(PackerRules) {
               })
           };
   };
-  var pileRules = function (pile, card, i, j) {
+  var pileRules = function (game, pile, card, i, j) {
     var isLast = j === (pile.length - 1 | 0);
     return {
             locationAdjustment: {
@@ -537,7 +537,7 @@ function Make(PackerRules) {
             },
             dragPile: (function () {
                 var dragPile = pile.slice(j);
-                if (dragCheck(dragPile)) {
+                if (dragCheck(dragPile) && dragSizeCheck(game, dragPile)) {
                   return dragPile;
                 }
                 
@@ -760,7 +760,7 @@ function Make(PackerRules) {
                         _0: card.card
                       }, {
                         TAG: "Movable",
-                        _0: pileRules$1(pile, card, i, j)
+                        _0: pileRules$1(game, pile, card, i, j)
                       });
                 });
           });
