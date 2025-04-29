@@ -50,18 +50,22 @@ let equals = (a, b) => {
 let isRed = (v: sides) => v.card.suit == Hearts || v.card.suit == Diamonds
 let isBlack = (v: sides) => v.card.suit == Spades || v.card.suit == Clubs
 
-let rankIsBelow = (a, b) => {
-  allRanks->Array.findIndex(x => x == a.card.rank) ==
-    allRanks->Array.findIndex(x => x == b.card.rank) - 1
-}
-
 let rankIsAbove = (a, b) => {
   allRanks->Array.findIndex(x => x == a.card.rank) ==
     allRanks->Array.findIndex(x => x == b.card.rank) + 1
 }
 
+let rankIsAboveCyclic = (a, b) => {
+  if a.card.rank == RK {
+    b.card.rank == RA
+  } else {
+    allRanks->Array.findIndex(x => x == a.card.rank) ==
+      allRanks->Array.findIndex(x => x == b.card.rank) + 1
+  }
+}
+
 let rankIsAdjacent = (a, b) => {
-  rankIsBelow(a, b) || rankIsAbove(a, b)
+  rankIsAbove(b, a) || rankIsAbove(a, b)
 }
 
 let rankString = v => (v.card.rank :> string)

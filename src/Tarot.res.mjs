@@ -414,14 +414,6 @@ function equals(a, b) {
   return a.card.rank === b.card.rank;
 }
 
-function rankIsBelow(a, b) {
-  return allRanks.findIndex(function (x) {
-              return x === a.card.rank;
-            }) === (allRanks.findIndex(function (x) {
-                return x === b.card.rank;
-              }) - 1 | 0);
-}
-
 function rankIsAbove(a, b) {
   return allRanks.findIndex(function (x) {
               return x === a.card.rank;
@@ -431,7 +423,7 @@ function rankIsAbove(a, b) {
 }
 
 function rankIsAdjacent(a, b) {
-  if (rankIsBelow(a, b)) {
+  if (rankIsAbove(b, a)) {
     return true;
   } else {
     return rankIsAbove(a, b);
@@ -567,7 +559,6 @@ export {
   sides_decode ,
   allRanks ,
   equals ,
-  rankIsBelow ,
   rankIsAbove ,
   rankIsAdjacent ,
   rankString ,

@@ -3,7 +3,7 @@
 import * as Card from "../Card.res.mjs";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 
-function decAndAltValidation(dragPile) {
+function pileValidation(dragPile, f) {
   return Core__Array.reduce(dragPile.toReversed(), [
                 true,
                 undefined
@@ -17,7 +17,7 @@ function decAndAltValidation(dragPile) {
                   var onTop = param[1];
                   if (onTop !== undefined) {
                     return [
-                            Card.rankIsBelow(onTop, onBottom) && Card.color(onTop) !== Card.color(onBottom),
+                            f(onBottom, onTop),
                             onBottom
                           ];
                   } else {
@@ -27,36 +27,42 @@ function decAndAltValidation(dragPile) {
                           ];
                   }
                 }))[0];
+}
+
+function decAndAltValidation(dragPile) {
+  return pileValidation(dragPile, (function (onTop, onBottom) {
+                if (Card.rankIsAbove(onBottom, onTop)) {
+                  return Card.color(onTop) !== Card.color(onBottom);
+                } else {
+                  return false;
+                }
+              }));
 }
 
 function decValidation(dragPile) {
-  return Core__Array.reduce(dragPile.toReversed(), [
-                true,
-                undefined
-              ], (function (param, onBottom) {
-                  if (!param[0]) {
-                    return [
-                            false,
-                            undefined
-                          ];
-                  }
-                  var onTop = param[1];
-                  if (onTop !== undefined) {
-                    return [
-                            Card.rankIsBelow(onTop, onBottom) && onTop.card.suit === onBottom.card.suit,
-                            onBottom
-                          ];
-                  } else {
-                    return [
-                            true,
-                            onBottom
-                          ];
-                  }
-                }))[0];
+  return pileValidation(dragPile, (function (onTop, onBottom) {
+                if (Card.rankIsAbove(onBottom, onTop)) {
+                  return onTop.card.suit === onBottom.card.suit;
+                } else {
+                  return false;
+                }
+              }));
+}
+
+function decCyclicValidation(dragPile) {
+  return pileValidation(dragPile, (function (onTop, onBottom) {
+                if (Card.rankIsAboveCyclic(onBottom, onTop)) {
+                  return onTop.card.suit === onBottom.card.suit;
+                } else {
+                  return false;
+                }
+              }));
 }
 
 export {
+  pileValidation ,
   decAndAltValidation ,
   decValidation ,
+  decCyclicValidation ,
 }
 /* Card Not a pure module */

@@ -367,6 +367,12 @@ function Make(PackerRules) {
           } else {
             return false;
           }
+      case "CyclicOneSuit" :
+          if (isLast && Card.rankIsAboveCyclic(card, dragPileBase)) {
+            return dragPileBase.card.suit === card.card.suit;
+          } else {
+            return false;
+          }
       
     }
   };
@@ -379,6 +385,8 @@ function Make(PackerRules) {
           return true;
       case "OneSuit" :
           return GameCommons.decValidation(dragPile);
+      case "CyclicOneSuit" :
+          return GameCommons.decCyclicValidation(dragPile);
       
     }
   };
@@ -396,15 +404,13 @@ function Make(PackerRules) {
   var pileBaseCheck = function (game, dragPile, i) {
     var dragPileBase = dragPile[0];
     var noChildren = game.piles[i].length === 0;
-    var match = PackerRules.spec.depot;
-    if (match === "KingDepot") {
-      if (noChildren) {
-        return dragPileBase.card.rank === "RK";
-      } else {
-        return false;
-      }
-    } else {
+    var rank = PackerRules.spec.depot;
+    if (typeof rank !== "object") {
       return noChildren;
+    } else if (noChildren) {
+      return dragPileBase.card.rank === rank._0;
+    } else {
+      return false;
     }
   };
   var foundationBaseCheck = function (game, dragPile, i) {
@@ -431,7 +437,7 @@ function Make(PackerRules) {
     var dragPileBase = dragPile[0];
     var match = PackerRules.spec.foundation;
     if (match === "ByOne" && justOne && dragPileBase.card.suit === card.card.suit) {
-      return Card.rankIsBelow(card, dragPileBase);
+      return Card.rankIsAbove(dragPileBase, card);
     } else {
       return false;
     }

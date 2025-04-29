@@ -514,7 +514,10 @@ var ScorpionBase = Packer.Make({
         drop: "OneSuit",
         drag: "AnySuit",
         size: "AnySize",
-        depot: "KingDepot",
+        depot: {
+          TAG: "SpecificDepot",
+          _0: "RK"
+        },
         foundation: "ByAll"
       }
     });

@@ -61,18 +61,13 @@ let equals = (a, b) => {
   a.card.rank == b.card.rank
 }
 
-let rankIsBelow = (a, b) => {
-  allRanks->Array.findIndex(x => x == a.card.rank) ==
-    allRanks->Array.findIndex(x => x == b.card.rank) - 1
-}
-
 let rankIsAbove = (a, b) => {
   allRanks->Array.findIndex(x => x == a.card.rank) ==
     allRanks->Array.findIndex(x => x == b.card.rank) + 1
 }
 
 let rankIsAdjacent = (a, b) => {
-  rankIsBelow(a, b) || rankIsAbove(a, b)
+  rankIsAbove(b, a) || rankIsAbove(a, b)
 }
 
 let rankString = card => (card.card.rank :> string)

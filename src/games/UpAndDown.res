@@ -237,7 +237,7 @@ module GameRules: GameBase.GameRules = {
       droppedUpon: (game, dragPile) => {
         switch dragPile {
         | Card(dragCard) =>
-          if dragCard.card.suit == card.card.suit && Card.rankIsBelow(card, dragCard) {
+          if dragCard.card.suit == card.card.suit && Card.rankIsAbove(dragCard, card) {
             Some({
               ...game,
               foundations: game.foundations->Array.map(stack => {
@@ -290,7 +290,7 @@ module GameRules: GameBase.GameRules = {
       droppedUpon: (game, dragPile) => {
         switch dragPile {
         | Tarot(dragTarot) =>
-          if Tarot.rankIsBelow(tarot, dragTarot) {
+          if Tarot.rankIsAbove(dragTarot, tarot) {
             Some({
               ...game,
               tarotUp: Array.concat(game.tarotUp, [dragTarot]),

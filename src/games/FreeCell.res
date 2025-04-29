@@ -350,7 +350,7 @@ module SeahavenTowersBase = Packer.Make({
     drop: OneSuit,
     drag: OneSuit,
     size: FreeSize,
-    depot: KingDepot,
+    depot: SpecificDepot(RK),
     foundation: ByOne,
   }
 })

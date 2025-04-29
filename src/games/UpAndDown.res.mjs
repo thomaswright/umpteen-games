@@ -765,7 +765,7 @@ function foundationRules(card, i, j) {
                 return ;
               }
               var dragCard = dragPile._0;
-              if (dragCard.card.suit === card.card.suit && Card.rankIsBelow(card, dragCard)) {
+              if (dragCard.card.suit === card.card.suit && Card.rankIsAbove(dragCard, card)) {
                 return {
                         piles: game.piles,
                         foundations: game.foundations.map(function (stack) {
@@ -832,7 +832,7 @@ function tarotUpRules(tarot, j) {
                 return ;
               }
               var dragTarot = dragPile._0;
-              if (Tarot.rankIsBelow(tarot, dragTarot)) {
+              if (Tarot.rankIsAbove(dragTarot, tarot)) {
                 return {
                         piles: game.piles,
                         foundations: game.foundations,

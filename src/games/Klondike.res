@@ -5,7 +5,7 @@ module Base = Packer.Make({
     drop: AltSuit,
     drag: AltSuit,
     size: AnySize,
-    depot: KingDepot,
+    depot: SpecificDepot(RK),
     foundation: ByOne,
   }
 })

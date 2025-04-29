@@ -1,9 +1,9 @@
 open Webapi.Dom
 open Common
 
-type stack = AltSuit | AnySuit | OneSuit
+type stack = AltSuit | AnySuit | OneSuit | CyclicOneSuit
 type size = AnySize | FreeSize
-type depot = KingDepot | AnyDepot
+type depot = SpecificDepot(Card.rank) | AnyDepot
 type foundation = ByOne | ByAll
 
 type spec = {drop: stack, drag: stack, size: size, depot: depot, foundation: foundation}
@@ -56,6 +56,10 @@ module Make = (PackerRules: PackerRules) => {
     | AnySuit => isLast && Card.rankIsAbove(card, dragPileBase)
     | OneSuit =>
       isLast && Card.rankIsAbove(card, dragPileBase) && dragPileBase.card.suit == card.card.suit
+    | CyclicOneSuit =>
+      isLast &&
+      Card.rankIsAboveCyclic(card, dragPileBase) &&
+      dragPileBase.card.suit == card.card.suit
     }
   }
 
@@ -64,6 +68,7 @@ module Make = (PackerRules: PackerRules) => {
     | AltSuit => dragPile->GameCommons.decAndAltValidation
     | OneSuit => dragPile->GameCommons.decValidation
     | AnySuit => true
+    | CyclicOneSuit => dragPile->GameCommons.decCyclicValidation
     }
 
   let dragSizeCheck = (game: game, dragPile: dragPile) => {
@@ -82,7 +87,7 @@ module Make = (PackerRules: PackerRules) => {
     let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
 
     switch PackerRules.spec.depot {
-    | KingDepot => noChildren && dragPileBase.card.rank == RK
+    | SpecificDepot(rank) => noChildren && dragPileBase.card.rank == rank
     | AnyDepot => noChildren
     }
   }
@@ -106,7 +111,7 @@ module Make = (PackerRules: PackerRules) => {
 
     switch PackerRules.spec.foundation {
     | ByOne =>
-      justOne && dragPileBase.card.suit == card.card.suit && Card.rankIsBelow(card, dragPileBase)
+      justOne && dragPileBase.card.suit == card.card.suit && Card.rankIsAbove(dragPileBase, card)
     | ByAll => false
     }
   }

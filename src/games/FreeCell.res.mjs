@@ -691,7 +691,10 @@ var SeahavenTowersBase = Packer.Make({
         drop: "OneSuit",
         drag: "OneSuit",
         size: "FreeSize",
-        depot: "KingDepot",
+        depot: {
+          TAG: "SpecificDepot",
+          _0: "RK"
+        },
         foundation: "ByOne"
       }
     });

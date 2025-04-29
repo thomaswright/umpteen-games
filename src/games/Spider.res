@@ -329,7 +329,7 @@ module ScorpionBase = Packer.Make({
     drop: OneSuit,
     drag: AnySuit,
     size: AnySize,
-    depot: KingDepot,
+    depot: SpecificDepot(RK),
     foundation: ByAll,
   }
 })

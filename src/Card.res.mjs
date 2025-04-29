@@ -423,14 +423,6 @@ function isBlack(v) {
   }
 }
 
-function rankIsBelow(a, b) {
-  return allRanks.findIndex(function (x) {
-              return x === a.card.rank;
-            }) === (allRanks.findIndex(function (x) {
-                return x === b.card.rank;
-              }) - 1 | 0);
-}
-
 function rankIsAbove(a, b) {
   return allRanks.findIndex(function (x) {
               return x === a.card.rank;
@@ -439,8 +431,20 @@ function rankIsAbove(a, b) {
               }) + 1 | 0);
 }
 
+function rankIsAboveCyclic(a, b) {
+  if (a.card.rank === "RK") {
+    return b.card.rank === "RA";
+  } else {
+    return allRanks.findIndex(function (x) {
+                return x === a.card.rank;
+              }) === (allRanks.findIndex(function (x) {
+                  return x === b.card.rank;
+                }) + 1 | 0);
+  }
+}
+
 function rankIsAdjacent(a, b) {
-  if (rankIsBelow(a, b)) {
+  if (rankIsAbove(b, a)) {
     return true;
   } else {
     return rankIsAbove(a, b);
@@ -735,8 +739,8 @@ export {
   equals ,
   isRed ,
   isBlack ,
-  rankIsBelow ,
   rankIsAbove ,
+  rankIsAboveCyclic ,
   rankIsAdjacent ,
   rankString ,
   stringToRank ,

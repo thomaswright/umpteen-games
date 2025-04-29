@@ -14,7 +14,10 @@ var Base = Packer.Make({
         drop: "AltSuit",
         drag: "AltSuit",
         size: "AnySize",
-        depot: "KingDepot",
+        depot: {
+          TAG: "SpecificDepot",
+          _0: "RK"
+        },
         foundation: "ByOne"
       }
     });
