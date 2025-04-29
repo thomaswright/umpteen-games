@@ -4,10 +4,10 @@ import * as Card from "../Card.res.mjs";
 import * as React from "react";
 import * as Common from "../Common.res.mjs";
 import * as Packer from "./Packer.res.mjs";
+import * as Spider from "./Spider.res.mjs";
 import * as GameBase from "../GameBase.res.mjs";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
-import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 var Base = Packer.Make({
@@ -33,55 +33,9 @@ function flipLastUp(piles) {
 
 var spaceToString = Base.spaceToString;
 
-function winCheck(game) {
-  if (game.piles.every(function (pile) {
-          return pile.length === 0;
-        })) {
-    return game.stock.every(function (stockGroup) {
-                return stockGroup.length === 0;
-              });
-  } else {
-    return false;
-  }
-}
+var winCheck = Spider.SpiderRules.winCheck;
 
-function stockRules(_game, card, i, j) {
-  return {
-          locationAdjustment: {
-            x: Math.imul(i, 20),
-            y: 0,
-            z: (Math.imul(i, 10) + j | 0) + 1 | 0
-          },
-          baseSpace: "Stock",
-          dragPile: (function () {
-              
-            }),
-          autoProgress: (function () {
-              return "DoNothing";
-            }),
-          droppedUpon: (function (_game, _dragPile) {
-              
-            }),
-          onStateChange: (function (element) {
-              Card.showOrHide(card, element);
-            }),
-          onClick: (function (game) {
-              return Core__Option.map(Common.ArrayAux.getLast(game.stock), (function (stockGroup) {
-                            return {
-                                    piles: flipLastUp(game.piles.map(function (pile, i) {
-                                              return Core__Option.mapOr(stockGroup[i], pile, (function (v) {
-                                                            return pile.concat([v]);
-                                                          }));
-                                            })),
-                                    foundations: game.foundations,
-                                    stock: game.stock.slice(0, game.stock.length - 1 | 0),
-                                    waste: game.waste,
-                                    free: game.free
-                                  };
-                          }));
-            })
-        };
-}
+var stockRules = Spider.SpiderRules.stockRules;
 
 var forEachSpace = Base.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, stockRules, undefined, undefined);
 

@@ -16,44 +16,9 @@ let flipLastUp = (piles: array<array<Card.sides>>) =>
 module Game = GameBase.Create({
   include Base
 
-  let winCheck = (game: game) => {
-    game.piles->Array.every(pile => pile->Array.length == 0) &&
-      game.stock->Array.every(stockGroup => stockGroup->Array.length == 0)
-  }
+  let winCheck = Spider.SpiderRules.winCheck
 
-  let stockRules = (_game, card, i, j): movableSpace => {
-    {
-      locationAdjustment: {
-        x: i * 20,
-        y: 0,
-        z: i * 10 + j + 1,
-      },
-      baseSpace: Stock,
-      dragPile: () => {
-        None
-      },
-      autoProgress: () => DoNothing,
-      droppedUpon: (_game, _dragPile) => {
-        None
-      },
-      onClick: game => {
-        game.stock
-        ->Common.ArrayAux.getLast
-        ->Option.map(stockGroup => {
-          {
-            ...game,
-            piles: game.piles
-            ->Array.mapWithIndex((pile, i) => {
-              stockGroup->Array.get(i)->Option.mapOr(pile, v => Array.concat(pile, [v]))
-            })
-            ->flipLastUp,
-            stock: game.stock->Array.slice(~start=0, ~end=game.stock->Array.length - 1),
-          }
-        })
-      },
-      onStateChange: element => Card.showOrHide(card, element),
-    }
-  }
+  let stockRules = Spider.SpiderRules.stockRules
 
   let forEachSpace = Base.makeForEachSpace(~stockRules)
 
