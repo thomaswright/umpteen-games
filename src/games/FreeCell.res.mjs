@@ -470,43 +470,25 @@ var BakersGameBase = Packer.Make({
       }
     });
 
+var getSpace$1 = BakersGameBase.getSpace;
+
 var spaceToString$1 = BakersGameBase.spaceToString;
 
-function initiateGame$2() {
-  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
-  var deckToDeal = {
-    contents: shuffledDeck
-  };
-  return [
-          shuffledDeck,
-          {
-            piles: [
-              Common.ArrayAux.popN(deckToDeal, 7),
-              Common.ArrayAux.popN(deckToDeal, 7),
-              Common.ArrayAux.popN(deckToDeal, 7),
-              Common.ArrayAux.popN(deckToDeal, 7),
-              Common.ArrayAux.popN(deckToDeal, 6),
-              Common.ArrayAux.popN(deckToDeal, 6),
-              Common.ArrayAux.popN(deckToDeal, 6),
-              Common.ArrayAux.popN(deckToDeal, 6)
-            ],
-            foundations: [
-              [],
-              [],
-              [],
-              []
-            ],
-            stock: [],
-            waste: [],
-            free: [
-              undefined,
-              undefined,
-              undefined,
-              undefined
-            ]
-          }
-        ];
-}
+var deck_encode$1 = BakersGameBase.deck_encode;
+
+var deck_decode$1 = BakersGameBase.deck_decode;
+
+var game_encode$1 = BakersGameBase.game_encode;
+
+var game_decode$1 = BakersGameBase.game_decode;
+
+var applyLiftToDragPile$1 = BakersGameBase.applyLiftToDragPile;
+
+var applyMoveToDragPile$1 = BakersGameBase.applyMoveToDragPile;
+
+var removeDragFromGame$1 = BakersGameBase.removeDragFromGame;
+
+var AllCards$1 = BakersGameBase.AllCards;
 
 function winCheck$1(game) {
   if (game.piles.every(function (pile) {
@@ -576,7 +558,7 @@ function freeRules$1(card, i) {
 
 var forEachSpace$1 = BakersGameBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules$1, freeRules$1);
 
-function FreeCell$BakersGame$Board(props) {
+function FreeCell$BakersGameRules$StandardBoard(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
@@ -654,25 +636,275 @@ function FreeCell$BakersGame$Board(props) {
             });
 }
 
-var Board$1 = {
-  make: FreeCell$BakersGame$Board
+var StandardBoard$1 = {
+  make: FreeCell$BakersGameRules$StandardBoard
 };
 
+var BakersGameRules_space_encode = BakersGameBase.space_encode;
+
+var BakersGameRules_space_decode = BakersGameBase.space_decode;
+
+var BakersGameRules_dropCheck = BakersGameBase.dropCheck;
+
+var BakersGameRules_dragCheck = BakersGameBase.dragCheck;
+
+var BakersGameRules_dragSizeCheck = BakersGameBase.dragSizeCheck;
+
+var BakersGameRules_pileBaseCheck = BakersGameBase.pileBaseCheck;
+
+var BakersGameRules_foundationBaseCheck = BakersGameBase.foundationBaseCheck;
+
+var BakersGameRules_foundationCheck = BakersGameBase.foundationCheck;
+
+var BakersGameRules_pileBaseRules = BakersGameBase.pileBaseRules;
+
+var BakersGameRules_pileRules = BakersGameBase.pileRules;
+
+var BakersGameRules_foundationBaseRules = BakersGameBase.foundationBaseRules;
+
+var BakersGameRules_foundationRules = BakersGameBase.foundationRules;
+
+var BakersGameRules_wasteRules = BakersGameBase.wasteRules;
+
+var BakersGameRules_stockRules = BakersGameBase.stockRules;
+
+var BakersGameRules_stockBaseRules = BakersGameBase.stockBaseRules;
+
+var BakersGameRules_makeForEachSpace = BakersGameBase.makeForEachSpace;
+
+var BakersGameRules = {
+  space_encode: BakersGameRules_space_encode,
+  space_decode: BakersGameRules_space_decode,
+  getSpace: getSpace$1,
+  spaceToString: spaceToString$1,
+  deck_encode: deck_encode$1,
+  deck_decode: deck_decode$1,
+  game_encode: game_encode$1,
+  game_decode: game_decode$1,
+  dropCheck: BakersGameRules_dropCheck,
+  dragCheck: BakersGameRules_dragCheck,
+  dragSizeCheck: BakersGameRules_dragSizeCheck,
+  pileBaseCheck: BakersGameRules_pileBaseCheck,
+  foundationBaseCheck: BakersGameRules_foundationBaseCheck,
+  foundationCheck: BakersGameRules_foundationCheck,
+  applyLiftToDragPile: applyLiftToDragPile$1,
+  applyMoveToDragPile: applyMoveToDragPile$1,
+  removeDragFromGame: removeDragFromGame$1,
+  pileBaseRules: BakersGameRules_pileBaseRules,
+  pileRules: BakersGameRules_pileRules,
+  foundationBaseRules: BakersGameRules_foundationBaseRules,
+  foundationRules: BakersGameRules_foundationRules,
+  wasteRules: BakersGameRules_wasteRules,
+  stockRules: BakersGameRules_stockRules,
+  stockBaseRules: BakersGameRules_stockBaseRules,
+  makeForEachSpace: BakersGameRules_makeForEachSpace,
+  AllCards: AllCards$1,
+  winCheck: winCheck$1,
+  freeBaseRules: freeBaseRules$1,
+  freeRules: freeRules$1,
+  forEachSpace: forEachSpace$1,
+  StandardBoard: StandardBoard$1
+};
+
+function initiateGame$2() {
+  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
+  var deckToDeal = {
+    contents: shuffledDeck
+  };
+  return [
+          shuffledDeck,
+          {
+            piles: [
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6)
+            ],
+            foundations: [
+              [],
+              [],
+              [],
+              []
+            ],
+            stock: [],
+            waste: [],
+            free: [
+              undefined,
+              undefined,
+              undefined,
+              undefined
+            ]
+          }
+        ];
+}
+
 var BakersGame = GameBase.Create({
-      game_encode: BakersGameBase.game_encode,
-      game_decode: BakersGameBase.game_decode,
-      deck_encode: BakersGameBase.deck_encode,
-      deck_decode: BakersGameBase.deck_decode,
-      getSpace: BakersGameBase.getSpace,
+      game_encode: game_encode$1,
+      game_decode: game_decode$1,
+      deck_encode: deck_encode$1,
+      deck_decode: deck_decode$1,
+      getSpace: getSpace$1,
       spaceToString: spaceToString$1,
       initiateGame: initiateGame$2,
       forEachSpace: forEachSpace$1,
-      removeDragFromGame: BakersGameBase.removeDragFromGame,
+      removeDragFromGame: removeDragFromGame$1,
       winCheck: winCheck$1,
-      applyLiftToDragPile: BakersGameBase.applyLiftToDragPile,
-      applyMoveToDragPile: BakersGameBase.applyMoveToDragPile,
+      applyLiftToDragPile: applyLiftToDragPile$1,
+      applyMoveToDragPile: applyMoveToDragPile$1,
+      Board: StandardBoard$1,
+      AllCards: AllCards$1
+    });
+
+function initiateGame$3() {
+  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
+  var deckToDeal = {
+    contents: shuffledDeck
+  };
+  return [
+          shuffledDeck,
+          {
+            piles: [
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6)
+            ],
+            foundations: [
+              [],
+              [],
+              [],
+              []
+            ],
+            stock: [],
+            waste: [],
+            free: [
+              Common.ArrayAux.popN(deckToDeal, 1)[0],
+              Common.ArrayAux.popN(deckToDeal, 1)[0],
+              Common.ArrayAux.popN(deckToDeal, 1)[0],
+              Common.ArrayAux.popN(deckToDeal, 1)[0],
+              undefined,
+              undefined,
+              undefined,
+              undefined
+            ]
+          }
+        ];
+}
+
+function FreeCell$EightOff$Board(props) {
+  var setRef = props.setRef;
+  return JsxRuntime.jsx(React.Fragment, {
+              children: JsxRuntime.jsxs("div", {
+                    children: [
+                      JsxRuntime.jsx("div", {
+                            children: [
+                                [],
+                                [],
+                                [],
+                                []
+                              ].map(function (param, i) {
+                                  return JsxRuntime.jsx("div", {
+                                              ref: Caml_option.some(setRef({
+                                                        TAG: "Foundation",
+                                                        _0: i
+                                                      })),
+                                              className: " bg-white opacity-10  rounded w-14 h-20"
+                                            }, spaceToString$1({
+                                                  TAG: "Foundation",
+                                                  _0: i
+                                                }));
+                                }),
+                            className: "flex flex-col gap-3 mr-5"
+                          }),
+                      JsxRuntime.jsxs("div", {
+                            children: [
+                              JsxRuntime.jsx("div", {
+                                    children: JsxRuntime.jsx("div", {
+                                          children: [
+                                              [],
+                                              [],
+                                              [],
+                                              [],
+                                              [],
+                                              [],
+                                              [],
+                                              []
+                                            ].map(function (param, i) {
+                                                return JsxRuntime.jsx("div", {
+                                                            ref: Caml_option.some(setRef({
+                                                                      TAG: "Free",
+                                                                      _0: i
+                                                                    })),
+                                                            className: " bg-black opacity-20   rounded w-14 h-20"
+                                                          }, spaceToString$1({
+                                                                TAG: "Free",
+                                                                _0: i
+                                                              }));
+                                              }),
+                                          className: "flex flex-row gap-3"
+                                        }),
+                                    className: "flex flex-row"
+                                  }),
+                              JsxRuntime.jsx("div", {}),
+                              JsxRuntime.jsx("div", {
+                                    children: [
+                                        [],
+                                        [],
+                                        [],
+                                        [],
+                                        [],
+                                        [],
+                                        [],
+                                        []
+                                      ].map(function (param, i) {
+                                          return JsxRuntime.jsx("div", {
+                                                      ref: Caml_option.some(setRef({
+                                                                TAG: "Pile",
+                                                                _0: i
+                                                              })),
+                                                      className: " bg-black opacity-20   rounded w-14 h-20"
+                                                    }, spaceToString$1({
+                                                          TAG: "Pile",
+                                                          _0: i
+                                                        }));
+                                        }),
+                                    className: "flex flex-row gap-3 mt-5"
+                                  })
+                            ]
+                          })
+                    ],
+                    className: "flex flex-row"
+                  })
+            });
+}
+
+var Board$1 = {
+  make: FreeCell$EightOff$Board
+};
+
+var EightOff = GameBase.Create({
+      game_encode: game_encode$1,
+      game_decode: game_decode$1,
+      deck_encode: deck_encode$1,
+      deck_decode: deck_decode$1,
+      getSpace: getSpace$1,
+      spaceToString: spaceToString$1,
+      initiateGame: initiateGame$3,
+      forEachSpace: forEachSpace$1,
+      removeDragFromGame: removeDragFromGame$1,
+      winCheck: winCheck$1,
+      applyLiftToDragPile: applyLiftToDragPile$1,
+      applyMoveToDragPile: applyMoveToDragPile$1,
       Board: Board$1,
-      AllCards: BakersGameBase.AllCards
+      AllCards: AllCards$1
     });
 
 export {
@@ -681,6 +913,8 @@ export {
   OneDeck ,
   TwoDeck ,
   BakersGameBase ,
+  BakersGameRules ,
   BakersGame ,
+  EightOff ,
 }
 /* FreeCellBase Not a pure module */
