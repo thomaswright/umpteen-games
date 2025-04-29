@@ -13,7 +13,7 @@ module Base = Packer.Make({
 module GameRules: GameBase.GameRules = {
   include Base
 
-  let initiateGame = () => {
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
     let deckToDeal = ref(shuffledDeck)
 
@@ -43,7 +43,7 @@ module GameRules: GameBase.GameRules = {
     game.waste->Array.length == 0
   }
 
-  let wasteRules = (game, card, i): movableSpace => {
+  let wasteRules = (game: Packer.game, card, i): movableSpace => {
     baseSpace: Waste,
     locationAdjustment: {
       x: 20 * i,
@@ -114,7 +114,7 @@ module GameRules: GameBase.GameRules = {
           <div
             key={Stock->spaceToString}
             id={Stock->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Stock))}
             className=" bg-black opacity-20 rounded w-14 h-20"
           />
           <div

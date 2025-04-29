@@ -15,7 +15,8 @@ module SpiderBase = Packer.Make({
 
 module SpiderRules = {
   include SpiderBase
-  let winCheck = game => {
+
+  let winCheck = (game: Packer.game) => {
     game.piles->Array.every(pile => pile->Array.length == 0) &&
       game.stock->Array.every(stockGroup => stockGroup->Array.length == 0)
   }
@@ -65,7 +66,7 @@ module SpiderRules = {
         <div className="flex flex-row">
           <div
             key={Stock->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Stock))}
             className=" bg-white opacity-10  rounded w-14 h-20 mr-20"
           />
           <div className="flex flex-row gap-3 ml-10">
@@ -100,7 +101,7 @@ module SpiderRules = {
 module OneSuit = GameBase.Create({
   include SpiderRules
 
-  let initiateGame = () => {
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck =
       Array.concatMany(
         [],
@@ -153,7 +154,7 @@ module OneSuit = GameBase.Create({
 module TwoSuit = GameBase.Create({
   include SpiderRules
 
-  let initiateGame = () => {
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck =
       Array.concatMany(
         [],
@@ -205,7 +206,7 @@ module TwoSuit = GameBase.Create({
 module FourSuit = GameBase.Create({
   include SpiderRules
 
-  let initiateGame = () => {
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck =
       Array.concatMany(
         [],
@@ -257,7 +258,7 @@ module FourSuit = GameBase.Create({
 module SimpleSimon = GameBase.Create({
   include SpiderBase
 
-  let initiateGame = () => {
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
     let deckToDeal = ref(shuffledDeck)
 
@@ -300,7 +301,7 @@ module SimpleSimon = GameBase.Create({
             <div
               key={Foundation(i)->spaceToString}
               id={Foundation(i)->spaceToString}
-              ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
+              ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Foundation(i)))}
               className=" bg-white opacity-10 rounded w-14 h-20"
             />
           })
@@ -336,7 +337,7 @@ module ScorpionBase = Packer.Make({
 module Scorpion = GameBase.Create({
   include ScorpionBase
 
-  let initiateGame = () => {
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, true)->Array.toShuffled
 
     let deckToDeal = ref(shuffledDeck)
@@ -385,7 +386,7 @@ module Scorpion = GameBase.Create({
     )
   }
 
-  let winCheck = game => {
+  let winCheck = (game: Packer.game) => {
     game.piles->Array.every(pile => pile->Array.length == 0) &&
       game.stock->Array.every(stockGroup => stockGroup->Array.length == 0)
   }
@@ -435,7 +436,7 @@ module Scorpion = GameBase.Create({
         <div className="flex flex-row">
           <div
             key={Stock->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Stock))}
             className=" bg-white opacity-10  rounded w-14 h-20 mr-20"
           />
           <div className="flex flex-row gap-3 ml-10">

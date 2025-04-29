@@ -31,11 +31,11 @@ var SpiderBase = Packer.Make({
       }
     });
 
-var getSpace = SpiderBase.getSpace;
-
 var game_encode = SpiderBase.game_encode;
 
 var game_decode = SpiderBase.game_decode;
+
+var getSpace = SpiderBase.getSpace;
 
 var spaceToString = SpiderBase.spaceToString;
 
@@ -175,10 +175,6 @@ var StandardBoard = {
   make: Spider$SpiderRules$StandardBoard
 };
 
-var SpiderRules_space_encode = SpiderBase.space_encode;
-
-var SpiderRules_space_decode = SpiderBase.space_decode;
-
 var SpiderRules_dropCheck = SpiderBase.dropCheck;
 
 var SpiderRules_dragCheck = SpiderBase.dragCheck;
@@ -210,11 +206,9 @@ var SpiderRules_freeBaseRules = SpiderBase.freeBaseRules;
 var SpiderRules_makeForEachSpace = SpiderBase.makeForEachSpace;
 
 var SpiderRules = {
-  space_encode: SpiderRules_space_encode,
-  space_decode: SpiderRules_space_decode,
-  getSpace: getSpace,
   game_encode: game_encode,
   game_decode: game_decode,
+  getSpace: getSpace,
   spaceToString: spaceToString,
   deck_encode: deck_encode,
   deck_decode: deck_decode,

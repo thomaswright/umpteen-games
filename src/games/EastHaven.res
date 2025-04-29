@@ -57,7 +57,7 @@ module Game = GameBase.Create({
 
   let forEachSpace = Base.makeForEachSpace(~stockRules)
 
-  let initiateGame = () => {
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, true)->Array.toShuffled
 
     let deckToDeal = ref(shuffledDeck)
@@ -95,7 +95,7 @@ module Game = GameBase.Create({
         <div className="flex flex-row">
           <div
             key={Stock->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Stock))}
             className=" bg-white opacity-10  rounded w-14 h-20 mr-20"
           />
           <div className="flex flex-row gap-3 ml-10">
