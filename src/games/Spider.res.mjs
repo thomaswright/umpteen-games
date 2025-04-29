@@ -632,57 +632,7 @@ function initiateGame$4() {
         ];
 }
 
-function winCheck$2(game) {
-  if (game.piles.every(function (pile) {
-          return pile.length === 0;
-        })) {
-    return game.stock.every(function (stockGroup) {
-                return stockGroup.length === 0;
-              });
-  } else {
-    return false;
-  }
-}
-
-function stockRules$1(_game, _card, i, j) {
-  return {
-          locationAdjustment: {
-            x: Math.imul(i, 20),
-            y: 0,
-            z: (Math.imul(i, 10) + j | 0) + 1 | 0
-          },
-          baseSpace: "Stock",
-          dragPile: (function () {
-              
-            }),
-          autoProgress: (function () {
-              return "DoNothing";
-            }),
-          droppedUpon: (function (_game, _dragPile) {
-              
-            }),
-          onStateChange: (function (element) {
-              Card.hide(element);
-            }),
-          onClick: (function (game) {
-              return Core__Option.map(Common.ArrayAux.getLast(game.stock), (function (stockGroup) {
-                            return {
-                                    piles: flipLastUp(game.piles.map(function (pile, i) {
-                                              return Core__Option.mapOr(stockGroup[i], pile, (function (v) {
-                                                            return pile.concat([v]);
-                                                          }));
-                                            })),
-                                    foundations: game.foundations,
-                                    stock: game.stock.slice(0, game.stock.length - 1 | 0),
-                                    waste: game.waste,
-                                    free: game.free
-                                  };
-                          }));
-            })
-        };
-}
-
-var forEachSpace$2 = ScorpionBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, stockRules$1, undefined, undefined);
+var forEachSpace$2 = ScorpionBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, stockRules, undefined, undefined);
 
 function Spider$Scorpion$Board(props) {
   var setRef = props.setRef;
@@ -759,7 +709,7 @@ var Scorpion = GameBase.Create({
       initiateGame: initiateGame$4,
       forEachSpace: forEachSpace$2,
       removeDragFromGame: ScorpionBase.removeDragFromGame,
-      winCheck: winCheck$2,
+      winCheck: winCheck,
       applyLiftToDragPile: ScorpionBase.applyLiftToDragPile,
       applyMoveToDragPile: ScorpionBase.applyMoveToDragPile,
       Board: Board$1,
