@@ -63,7 +63,7 @@ module FreeCellRules = {
             ->Array.mapWithIndex((_, i) => {
               <div
                 key={Free(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
+                ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Free(i)))}
                 className=" bg-black opacity-20   rounded w-14 h-20"
               />
             })
@@ -101,7 +101,7 @@ module FreeCellRules = {
 module OneDeck = GameBase.Create({
   include FreeCellRules
 
-  let initiateGame = () => {
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
 
     let deckToDeal = ref(shuffledDeck)
@@ -132,7 +132,7 @@ module OneDeck = GameBase.Create({
 module TwoDeck = GameBase.Create({
   include FreeCellRules
 
-  let initiateGame = () => {
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck =
       Array.concatMany([], [Card.getDeck(0, false), Card.getDeck(1, false)])->Array.toShuffled
 
@@ -171,7 +171,7 @@ module TwoDeck = GameBase.Create({
             ->Array.mapWithIndex((_, i) => {
               <div
                 key={Free(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
+                ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Free(i)))}
                 className="   bg-black opacity-20  rounded w-14 h-20"
               />
             })
@@ -219,95 +219,18 @@ module BakersGameBase = Packer.Make({
 module BakersGameRules = {
   include BakersGameBase
 
-  let winCheck = (game: game) => {
-    game.piles->Array.every(pile => pile->Array.length == 0) &&
-      game.free->Array.every(Option.isNone)
-  }
+  let winCheck = FreeCellRules.winCheck
 
-  let freeBaseRules = (i): staticSpace => {
-    autoProgress: DoNothing,
-    droppedUpon: (game, dragPile) => {
-      let noChildren = game.free->Array.getUnsafe(i)->Option.isNone
-
-      if noChildren && dragPile->Array.length == 1 {
-        Some({
-          ...game,
-          free: game.free->ArrayAux.update(i, _ => dragPile->Array.get(0)),
-        })
-      } else {
-        None
-      }
-    },
-    onClick: _ => None,
-  }
-
-  let freeRules = (card, i): movableSpace => {
-    {
-      locationAdjustment: {
-        x: 0,
-        y: 0,
-        z: 1,
-      },
-      baseSpace: Free(i),
-      autoProgress: () => Send([card]),
-      dragPile: () => Some([card]),
-      droppedUpon: (_game, _dragPile) => None,
-      onClick: _ => None,
-      onStateChange: _ => (),
-    }
-  }
-
-  let forEachSpace = BakersGameBase.makeForEachSpace(~freeBaseRules, ~freeRules)
-
-  module StandardBoard = {
-    @react.component
-    let make = (~setRef) => {
-      <React.Fragment>
-        <div className="flex flex-row">
-          <div className="flex flex-row gap-3">
-            {[[], [], [], []]
-            ->Array.mapWithIndex((_, i) => {
-              <div
-                key={Free(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
-                className=" bg-black opacity-20   rounded w-14 h-20"
-              />
-            })
-            ->React.array}
-          </div>
-          <div className="flex flex-row gap-3 ml-10">
-            {[[], [], [], []]
-            ->Array.mapWithIndex((_, i) => {
-              <div
-                key={Foundation(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-                className=" bg-white opacity-10  rounded w-14 h-20"
-              />
-            })
-            ->React.array}
-          </div>
-        </div>
-        <div />
-        <div className="flex flex-row gap-3 mt-5">
-          {[[], [], [], [], [], [], [], []]
-          ->Array.mapWithIndex((_, i) => {
-            <div
-              key={Pile(i)->spaceToString}
-              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-              className=" bg-black opacity-20   rounded w-14 h-20"
-            />
-          })
-          ->React.array}
-        </div>
-      </React.Fragment>
-    }
-  }
+  let forEachSpace = BakersGameBase.makeForEachSpace(
+    ~freeBaseRules=FreeCellRules.freeBaseRules,
+    ~freeRules=FreeCellRules.freeRules,
+  )
 }
 
 module BakersGame = GameBase.Create({
   include BakersGameRules
 
-  let initiateGame = () => {
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
 
     let deckToDeal = ref(shuffledDeck)
@@ -332,13 +255,13 @@ module BakersGame = GameBase.Create({
       },
     )
   }
-  module Board = BakersGameRules.StandardBoard
+  module Board = FreeCellRules.StandardBoard
 })
 
 module EightOff = GameBase.Create({
   include BakersGameRules
 
-  let initiateGame = () => {
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
 
     let deckToDeal = ref(shuffledDeck)
@@ -383,7 +306,7 @@ module EightOff = GameBase.Create({
             ->Array.mapWithIndex((_, i) => {
               <div
                 key={Foundation(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
+                ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Foundation(i)))}
                 className=" bg-white opacity-10  rounded w-14 h-20"
               />
             })
@@ -435,7 +358,7 @@ module SeahavenTowersBase = Packer.Make({
 module SeahavenTowers = GameBase.Create({
   include SeahavenTowersBase
 
-  let initiateGame = () => {
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
 
     let deckToDeal = ref(shuffledDeck)
@@ -468,87 +391,12 @@ module SeahavenTowers = GameBase.Create({
     )
   }
 
-  let winCheck = (game: game) => {
-    game.piles->Array.every(pile => pile->Array.length == 0) &&
-      game.free->Array.every(Option.isNone)
-  }
+  let winCheck = FreeCellRules.winCheck
 
-  let freeBaseRules = (i): staticSpace => {
-    autoProgress: DoNothing,
-    droppedUpon: (game, dragPile) => {
-      let noChildren = game.free->Array.getUnsafe(i)->Option.isNone
+  let forEachSpace = SeahavenTowersBase.makeForEachSpace(
+    ~freeBaseRules=FreeCellRules.freeBaseRules,
+    ~freeRules=FreeCellRules.freeRules,
+  )
 
-      if noChildren && dragPile->Array.length == 1 {
-        Some({
-          ...game,
-          free: game.free->ArrayAux.update(i, _ => dragPile->Array.get(0)),
-        })
-      } else {
-        None
-      }
-    },
-    onClick: _ => None,
-  }
-
-  let freeRules = (card, i): movableSpace => {
-    {
-      locationAdjustment: {
-        x: 0,
-        y: 0,
-        z: 1,
-      },
-      baseSpace: Free(i),
-      autoProgress: () => Send([card]),
-      dragPile: () => Some([card]),
-      droppedUpon: (_game, _dragPile) => None,
-      onClick: _ => None,
-      onStateChange: _ => (),
-    }
-  }
-
-  let forEachSpace = SeahavenTowersBase.makeForEachSpace(~freeBaseRules, ~freeRules)
-
-  module Board = {
-    @react.component
-    let make = (~setRef) => {
-      <React.Fragment>
-        <div className="flex flex-row">
-          <div className="flex flex-row gap-3">
-            {[[], [], [], []]
-            ->Array.mapWithIndex((_, i) => {
-              <div
-                key={Free(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
-                className=" bg-black opacity-20   rounded w-14 h-20"
-              />
-            })
-            ->React.array}
-          </div>
-          <div className="flex flex-row gap-3 ml-10">
-            {[[], [], [], []]
-            ->Array.mapWithIndex((_, i) => {
-              <div
-                key={Foundation(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-                className=" bg-white opacity-10  rounded w-14 h-20"
-              />
-            })
-            ->React.array}
-          </div>
-        </div>
-        <div />
-        <div className="flex flex-row gap-3 mt-5">
-          {[[], [], [], [], [], [], [], [], [], []]
-          ->Array.mapWithIndex((_, i) => {
-            <div
-              key={Pile(i)->spaceToString}
-              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-              className=" bg-black opacity-20   rounded w-14 h-20"
-            />
-          })
-          ->React.array}
-        </div>
-      </React.Fragment>
-    }
-  }
+  module Board = FreeCellRules.StandardBoard
 })

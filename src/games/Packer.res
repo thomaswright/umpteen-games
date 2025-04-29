@@ -15,25 +15,28 @@ let flipLastUp = (piles: array<array<Card.sides>>) =>
 module type PackerRules = {
   let spec: spec
 }
+@decco
+type space = Card(Card.card) | Foundation(int) | Pile(int) | Waste | Stock | Free(int)
+
+@decco
+type game = {
+  piles: array<array<Card.sides>>,
+  foundations: array<array<Card.sides>>,
+  stock: array<array<Card.sides>>,
+  waste: array<Card.sides>,
+  free: array<option<Card.sides>>,
+}
 
 module Make = (PackerRules: PackerRules) => {
+  type space = space
   @decco
-  type space = Card(Card.card) | Foundation(int) | Pile(int) | Waste | Stock | Free(int)
+  type game = game
 
   let getSpace = element => {
     switch element->Element.id->Js.Json.parseExn->space_decode {
     | Ok(d) => Some(d)
     | _ => None
     }
-  }
-
-  @decco
-  type game = {
-    piles: array<array<Card.sides>>,
-    foundations: array<array<Card.sides>>,
-    stock: array<array<Card.sides>>,
-    waste: array<Card.sides>,
-    free: array<option<Card.sides>>,
   }
 
   let spaceToString = space => {

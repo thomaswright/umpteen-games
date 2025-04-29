@@ -25,170 +25,309 @@ function flipLastUp(piles) {
             });
 }
 
-function Make(PackerRules) {
-  var space_encode = function (value) {
-    if (typeof value !== "object") {
-      if (value === "Waste") {
-        return ["Waste"];
-      } else {
-        return ["Stock"];
-      }
+function space_encode(value) {
+  if (typeof value !== "object") {
+    if (value === "Waste") {
+      return ["Waste"];
+    } else {
+      return ["Stock"];
     }
-    switch (value.TAG) {
+  }
+  switch (value.TAG) {
+    case "Card" :
+        return [
+                "Card",
+                Card.card_encode(value._0)
+              ];
+    case "Foundation" :
+        return [
+                "Foundation",
+                Decco.intToJson(value._0)
+              ];
+    case "Pile" :
+        return [
+                "Pile",
+                Decco.intToJson(value._0)
+              ];
+    case "Free" :
+        return [
+                "Free",
+                Decco.intToJson(value._0)
+              ];
+    
+  }
+}
+
+function space_decode(value) {
+  var jsonArr = Js_json.classify(value);
+  if (typeof jsonArr !== "object") {
+    return Decco.error(undefined, "Not a variant", value);
+  }
+  if (jsonArr.TAG !== "JSONArray") {
+    return Decco.error(undefined, "Not a variant", value);
+  }
+  var jsonArr$1 = jsonArr._0;
+  if (jsonArr$1.length === 0) {
+    return Decco.error(undefined, "Expected variant, found empty array", value);
+  }
+  var tagged = Js_array.map(Js_json.classify, jsonArr$1);
+  var match = Belt_Array.getExn(tagged, 0);
+  if (typeof match === "object" && match.TAG === "JSONString") {
+    switch (match._0) {
       case "Card" :
-          return [
-                  "Card",
-                  Card.card_encode(value._0)
-                ];
+          if (tagged.length !== 2) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          }
+          var v0 = Card.card_decode(Belt_Array.getExn(jsonArr$1, 1));
+          if (v0.TAG === "Ok") {
+            return {
+                    TAG: "Ok",
+                    _0: {
+                      TAG: "Card",
+                      _0: v0._0
+                    }
+                  };
+          }
+          var e = v0._0;
+          return {
+                  TAG: "Error",
+                  _0: {
+                    path: "[0]" + e.path,
+                    message: e.message,
+                    value: e.value
+                  }
+                };
       case "Foundation" :
-          return [
-                  "Foundation",
-                  Decco.intToJson(value._0)
-                ];
-      case "Pile" :
-          return [
-                  "Pile",
-                  Decco.intToJson(value._0)
-                ];
+          if (tagged.length !== 2) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          }
+          var v0$1 = Decco.intFromJson(Belt_Array.getExn(jsonArr$1, 1));
+          if (v0$1.TAG === "Ok") {
+            return {
+                    TAG: "Ok",
+                    _0: {
+                      TAG: "Foundation",
+                      _0: v0$1._0
+                    }
+                  };
+          }
+          var e$1 = v0$1._0;
+          return {
+                  TAG: "Error",
+                  _0: {
+                    path: "[0]" + e$1.path,
+                    message: e$1.message,
+                    value: e$1.value
+                  }
+                };
       case "Free" :
-          return [
-                  "Free",
-                  Decco.intToJson(value._0)
-                ];
-      
-    }
-  };
-  var space_decode = function (value) {
-    var jsonArr = Js_json.classify(value);
-    if (typeof jsonArr !== "object") {
-      return Decco.error(undefined, "Not a variant", value);
-    }
-    if (jsonArr.TAG !== "JSONArray") {
-      return Decco.error(undefined, "Not a variant", value);
-    }
-    var jsonArr$1 = jsonArr._0;
-    if (jsonArr$1.length === 0) {
-      return Decco.error(undefined, "Expected variant, found empty array", value);
-    }
-    var tagged = Js_array.map(Js_json.classify, jsonArr$1);
-    var match = Belt_Array.getExn(tagged, 0);
-    if (typeof match === "object" && match.TAG === "JSONString") {
-      switch (match._0) {
-        case "Card" :
-            if (tagged.length !== 2) {
-              return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-            }
-            var v0 = Card.card_decode(Belt_Array.getExn(jsonArr$1, 1));
-            if (v0.TAG === "Ok") {
-              return {
-                      TAG: "Ok",
-                      _0: {
-                        TAG: "Card",
-                        _0: v0._0
-                      }
-                    };
-            }
-            var e = v0._0;
+          if (tagged.length !== 2) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          }
+          var v0$2 = Decco.intFromJson(Belt_Array.getExn(jsonArr$1, 1));
+          if (v0$2.TAG === "Ok") {
             return {
-                    TAG: "Error",
+                    TAG: "Ok",
                     _0: {
-                      path: "[0]" + e.path,
-                      message: e.message,
-                      value: e.value
+                      TAG: "Free",
+                      _0: v0$2._0
                     }
                   };
-        case "Foundation" :
-            if (tagged.length !== 2) {
-              return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-            }
-            var v0$1 = Decco.intFromJson(Belt_Array.getExn(jsonArr$1, 1));
-            if (v0$1.TAG === "Ok") {
-              return {
-                      TAG: "Ok",
-                      _0: {
-                        TAG: "Foundation",
-                        _0: v0$1._0
-                      }
-                    };
-            }
-            var e$1 = v0$1._0;
+          }
+          var e$2 = v0$2._0;
+          return {
+                  TAG: "Error",
+                  _0: {
+                    path: "[0]" + e$2.path,
+                    message: e$2.message,
+                    value: e$2.value
+                  }
+                };
+      case "Pile" :
+          if (tagged.length !== 2) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          }
+          var v0$3 = Decco.intFromJson(Belt_Array.getExn(jsonArr$1, 1));
+          if (v0$3.TAG === "Ok") {
             return {
-                    TAG: "Error",
+                    TAG: "Ok",
                     _0: {
-                      path: "[0]" + e$1.path,
-                      message: e$1.message,
-                      value: e$1.value
+                      TAG: "Pile",
+                      _0: v0$3._0
                     }
                   };
-        case "Free" :
-            if (tagged.length !== 2) {
-              return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-            }
-            var v0$2 = Decco.intFromJson(Belt_Array.getExn(jsonArr$1, 1));
-            if (v0$2.TAG === "Ok") {
-              return {
-                      TAG: "Ok",
-                      _0: {
-                        TAG: "Free",
-                        _0: v0$2._0
-                      }
-                    };
-            }
-            var e$2 = v0$2._0;
+          }
+          var e$3 = v0$3._0;
+          return {
+                  TAG: "Error",
+                  _0: {
+                    path: "[0]" + e$3.path,
+                    message: e$3.message,
+                    value: e$3.value
+                  }
+                };
+      case "Stock" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
             return {
-                    TAG: "Error",
-                    _0: {
-                      path: "[0]" + e$2.path,
-                      message: e$2.message,
-                      value: e$2.value
-                    }
+                    TAG: "Ok",
+                    _0: "Stock"
                   };
-        case "Pile" :
-            if (tagged.length !== 2) {
-              return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-            }
-            var v0$3 = Decco.intFromJson(Belt_Array.getExn(jsonArr$1, 1));
-            if (v0$3.TAG === "Ok") {
-              return {
-                      TAG: "Ok",
-                      _0: {
-                        TAG: "Pile",
-                        _0: v0$3._0
-                      }
-                    };
-            }
-            var e$3 = v0$3._0;
+          }
+      case "Waste" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
             return {
-                    TAG: "Error",
-                    _0: {
-                      path: "[0]" + e$3.path,
-                      message: e$3.message,
-                      value: e$3.value
-                    }
+                    TAG: "Ok",
+                    _0: "Waste"
                   };
-        case "Stock" :
-            if (tagged.length !== 1) {
-              return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-            } else {
-              return {
-                      TAG: "Ok",
-                      _0: "Stock"
-                    };
-            }
-        case "Waste" :
-            if (tagged.length !== 1) {
-              return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-            } else {
-              return {
-                      TAG: "Ok",
-                      _0: "Waste"
-                    };
-            }
-        default:
-          
+          }
+      default:
+        
+    }
+  }
+  return Decco.error(undefined, "Invalid variant constructor", Belt_Array.getExn(jsonArr$1, 0));
+}
+
+function game_encode(value) {
+  return Js_dict.fromArray([
+              [
+                "piles",
+                (function (extra) {
+                      return Decco.arrayToJson((function (extra) {
+                                    return Decco.arrayToJson(Card.sides_encode, extra);
+                                  }), extra);
+                    })(value.piles)
+              ],
+              [
+                "foundations",
+                (function (extra) {
+                      return Decco.arrayToJson((function (extra) {
+                                    return Decco.arrayToJson(Card.sides_encode, extra);
+                                  }), extra);
+                    })(value.foundations)
+              ],
+              [
+                "stock",
+                (function (extra) {
+                      return Decco.arrayToJson((function (extra) {
+                                    return Decco.arrayToJson(Card.sides_encode, extra);
+                                  }), extra);
+                    })(value.stock)
+              ],
+              [
+                "waste",
+                (function (extra) {
+                      return Decco.arrayToJson(Card.sides_encode, extra);
+                    })(value.waste)
+              ],
+              [
+                "free",
+                (function (extra) {
+                      return Decco.arrayToJson((function (extra) {
+                                    return Decco.optionToJson(Card.sides_encode, extra);
+                                  }), extra);
+                    })(value.free)
+              ]
+            ]);
+}
+
+function game_decode(value) {
+  var dict = Js_json.classify(value);
+  if (typeof dict !== "object") {
+    return Decco.error(undefined, "Not an object", value);
+  }
+  if (dict.TAG !== "JSONObject") {
+    return Decco.error(undefined, "Not an object", value);
+  }
+  var dict$1 = dict._0;
+  var extra = Belt_Option.getWithDefault(Js_dict.get(dict$1, "piles"), null);
+  var piles = Decco.arrayFromJson((function (extra) {
+          return Decco.arrayFromJson(Card.sides_decode, extra);
+        }), extra);
+  if (piles.TAG === "Ok") {
+    var extra$1 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "foundations"), null);
+    var foundations = Decco.arrayFromJson((function (extra) {
+            return Decco.arrayFromJson(Card.sides_decode, extra);
+          }), extra$1);
+    if (foundations.TAG === "Ok") {
+      var extra$2 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "stock"), null);
+      var stock = Decco.arrayFromJson((function (extra) {
+              return Decco.arrayFromJson(Card.sides_decode, extra);
+            }), extra$2);
+      if (stock.TAG === "Ok") {
+        var extra$3 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "waste"), null);
+        var waste = Decco.arrayFromJson(Card.sides_decode, extra$3);
+        if (waste.TAG === "Ok") {
+          var extra$4 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "free"), null);
+          var free = Decco.arrayFromJson((function (extra) {
+                  return Decco.optionFromJson(Card.sides_decode, extra);
+                }), extra$4);
+          if (free.TAG === "Ok") {
+            return {
+                    TAG: "Ok",
+                    _0: Decco.unsafeAddFieldToObject("piles", piles._0, Decco.unsafeAddFieldToObject("foundations", foundations._0, Decco.unsafeAddFieldToObject("stock", stock._0, Decco.unsafeAddFieldToObject("waste", waste._0, Decco.unsafeAddFieldToObject("free", free._0, {})))))
+                  };
+          }
+          var e = free._0;
+          return {
+                  TAG: "Error",
+                  _0: {
+                    path: ".free" + e.path,
+                    message: e.message,
+                    value: e.value
+                  }
+                };
+        }
+        var e$1 = waste._0;
+        return {
+                TAG: "Error",
+                _0: {
+                  path: ".waste" + e$1.path,
+                  message: e$1.message,
+                  value: e$1.value
+                }
+              };
       }
+      var e$2 = stock._0;
+      return {
+              TAG: "Error",
+              _0: {
+                path: ".stock" + e$2.path,
+                message: e$2.message,
+                value: e$2.value
+              }
+            };
     }
-    return Decco.error(undefined, "Invalid variant constructor", Belt_Array.getExn(jsonArr$1, 0));
+    var e$3 = foundations._0;
+    return {
+            TAG: "Error",
+            _0: {
+              path: ".foundations" + e$3.path,
+              message: e$3.message,
+              value: e$3.value
+            }
+          };
+  }
+  var e$4 = piles._0;
+  return {
+          TAG: "Error",
+          _0: {
+            path: ".piles" + e$4.path,
+            message: e$4.message,
+            value: e$4.value
+          }
+        };
+}
+
+function Make(PackerRules) {
+  var game_encode$1 = function (value) {
+    return game_encode(value);
+  };
+  var game_decode$1 = function (value) {
+    return game_decode(value);
   };
   var getSpace = function (element) {
     var d = space_decode(JSON.parse(element.id));
@@ -196,135 +335,6 @@ function Make(PackerRules) {
       return d._0;
     }
     
-  };
-  var game_encode = function (value) {
-    return Js_dict.fromArray([
-                [
-                  "piles",
-                  (function (extra) {
-                        return Decco.arrayToJson((function (extra) {
-                                      return Decco.arrayToJson(Card.sides_encode, extra);
-                                    }), extra);
-                      })(value.piles)
-                ],
-                [
-                  "foundations",
-                  (function (extra) {
-                        return Decco.arrayToJson((function (extra) {
-                                      return Decco.arrayToJson(Card.sides_encode, extra);
-                                    }), extra);
-                      })(value.foundations)
-                ],
-                [
-                  "stock",
-                  (function (extra) {
-                        return Decco.arrayToJson((function (extra) {
-                                      return Decco.arrayToJson(Card.sides_encode, extra);
-                                    }), extra);
-                      })(value.stock)
-                ],
-                [
-                  "waste",
-                  (function (extra) {
-                        return Decco.arrayToJson(Card.sides_encode, extra);
-                      })(value.waste)
-                ],
-                [
-                  "free",
-                  (function (extra) {
-                        return Decco.arrayToJson((function (extra) {
-                                      return Decco.optionToJson(Card.sides_encode, extra);
-                                    }), extra);
-                      })(value.free)
-                ]
-              ]);
-  };
-  var game_decode = function (value) {
-    var dict = Js_json.classify(value);
-    if (typeof dict !== "object") {
-      return Decco.error(undefined, "Not an object", value);
-    }
-    if (dict.TAG !== "JSONObject") {
-      return Decco.error(undefined, "Not an object", value);
-    }
-    var dict$1 = dict._0;
-    var extra = Belt_Option.getWithDefault(Js_dict.get(dict$1, "piles"), null);
-    var piles = Decco.arrayFromJson((function (extra) {
-            return Decco.arrayFromJson(Card.sides_decode, extra);
-          }), extra);
-    if (piles.TAG === "Ok") {
-      var extra$1 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "foundations"), null);
-      var foundations = Decco.arrayFromJson((function (extra) {
-              return Decco.arrayFromJson(Card.sides_decode, extra);
-            }), extra$1);
-      if (foundations.TAG === "Ok") {
-        var extra$2 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "stock"), null);
-        var stock = Decco.arrayFromJson((function (extra) {
-                return Decco.arrayFromJson(Card.sides_decode, extra);
-              }), extra$2);
-        if (stock.TAG === "Ok") {
-          var extra$3 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "waste"), null);
-          var waste = Decco.arrayFromJson(Card.sides_decode, extra$3);
-          if (waste.TAG === "Ok") {
-            var extra$4 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "free"), null);
-            var free = Decco.arrayFromJson((function (extra) {
-                    return Decco.optionFromJson(Card.sides_decode, extra);
-                  }), extra$4);
-            if (free.TAG === "Ok") {
-              return {
-                      TAG: "Ok",
-                      _0: Decco.unsafeAddFieldToObject("piles", piles._0, Decco.unsafeAddFieldToObject("foundations", foundations._0, Decco.unsafeAddFieldToObject("stock", stock._0, Decco.unsafeAddFieldToObject("waste", waste._0, Decco.unsafeAddFieldToObject("free", free._0, {})))))
-                    };
-            }
-            var e = free._0;
-            return {
-                    TAG: "Error",
-                    _0: {
-                      path: ".free" + e.path,
-                      message: e.message,
-                      value: e.value
-                    }
-                  };
-          }
-          var e$1 = waste._0;
-          return {
-                  TAG: "Error",
-                  _0: {
-                    path: ".waste" + e$1.path,
-                    message: e$1.message,
-                    value: e$1.value
-                  }
-                };
-        }
-        var e$2 = stock._0;
-        return {
-                TAG: "Error",
-                _0: {
-                  path: ".stock" + e$2.path,
-                  message: e$2.message,
-                  value: e$2.value
-                }
-              };
-      }
-      var e$3 = foundations._0;
-      return {
-              TAG: "Error",
-              _0: {
-                path: ".foundations" + e$3.path,
-                message: e$3.message,
-                value: e$3.value
-              }
-            };
-    }
-    var e$4 = piles._0;
-    return {
-            TAG: "Error",
-            _0: {
-              path: ".piles" + e$4.path,
-              message: e$4.message,
-              value: e$4.value
-            }
-          };
   };
   var spaceToString = function (space) {
     return JSON.stringify(space_encode(space));
@@ -819,11 +829,9 @@ function Make(PackerRules) {
     make: Packer$Make$AllCards
   };
   return {
-          space_encode: space_encode,
-          space_decode: space_decode,
+          game_encode: game_encode$1,
+          game_decode: game_decode$1,
           getSpace: getSpace,
-          game_encode: game_encode,
-          game_decode: game_decode,
           spaceToString: spaceToString,
           deck_encode: deck_encode,
           deck_decode: deck_decode,
@@ -852,6 +860,10 @@ function Make(PackerRules) {
 
 export {
   flipLastUp ,
+  space_encode ,
+  space_decode ,
+  game_encode ,
+  game_decode ,
   Make ,
 }
 /* Card Not a pure module */
