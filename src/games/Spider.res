@@ -307,7 +307,7 @@ module SimpleSimonRules = {
 }
 module SimpleSimon = GameBase.Create(SimpleSimonRules)
 
-module MsMop = GameBase.Create({
+module MrsMop = GameBase.Create({
   include SpiderRules
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {

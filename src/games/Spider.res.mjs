@@ -573,7 +573,7 @@ function initiateGame$4() {
         ];
 }
 
-var MsMop = GameBase.Create({
+var MrsMop = GameBase.Create({
       game_encode: game_encode,
       game_decode: game_decode,
       deck_encode: deck_encode,
@@ -744,7 +744,7 @@ export {
   FourSuit ,
   SimpleSimonRules ,
   SimpleSimon ,
-  MsMop ,
+  MrsMop ,
   ScorpionBase ,
   ScorpionRules ,
   Scorpion ,
