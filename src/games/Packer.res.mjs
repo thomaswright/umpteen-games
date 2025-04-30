@@ -311,22 +311,24 @@ function game_decode(value) {
         };
 }
 
+function getSpace(element) {
+  var d = space_decode(JSON.parse(element.id));
+  if (d.TAG === "Ok") {
+    return d._0;
+  }
+  
+}
+
+function spaceToString(space) {
+  return JSON.stringify(space_encode(space));
+}
+
 function Make(PackerRules) {
   var game_encode$1 = function (value) {
     return game_encode(value);
   };
   var game_decode$1 = function (value) {
     return game_decode(value);
-  };
-  var getSpace = function (element) {
-    var d = space_decode(JSON.parse(element.id));
-    if (d.TAG === "Ok") {
-      return d._0;
-    }
-    
-  };
-  var spaceToString = function (space) {
-    return JSON.stringify(space_encode(space));
   };
   var deck_encode = function (value) {
     return Decco.arrayToJson(Card.sides_encode, value);
@@ -899,6 +901,8 @@ export {
   space_decode ,
   game_encode ,
   game_decode ,
+  getSpace ,
+  spaceToString ,
   Make ,
 }
 /* Card Not a pure module */

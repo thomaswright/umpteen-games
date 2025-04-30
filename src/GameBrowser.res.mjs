@@ -7,6 +7,7 @@ import * as FreeCell from "./games/FreeCell.res.mjs";
 import * as Klondike from "./games/Klondike.res.mjs";
 import * as EastHaven from "./games/EastHaven.res.mjs";
 import * as UpAndDown from "./games/UpAndDown.res.mjs";
+import * as BakersGame from "./games/BakersGame.res.mjs";
 import * as GermanPatience from "./games/GermanPatience.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
@@ -57,12 +58,12 @@ function GameBrowser(props) {
             });
         break;
     case "Baker's Game" :
-        tmp = JsxRuntime.jsx(FreeCell.BakersGame.make, {
+        tmp = JsxRuntime.jsx(BakersGame.BakersGame.make, {
               id: selectGameType
             });
         break;
     case "Eight Off" :
-        tmp = JsxRuntime.jsx(FreeCell.EightOff.make, {
+        tmp = JsxRuntime.jsx(BakersGame.EightOff.make, {
               id: selectGameType
             });
         break;

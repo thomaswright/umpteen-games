@@ -76,8 +76,8 @@ let make = () => {
     | Klondike => <Klondike.Game id />
     | FreeCellOneDeck => <FreeCell.OneDeck id />
     | FreeCellTwoDeck => <FreeCell.TwoDeck id />
-    | BakersGame => <FreeCell.BakersGame id />
-    | EightOff => <FreeCell.EightOff id />
+    | BakersGame => <BakersGame.BakersGame id />
+    | EightOff => <BakersGame.EightOff id />
     | SeahavenTowers => <FreeCell.SeahavenTowers id />
     | Penguin => <FreeCell.Penguin id />
     | UpAndDown => <UpAndDown.Game id />

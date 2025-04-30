@@ -1,17 +1,7 @@
 open Common
 
-module FreeCellBase = Packer.Make({
-  let spec: Packer.spec = {
-    drop: AltSuit,
-    drag: AltSuit,
-    size: FreeSize,
-    depot: AnyDepot,
-    foundation: ByOne,
-  }
-})
-
 module FreeCellRules = {
-  include FreeCellBase
+  include Bases.FreeCell
 
   let winCheck = (game: game) => {
     game.piles->Array.every(pile => pile->Array.length == 0) &&
@@ -51,51 +41,7 @@ module FreeCellRules = {
     }
   }
 
-  let forEachSpace = FreeCellBase.makeForEachSpace(~freeBaseRules, ~freeRules)
-
-  module StandardBoard = {
-    @react.component
-    let make = (~setRef, ~initialGame: Packer.game) => {
-      <React.Fragment>
-        <div className="flex flex-row">
-          <div className="flex flex-row gap-3">
-            {Array.make(~length=initialGame.free->Array.length, [])
-            ->Array.mapWithIndex((_, i) => {
-              <div
-                key={Free(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Free(i)))}
-                className=" bg-black opacity-20   rounded w-14 h-20"
-              />
-            })
-            ->React.array}
-          </div>
-          <div className="flex flex-row gap-3 ml-10">
-            {Array.make(~length=initialGame.foundations->Array.length, [])
-            ->Array.mapWithIndex((_, i) => {
-              <div
-                key={Foundation(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-                className=" bg-white opacity-10  rounded w-14 h-20"
-              />
-            })
-            ->React.array}
-          </div>
-        </div>
-        <div />
-        <div className="flex flex-row gap-3 mt-5">
-          {Array.make(~length=initialGame.piles->Array.length, [])
-          ->Array.mapWithIndex((_, i) => {
-            <div
-              key={Pile(i)->spaceToString}
-              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-              className=" bg-black opacity-20   rounded w-14 h-20"
-            />
-          })
-          ->React.array}
-        </div>
-      </React.Fragment>
-    }
-  }
+  let forEachSpace = Bases.FreeCell.makeForEachSpace(~freeBaseRules, ~freeRules)
 }
 
 module OneDeck = GameBase.Create({
@@ -126,7 +72,7 @@ module OneDeck = GameBase.Create({
       },
     )
   }
-  module Board = FreeCellRules.StandardBoard
+  module Board = Boards.FreeCell
 })
 
 module TwoDeck = GameBase.Create({
@@ -161,203 +107,11 @@ module TwoDeck = GameBase.Create({
     )
   }
 
-  module Board = {
-    @react.component
-    let make = (~setRef, ~initialGame: Packer.game) => {
-      <React.Fragment>
-        <div className="flex flex-row">
-          <div className="grid grid-cols-4 gap-3">
-            {Array.make(~length=initialGame.free->Array.length, [])
-            ->Array.mapWithIndex((_, i) => {
-              <div
-                key={Free(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Free(i)))}
-                className="   bg-black opacity-20  rounded w-14 h-20"
-              />
-            })
-            ->React.array}
-          </div>
-          <div className="grid grid-cols-4 gap-3 ml-20">
-            {Array.make(~length=initialGame.foundations->Array.length, [])
-            ->Array.mapWithIndex((_, i) => {
-              <div
-                key={Foundation(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-                className="   bg-white opacity-10  rounded w-14 h-20"
-              />
-            })
-            ->React.array}
-          </div>
-        </div>
-        <div />
-        <div className="flex flex-row gap-3 mt-5">
-          {Array.make(~length=initialGame.piles->Array.length, [])
-          ->Array.mapWithIndex((_, i) => {
-            <div
-              key={Pile(i)->spaceToString}
-              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-              className=" bg-black opacity-20  rounded w-14 h-20"
-            />
-          })
-          ->React.array}
-        </div>
-      </React.Fragment>
-    }
-  }
-})
-
-module BakersGameBase = Packer.Make({
-  let spec: Packer.spec = {
-    drop: OneSuit,
-    drag: OneSuit,
-    size: FreeSize,
-    depot: AnyDepot,
-    foundation: ByOne,
-  }
-})
-
-module BakersGameRules = {
-  include BakersGameBase
-
-  let winCheck = FreeCellRules.winCheck
-
-  let forEachSpace = BakersGameBase.makeForEachSpace(
-    ~freeBaseRules=FreeCellRules.freeBaseRules,
-    ~freeRules=FreeCellRules.freeRules,
-  )
-}
-
-module BakersGame = GameBase.Create({
-  include BakersGameRules
-
-  let initiateGame = (): (array<Card.sides>, Packer.game) => {
-    let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
-
-    let deckToDeal = ref(shuffledDeck)
-
-    (
-      shuffledDeck,
-      {
-        piles: [
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-        ],
-        foundations: [[], [], [], []],
-        free: [None, None, None, None],
-        stock: [],
-        waste: [],
-      },
-    )
-  }
-  module Board = FreeCellRules.StandardBoard
-})
-
-module EightOffRules = {
-  include BakersGameRules
-
-  let initiateGame = (): (array<Card.sides>, Packer.game) => {
-    let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
-
-    let deckToDeal = ref(shuffledDeck)
-
-    (
-      shuffledDeck,
-      {
-        piles: [
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(6),
-        ],
-        foundations: [[], [], [], []],
-        free: [
-          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
-          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
-          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
-          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
-          None,
-          None,
-          None,
-          None,
-        ],
-        stock: [],
-        waste: [],
-      },
-    )
-  }
-
-  module Board = {
-    @react.component
-    let make = (~setRef, ~initialGame: Packer.game) => {
-      <React.Fragment>
-        <div className="flex flex-row">
-          <div className="flex flex-col gap-3 mr-5">
-            {Array.make(~length=initialGame.foundations->Array.length, [])
-            ->Array.mapWithIndex((_, i) => {
-              <div
-                key={Foundation(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Foundation(i)))}
-                className=" bg-white opacity-10  rounded w-14 h-20"
-              />
-            })
-            ->React.array}
-          </div>
-          <div>
-            <div className="flex flex-row">
-              <div className="flex flex-row gap-3">
-                {Array.make(~length=initialGame.free->Array.length, [])
-                ->Array.mapWithIndex((_, i) => {
-                  <div
-                    key={Free(i)->spaceToString}
-                    ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
-                    className=" bg-black opacity-20   rounded w-14 h-20"
-                  />
-                })
-                ->React.array}
-              </div>
-            </div>
-            <div />
-            <div className="flex flex-row gap-3 mt-5">
-              {Array.make(~length=initialGame.piles->Array.length, [])
-              ->Array.mapWithIndex((_, i) => {
-                <div
-                  key={Pile(i)->spaceToString}
-                  ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-                  className=" bg-black opacity-20   rounded w-14 h-20"
-                />
-              })
-              ->React.array}
-            </div>
-          </div>
-        </div>
-      </React.Fragment>
-    }
-  }
-}
-module EightOff = GameBase.Create(EightOffRules)
-
-module SeahavenTowersBase = Packer.Make({
-  let spec: Packer.spec = {
-    drop: OneSuit,
-    drag: OneSuit,
-    size: FreeSize,
-    depot: SpecificDepot(RK),
-    foundation: ByOne,
-  }
+  module Board = Boards.DoubleFreeCell
 })
 
 module SeahavenTowers = GameBase.Create({
-  include SeahavenTowersBase
+  include Bases.SeahavenTowers
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
@@ -394,68 +148,16 @@ module SeahavenTowers = GameBase.Create({
 
   let winCheck = FreeCellRules.winCheck
 
-  let forEachSpace = SeahavenTowersBase.makeForEachSpace(
+  let forEachSpace = Bases.SeahavenTowers.makeForEachSpace(
     ~freeBaseRules=FreeCellRules.freeBaseRules,
     ~freeRules=FreeCellRules.freeRules,
   )
 
-  module Board = {
-    @react.component
-    let make = (~setRef, ~initialGame: Packer.game) => {
-      <React.Fragment>
-        <div className="flex flex-row">
-          <div className="flex flex-row gap-3">
-            {Array.make(~length=initialGame.free->Array.length, [])
-            ->Array.mapWithIndex((_, i) => {
-              <div
-                key={Free(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Free(i)))}
-                className=" bg-black opacity-20   rounded w-14 h-20"
-              />
-            })
-            ->React.array}
-          </div>
-          <div className="flex flex-row gap-3 ml-10">
-            {Array.make(~length=initialGame.foundations->Array.length, [])
-            ->Array.mapWithIndex((_, i) => {
-              <div
-                key={Foundation(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-                className=" bg-white opacity-10  rounded w-14 h-20"
-              />
-            })
-            ->React.array}
-          </div>
-        </div>
-        <div />
-        <div className="flex flex-row gap-3 mt-5">
-          {Array.make(~length=initialGame.piles->Array.length, [])
-          ->Array.mapWithIndex((_, i) => {
-            <div
-              key={Pile(i)->spaceToString}
-              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-              className=" bg-black opacity-20   rounded w-14 h-20"
-            />
-          })
-          ->React.array}
-        </div>
-      </React.Fragment>
-    }
-  }
-})
-
-module PenguinBase = Packer.Make({
-  let spec: Packer.spec = {
-    drop: CyclicOneSuit,
-    drag: CyclicOneSuit,
-    size: AnySize,
-    depot: AnyDepot, // will override
-    foundation: ByOneCyclicOneSuit,
-  }
+  module Board = Boards.FreeCell
 })
 
 module Penguin = GameBase.Create({
-  include PenguinBase
+  include Bases.Penguin
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
@@ -548,28 +250,18 @@ module Penguin = GameBase.Create({
     }
   }
 
-  let forEachSpace = PenguinBase.makeForEachSpace(
+  let forEachSpace = Bases.Penguin.makeForEachSpace(
     ~pileBaseRules,
     ~freeBaseRules=FreeCellRules.freeBaseRules,
     ~freeRules=FreeCellRules.freeRules,
     ~foundationBaseRules,
   )
 
-  module Board = EightOffRules.Board
-})
-
-module StalactiteBase = Packer.Make({
-  let spec: Packer.spec = {
-    drop: NoDrop,
-    drag: AnySuit,
-    size: JustOne,
-    depot: AnyDepot, // will override
-    foundation: ByOneCyclicAnySuit,
-  }
+  module Board = Boards.EightOff
 })
 
 module Stalactite = GameBase.Create({
-  include StalactiteBase
+  include Bases.Stalactite
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
@@ -604,10 +296,10 @@ module Stalactite = GameBase.Create({
 
   let winCheck = FreeCellRules.winCheck
 
-  let forEachSpace = StalactiteBase.makeForEachSpace(
+  let forEachSpace = Bases.Stalactite.makeForEachSpace(
     ~freeBaseRules=FreeCellRules.freeBaseRules,
     ~freeRules=FreeCellRules.freeRules,
   )
 
-  module Board = FreeCellRules.StandardBoard
+  module Board = Boards.FreeCell
 })

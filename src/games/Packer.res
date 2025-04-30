@@ -24,22 +24,24 @@ module type PackerRules = {
   let spec: spec
 }
 
+let getSpace = element => {
+  switch element->Element.id->Js.Json.parseExn->space_decode {
+  | Ok(d) => Some(d)
+  | _ => None
+  }
+}
+
+let spaceToString = space => {
+  space->space_encode->Js.Json.stringify
+}
+
 module Make = (PackerRules: PackerRules) => {
   type space = space
   @decco
   type game = game
 
-  let getSpace = element => {
-    switch element->Element.id->Js.Json.parseExn->space_decode {
-    | Ok(d) => Some(d)
-    | _ => None
-    }
-  }
-
-  let spaceToString = space => {
-    space->space_encode->Js.Json.stringify
-  }
-
+  let getSpace = getSpace
+  let spaceToString = spaceToString
   type dragPile = array<Card.sides>
   @decco
   type deck = array<Card.sides>
