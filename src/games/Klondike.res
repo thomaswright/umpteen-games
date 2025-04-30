@@ -1,17 +1,8 @@
 open Common
+open Packer
 
-module Base = Packer.Make({
-  let spec: Packer.spec = {
-    drop: AltSuit,
-    drag: AltSuit,
-    size: AnySize,
-    depot: SpecificDepot(RK),
-    foundation: ByOne,
-  }
-})
-
-module GameRules: GameBase.GameRules = {
-  include Base
+module Game = GameBase.Create({
+  include Bases.Klondike
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
@@ -35,12 +26,6 @@ module GameRules: GameBase.GameRules = {
         free: [],
       },
     )
-  }
-
-  let winCheck = (game: game) => {
-    game.piles->Array.every(pile => pile->Array.length == 0) &&
-    game.stock->Array.length == 0 &&
-    game.waste->Array.length == 0
   }
 
   let wasteRules = (game: Packer.game, card, i): movableSpace => {
@@ -104,53 +89,7 @@ module GameRules: GameBase.GameRules = {
     },
   }
 
-  let forEachSpace = Base.makeForEachSpace(~wasteRules, ~stockRules, ~stockBaseRules)
+  let forEachSpace = Bases.Klondike.makeForEachSpace(~wasteRules, ~stockRules, ~stockBaseRules)
 
-  module Board = {
-    @react.component
-    let make = (~setRef, ~initialGame: Packer.game) => {
-      <React.Fragment>
-        <div className="flex flex-row gap-3">
-          <div
-            key={Stock->spaceToString}
-            id={Stock->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Stock))}
-            className=" bg-black opacity-20 rounded w-14 h-20"
-          />
-          <div
-            key={Waste->spaceToString}
-            id={Waste->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Waste))}
-            className=" w-14 h-20"
-          />
-        </div>
-        <div className="flex flex-row gap-3 mt-5">
-          {Array.make(~length=initialGame.foundations->Array.length, [])
-          ->Array.mapWithIndex((_, i) => {
-            <div
-              key={Foundation(i)->spaceToString}
-              id={Foundation(i)->spaceToString}
-              ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-              className=" bg-white opacity-10 rounded w-14 h-20"
-            />
-          })
-          ->React.array}
-        </div>
-        <div className="flex flex-row gap-3 mt-5">
-          {Array.make(~length=initialGame.piles->Array.length, [])
-          ->Array.mapWithIndex((_, i) => {
-            <div
-              key={Pile(i)->spaceToString}
-              id={Pile(i)->spaceToString}
-              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-              className=" bg-black opacity-20  rounded w-14 h-20"
-            />
-          })
-          ->React.array}
-        </div>
-      </React.Fragment>
-    }
-  }
-}
-
-module Game = GameBase.Create(GameRules)
+  module Board = Boards.Klondike
+})

@@ -1,26 +1,10 @@
 open Common
-
-module Base = Packer.Make({
-  let spec: Packer.spec = {
-    drop: AltSuit,
-    drag: AltSuit,
-    size: AnySize,
-    depot: AnyDepot,
-    foundation: ByOne,
-  }
-})
-
-let flipLastUp = (piles: array<array<Card.sides>>) =>
-  piles->Array.map(pile => pile->ArrayAux.updateLast(v => {...v, hidden: false}))
+open Packer
 
 module Game = GameBase.Create({
-  include Base
+  include Bases.EastHaven
 
-  let winCheck = Spider.SpiderRules.winCheck
-
-  let stockRules = Spider.SpiderRules.stockRules
-
-  let forEachSpace = Base.makeForEachSpace(~stockRules)
+  let forEachSpace = Bases.EastHaven.makeForEachSpace(~stockRules=Spider.SpiderRules.stockRules)
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, true)->Array.toShuffled
@@ -38,7 +22,7 @@ module Game = GameBase.Create({
           deckToDeal->ArrayAux.popN(3),
           deckToDeal->ArrayAux.popN(3),
           deckToDeal->ArrayAux.popN(3),
-        ]->flipLastUp,
+        ]->GameCommons.flipLastUp,
         foundations: [[], [], [], []],
         stock: [
           deckToDeal->ArrayAux.popN(3),
@@ -53,5 +37,5 @@ module Game = GameBase.Create({
     )
   }
 
-  module Board = Spider.SpiderRules.StandardBoard
+  module Board = Boards.Spider
 })

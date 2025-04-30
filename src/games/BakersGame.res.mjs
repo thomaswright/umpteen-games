@@ -8,8 +8,6 @@ import * as FreeCell from "./FreeCell.res.mjs";
 import * as GameBase from "../GameBase.res.mjs";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 
-var winCheck = FreeCell.FreeCellRules.winCheck;
-
 var forEachSpace = Bases.BakersGame.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, FreeCell.FreeCellRules.freeBaseRules, FreeCell.FreeCellRules.freeRules);
 
 function initiateGame() {
@@ -58,14 +56,12 @@ var BakersGame = GameBase.Create({
       initiateGame: initiateGame,
       forEachSpace: forEachSpace,
       removeDragFromGame: Bases.BakersGame.removeDragFromGame,
-      winCheck: winCheck,
+      winCheck: Bases.BakersGame.winCheck,
       applyLiftToDragPile: Bases.BakersGame.applyLiftToDragPile,
       applyMoveToDragPile: Bases.BakersGame.applyMoveToDragPile,
       Board: Boards.FreeCell,
       AllCards: Bases.BakersGame.AllCards
     });
-
-var winCheck$1 = FreeCell.FreeCellRules.winCheck;
 
 var forEachSpace$1 = Bases.BakersGame.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, FreeCell.FreeCellRules.freeBaseRules, FreeCell.FreeCellRules.freeRules);
 
@@ -119,7 +115,7 @@ var EightOff = GameBase.Create({
       initiateGame: initiateGame$1,
       forEachSpace: forEachSpace$1,
       removeDragFromGame: Bases.BakersGame.removeDragFromGame,
-      winCheck: winCheck$1,
+      winCheck: Bases.BakersGame.winCheck,
       applyLiftToDragPile: Bases.BakersGame.applyLiftToDragPile,
       applyMoveToDragPile: Bases.BakersGame.applyMoveToDragPile,
       Board: Boards.EightOff,

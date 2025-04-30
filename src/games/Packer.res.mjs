@@ -311,6 +311,16 @@ function game_decode(value) {
         };
 }
 
+function onlyFoundationWinCheck(game) {
+  if (game.piles.every(function (pile) {
+          return pile.length === 0;
+        }) && game.free.every(Core__Option.isNone) && game.stock.length === 0) {
+    return game.waste.length === 0;
+  } else {
+    return false;
+  }
+}
+
 function getSpace(element) {
   var d = space_decode(JSON.parse(element.id));
   if (d.TAG === "Ok") {
@@ -873,6 +883,7 @@ function Make(PackerRules) {
           spaceToString: spaceToString,
           deck_encode: deck_encode,
           deck_decode: deck_decode,
+          winCheck: onlyFoundationWinCheck,
           dropCheck: dropCheck,
           dragCheck: dragCheck,
           dragSizeCheck: dragSizeCheck,
@@ -901,6 +912,7 @@ export {
   space_decode ,
   game_encode ,
   game_decode ,
+  onlyFoundationWinCheck ,
   getSpace ,
   spaceToString ,
   Make ,

@@ -2,6 +2,19 @@
 
 import * as Packer from "./Packer.res.mjs";
 
+var Klondike = Packer.Make({
+      spec: {
+        drop: "AltSuit",
+        drag: "AltSuit",
+        size: "AnySize",
+        depot: {
+          TAG: "SpecificDepot",
+          _0: "RK"
+        },
+        foundation: "ByOne"
+      }
+    });
+
 var BakersGame = Packer.Make({
       spec: {
         drop: "OneSuit",
@@ -55,11 +68,59 @@ var Stalactite = Packer.Make({
       }
     });
 
+var Spider = Packer.Make({
+      spec: {
+        drop: "AnySuit",
+        drag: "OneSuit",
+        size: "AnySize",
+        depot: "AnyDepot",
+        foundation: "ByAll"
+      }
+    });
+
+var Scorpion = Packer.Make({
+      spec: {
+        drop: "OneSuit",
+        drag: "AnySuit",
+        size: "AnySize",
+        depot: {
+          TAG: "SpecificDepot",
+          _0: "RK"
+        },
+        foundation: "ByAll"
+      }
+    });
+
+var GermanPatience = Packer.Make({
+      spec: {
+        drop: "CyclicAnySuit",
+        drag: "CyclicAnySuit",
+        size: "AnySize",
+        depot: "AnyDepot",
+        foundation: "NoFoundation"
+      }
+    });
+
+var EastHaven = Packer.Make({
+      spec: {
+        drop: "AltSuit",
+        drag: "AltSuit",
+        size: "AnySize",
+        depot: "AnyDepot",
+        foundation: "ByOne"
+      }
+    });
+
 export {
+  Klondike ,
   BakersGame ,
   FreeCell ,
   SeahavenTowers ,
   Penguin ,
   Stalactite ,
+  Spider ,
+  Scorpion ,
+  GermanPatience ,
+  EastHaven ,
 }
-/* BakersGame Not a pure module */
+/* Klondike Not a pure module */

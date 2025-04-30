@@ -1,23 +1,7 @@
 open Common
-
-module SpiderBase = Packer.Make({
-  let spec: Packer.spec = {
-    drop: AnySuit,
-    drag: OneSuit,
-    size: AnySize,
-    depot: AnyDepot,
-    foundation: ByAll,
-  }
-})
+open Packer
 
 module SpiderRules = {
-  include SpiderBase
-
-  let winCheck = (game: Packer.game) => {
-    game.piles->Array.every(pile => pile->Array.length == 0) &&
-      game.stock->Array.every(stockGroup => stockGroup->Array.length == 0)
-  }
-
   let stockRules = (_game, _card, i, j): movableSpace => {
     {
       locationAdjustment: {
@@ -53,50 +37,12 @@ module SpiderRules = {
       },
     }
   }
-
-  let forEachSpace = SpiderBase.makeForEachSpace(~stockRules)
-
-  module StandardBoard = {
-    @react.component
-    let make = (~setRef, ~initialGame: Packer.game) => {
-      <React.Fragment>
-        <div className="flex flex-row">
-          <div
-            key={Stock->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Stock))}
-            className=" bg-white opacity-10  rounded w-14 h-20 mr-20"
-          />
-          <div className="flex flex-row gap-3 ml-10">
-            {Array.make(~length=initialGame.foundations->Array.length, [])
-            ->Array.mapWithIndex((_, i) => {
-              <div
-                key={Foundation(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-                className=" bg-white opacity-10  rounded w-14 h-20"
-              />
-            })
-            ->React.array}
-          </div>
-        </div>
-        <div />
-        <div className="flex flex-row gap-3 mt-5">
-          {Array.make(~length=initialGame.piles->Array.length, [])
-          ->Array.mapWithIndex((_, i) => {
-            <div
-              key={Pile(i)->spaceToString}
-              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-              className=" bg-black opacity-20   rounded w-14 h-20"
-            />
-          })
-          ->React.array}
-        </div>
-      </React.Fragment>
-    }
-  }
 }
 
 module OneSuit = GameBase.Create({
-  include SpiderRules
+  include Bases.Spider
+
+  let forEachSpace = makeForEachSpace(~stockRules=SpiderRules.stockRules)
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck =
@@ -145,11 +91,12 @@ module OneSuit = GameBase.Create({
     )
   }
 
-  module Board = SpiderRules.StandardBoard
+  module Board = Boards.Spider
 })
 
 module TwoSuit = GameBase.Create({
-  include SpiderRules
+  include Bases.Spider
+  let forEachSpace = makeForEachSpace(~stockRules=SpiderRules.stockRules)
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck =
@@ -197,11 +144,12 @@ module TwoSuit = GameBase.Create({
       },
     )
   }
-  module Board = SpiderRules.StandardBoard
+  module Board = Boards.Spider
 })
 
 module FourSuit = GameBase.Create({
-  include SpiderRules
+  include Bases.Spider
+  let forEachSpace = makeForEachSpace(~stockRules=SpiderRules.stockRules)
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck =
@@ -237,11 +185,12 @@ module FourSuit = GameBase.Create({
       },
     )
   }
-  module Board = SpiderRules.StandardBoard
+  module Board = Boards.Spider
 })
 
-module SimpleSimonRules = {
-  include SpiderRules
+module SimpleSimon = GameBase.Create({
+  include Bases.Spider
+  let forEachSpace = makeForEachSpace(~stockRules=SpiderRules.stockRules)
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
@@ -270,42 +219,12 @@ module SimpleSimonRules = {
     )
   }
 
-  module Board = {
-    @react.component
-    let make = (~setRef, ~initialGame: Packer.game) => {
-      <React.Fragment>
-        <div className="flex flex-row gap-3 mt-5">
-          {Array.make(~length=initialGame.foundations->Array.length, [])
-          ->Array.mapWithIndex((_, i) => {
-            <div
-              key={Foundation(i)->spaceToString}
-              id={Foundation(i)->spaceToString}
-              ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Foundation(i)))}
-              className=" bg-white opacity-10 rounded w-14 h-20"
-            />
-          })
-          ->React.array}
-        </div>
-        <div className="flex flex-row gap-3 mt-5">
-          {Array.make(~length=initialGame.piles->Array.length, [])
-          ->Array.mapWithIndex((_, i) => {
-            <div
-              key={Pile(i)->spaceToString}
-              id={Pile(i)->spaceToString}
-              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-              className=" bg-black opacity-20  rounded w-14 h-20"
-            />
-          })
-          ->React.array}
-        </div>
-      </React.Fragment>
-    }
-  }
-}
-module SimpleSimon = GameBase.Create(SimpleSimonRules)
+  module Board = Boards.SimpleSimon
+})
 
 module MrsMop = GameBase.Create({
-  include SpiderRules
+  include Bases.Spider
+  let forEachSpace = makeForEachSpace(~stockRules=SpiderRules.stockRules)
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck =
@@ -338,21 +257,13 @@ module MrsMop = GameBase.Create({
       },
     )
   }
-  module Board = SimpleSimonRules.Board
+  module Board = Boards.SimpleSimon
 })
 
-module ScorpionBase = Packer.Make({
-  let spec: Packer.spec = {
-    drop: OneSuit,
-    drag: AnySuit,
-    size: AnySize,
-    depot: SpecificDepot(RK),
-    foundation: ByAll,
-  }
-})
+module Scorpion = GameBase.Create({
+  include Bases.Scorpion
 
-module ScorpionRules = {
-  include ScorpionBase
+  let forEachSpace = makeForEachSpace(~stockRules=SpiderRules.stockRules)
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, true)->Array.toShuffled
@@ -379,13 +290,5 @@ module ScorpionRules = {
     )
   }
 
-  let winCheck = SpiderRules.winCheck
-
-  let stockRules = SpiderRules.stockRules
-
-  let forEachSpace = ScorpionBase.makeForEachSpace(~stockRules)
-
-  module Board = SpiderRules.StandardBoard
-}
-
-module Scorpion = GameBase.Create(ScorpionRules)
+  module Board = Boards.Spider
+})

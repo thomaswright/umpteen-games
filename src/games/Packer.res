@@ -12,6 +12,9 @@ type game = {
   waste: array<Card.sides>,
   free: array<option<Card.sides>>,
 }
+type dragPile = array<Card.sides>
+type movableSpace = GameBase.movableSpace<game, space, dragPile>
+type staticSpace = GameBase.staticSpace<game, dragPile>
 
 type stack = AltSuit | AnySuit | OneSuit | CyclicOneSuit | CyclicAnySuit | NoDrop
 type size = AnySize | FreeSize | JustOne
@@ -19,6 +22,13 @@ type depot = SpecificDepot(Card.rank) | AnyDepot
 type foundation = ByOne | ByAll | ByOneCyclicOneSuit | ByOneCyclicAnySuit | NoFoundation
 
 type spec = {drop: stack, drag: stack, size: size, depot: depot, foundation: foundation}
+
+let onlyFoundationWinCheck = (game: game) => {
+  game.piles->Array.every(pile => pile->Array.length == 0) &&
+  game.free->Array.every(Option.isNone) &&
+  game.stock->Array.length == 0 &&
+  game.waste->Array.length == 0
+}
 
 module type PackerRules = {
   let spec: spec
@@ -42,9 +52,11 @@ module Make = (PackerRules: PackerRules) => {
 
   let getSpace = getSpace
   let spaceToString = spaceToString
-  type dragPile = array<Card.sides>
+  type dragPile = dragPile
   @decco
   type deck = array<Card.sides>
+
+  let winCheck = onlyFoundationWinCheck
 
   let dropCheck = (isLast, dragPile, card) => {
     let dragPileBase = dragPile->Array.getUnsafe(0)
@@ -126,9 +138,6 @@ module Make = (PackerRules: PackerRules) => {
     | NoFoundation => false
     }
   }
-
-  type movableSpace = GameBase.movableSpace<game, space, dragPile>
-  type staticSpace = GameBase.staticSpace<game, dragPile>
 
   let applyLiftToDragPile = (dragPile: dragPile, lift) => {
     dragPile->Array.forEachWithIndex((v, j) => {

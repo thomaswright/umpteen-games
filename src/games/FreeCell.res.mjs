@@ -10,36 +10,6 @@ import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as GameCommons from "./GameCommons.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 
-var game_encode = Bases.FreeCell.game_encode;
-
-var game_decode = Bases.FreeCell.game_decode;
-
-var getSpace = Bases.FreeCell.getSpace;
-
-var spaceToString = Bases.FreeCell.spaceToString;
-
-var deck_encode = Bases.FreeCell.deck_encode;
-
-var deck_decode = Bases.FreeCell.deck_decode;
-
-var applyLiftToDragPile = Bases.FreeCell.applyLiftToDragPile;
-
-var applyMoveToDragPile = Bases.FreeCell.applyMoveToDragPile;
-
-var removeDragFromGame = Bases.FreeCell.removeDragFromGame;
-
-var AllCards = Bases.FreeCell.AllCards;
-
-function winCheck(game) {
-  if (game.piles.every(function (pile) {
-          return pile.length === 0;
-        })) {
-    return game.free.every(Core__Option.isNone);
-  } else {
-    return false;
-  }
-}
-
 function freeBaseRules(i) {
   return {
           droppedUpon: (function (game, dragPile) {
@@ -96,66 +66,12 @@ function freeRules(card, i) {
         };
 }
 
-var forEachSpace = Bases.FreeCell.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
-
-var FreeCellRules_dropCheck = Bases.FreeCell.dropCheck;
-
-var FreeCellRules_dragCheck = Bases.FreeCell.dragCheck;
-
-var FreeCellRules_dragSizeCheck = Bases.FreeCell.dragSizeCheck;
-
-var FreeCellRules_pileBaseCheck = Bases.FreeCell.pileBaseCheck;
-
-var FreeCellRules_foundationBaseCheck = Bases.FreeCell.foundationBaseCheck;
-
-var FreeCellRules_foundationCheck = Bases.FreeCell.foundationCheck;
-
-var FreeCellRules_pileBaseRules = Bases.FreeCell.pileBaseRules;
-
-var FreeCellRules_pileRules = Bases.FreeCell.pileRules;
-
-var FreeCellRules_foundationBaseRules = Bases.FreeCell.foundationBaseRules;
-
-var FreeCellRules_foundationRules = Bases.FreeCell.foundationRules;
-
-var FreeCellRules_wasteRules = Bases.FreeCell.wasteRules;
-
-var FreeCellRules_stockRules = Bases.FreeCell.stockRules;
-
-var FreeCellRules_stockBaseRules = Bases.FreeCell.stockBaseRules;
-
-var FreeCellRules_makeForEachSpace = Bases.FreeCell.makeForEachSpace;
-
 var FreeCellRules = {
-  game_encode: game_encode,
-  game_decode: game_decode,
-  getSpace: getSpace,
-  spaceToString: spaceToString,
-  deck_encode: deck_encode,
-  deck_decode: deck_decode,
-  dropCheck: FreeCellRules_dropCheck,
-  dragCheck: FreeCellRules_dragCheck,
-  dragSizeCheck: FreeCellRules_dragSizeCheck,
-  pileBaseCheck: FreeCellRules_pileBaseCheck,
-  foundationBaseCheck: FreeCellRules_foundationBaseCheck,
-  foundationCheck: FreeCellRules_foundationCheck,
-  applyLiftToDragPile: applyLiftToDragPile,
-  applyMoveToDragPile: applyMoveToDragPile,
-  removeDragFromGame: removeDragFromGame,
-  pileBaseRules: FreeCellRules_pileBaseRules,
-  pileRules: FreeCellRules_pileRules,
-  foundationBaseRules: FreeCellRules_foundationBaseRules,
-  foundationRules: FreeCellRules_foundationRules,
-  wasteRules: FreeCellRules_wasteRules,
-  stockRules: FreeCellRules_stockRules,
-  stockBaseRules: FreeCellRules_stockBaseRules,
-  makeForEachSpace: FreeCellRules_makeForEachSpace,
-  AllCards: AllCards,
-  winCheck: winCheck,
   freeBaseRules: freeBaseRules,
-  freeRules: freeRules,
-  forEachSpace: forEachSpace
+  freeRules: freeRules
 };
+
+var forEachSpace = Bases.FreeCell.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
 
 function initiateGame() {
   var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
@@ -194,21 +110,23 @@ function initiateGame() {
 }
 
 var OneDeck = GameBase.Create({
-      game_encode: game_encode,
-      game_decode: game_decode,
-      deck_encode: deck_encode,
-      deck_decode: deck_decode,
-      getSpace: getSpace,
-      spaceToString: spaceToString,
+      game_encode: Bases.FreeCell.game_encode,
+      game_decode: Bases.FreeCell.game_decode,
+      deck_encode: Bases.FreeCell.deck_encode,
+      deck_decode: Bases.FreeCell.deck_decode,
+      getSpace: Bases.FreeCell.getSpace,
+      spaceToString: Bases.FreeCell.spaceToString,
       initiateGame: initiateGame,
       forEachSpace: forEachSpace,
-      removeDragFromGame: removeDragFromGame,
-      winCheck: winCheck,
-      applyLiftToDragPile: applyLiftToDragPile,
-      applyMoveToDragPile: applyMoveToDragPile,
+      removeDragFromGame: Bases.FreeCell.removeDragFromGame,
+      winCheck: Bases.FreeCell.winCheck,
+      applyLiftToDragPile: Bases.FreeCell.applyLiftToDragPile,
+      applyMoveToDragPile: Bases.FreeCell.applyMoveToDragPile,
       Board: Boards.FreeCell,
-      AllCards: AllCards
+      AllCards: Bases.FreeCell.AllCards
     });
+
+var forEachSpace$1 = Bases.FreeCell.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
 
 function initiateGame$1() {
   var shuffledDeck = Core__Array.toShuffled([].concat(Card.getDeck(0, false), Card.getDeck(1, false)));
@@ -257,20 +175,20 @@ function initiateGame$1() {
 }
 
 var TwoDeck = GameBase.Create({
-      game_encode: game_encode,
-      game_decode: game_decode,
-      deck_encode: deck_encode,
-      deck_decode: deck_decode,
-      getSpace: getSpace,
-      spaceToString: spaceToString,
+      game_encode: Bases.FreeCell.game_encode,
+      game_decode: Bases.FreeCell.game_decode,
+      deck_encode: Bases.FreeCell.deck_encode,
+      deck_decode: Bases.FreeCell.deck_decode,
+      getSpace: Bases.FreeCell.getSpace,
+      spaceToString: Bases.FreeCell.spaceToString,
       initiateGame: initiateGame$1,
-      forEachSpace: forEachSpace,
-      removeDragFromGame: removeDragFromGame,
-      winCheck: winCheck,
-      applyLiftToDragPile: applyLiftToDragPile,
-      applyMoveToDragPile: applyMoveToDragPile,
+      forEachSpace: forEachSpace$1,
+      removeDragFromGame: Bases.FreeCell.removeDragFromGame,
+      winCheck: Bases.FreeCell.winCheck,
+      applyLiftToDragPile: Bases.FreeCell.applyLiftToDragPile,
+      applyMoveToDragPile: Bases.FreeCell.applyMoveToDragPile,
       Board: Boards.DoubleFreeCell,
-      AllCards: AllCards
+      AllCards: Bases.FreeCell.AllCards
     });
 
 function initiateGame$2() {
@@ -311,7 +229,7 @@ function initiateGame$2() {
         ];
 }
 
-var forEachSpace$1 = Bases.SeahavenTowers.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
+var forEachSpace$2 = Bases.SeahavenTowers.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
 
 var SeahavenTowers = GameBase.Create({
       game_encode: Bases.SeahavenTowers.game_encode,
@@ -321,9 +239,9 @@ var SeahavenTowers = GameBase.Create({
       getSpace: Bases.SeahavenTowers.getSpace,
       spaceToString: Bases.SeahavenTowers.spaceToString,
       initiateGame: initiateGame$2,
-      forEachSpace: forEachSpace$1,
+      forEachSpace: forEachSpace$2,
       removeDragFromGame: Bases.SeahavenTowers.removeDragFromGame,
-      winCheck: winCheck,
+      winCheck: Bases.SeahavenTowers.winCheck,
       applyLiftToDragPile: Bases.SeahavenTowers.applyLiftToDragPile,
       applyMoveToDragPile: Bases.SeahavenTowers.applyMoveToDragPile,
       Board: Boards.FreeCell,
@@ -431,7 +349,7 @@ function pileBaseRules(game, i) {
         };
 }
 
-var forEachSpace$2 = Bases.Penguin.makeForEachSpace(pileBaseRules, undefined, foundationBaseRules, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
+var forEachSpace$3 = Bases.Penguin.makeForEachSpace(pileBaseRules, undefined, foundationBaseRules, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
 
 var Penguin = GameBase.Create({
       game_encode: Bases.Penguin.game_encode,
@@ -441,9 +359,9 @@ var Penguin = GameBase.Create({
       getSpace: Bases.Penguin.getSpace,
       spaceToString: Bases.Penguin.spaceToString,
       initiateGame: initiateGame$3,
-      forEachSpace: forEachSpace$2,
+      forEachSpace: forEachSpace$3,
       removeDragFromGame: Bases.Penguin.removeDragFromGame,
-      winCheck: winCheck,
+      winCheck: Bases.Penguin.winCheck,
       applyLiftToDragPile: Bases.Penguin.applyLiftToDragPile,
       applyMoveToDragPile: Bases.Penguin.applyMoveToDragPile,
       Board: Boards.EightOff,
@@ -484,7 +402,7 @@ function initiateGame$4() {
         ];
 }
 
-var forEachSpace$3 = Bases.Stalactite.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
+var forEachSpace$4 = Bases.Stalactite.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
 
 var Stalactite = GameBase.Create({
       game_encode: Bases.Stalactite.game_encode,
@@ -494,9 +412,9 @@ var Stalactite = GameBase.Create({
       getSpace: Bases.Stalactite.getSpace,
       spaceToString: Bases.Stalactite.spaceToString,
       initiateGame: initiateGame$4,
-      forEachSpace: forEachSpace$3,
+      forEachSpace: forEachSpace$4,
       removeDragFromGame: Bases.Stalactite.removeDragFromGame,
-      winCheck: winCheck,
+      winCheck: Bases.Stalactite.winCheck,
       applyLiftToDragPile: Bases.Stalactite.applyLiftToDragPile,
       applyMoveToDragPile: Bases.Stalactite.applyMoveToDragPile,
       Board: Boards.FreeCell,
@@ -511,4 +429,4 @@ export {
   Penguin ,
   Stalactite ,
 }
-/* forEachSpace Not a pure module */
+/* OneDeck Not a pure module */

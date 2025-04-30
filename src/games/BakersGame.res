@@ -3,8 +3,6 @@ open Common
 module BakersGame = GameBase.Create({
   include Bases.BakersGame
 
-  let winCheck = FreeCell.FreeCellRules.winCheck
-
   let forEachSpace = Bases.BakersGame.makeForEachSpace(
     ~freeBaseRules=FreeCell.FreeCellRules.freeBaseRules,
     ~freeRules=FreeCell.FreeCellRules.freeRules,
@@ -40,8 +38,6 @@ module BakersGame = GameBase.Create({
 
 module EightOff = GameBase.Create({
   include Bases.BakersGame
-
-  let winCheck = FreeCell.FreeCellRules.winCheck
 
   let forEachSpace = Bases.BakersGame.makeForEachSpace(
     ~freeBaseRules=FreeCell.FreeCellRules.freeBaseRules,

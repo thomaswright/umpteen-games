@@ -1,13 +1,7 @@
 open Common
+open Packer
 
 module FreeCellRules = {
-  include Bases.FreeCell
-
-  let winCheck = (game: game) => {
-    game.piles->Array.every(pile => pile->Array.length == 0) &&
-      game.free->Array.every(Option.isNone)
-  }
-
   let freeBaseRules = (i): staticSpace => {
     autoProgress: DoNothing,
     droppedUpon: (game, dragPile) => {
@@ -40,12 +34,15 @@ module FreeCellRules = {
       onStateChange: _ => (),
     }
   }
-
-  let forEachSpace = Bases.FreeCell.makeForEachSpace(~freeBaseRules, ~freeRules)
 }
 
 module OneDeck = GameBase.Create({
-  include FreeCellRules
+  include Bases.FreeCell
+
+  let forEachSpace = makeForEachSpace(
+    ~freeBaseRules=FreeCellRules.freeBaseRules,
+    ~freeRules=FreeCellRules.freeRules,
+  )
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
@@ -76,7 +73,12 @@ module OneDeck = GameBase.Create({
 })
 
 module TwoDeck = GameBase.Create({
-  include FreeCellRules
+  include Bases.FreeCell
+
+  let forEachSpace = makeForEachSpace(
+    ~freeBaseRules=FreeCellRules.freeBaseRules,
+    ~freeRules=FreeCellRules.freeRules,
+  )
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck =
@@ -146,8 +148,6 @@ module SeahavenTowers = GameBase.Create({
     )
   }
 
-  let winCheck = FreeCellRules.winCheck
-
   let forEachSpace = Bases.SeahavenTowers.makeForEachSpace(
     ~freeBaseRules=FreeCellRules.freeBaseRules,
     ~freeRules=FreeCellRules.freeRules,
@@ -202,8 +202,6 @@ module Penguin = GameBase.Create({
       },
     )
   }
-
-  let winCheck = FreeCellRules.winCheck
 
   let foundationBaseRules = (i): staticSpace => {
     {
@@ -293,8 +291,6 @@ module Stalactite = GameBase.Create({
       },
     )
   }
-
-  let winCheck = FreeCellRules.winCheck
 
   let forEachSpace = Bases.Stalactite.makeForEachSpace(
     ~freeBaseRules=FreeCellRules.freeBaseRules,

@@ -1,17 +1,8 @@
 open Common
+open Packer
 
-module GermanPatienceBase = Packer.Make({
-  let spec: Packer.spec = {
-    drop: CyclicAnySuit,
-    drag: CyclicAnySuit,
-    size: AnySize,
-    depot: AnyDepot,
-    foundation: NoFoundation,
-  }
-})
-
-module GermanPatienceRules = {
-  include GermanPatienceBase
+module Game = GameBase.Create({
+  include Bases.GermanPatience
 
   let winCheck = (game: Packer.game) => {
     game.piles->Array.every(pile =>
@@ -95,34 +86,7 @@ module GermanPatienceRules = {
     }
   }
 
-  let forEachSpace = GermanPatienceBase.makeForEachSpace(~stockRules)
+  let forEachSpace = Bases.GermanPatience.makeForEachSpace(~stockRules)
 
-  module Board = {
-    @react.component
-    let make = (~setRef, ~initialGame: Packer.game) => {
-      <React.Fragment>
-        <div className="flex flex-row">
-          <div
-            key={Stock->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Packer.Stock))}
-            className=" bg-white opacity-10  rounded w-14 h-20 mr-20"
-          />
-        </div>
-        <div />
-        <div className="flex flex-row gap-3 mt-5">
-          {Array.make(~length=initialGame.piles->Array.length, [])
-          ->Array.mapWithIndex((_, i) => {
-            <div
-              key={Pile(i)->spaceToString}
-              ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
-              className=" bg-black opacity-20   rounded w-14 h-20"
-            />
-          })
-          ->React.array}
-        </div>
-      </React.Fragment>
-    }
-  }
-}
-
-module Game = GameBase.Create(GermanPatienceRules)
+  module Board = Boards.GermanPatience
+})

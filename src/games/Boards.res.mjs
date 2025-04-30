@@ -6,6 +6,72 @@ import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
+function Boards$Klondike(props) {
+  var initialGame = props.initialGame;
+  var setRef = props.setRef;
+  return JsxRuntime.jsxs(React.Fragment, {
+              children: [
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("div", {
+                              ref: Caml_option.some(setRef("Stock")),
+                              className: " bg-black opacity-20 rounded w-14 h-20",
+                              id: Packer.spaceToString("Stock")
+                            }, Packer.spaceToString("Stock")),
+                        JsxRuntime.jsx("div", {
+                              ref: Caml_option.some(setRef("Waste")),
+                              className: " w-14 h-20",
+                              id: Packer.spaceToString("Waste")
+                            }, Packer.spaceToString("Waste"))
+                      ],
+                      className: "flex flex-row gap-3"
+                    }),
+                JsxRuntime.jsx("div", {
+                      children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Foundation",
+                                                  _0: i
+                                                })),
+                                        className: " bg-white opacity-10 rounded w-14 h-20",
+                                        id: Packer.spaceToString({
+                                              TAG: "Foundation",
+                                              _0: i
+                                            })
+                                      }, Packer.spaceToString({
+                                            TAG: "Foundation",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    }),
+                JsxRuntime.jsx("div", {
+                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                })),
+                                        className: " bg-black opacity-20  rounded w-14 h-20",
+                                        id: Packer.spaceToString({
+                                              TAG: "Pile",
+                                              _0: i
+                                            })
+                                      }, Packer.spaceToString({
+                                            TAG: "Pile",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    })
+              ]
+            });
+}
+
+var Klondike = {
+  make: Boards$Klondike
+};
+
 function Boards$FreeCell(props) {
   var initialGame = props.initialGame;
   var setRef = props.setRef;
@@ -203,9 +269,152 @@ var EightOff = {
   make: Boards$EightOff
 };
 
+function Boards$Spider(props) {
+  var initialGame = props.initialGame;
+  var setRef = props.setRef;
+  return JsxRuntime.jsxs(React.Fragment, {
+              children: [
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("div", {
+                              ref: Caml_option.some(setRef("Stock")),
+                              className: " bg-white opacity-10  rounded w-14 h-20 mr-20"
+                            }, Packer.spaceToString("Stock")),
+                        JsxRuntime.jsx("div", {
+                              children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
+                                    return JsxRuntime.jsx("div", {
+                                                ref: Caml_option.some(setRef({
+                                                          TAG: "Foundation",
+                                                          _0: i
+                                                        })),
+                                                className: " bg-white opacity-10  rounded w-14 h-20"
+                                              }, Packer.spaceToString({
+                                                    TAG: "Foundation",
+                                                    _0: i
+                                                  }));
+                                  }),
+                              className: "flex flex-row gap-3 ml-10"
+                            })
+                      ],
+                      className: "flex flex-row"
+                    }),
+                JsxRuntime.jsx("div", {}),
+                JsxRuntime.jsx("div", {
+                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                })),
+                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                      }, Packer.spaceToString({
+                                            TAG: "Pile",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    })
+              ]
+            });
+}
+
+var Spider = {
+  make: Boards$Spider
+};
+
+function Boards$SimpleSimon(props) {
+  var initialGame = props.initialGame;
+  var setRef = props.setRef;
+  return JsxRuntime.jsxs(React.Fragment, {
+              children: [
+                JsxRuntime.jsx("div", {
+                      children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Foundation",
+                                                  _0: i
+                                                })),
+                                        className: " bg-white opacity-10 rounded w-14 h-20",
+                                        id: Packer.spaceToString({
+                                              TAG: "Foundation",
+                                              _0: i
+                                            })
+                                      }, Packer.spaceToString({
+                                            TAG: "Foundation",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    }),
+                JsxRuntime.jsx("div", {
+                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                })),
+                                        className: " bg-black opacity-20  rounded w-14 h-20",
+                                        id: Packer.spaceToString({
+                                              TAG: "Pile",
+                                              _0: i
+                                            })
+                                      }, Packer.spaceToString({
+                                            TAG: "Pile",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    })
+              ]
+            });
+}
+
+var SimpleSimon = {
+  make: Boards$SimpleSimon
+};
+
+function Boards$GermanPatience(props) {
+  var setRef = props.setRef;
+  return JsxRuntime.jsxs(React.Fragment, {
+              children: [
+                JsxRuntime.jsx("div", {
+                      children: JsxRuntime.jsx("div", {
+                            ref: Caml_option.some(setRef("Stock")),
+                            className: " bg-white opacity-10  rounded w-14 h-20 mr-20"
+                          }, Packer.spaceToString("Stock")),
+                      className: "flex flex-row"
+                    }),
+                JsxRuntime.jsx("div", {}),
+                JsxRuntime.jsx("div", {
+                      children: Core__Array.make(props.initialGame.piles.length, []).map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                })),
+                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                      }, Packer.spaceToString({
+                                            TAG: "Pile",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    })
+              ]
+            });
+}
+
+var GermanPatience = {
+  make: Boards$GermanPatience
+};
+
 export {
+  Klondike ,
   FreeCell ,
   DoubleFreeCell ,
   EightOff ,
+  Spider ,
+  SimpleSimon ,
+  GermanPatience ,
 }
 /* react Not a pure module */
