@@ -373,6 +373,8 @@ function Make(PackerRules) {
           } else {
             return false;
           }
+      case "NoDrop" :
+          return false;
       
     }
   };
@@ -387,6 +389,8 @@ function Make(PackerRules) {
           return GameCommons.decValidation(dragPile);
       case "CyclicOneSuit" :
           return GameCommons.decCyclicValidation(dragPile);
+      case "NoDrop" :
+          return false;
       
     }
   };
@@ -395,10 +399,14 @@ function Make(PackerRules) {
           return pile.length === 0;
         }).length + game.free.filter(Core__Option.isNone).length | 0;
     var match = PackerRules.spec.size;
-    if (match === "AnySize") {
-      return true;
-    } else {
-      return freeCellCount >= (dragPile.length - 1 | 0);
+    switch (match) {
+      case "AnySize" :
+          return true;
+      case "FreeSize" :
+          return freeCellCount >= (dragPile.length - 1 | 0);
+      case "JustOne" :
+          return dragPile.length === 1;
+      
     }
   };
   var pileBaseCheck = function (game, dragPile, i) {
@@ -420,19 +428,13 @@ function Make(PackerRules) {
     var valid = GameCommons.decValidation(dragPile);
     var dragPileBase = dragPile[0];
     var match = PackerRules.spec.foundation;
-    switch (match) {
-      case "ByAll" :
-          if (noChildren && fullStack) {
-            return valid;
-          } else {
-            return false;
-          }
-      case "ByOne" :
-      case "ByOneCyclic" :
-          break;
-      
-    }
-    if (noChildren && justOne) {
+    if (match === "ByAll") {
+      if (noChildren && fullStack) {
+        return valid;
+      } else {
+        return false;
+      }
+    } else if (noChildren && justOne) {
       return dragPileBase.card.rank === "RA";
     } else {
       return false;
@@ -451,8 +453,14 @@ function Make(PackerRules) {
           }
       case "ByAll" :
           return false;
-      case "ByOneCyclic" :
+      case "ByOneCyclicOneSuit" :
           if (justOne && dragPileBase.card.suit === card.card.suit) {
+            return Card.rankIsAboveCyclic(dragPileBase, card);
+          } else {
+            return false;
+          }
+      case "ByOneCyclicAnySuit" :
+          if (justOne) {
             return Card.rankIsAboveCyclic(dragPileBase, card);
           } else {
             return false;
@@ -596,7 +604,8 @@ function Make(PackerRules) {
               })
           };
   };
-  var foundationRules = function (game, card, i, j) {
+  var foundationRules = function (game, pile, card, i, j) {
+    var isLast = j === (pile.length - 1 | 0);
     return {
             locationAdjustment: {
               x: 0,
@@ -617,7 +626,7 @@ function Make(PackerRules) {
                 return "Seek";
               }),
             droppedUpon: (function (game, dragPile) {
-                if (foundationCheck(dragPile, card)) {
+                if (isLast && foundationCheck(dragPile, card)) {
                   return {
                           piles: flipLastUp(game.piles),
                           foundations: game.foundations.map(function (stack) {
@@ -778,7 +787,7 @@ function Make(PackerRules) {
                         _0: card.card
                       }, {
                         TAG: "Movable",
-                        _0: foundationRules$1(game, card, i, j)
+                        _0: foundationRules$1(game, foundation, card, i, j)
                       });
                 });
           });

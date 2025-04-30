@@ -28,7 +28,8 @@ var allGames = [
   "Scorpion",
   "Simple Simon",
   "Pyramid",
-  "East Haven"
+  "East Haven",
+  "Stalactite"
 ];
 
 function GameBrowser(props) {
@@ -109,6 +110,11 @@ function GameBrowser(props) {
         break;
     case "East Haven" :
         tmp = JsxRuntime.jsx(EastHaven.Game.make, {
+              id: selectGameType
+            });
+        break;
+    case "Stalactite" :
+        tmp = JsxRuntime.jsx(FreeCell.Stalactite.make, {
               id: selectGameType
             });
         break;

@@ -224,7 +224,9 @@ module GameRules: GameBase.GameRules = {
     }
   }
 
-  let foundationRules = (card: Card.sides, i, j): movableSpace => {
+  let foundationRules = (card: Card.sides, pile, i, j): movableSpace => {
+    let isLast = j == pile->Array.length - 1
+
     {
       locationAdjustment: {
         x: 0,
@@ -237,7 +239,7 @@ module GameRules: GameBase.GameRules = {
       droppedUpon: (game, dragPile) => {
         switch dragPile {
         | Card(dragCard) =>
-          if dragCard.card.suit == card.card.suit && Card.rankIsAbove(dragCard, card) {
+          if isLast && dragCard.card.suit == card.card.suit && Card.rankIsAbove(dragCard, card) {
             Some({
               ...game,
               foundations: game.foundations->Array.map(stack => {
@@ -397,7 +399,7 @@ module GameRules: GameBase.GameRules = {
       f(Foundation(i), foundationBaseRules(i)->Static)
 
       foundation->Array.forEachWithIndex((card, j) => {
-        f(Item(SpaceCard(card.card)), foundationRules(card, i, j)->Movable)
+        f(Item(SpaceCard(card.card)), foundationRules(card, foundation, i, j)->Movable)
       })
     })
 

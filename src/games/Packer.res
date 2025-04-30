@@ -13,10 +13,10 @@ type game = {
   free: array<option<Card.sides>>,
 }
 
-type stack = AltSuit | AnySuit | OneSuit | CyclicOneSuit
-type size = AnySize | FreeSize
+type stack = AltSuit | AnySuit | OneSuit | CyclicOneSuit | NoDrop
+type size = AnySize | FreeSize | JustOne
 type depot = SpecificDepot(Card.rank) | AnyDepot
-type foundation = ByOne | ByAll | ByOneCyclic
+type foundation = ByOne | ByAll | ByOneCyclicOneSuit | ByOneCyclicAnySuit
 
 type spec = {drop: stack, drag: stack, size: size, depot: depot, foundation: foundation}
 
@@ -60,6 +60,7 @@ module Make = (PackerRules: PackerRules) => {
       isLast &&
       Card.rankIsAboveCyclic(card, dragPileBase) &&
       dragPileBase.card.suit == card.card.suit
+    | NoDrop => false
     }
   }
 
@@ -69,6 +70,7 @@ module Make = (PackerRules: PackerRules) => {
     | OneSuit => dragPile->GameCommons.decValidation
     | AnySuit => true
     | CyclicOneSuit => dragPile->GameCommons.decCyclicValidation
+    | NoDrop => false
     }
 
   let dragSizeCheck = (game: game, dragPile: dragPile) => {
@@ -78,6 +80,7 @@ module Make = (PackerRules: PackerRules) => {
     switch PackerRules.spec.size {
     | AnySize => true
     | FreeSize => freeCellCount >= dragPile->Array.length - 1
+    | JustOne => dragPile->Array.length == 1
     }
   }
 
@@ -101,7 +104,8 @@ module Make = (PackerRules: PackerRules) => {
     switch PackerRules.spec.foundation {
     | ByOne => noChildren && justOne && dragPileBase.card.rank == RA
     | ByAll => noChildren && fullStack && valid
-    | ByOneCyclic => noChildren && justOne && dragPileBase.card.rank == RA
+    | ByOneCyclicOneSuit => noChildren && justOne && dragPileBase.card.rank == RA
+    | ByOneCyclicAnySuit => noChildren && justOne && dragPileBase.card.rank == RA
     }
   }
 
@@ -110,11 +114,11 @@ module Make = (PackerRules: PackerRules) => {
     let dragPileBase = dragPile->Array.getUnsafe(0)
 
     switch PackerRules.spec.foundation {
-    | ByOneCyclic =>
+    | ByOneCyclicAnySuit => justOne && Card.rankIsAboveCyclic(dragPileBase, card)
+    | ByOneCyclicOneSuit =>
       justOne &&
       dragPileBase.card.suit == card.card.suit &&
       Card.rankIsAboveCyclic(dragPileBase, card)
-
     | ByOne =>
       justOne && dragPileBase.card.suit == card.card.suit && Card.rankIsAbove(dragPileBase, card)
     | ByAll => false
@@ -235,7 +239,9 @@ module Make = (PackerRules: PackerRules) => {
     }
   }
 
-  let foundationRules = (game, card, i, j): movableSpace => {
+  let foundationRules = (game, pile, card, i, j): movableSpace => {
+    let isLast = j == pile->Array.length - 1
+
     {
       locationAdjustment: {
         x: 0,
@@ -252,7 +258,7 @@ module Make = (PackerRules: PackerRules) => {
       },
       autoProgress: () => Seek,
       droppedUpon: (game, dragPile) => {
-        if foundationCheck(dragPile, card) {
+        if isLast && foundationCheck(dragPile, card) {
           Some({
             ...game,
             piles: game.piles->flipLastUp,
@@ -347,7 +353,7 @@ module Make = (PackerRules: PackerRules) => {
         f(Foundation(i), foundationBaseRules(i)->Static)
 
         foundation->Array.forEachWithIndex((card, j) => {
-          f(Card(card.card), foundationRules(game, card, i, j)->Movable)
+          f(Card(card.card), foundationRules(game, foundation, card, i, j)->Movable)
         })
       })
 

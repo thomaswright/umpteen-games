@@ -862,7 +862,7 @@ var PenguinBase = Packer.Make({
         drag: "CyclicOneSuit",
         size: "AnySize",
         depot: "AnyDepot",
-        foundation: "ByOneCyclic"
+        foundation: "ByOneCyclicOneSuit"
       }
     });
 
@@ -986,6 +986,69 @@ var Penguin = GameBase.Create({
       AllCards: PenguinBase.AllCards
     });
 
+var StalactiteBase = Packer.Make({
+      spec: {
+        drop: "NoDrop",
+        drag: "AnySuit",
+        size: "JustOne",
+        depot: "AnyDepot",
+        foundation: "ByOneCyclicAnySuit"
+      }
+    });
+
+function initiateGame$6() {
+  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
+  var deckToDeal = {
+    contents: shuffledDeck
+  };
+  return [
+          shuffledDeck,
+          {
+            piles: [
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6)
+            ],
+            foundations: [
+              Common.ArrayAux.popN(deckToDeal, 1),
+              Common.ArrayAux.popN(deckToDeal, 1),
+              Common.ArrayAux.popN(deckToDeal, 1),
+              Common.ArrayAux.popN(deckToDeal, 1)
+            ],
+            stock: [],
+            waste: [],
+            free: [
+              undefined,
+              undefined
+            ]
+          }
+        ];
+}
+
+var forEachSpace$4 = StalactiteBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
+
+var Stalactite = GameBase.Create({
+      game_encode: StalactiteBase.game_encode,
+      game_decode: StalactiteBase.game_decode,
+      deck_encode: StalactiteBase.deck_encode,
+      deck_decode: StalactiteBase.deck_decode,
+      getSpace: StalactiteBase.getSpace,
+      spaceToString: StalactiteBase.spaceToString,
+      initiateGame: initiateGame$6,
+      forEachSpace: forEachSpace$4,
+      removeDragFromGame: StalactiteBase.removeDragFromGame,
+      winCheck: winCheck,
+      applyLiftToDragPile: StalactiteBase.applyLiftToDragPile,
+      applyMoveToDragPile: StalactiteBase.applyMoveToDragPile,
+      Board: StandardBoard,
+      AllCards: StalactiteBase.AllCards
+    });
+
 export {
   FreeCellBase ,
   FreeCellRules ,
@@ -1000,5 +1063,7 @@ export {
   SeahavenTowers ,
   PenguinBase ,
   Penguin ,
+  StalactiteBase ,
+  Stalactite ,
 }
 /* FreeCellBase Not a pure module */

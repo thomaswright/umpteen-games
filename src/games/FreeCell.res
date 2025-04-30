@@ -450,7 +450,7 @@ module PenguinBase = Packer.Make({
     drag: CyclicOneSuit,
     size: AnySize,
     depot: AnyDepot, // will override
-    foundation: ByOneCyclic,
+    foundation: ByOneCyclicOneSuit,
   }
 })
 
@@ -556,4 +556,58 @@ module Penguin = GameBase.Create({
   )
 
   module Board = EightOffRules.Board
+})
+
+module StalactiteBase = Packer.Make({
+  let spec: Packer.spec = {
+    drop: NoDrop,
+    drag: AnySuit,
+    size: JustOne,
+    depot: AnyDepot, // will override
+    foundation: ByOneCyclicAnySuit,
+  }
+})
+
+module Stalactite = GameBase.Create({
+  include StalactiteBase
+
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
+    let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
+
+    let deckToDeal = ref(shuffledDeck)
+
+    (
+      shuffledDeck,
+      {
+        piles: [
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+        ],
+        foundations: [
+          deckToDeal->ArrayAux.popN(1),
+          deckToDeal->ArrayAux.popN(1),
+          deckToDeal->ArrayAux.popN(1),
+          deckToDeal->ArrayAux.popN(1),
+        ],
+        free: [None, None],
+        stock: [],
+        waste: [],
+      },
+    )
+  }
+
+  let winCheck = FreeCellRules.winCheck
+
+  let forEachSpace = StalactiteBase.makeForEachSpace(
+    ~freeBaseRules=FreeCellRules.freeBaseRules,
+    ~freeRules=FreeCellRules.freeRules,
+  )
+
+  module Board = FreeCellRules.StandardBoard
 })

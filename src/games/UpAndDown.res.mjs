@@ -743,7 +743,8 @@ function foundationBaseRules(i) {
         };
 }
 
-function foundationRules(card, i, j) {
+function foundationRules(card, pile, i, j) {
+  var isLast = j === (pile.length - 1 | 0);
   return {
           locationAdjustment: {
             x: 0,
@@ -765,7 +766,7 @@ function foundationRules(card, i, j) {
                 return ;
               }
               var dragCard = dragPile._0;
-              if (dragCard.card.suit === card.card.suit && Card.rankIsAbove(dragCard, card)) {
+              if (isLast && dragCard.card.suit === card.card.suit && Card.rankIsAbove(dragCard, card)) {
                 return {
                         piles: game.piles,
                         foundations: game.foundations.map(function (stack) {
@@ -1005,7 +1006,7 @@ function forEachSpace(game, f) {
                     }
                   }, {
                     TAG: "Movable",
-                    _0: foundationRules(card, i, j)
+                    _0: foundationRules(card, foundation, i, j)
                   });
             });
       });
