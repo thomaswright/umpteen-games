@@ -27,6 +27,7 @@ var allGames = [
   "Spider: Four Suit",
   "Scorpion",
   "Simple Simon",
+  "MsMop",
   "Pyramid",
   "East Haven",
   "Stalactite"
@@ -105,6 +106,11 @@ function GameBrowser(props) {
         break;
     case "Simple Simon" :
         tmp = JsxRuntime.jsx(Spider.SimpleSimon.make, {
+              id: selectGameType
+            });
+        break;
+    case "MsMop" :
+        tmp = JsxRuntime.jsx(Spider.MsMop.make, {
               id: selectGameType
             });
         break;

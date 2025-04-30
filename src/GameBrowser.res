@@ -13,6 +13,7 @@ type gameType =
   | @as("Scorpion") Scorpion
   | @as("Pyramid") Pyramid
   | @as("Simple Simon") SimpleSimon
+  | @as("MsMop") MsMop
   | @as("East Haven") EastHaven
   | @as("Stalactite") Stalactite
 
@@ -32,6 +33,7 @@ let allGames = [
   SpiderFourSuit,
   Scorpion,
   SimpleSimon,
+  MsMop,
   Pyramid,
   EastHaven,
   Stalactite,
@@ -82,6 +84,7 @@ let make = () => {
     | SpiderFourSuit => <Spider.FourSuit id />
     | Scorpion => <Spider.Scorpion id />
     | SimpleSimon => <Spider.SimpleSimon id />
+    | MsMop => <Spider.MsMop id />
     | Pyramid => <Pyramid.Game id />
     | EastHaven => <EastHaven.Game id />
     | Stalactite => <FreeCell.Stalactite id />

@@ -208,19 +208,7 @@ module FourSuit = GameBase.Create({
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck =
-      Array.concatMany(
-        [],
-        [
-          Card.getOneSuitDeck(0, Spades, true),
-          Card.getOneSuitDeck(1, Spades, true),
-          Card.getOneSuitDeck(2, Clubs, true),
-          Card.getOneSuitDeck(3, Clubs, true),
-          Card.getOneSuitDeck(4, Hearts, true),
-          Card.getOneSuitDeck(5, Hearts, true),
-          Card.getOneSuitDeck(6, Diamonds, true),
-          Card.getOneSuitDeck(7, Diamonds, true),
-        ],
-      )->Array.toShuffled
+      Array.concatMany([], [Card.getDeck(0, true), Card.getDeck(1, true)])->Array.toShuffled
 
     let deckToDeal = ref(shuffledDeck)
 
@@ -255,8 +243,8 @@ module FourSuit = GameBase.Create({
   module Board = SpiderRules.StandardBoard
 })
 
-module SimpleSimon = GameBase.Create({
-  include SpiderBase
+module SimpleSimonRules = {
+  include SpiderRules
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
@@ -284,12 +272,6 @@ module SimpleSimon = GameBase.Create({
       },
     )
   }
-
-  let winCheck = (game: game) => {
-    game.piles->Array.every(pile => pile->Array.length == 0)
-  }
-
-  let forEachSpace = SpiderBase.makeForEachSpace()
 
   module Board = {
     @react.component
@@ -322,6 +304,44 @@ module SimpleSimon = GameBase.Create({
       </React.Fragment>
     }
   }
+}
+module SimpleSimon = GameBase.Create(SimpleSimonRules)
+
+module MsMop = GameBase.Create({
+  include SpiderRules
+
+  let initiateGame = (): (array<Card.sides>, Packer.game) => {
+    let shuffledDeck =
+      Array.concatMany([], [Card.getDeck(0, false), Card.getDeck(1, false)])->Array.toShuffled
+
+    let deckToDeal = ref(shuffledDeck)
+
+    (
+      shuffledDeck,
+      {
+        piles: [
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(8),
+          deckToDeal->ArrayAux.popN(8),
+        ]->flipLastUp,
+        foundations: [[], [], [], [], [], [], [], []],
+        stock: [],
+        waste: [],
+        free: [],
+      },
+    )
+  }
+  module Board = SimpleSimonRules.Board
 })
 
 module ScorpionBase = Packer.Make({
@@ -334,7 +354,7 @@ module ScorpionBase = Packer.Make({
   }
 })
 
-module Scorpion = GameBase.Create({
+module ScorpionRules = {
   include ScorpionBase
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
@@ -369,4 +389,6 @@ module Scorpion = GameBase.Create({
   let forEachSpace = ScorpionBase.makeForEachSpace(~stockRules)
 
   module Board = SpiderRules.StandardBoard
-})
+}
+
+module Scorpion = GameBase.Create(ScorpionRules)

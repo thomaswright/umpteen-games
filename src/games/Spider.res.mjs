@@ -43,11 +43,41 @@ var deck_encode = SpiderBase.deck_encode;
 
 var deck_decode = SpiderBase.deck_decode;
 
+var dropCheck = SpiderBase.dropCheck;
+
+var dragCheck = SpiderBase.dragCheck;
+
+var dragSizeCheck = SpiderBase.dragSizeCheck;
+
+var pileBaseCheck = SpiderBase.pileBaseCheck;
+
+var foundationBaseCheck = SpiderBase.foundationBaseCheck;
+
+var foundationCheck = SpiderBase.foundationCheck;
+
 var applyLiftToDragPile = SpiderBase.applyLiftToDragPile;
 
 var applyMoveToDragPile = SpiderBase.applyMoveToDragPile;
 
 var removeDragFromGame = SpiderBase.removeDragFromGame;
+
+var pileBaseRules = SpiderBase.pileBaseRules;
+
+var pileRules = SpiderBase.pileRules;
+
+var foundationBaseRules = SpiderBase.foundationBaseRules;
+
+var foundationRules = SpiderBase.foundationRules;
+
+var wasteRules = SpiderBase.wasteRules;
+
+var stockBaseRules = SpiderBase.stockBaseRules;
+
+var freeRules = SpiderBase.freeRules;
+
+var freeBaseRules = SpiderBase.freeBaseRules;
+
+var makeForEachSpace = SpiderBase.makeForEachSpace;
 
 var AllCards = SpiderBase.AllCards;
 
@@ -156,36 +186,6 @@ var StandardBoard = {
   make: Spider$SpiderRules$StandardBoard
 };
 
-var SpiderRules_dropCheck = SpiderBase.dropCheck;
-
-var SpiderRules_dragCheck = SpiderBase.dragCheck;
-
-var SpiderRules_dragSizeCheck = SpiderBase.dragSizeCheck;
-
-var SpiderRules_pileBaseCheck = SpiderBase.pileBaseCheck;
-
-var SpiderRules_foundationBaseCheck = SpiderBase.foundationBaseCheck;
-
-var SpiderRules_foundationCheck = SpiderBase.foundationCheck;
-
-var SpiderRules_pileBaseRules = SpiderBase.pileBaseRules;
-
-var SpiderRules_pileRules = SpiderBase.pileRules;
-
-var SpiderRules_foundationBaseRules = SpiderBase.foundationBaseRules;
-
-var SpiderRules_foundationRules = SpiderBase.foundationRules;
-
-var SpiderRules_wasteRules = SpiderBase.wasteRules;
-
-var SpiderRules_stockBaseRules = SpiderBase.stockBaseRules;
-
-var SpiderRules_freeRules = SpiderBase.freeRules;
-
-var SpiderRules_freeBaseRules = SpiderBase.freeBaseRules;
-
-var SpiderRules_makeForEachSpace = SpiderBase.makeForEachSpace;
-
 var SpiderRules = {
   game_encode: game_encode,
   game_decode: game_decode,
@@ -193,24 +193,24 @@ var SpiderRules = {
   spaceToString: spaceToString,
   deck_encode: deck_encode,
   deck_decode: deck_decode,
-  dropCheck: SpiderRules_dropCheck,
-  dragCheck: SpiderRules_dragCheck,
-  dragSizeCheck: SpiderRules_dragSizeCheck,
-  pileBaseCheck: SpiderRules_pileBaseCheck,
-  foundationBaseCheck: SpiderRules_foundationBaseCheck,
-  foundationCheck: SpiderRules_foundationCheck,
+  dropCheck: dropCheck,
+  dragCheck: dragCheck,
+  dragSizeCheck: dragSizeCheck,
+  pileBaseCheck: pileBaseCheck,
+  foundationBaseCheck: foundationBaseCheck,
+  foundationCheck: foundationCheck,
   applyLiftToDragPile: applyLiftToDragPile,
   applyMoveToDragPile: applyMoveToDragPile,
   removeDragFromGame: removeDragFromGame,
-  pileBaseRules: SpiderRules_pileBaseRules,
-  pileRules: SpiderRules_pileRules,
-  foundationBaseRules: SpiderRules_foundationBaseRules,
-  foundationRules: SpiderRules_foundationRules,
-  wasteRules: SpiderRules_wasteRules,
-  stockBaseRules: SpiderRules_stockBaseRules,
-  freeRules: SpiderRules_freeRules,
-  freeBaseRules: SpiderRules_freeBaseRules,
-  makeForEachSpace: SpiderRules_makeForEachSpace,
+  pileBaseRules: pileBaseRules,
+  pileRules: pileRules,
+  foundationBaseRules: foundationBaseRules,
+  foundationRules: foundationRules,
+  wasteRules: wasteRules,
+  stockBaseRules: stockBaseRules,
+  freeRules: freeRules,
+  freeBaseRules: freeBaseRules,
+  makeForEachSpace: makeForEachSpace,
   AllCards: AllCards,
   winCheck: winCheck,
   stockRules: stockRules,
@@ -339,7 +339,7 @@ var TwoSuit = GameBase.Create({
     });
 
 function initiateGame$2() {
-  var shuffledDeck = Core__Array.toShuffled([].concat(Card.getOneSuitDeck(0, "Spades", true), Card.getOneSuitDeck(1, "Spades", true), Card.getOneSuitDeck(2, "Clubs", true), Card.getOneSuitDeck(3, "Clubs", true), Card.getOneSuitDeck(4, "Hearts", true), Card.getOneSuitDeck(5, "Hearts", true), Card.getOneSuitDeck(6, "Diamonds", true), Card.getOneSuitDeck(7, "Diamonds", true)));
+  var shuffledDeck = Core__Array.toShuffled([].concat(Card.getDeck(0, true), Card.getDeck(1, true)));
   var deckToDeal = {
     contents: shuffledDeck
   };
@@ -398,8 +398,6 @@ var FourSuit = GameBase.Create({
       AllCards: AllCards
     });
 
-var spaceToString$1 = SpiderBase.spaceToString;
-
 function initiateGame$3() {
   var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
   var deckToDeal = {
@@ -433,15 +431,7 @@ function initiateGame$3() {
         ];
 }
 
-function winCheck$1(game) {
-  return game.piles.every(function (pile) {
-              return pile.length === 0;
-            });
-}
-
-var forEachSpace$1 = SpiderBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
-
-function Spider$SimpleSimon$Board(props) {
+function Spider$SimpleSimonRules$Board(props) {
   var initialGame = props.initialGame;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
@@ -454,11 +444,11 @@ function Spider$SimpleSimon$Board(props) {
                                                   _0: i
                                                 })),
                                         className: " bg-white opacity-10 rounded w-14 h-20",
-                                        id: spaceToString$1({
+                                        id: spaceToString({
                                               TAG: "Foundation",
                                               _0: i
                                             })
-                                      }, spaceToString$1({
+                                      }, spaceToString({
                                             TAG: "Foundation",
                                             _0: i
                                           }));
@@ -473,11 +463,11 @@ function Spider$SimpleSimon$Board(props) {
                                                   _0: i
                                                 })),
                                         className: " bg-black opacity-20  rounded w-14 h-20",
-                                        id: spaceToString$1({
+                                        id: spaceToString({
                                               TAG: "Pile",
                                               _0: i
                                             })
-                                      }, spaceToString$1({
+                                      }, spaceToString({
                                             TAG: "Pile",
                                             _0: i
                                           }));
@@ -489,24 +479,115 @@ function Spider$SimpleSimon$Board(props) {
 }
 
 var Board = {
-  make: Spider$SimpleSimon$Board
+  make: Spider$SimpleSimonRules$Board
+};
+
+var SimpleSimonRules = {
+  game_encode: game_encode,
+  game_decode: game_decode,
+  getSpace: getSpace,
+  spaceToString: spaceToString,
+  deck_encode: deck_encode,
+  deck_decode: deck_decode,
+  dropCheck: dropCheck,
+  dragCheck: dragCheck,
+  dragSizeCheck: dragSizeCheck,
+  pileBaseCheck: pileBaseCheck,
+  foundationBaseCheck: foundationBaseCheck,
+  foundationCheck: foundationCheck,
+  applyLiftToDragPile: applyLiftToDragPile,
+  applyMoveToDragPile: applyMoveToDragPile,
+  removeDragFromGame: removeDragFromGame,
+  pileBaseRules: pileBaseRules,
+  pileRules: pileRules,
+  foundationBaseRules: foundationBaseRules,
+  foundationRules: foundationRules,
+  wasteRules: wasteRules,
+  stockBaseRules: stockBaseRules,
+  freeRules: freeRules,
+  freeBaseRules: freeBaseRules,
+  makeForEachSpace: makeForEachSpace,
+  AllCards: AllCards,
+  winCheck: winCheck,
+  stockRules: stockRules,
+  forEachSpace: forEachSpace,
+  StandardBoard: StandardBoard,
+  initiateGame: initiateGame$3,
+  Board: Board
 };
 
 var SimpleSimon = GameBase.Create({
-      game_encode: SpiderBase.game_encode,
-      game_decode: SpiderBase.game_decode,
-      deck_encode: SpiderBase.deck_encode,
-      deck_decode: SpiderBase.deck_decode,
-      getSpace: SpiderBase.getSpace,
-      spaceToString: spaceToString$1,
+      game_encode: game_encode,
+      game_decode: game_decode,
+      deck_encode: deck_encode,
+      deck_decode: deck_decode,
+      getSpace: getSpace,
+      spaceToString: spaceToString,
       initiateGame: initiateGame$3,
-      forEachSpace: forEachSpace$1,
-      removeDragFromGame: SpiderBase.removeDragFromGame,
-      winCheck: winCheck$1,
-      applyLiftToDragPile: SpiderBase.applyLiftToDragPile,
-      applyMoveToDragPile: SpiderBase.applyMoveToDragPile,
+      forEachSpace: forEachSpace,
+      removeDragFromGame: removeDragFromGame,
+      winCheck: winCheck,
+      applyLiftToDragPile: applyLiftToDragPile,
+      applyMoveToDragPile: applyMoveToDragPile,
       Board: Board,
-      AllCards: SpiderBase.AllCards
+      AllCards: AllCards
+    });
+
+function initiateGame$4() {
+  var shuffledDeck = Core__Array.toShuffled([].concat(Card.getDeck(0, false), Card.getDeck(1, false)));
+  var deckToDeal = {
+    contents: shuffledDeck
+  };
+  return [
+          shuffledDeck,
+          {
+            piles: flipLastUp([
+                  Common.ArrayAux.popN(deckToDeal, 8),
+                  Common.ArrayAux.popN(deckToDeal, 8),
+                  Common.ArrayAux.popN(deckToDeal, 8),
+                  Common.ArrayAux.popN(deckToDeal, 8),
+                  Common.ArrayAux.popN(deckToDeal, 8),
+                  Common.ArrayAux.popN(deckToDeal, 8),
+                  Common.ArrayAux.popN(deckToDeal, 8),
+                  Common.ArrayAux.popN(deckToDeal, 8),
+                  Common.ArrayAux.popN(deckToDeal, 8),
+                  Common.ArrayAux.popN(deckToDeal, 8),
+                  Common.ArrayAux.popN(deckToDeal, 8),
+                  Common.ArrayAux.popN(deckToDeal, 8),
+                  Common.ArrayAux.popN(deckToDeal, 8)
+                ]),
+            foundations: [
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              [],
+              []
+            ],
+            stock: [],
+            waste: [],
+            free: []
+          }
+        ];
+}
+
+var MsMop = GameBase.Create({
+      game_encode: game_encode,
+      game_decode: game_decode,
+      deck_encode: deck_encode,
+      deck_decode: deck_decode,
+      getSpace: getSpace,
+      spaceToString: spaceToString,
+      initiateGame: initiateGame$4,
+      forEachSpace: forEachSpace,
+      removeDragFromGame: removeDragFromGame,
+      winCheck: winCheck,
+      applyLiftToDragPile: applyLiftToDragPile,
+      applyMoveToDragPile: applyMoveToDragPile,
+      Board: Board,
+      AllCards: AllCards
     });
 
 var ScorpionBase = Packer.Make({
@@ -522,7 +603,27 @@ var ScorpionBase = Packer.Make({
       }
     });
 
-function initiateGame$4() {
+var game_encode$1 = ScorpionBase.game_encode;
+
+var game_decode$1 = ScorpionBase.game_decode;
+
+var getSpace$1 = ScorpionBase.getSpace;
+
+var spaceToString$1 = ScorpionBase.spaceToString;
+
+var deck_encode$1 = ScorpionBase.deck_encode;
+
+var deck_decode$1 = ScorpionBase.deck_decode;
+
+var applyLiftToDragPile$1 = ScorpionBase.applyLiftToDragPile;
+
+var applyMoveToDragPile$1 = ScorpionBase.applyMoveToDragPile;
+
+var removeDragFromGame$1 = ScorpionBase.removeDragFromGame;
+
+var AllCards$1 = ScorpionBase.AllCards;
+
+function initiateGame$5() {
   var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, true));
   var deckToDeal = {
     contents: shuffledDeck
@@ -552,23 +653,86 @@ function initiateGame$4() {
         ];
 }
 
-var forEachSpace$2 = ScorpionBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, stockRules, undefined, undefined);
+var forEachSpace$1 = ScorpionBase.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, stockRules, undefined, undefined);
+
+var ScorpionRules_dropCheck = ScorpionBase.dropCheck;
+
+var ScorpionRules_dragCheck = ScorpionBase.dragCheck;
+
+var ScorpionRules_dragSizeCheck = ScorpionBase.dragSizeCheck;
+
+var ScorpionRules_pileBaseCheck = ScorpionBase.pileBaseCheck;
+
+var ScorpionRules_foundationBaseCheck = ScorpionBase.foundationBaseCheck;
+
+var ScorpionRules_foundationCheck = ScorpionBase.foundationCheck;
+
+var ScorpionRules_pileBaseRules = ScorpionBase.pileBaseRules;
+
+var ScorpionRules_pileRules = ScorpionBase.pileRules;
+
+var ScorpionRules_foundationBaseRules = ScorpionBase.foundationBaseRules;
+
+var ScorpionRules_foundationRules = ScorpionBase.foundationRules;
+
+var ScorpionRules_wasteRules = ScorpionBase.wasteRules;
+
+var ScorpionRules_stockBaseRules = ScorpionBase.stockBaseRules;
+
+var ScorpionRules_freeRules = ScorpionBase.freeRules;
+
+var ScorpionRules_freeBaseRules = ScorpionBase.freeBaseRules;
+
+var ScorpionRules_makeForEachSpace = ScorpionBase.makeForEachSpace;
+
+var ScorpionRules = {
+  game_encode: game_encode$1,
+  game_decode: game_decode$1,
+  getSpace: getSpace$1,
+  spaceToString: spaceToString$1,
+  deck_encode: deck_encode$1,
+  deck_decode: deck_decode$1,
+  dropCheck: ScorpionRules_dropCheck,
+  dragCheck: ScorpionRules_dragCheck,
+  dragSizeCheck: ScorpionRules_dragSizeCheck,
+  pileBaseCheck: ScorpionRules_pileBaseCheck,
+  foundationBaseCheck: ScorpionRules_foundationBaseCheck,
+  foundationCheck: ScorpionRules_foundationCheck,
+  applyLiftToDragPile: applyLiftToDragPile$1,
+  applyMoveToDragPile: applyMoveToDragPile$1,
+  removeDragFromGame: removeDragFromGame$1,
+  pileBaseRules: ScorpionRules_pileBaseRules,
+  pileRules: ScorpionRules_pileRules,
+  foundationBaseRules: ScorpionRules_foundationBaseRules,
+  foundationRules: ScorpionRules_foundationRules,
+  wasteRules: ScorpionRules_wasteRules,
+  stockBaseRules: ScorpionRules_stockBaseRules,
+  freeRules: ScorpionRules_freeRules,
+  freeBaseRules: ScorpionRules_freeBaseRules,
+  makeForEachSpace: ScorpionRules_makeForEachSpace,
+  AllCards: AllCards$1,
+  initiateGame: initiateGame$5,
+  winCheck: winCheck,
+  stockRules: stockRules,
+  forEachSpace: forEachSpace$1,
+  Board: undefined
+};
 
 var Scorpion = GameBase.Create({
-      game_encode: ScorpionBase.game_encode,
-      game_decode: ScorpionBase.game_decode,
-      deck_encode: ScorpionBase.deck_encode,
-      deck_decode: ScorpionBase.deck_decode,
-      getSpace: ScorpionBase.getSpace,
-      spaceToString: ScorpionBase.spaceToString,
-      initiateGame: initiateGame$4,
-      forEachSpace: forEachSpace$2,
-      removeDragFromGame: ScorpionBase.removeDragFromGame,
+      game_encode: game_encode$1,
+      game_decode: game_decode$1,
+      deck_encode: deck_encode$1,
+      deck_decode: deck_decode$1,
+      getSpace: getSpace$1,
+      spaceToString: spaceToString$1,
+      initiateGame: initiateGame$5,
+      forEachSpace: forEachSpace$1,
+      removeDragFromGame: removeDragFromGame$1,
       winCheck: winCheck,
-      applyLiftToDragPile: ScorpionBase.applyLiftToDragPile,
-      applyMoveToDragPile: ScorpionBase.applyMoveToDragPile,
+      applyLiftToDragPile: applyLiftToDragPile$1,
+      applyMoveToDragPile: applyMoveToDragPile$1,
       Board: StandardBoard,
-      AllCards: ScorpionBase.AllCards
+      AllCards: AllCards$1
     });
 
 export {
@@ -578,8 +742,11 @@ export {
   OneSuit ,
   TwoSuit ,
   FourSuit ,
+  SimpleSimonRules ,
   SimpleSimon ,
+  MsMop ,
   ScorpionBase ,
+  ScorpionRules ,
   Scorpion ,
 }
 /* SpiderBase Not a pure module */
