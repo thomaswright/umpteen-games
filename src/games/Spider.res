@@ -1,8 +1,5 @@
 open Common
 
-let flipLastUp = (piles: array<array<Card.sides>>) =>
-  piles->Array.map(pile => pile->ArrayAux.updateLast(v => {...v, hidden: false}))
-
 module SpiderBase = Packer.Make({
   let spec: Packer.spec = {
     drop: AnySuit,
@@ -46,7 +43,7 @@ module SpiderRules = {
             ->Array.mapWithIndex((pile, i) => {
               stockGroup->Array.get(i)->Option.mapOr(pile, v => Array.concat(pile, [v]))
             })
-            ->flipLastUp,
+            ->GameCommons.flipLastUp,
             stock: game.stock->Array.slice(~start=0, ~end=game.stock->Array.length - 1),
           }
         })
@@ -133,7 +130,7 @@ module OneSuit = GameBase.Create({
           deckToDeal->ArrayAux.popN(5),
           deckToDeal->ArrayAux.popN(5),
           deckToDeal->ArrayAux.popN(5),
-        ]->flipLastUp,
+        ]->GameCommons.flipLastUp,
         foundations: [[], [], [], [], [], [], [], []],
         stock: [
           deckToDeal->ArrayAux.popN(10),
@@ -186,7 +183,7 @@ module TwoSuit = GameBase.Create({
           deckToDeal->ArrayAux.popN(5),
           deckToDeal->ArrayAux.popN(5),
           deckToDeal->ArrayAux.popN(5),
-        ]->flipLastUp,
+        ]->GameCommons.flipLastUp,
         foundations: [[], [], [], [], [], [], [], []],
         stock: [
           deckToDeal->ArrayAux.popN(10),
@@ -226,7 +223,7 @@ module FourSuit = GameBase.Create({
           deckToDeal->ArrayAux.popN(5),
           deckToDeal->ArrayAux.popN(5),
           deckToDeal->ArrayAux.popN(5),
-        ]->flipLastUp,
+        ]->GameCommons.flipLastUp,
         foundations: [[], [], [], [], [], [], [], []],
         stock: [
           deckToDeal->ArrayAux.popN(10),
@@ -333,7 +330,7 @@ module MrsMop = GameBase.Create({
           deckToDeal->ArrayAux.popN(8),
           deckToDeal->ArrayAux.popN(8),
           deckToDeal->ArrayAux.popN(8),
-        ]->flipLastUp,
+        ]->GameCommons.flipLastUp,
         foundations: [[], [], [], [], [], [], [], []],
         stock: [],
         waste: [],
@@ -373,7 +370,7 @@ module ScorpionRules = {
           deckToDeal->ArrayAux.popN(7)->Card.showAfter(0),
           deckToDeal->ArrayAux.popN(7)->Card.showAfter(0),
           deckToDeal->ArrayAux.popN(7)->Card.showAfter(0),
-        ]->flipLastUp,
+        ]->GameCommons.flipLastUp,
         foundations: [[], [], [], []],
         stock: [deckToDeal->ArrayAux.popN(3)],
         waste: [],

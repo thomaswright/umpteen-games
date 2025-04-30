@@ -8,6 +8,7 @@ import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as GameBase from "../GameBase.res.mjs";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
+import * as GameCommons from "./GameCommons.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
@@ -923,7 +924,7 @@ function foundationBaseRules$1(i) {
               var second = game.foundations[1][0];
               if (noChildren && justOne && dragPileBase.card.rank === second.card.rank) {
                 return {
-                        piles: Packer.flipLastUp(game.piles),
+                        piles: GameCommons.flipLastUp(game.piles),
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                 return dragPile;
                               })),
@@ -949,7 +950,7 @@ function pileBaseRules$1(game, i) {
               var second = game.foundations[1][0];
               if (noChildren && Card.rankIsAbove(second, dragPileBase)) {
                 return {
-                        piles: Packer.flipLastUp(Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
+                        piles: GameCommons.flipLastUp(Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
                                     return dragPile;
                                   }))),
                         foundations: gameRemoved.foundations,

@@ -516,7 +516,7 @@ module Penguin = GameBase.Create({
         if noChildren && justOne && dragPileBase.card.rank == second.card.rank {
           Some({
             ...game,
-            piles: game.piles->Packer.flipLastUp,
+            piles: game.piles->GameCommons.flipLastUp,
             foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
           })
         } else {
@@ -537,7 +537,7 @@ module Penguin = GameBase.Create({
         if noChildren && Card.rankIsAbove(second, dragPileBase) {
           Some({
             ...gameRemoved,
-            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->Packer.flipLastUp,
+            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->GameCommons.flipLastUp,
           })
         } else {
           None

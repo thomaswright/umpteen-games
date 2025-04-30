@@ -7,19 +7,9 @@ import * as Packer from "./Packer.res.mjs";
 import * as GameBase from "../GameBase.res.mjs";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
+import * as GameCommons from "./GameCommons.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
-
-function flipLastUp(piles) {
-  return piles.map(function (pile) {
-              return Common.ArrayAux.updateLast(pile, (function (v) {
-                            return {
-                                    card: v.card,
-                                    hidden: false
-                                  };
-                          }));
-            });
-}
 
 var SpiderBase = Packer.Make({
       spec: {
@@ -116,7 +106,7 @@ function stockRules(_game, _card, i, j) {
           onClick: (function (game) {
               return Core__Option.map(Common.ArrayAux.getLast(game.stock), (function (stockGroup) {
                             return {
-                                    piles: flipLastUp(game.piles.map(function (pile, i) {
+                                    piles: GameCommons.flipLastUp(game.piles.map(function (pile, i) {
                                               return Core__Option.mapOr(stockGroup[i], pile, (function (v) {
                                                             return pile.concat([v]);
                                                           }));
@@ -226,7 +216,7 @@ function initiateGame() {
   return [
           shuffledDeck,
           {
-            piles: flipLastUp([
+            piles: GameCommons.flipLastUp([
                   Common.ArrayAux.popN(deckToDeal, 6),
                   Common.ArrayAux.popN(deckToDeal, 6),
                   Common.ArrayAux.popN(deckToDeal, 6),
@@ -286,7 +276,7 @@ function initiateGame$1() {
   return [
           shuffledDeck,
           {
-            piles: flipLastUp([
+            piles: GameCommons.flipLastUp([
                   Common.ArrayAux.popN(deckToDeal, 6),
                   Common.ArrayAux.popN(deckToDeal, 6),
                   Common.ArrayAux.popN(deckToDeal, 6),
@@ -346,7 +336,7 @@ function initiateGame$2() {
   return [
           shuffledDeck,
           {
-            piles: flipLastUp([
+            piles: GameCommons.flipLastUp([
                   Common.ArrayAux.popN(deckToDeal, 6),
                   Common.ArrayAux.popN(deckToDeal, 6),
                   Common.ArrayAux.popN(deckToDeal, 6),
@@ -541,7 +531,7 @@ function initiateGame$4() {
   return [
           shuffledDeck,
           {
-            piles: flipLastUp([
+            piles: GameCommons.flipLastUp([
                   Common.ArrayAux.popN(deckToDeal, 8),
                   Common.ArrayAux.popN(deckToDeal, 8),
                   Common.ArrayAux.popN(deckToDeal, 8),
@@ -631,7 +621,7 @@ function initiateGame$5() {
   return [
           shuffledDeck,
           {
-            piles: flipLastUp([
+            piles: GameCommons.flipLastUp([
                   Card.showAfter(Common.ArrayAux.popN(deckToDeal, 7), 3),
                   Card.showAfter(Common.ArrayAux.popN(deckToDeal, 7), 3),
                   Card.showAfter(Common.ArrayAux.popN(deckToDeal, 7), 3),
@@ -736,7 +726,6 @@ var Scorpion = GameBase.Create({
     });
 
 export {
-  flipLastUp ,
   SpiderBase ,
   SpiderRules ,
   OneSuit ,

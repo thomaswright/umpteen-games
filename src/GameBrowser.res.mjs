@@ -7,6 +7,7 @@ import * as FreeCell from "./games/FreeCell.res.mjs";
 import * as Klondike from "./games/Klondike.res.mjs";
 import * as EastHaven from "./games/EastHaven.res.mjs";
 import * as UpAndDown from "./games/UpAndDown.res.mjs";
+import * as GermanPatience from "./games/GermanPatience.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function gameString(a) {
@@ -27,10 +28,11 @@ var allGames = [
   "Spider: Four Suit",
   "Scorpion",
   "Simple Simon",
-  "MrsMop",
+  "Mrs Mop",
   "Pyramid",
   "East Haven",
-  "Stalactite"
+  "Stalactite",
+  "German Patience"
 ];
 
 function GameBrowser(props) {
@@ -109,7 +111,7 @@ function GameBrowser(props) {
               id: selectGameType
             });
         break;
-    case "MrsMop" :
+    case "Mrs Mop" :
         tmp = JsxRuntime.jsx(Spider.MrsMop.make, {
               id: selectGameType
             });
@@ -121,6 +123,11 @@ function GameBrowser(props) {
         break;
     case "Stalactite" :
         tmp = JsxRuntime.jsx(FreeCell.Stalactite.make, {
+              id: selectGameType
+            });
+        break;
+    case "German Patience" :
+        tmp = JsxRuntime.jsx(GermanPatience.Game.make, {
               id: selectGameType
             });
         break;

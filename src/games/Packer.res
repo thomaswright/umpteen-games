@@ -13,16 +13,12 @@ type game = {
   free: array<option<Card.sides>>,
 }
 
-type stack = AltSuit | AnySuit | OneSuit | CyclicOneSuit | NoDrop
+type stack = AltSuit | AnySuit | OneSuit | CyclicOneSuit | CyclicAnySuit | NoDrop
 type size = AnySize | FreeSize | JustOne
 type depot = SpecificDepot(Card.rank) | AnyDepot
-type foundation = ByOne | ByAll | ByOneCyclicOneSuit | ByOneCyclicAnySuit
+type foundation = ByOne | ByAll | ByOneCyclicOneSuit | ByOneCyclicAnySuit | NoFoundation
 
 type spec = {drop: stack, drag: stack, size: size, depot: depot, foundation: foundation}
-
-// TODO
-let flipLastUp = (piles: array<array<Card.sides>>) =>
-  piles->Array.map(pile => pile->ArrayAux.updateLast(v => {...v, hidden: false}))
 
 module type PackerRules = {
   let spec: spec
@@ -60,16 +56,18 @@ module Make = (PackerRules: PackerRules) => {
       isLast &&
       Card.rankIsAboveCyclic(card, dragPileBase) &&
       dragPileBase.card.suit == card.card.suit
+    | CyclicAnySuit => isLast && Card.rankIsAboveCyclic(card, dragPileBase)
     | NoDrop => false
     }
   }
 
   let dragCheck = dragPile =>
     switch PackerRules.spec.drag {
-    | AltSuit => dragPile->GameCommons.decAndAltValidation
-    | OneSuit => dragPile->GameCommons.decValidation
+    | AltSuit => dragPile->GameCommons.decAltColorValidation
+    | OneSuit => dragPile->GameCommons.decOneSuitValidation
     | AnySuit => true
-    | CyclicOneSuit => dragPile->GameCommons.decCyclicValidation
+    | CyclicOneSuit => dragPile->GameCommons.decCyclicOneSuitValidation
+    | CyclicAnySuit => dragPile->GameCommons.decCyclicAnySuitValidation
     | NoDrop => false
     }
 
@@ -98,7 +96,7 @@ module Make = (PackerRules: PackerRules) => {
     let justOne = dragPile->Array.length == 1
     let fullStack = dragPile->Array.length == 13
     let noChildren = game.foundations->Array.getUnsafe(i)->Array.length == 0
-    let valid = dragPile->GameCommons.decValidation
+    let valid = dragPile->GameCommons.decOneSuitValidation
     let dragPileBase = dragPile->Array.getUnsafe(0)
 
     switch PackerRules.spec.foundation {
@@ -106,6 +104,7 @@ module Make = (PackerRules: PackerRules) => {
     | ByAll => noChildren && fullStack && valid
     | ByOneCyclicOneSuit => noChildren && justOne && dragPileBase.card.rank == RA
     | ByOneCyclicAnySuit => noChildren && justOne && dragPileBase.card.rank == RA
+    | NoFoundation => false
     }
   }
 
@@ -122,6 +121,7 @@ module Make = (PackerRules: PackerRules) => {
     | ByOne =>
       justOne && dragPileBase.card.suit == card.card.suit && Card.rankIsAbove(dragPileBase, card)
     | ByAll => false
+    | NoFoundation => false
     }
   }
 
@@ -166,7 +166,7 @@ module Make = (PackerRules: PackerRules) => {
         if pileBaseCheck(game, dragPile, i) {
           Some({
             ...gameRemoved,
-            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->flipLastUp,
+            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->GameCommons.flipLastUp,
           })
         } else {
           None
@@ -210,7 +210,7 @@ module Make = (PackerRules: PackerRules) => {
             ->Array.map(stack => {
               stack->ArrayAux.insertAfter(card, dragPile)
             })
-            ->flipLastUp,
+            ->GameCommons.flipLastUp,
           })
         } else {
           None
@@ -228,7 +228,7 @@ module Make = (PackerRules: PackerRules) => {
         if foundationBaseCheck(game, dragPile, i) {
           Some({
             ...game,
-            piles: game.piles->flipLastUp,
+            piles: game.piles->GameCommons.flipLastUp,
             foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
           })
         } else {
@@ -261,7 +261,7 @@ module Make = (PackerRules: PackerRules) => {
         if isLast && foundationCheck(dragPile, card) {
           Some({
             ...game,
-            piles: game.piles->flipLastUp,
+            piles: game.piles->GameCommons.flipLastUp,
             foundations: game.foundations->Array.map(stack => {
               stack->ArrayAux.insertAfter(card, dragPile)
             }),

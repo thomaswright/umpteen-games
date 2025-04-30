@@ -13,21 +13,31 @@ let pileValidation = (dragPile: array<Card.sides>, f) => {
   dragPileIsValid
 }
 
-let decAndAltValidation = (dragPile: array<Card.sides>) => {
+let decAltColorValidation = (dragPile: array<Card.sides>) => {
   dragPile->pileValidation((onBottom, onTop) =>
     Card.rankIsAbove(onBottom, onTop) && onTop->Card.color != onBottom->Card.color
   )
 }
 
-let decValidation = (dragPile: array<Card.sides>) => {
+let decOneSuitValidation = (dragPile: array<Card.sides>) => {
   dragPile->pileValidation((onBottom, onTop) =>
     Card.rankIsAbove(onBottom, onTop) && onTop.card.suit == onBottom.card.suit
   )
 }
 
-let decCyclicValidation = (dragPile: array<Card.sides>) => {
+let decCyclicOneSuitValidation = (dragPile: array<Card.sides>) => {
   dragPile->pileValidation((onBottom, onTop) => {
     Console.log(Card.rankIsAboveCyclic(onBottom, onTop))
     Card.rankIsAboveCyclic(onBottom, onTop) && onTop.card.suit == onBottom.card.suit
   })
 }
+
+let decCyclicAnySuitValidation = (dragPile: array<Card.sides>) => {
+  dragPile->pileValidation((onBottom, onTop) => {
+    Console.log(Card.rankIsAboveCyclic(onBottom, onTop))
+    Card.rankIsAboveCyclic(onBottom, onTop)
+  })
+}
+
+let flipLastUp = (piles: array<array<Card.sides>>) =>
+  piles->Array.map(pile => pile->Common.ArrayAux.updateLast(v => {...v, hidden: false}))

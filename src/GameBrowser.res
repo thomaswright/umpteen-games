@@ -13,9 +13,10 @@ type gameType =
   | @as("Scorpion") Scorpion
   | @as("Pyramid") Pyramid
   | @as("Simple Simon") SimpleSimon
-  | @as("MrsMop") MrsMop
+  | @as("Mrs Mop") MrsMop
   | @as("East Haven") EastHaven
   | @as("Stalactite") Stalactite
+  | @as("German Patience") GermanPatience
 
 let gameString = (a: gameType) => (a :> string)
 
@@ -37,6 +38,7 @@ let allGames = [
   Pyramid,
   EastHaven,
   Stalactite,
+  GermanPatience,
 ]
 
 @react.component
@@ -88,6 +90,7 @@ let make = () => {
     | Pyramid => <Pyramid.Game id />
     | EastHaven => <EastHaven.Game id />
     | Stalactite => <FreeCell.Stalactite id />
+    | GermanPatience => <GermanPatience.Game id />
     }}
   </div>
 }

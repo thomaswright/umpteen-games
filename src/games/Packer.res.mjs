@@ -311,17 +311,6 @@ function game_decode(value) {
         };
 }
 
-function flipLastUp(piles) {
-  return piles.map(function (pile) {
-              return Common.ArrayAux.updateLast(pile, (function (v) {
-                            return {
-                                    card: v.card,
-                                    hidden: false
-                                  };
-                          }));
-            });
-}
-
 function Make(PackerRules) {
   var game_encode$1 = function (value) {
     return game_encode(value);
@@ -373,6 +362,12 @@ function Make(PackerRules) {
           } else {
             return false;
           }
+      case "CyclicAnySuit" :
+          if (isLast) {
+            return Card.rankIsAboveCyclic(card, dragPileBase);
+          } else {
+            return false;
+          }
       case "NoDrop" :
           return false;
       
@@ -382,13 +377,15 @@ function Make(PackerRules) {
     var match = PackerRules.spec.drag;
     switch (match) {
       case "AltSuit" :
-          return GameCommons.decAndAltValidation(dragPile);
+          return GameCommons.decAltColorValidation(dragPile);
       case "AnySuit" :
           return true;
       case "OneSuit" :
-          return GameCommons.decValidation(dragPile);
+          return GameCommons.decOneSuitValidation(dragPile);
       case "CyclicOneSuit" :
-          return GameCommons.decCyclicValidation(dragPile);
+          return GameCommons.decCyclicOneSuitValidation(dragPile);
+      case "CyclicAnySuit" :
+          return GameCommons.decCyclicAnySuitValidation(dragPile);
       case "NoDrop" :
           return false;
       
@@ -425,19 +422,24 @@ function Make(PackerRules) {
     var justOne = dragPile.length === 1;
     var fullStack = dragPile.length === 13;
     var noChildren = game.foundations[i].length === 0;
-    var valid = GameCommons.decValidation(dragPile);
+    var valid = GameCommons.decOneSuitValidation(dragPile);
     var dragPileBase = dragPile[0];
     var match = PackerRules.spec.foundation;
-    if (match === "ByAll") {
-      if (noChildren && fullStack) {
-        return valid;
-      } else {
-        return false;
-      }
-    } else if (noChildren && justOne) {
-      return dragPileBase.card.rank === "RA";
-    } else {
-      return false;
+    switch (match) {
+      case "ByAll" :
+          if (noChildren && fullStack) {
+            return valid;
+          } else {
+            return false;
+          }
+      case "NoFoundation" :
+          return false;
+      default:
+        if (noChildren && justOne) {
+          return dragPileBase.card.rank === "RA";
+        } else {
+          return false;
+        }
     }
   };
   var foundationCheck = function (dragPile, card) {
@@ -451,8 +453,6 @@ function Make(PackerRules) {
           } else {
             return false;
           }
-      case "ByAll" :
-          return false;
       case "ByOneCyclicOneSuit" :
           if (justOne && dragPileBase.card.suit === card.card.suit) {
             return Card.rankIsAboveCyclic(dragPileBase, card);
@@ -465,6 +465,9 @@ function Make(PackerRules) {
           } else {
             return false;
           }
+      case "ByAll" :
+      case "NoFoundation" :
+          return false;
       
     }
   };
@@ -514,7 +517,7 @@ function Make(PackerRules) {
             droppedUpon: (function (gameRemoved, dragPile) {
                 if (pileBaseCheck(game, dragPile, i)) {
                   return {
-                          piles: flipLastUp(Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
+                          piles: GameCommons.flipLastUp(Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
                                       return dragPile;
                                     }))),
                           foundations: gameRemoved.foundations,
@@ -563,7 +566,7 @@ function Make(PackerRules) {
             droppedUpon: (function (game, dragPile) {
                 if (dropCheck(isLast, dragPile, card)) {
                   return {
-                          piles: flipLastUp(game.piles.map(function (stack) {
+                          piles: GameCommons.flipLastUp(game.piles.map(function (stack) {
                                     return Common.ArrayAux.insertAfter(stack, card, dragPile);
                                   })),
                           foundations: game.foundations,
@@ -587,7 +590,7 @@ function Make(PackerRules) {
             droppedUpon: (function (game, dragPile) {
                 if (foundationBaseCheck(game, dragPile, i)) {
                   return {
-                          piles: flipLastUp(game.piles),
+                          piles: GameCommons.flipLastUp(game.piles),
                           foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                   return dragPile;
                                 })),
@@ -628,7 +631,7 @@ function Make(PackerRules) {
             droppedUpon: (function (game, dragPile) {
                 if (isLast && foundationCheck(dragPile, card)) {
                   return {
-                          piles: flipLastUp(game.piles),
+                          piles: GameCommons.flipLastUp(game.piles),
                           foundations: game.foundations.map(function (stack) {
                                 return Common.ArrayAux.insertAfter(stack, card, dragPile);
                               }),
@@ -896,7 +899,6 @@ export {
   space_decode ,
   game_encode ,
   game_decode ,
-  flipLastUp ,
   Make ,
 }
 /* Card Not a pure module */
