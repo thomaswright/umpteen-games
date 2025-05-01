@@ -125,9 +125,9 @@ function freeRules(card, i) {
         };
 }
 
-function pileBaseRules(game, i) {
+function pileBaseRules(_game, _i) {
   return {
-          droppedUpon: (function (gameRemoved, dragPile) {
+          droppedUpon: (function (_gameRemoved, _dragPile) {
               
             }),
           autoProgress: "Accept",
@@ -200,7 +200,7 @@ function foundationBaseRules(param) {
         };
 }
 
-function foundationRules(game, pile, card, i, j) {
+function foundationRules(_game, _pile, card, i, j) {
   return {
           locationAdjustment: {
             x: 0,
@@ -244,7 +244,7 @@ var Game = GameBase.Create({
       winCheck: Bases.GayGordons.winCheck,
       applyLiftToDragPile: Bases.GayGordons.applyLiftToDragPile,
       applyMoveToDragPile: Bases.GayGordons.applyMoveToDragPile,
-      Board: Boards.GayGordons,
+      Board: Boards.FreeCell,
       AllCards: Bases.GayGordons.AllCards
     });
 

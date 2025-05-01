@@ -87,9 +87,9 @@ module Game = GameBase.Create({
     }
   }
 
-  let pileBaseRules = (game, i): staticSpace => {
+  let pileBaseRules = (_game, _i): staticSpace => {
     {
-      droppedUpon: (gameRemoved, dragPile) => None,
+      droppedUpon: (_gameRemoved, _dragPile) => None,
       autoProgress: Accept,
       onClick: _ => None,
     }
@@ -144,7 +144,7 @@ module Game = GameBase.Create({
     }
   }
 
-  let foundationRules = (game, pile, card, i, j): movableSpace => {
+  let foundationRules = (_game, _pile, card, i, j): movableSpace => {
     {
       locationAdjustment: {
         x: 0,
@@ -169,5 +169,5 @@ module Game = GameBase.Create({
     ~foundationRules,
   )
 
-  module Board = Boards.GayGordons
+  module Board = Boards.FreeCell
 })
