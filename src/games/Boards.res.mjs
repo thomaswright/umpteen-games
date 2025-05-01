@@ -72,6 +72,80 @@ var Klondike = {
   make: Boards$Klondike
 };
 
+function Boards$GayGordons(props) {
+  var initialGame = props.initialGame;
+  var setRef = props.setRef;
+  return JsxRuntime.jsxs(React.Fragment, {
+              children: [
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("div", {
+                              children: Core__Array.make(initialGame.free.length, []).map(function (param, i) {
+                                    return JsxRuntime.jsx("div", {
+                                                ref: Caml_option.some(setRef({
+                                                          TAG: "Free",
+                                                          _0: i
+                                                        })),
+                                                className: " bg-black opacity-20   rounded w-14 h-20"
+                                              }, Packer.spaceToString({
+                                                    TAG: "Free",
+                                                    _0: i
+                                                  }));
+                                  }),
+                              className: "flex flex-row gap-3"
+                            }),
+                        Core__Array.make(7, JsxRuntime.jsx("div", {
+                                  className: "w-14 h-20"
+                                })),
+                        JsxRuntime.jsx("div", {
+                              children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
+                                    return JsxRuntime.jsx("div", {
+                                                ref: Caml_option.some(setRef({
+                                                          TAG: "Foundation",
+                                                          _0: i
+                                                        })),
+                                                className: " bg-white opacity-10 rounded w-14 h-20",
+                                                id: Packer.spaceToString({
+                                                      TAG: "Foundation",
+                                                      _0: i
+                                                    })
+                                              }, Packer.spaceToString({
+                                                    TAG: "Foundation",
+                                                    _0: i
+                                                  }));
+                                  }),
+                              className: "flex flex-row gap-3"
+                            })
+                      ],
+                      className: "flex flex-row gap-3 mt-5"
+                    }),
+                JsxRuntime.jsx("div", {
+                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                })),
+                                        className: " bg-black opacity-20  rounded w-14 h-20",
+                                        id: Packer.spaceToString({
+                                              TAG: "Pile",
+                                              _0: i
+                                            })
+                                      }, Packer.spaceToString({
+                                            TAG: "Pile",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    })
+              ]
+            });
+}
+
+var GayGordons = {
+  make: Boards$GayGordons
+};
+
 function Boards$FreeCell(props) {
   var initialGame = props.initialGame;
   var setRef = props.setRef;
@@ -94,6 +168,9 @@ function Boards$FreeCell(props) {
                                   }),
                               className: "flex flex-row gap-3"
                             }),
+                        Core__Array.make((initialGame.piles.length - initialGame.free.length | 0) - initialGame.foundations.length | 0, JsxRuntime.jsx("div", {
+                                  className: "w-14 h-20"
+                                })),
                         JsxRuntime.jsx("div", {
                               children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
                                     return JsxRuntime.jsx("div", {
@@ -107,10 +184,10 @@ function Boards$FreeCell(props) {
                                                     _0: i
                                                   }));
                                   }),
-                              className: "flex flex-row gap-3 ml-10"
+                              className: "flex flex-row gap-3"
                             })
                       ],
-                      className: "flex flex-row"
+                      className: "flex flex-row gap-3"
                     }),
                 JsxRuntime.jsx("div", {}),
                 JsxRuntime.jsx("div", {
@@ -158,6 +235,9 @@ function Boards$DoubleFreeCell(props) {
                                   }),
                               className: "grid grid-cols-4 gap-3"
                             }),
+                        Core__Array.make(2, JsxRuntime.jsx("div", {
+                                  className: "w-14 h-20"
+                                })),
                         JsxRuntime.jsx("div", {
                               children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
                                     return JsxRuntime.jsx("div", {
@@ -171,10 +251,10 @@ function Boards$DoubleFreeCell(props) {
                                                     _0: i
                                                   }));
                                   }),
-                              className: "grid grid-cols-4 gap-3 ml-20"
+                              className: "grid grid-cols-4 gap-3 "
                             })
                       ],
-                      className: "flex flex-row"
+                      className: "flex flex-row gap-3"
                     }),
                 JsxRuntime.jsx("div", {}),
                 JsxRuntime.jsx("div", {
@@ -219,7 +299,7 @@ function Boards$EightOff(props) {
                                                   _0: i
                                                 }));
                                 }),
-                            className: "flex flex-col gap-3 mr-5"
+                            className: "flex flex-col gap-3 mr-6"
                           }),
                       JsxRuntime.jsxs("div", {
                             children: [
@@ -255,7 +335,7 @@ function Boards$EightOff(props) {
                                                           _0: i
                                                         }));
                                         }),
-                                    className: "flex flex-row gap-3 mt-5"
+                                    className: "flex flex-row gap-3 mt-3"
                                   })
                             ]
                           })
@@ -410,6 +490,7 @@ var GermanPatience = {
 
 export {
   Klondike ,
+  GayGordons ,
   FreeCell ,
   DoubleFreeCell ,
   EightOff ,

@@ -587,20 +587,23 @@ module Create = (GameRules: GameRules) => {
               | Movable({droppedUpon}) => droppedUpon
               }
 
-              switch (droppedUpon(withoutDragPile, dragPile), space->getElement) {
-              | (Some(newGame), Some(element)) => {
+              switch space->getElement {
+              | None => ()
+              | Some(element) =>
+                if element != dragElement {
                   let overlap = getOverlap(element, dragElement)
-                  if overlap > greatestOverlap.contents {
+                  if overlap != 0. && overlap >= greatestOverlap.contents {
                     greatestOverlap := overlap
-                    if (
-                      oldGame->GameRules.game_encode->Js.Json.stringify !=
-                        newGame->GameRules.game_encode->Js.Json.stringify
-                    ) {
-                      updatedGame := Some(newGame)
-                    }
+                    droppedUpon(withoutDragPile, dragPile)->Option.mapOr((), newGame => {
+                      if (
+                        oldGame->GameRules.game_encode->Js.Json.stringify !=
+                          newGame->GameRules.game_encode->Js.Json.stringify
+                      ) {
+                        updatedGame := Some(newGame)
+                      }
+                    })
                   }
                 }
-              | _ => ()
               }
             })
 

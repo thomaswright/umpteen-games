@@ -111,6 +111,16 @@ var EastHaven = Packer.Make({
       }
     });
 
+var GayGordons = Packer.Make({
+      spec: {
+        drop: "NoDrop",
+        drag: "NoDrop",
+        size: "JustOne",
+        depot: "AnyDepot",
+        foundation: "ByOne"
+      }
+    });
+
 export {
   Klondike ,
   BakersGame ,
@@ -122,5 +132,6 @@ export {
   Scorpion ,
   GermanPatience ,
   EastHaven ,
+  GayGordons ,
 }
 /* Klondike Not a pure module */

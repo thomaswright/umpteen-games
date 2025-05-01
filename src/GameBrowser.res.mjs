@@ -8,6 +8,7 @@ import * as Klondike from "./games/Klondike.res.mjs";
 import * as EastHaven from "./games/EastHaven.res.mjs";
 import * as UpAndDown from "./games/UpAndDown.res.mjs";
 import * as BakersGame from "./games/BakersGame.res.mjs";
+import * as GayGordons from "./games/GayGordons.res.mjs";
 import * as GermanPatience from "./games/GermanPatience.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
@@ -33,7 +34,8 @@ var allGames = [
   "Pyramid",
   "East Haven",
   "Stalactite",
-  "German Patience"
+  "German Patience",
+  "Gay Gordon's"
 ];
 
 function GameBrowser(props) {
@@ -129,6 +131,11 @@ function GameBrowser(props) {
         break;
     case "German Patience" :
         tmp = JsxRuntime.jsx(GermanPatience.Game.make, {
+              id: selectGameType
+            });
+        break;
+    case "Gay Gordon's" :
+        tmp = JsxRuntime.jsx(GayGordons.Game.make, {
               id: selectGameType
             });
         break;

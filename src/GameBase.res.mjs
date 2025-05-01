@@ -665,24 +665,24 @@ function Create(GameRules) {
         GameRules.forEachSpace(getGame(), (function (space, rule) {
                 var droppedUpon;
                 droppedUpon = rule.TAG === "Movable" ? rule._0.droppedUpon : rule._0.droppedUpon;
-                var match = droppedUpon(withoutDragPile, dragPile);
-                var match$1 = getElement(space);
-                if (match === undefined) {
+                var element = getElement(space);
+                if (element === undefined) {
                   return ;
                 }
-                if (match$1 === undefined) {
+                var element$1 = Caml_option.valFromOption(element);
+                if (!Caml_obj.notequal(element$1, dragElement)) {
                   return ;
                 }
-                var newGame = Caml_option.valFromOption(match);
-                var overlap = getOverlap(Caml_option.valFromOption(match$1), dragElement);
-                if (overlap > greatestOverlap.contents) {
+                var overlap = getOverlap(element$1, dragElement);
+                if (overlap !== 0 && overlap >= greatestOverlap.contents) {
                   greatestOverlap.contents = overlap;
-                  if (JSON.stringify(GameRules.game_encode(oldGame)) !== JSON.stringify(GameRules.game_encode(newGame))) {
-                    updatedGame.contents = Caml_option.some(newGame);
-                    return ;
-                  } else {
-                    return ;
-                  }
+                  return Core__Option.mapOr(droppedUpon(withoutDragPile, dragPile), undefined, (function (newGame) {
+                                if (JSON.stringify(GameRules.game_encode(oldGame)) !== JSON.stringify(GameRules.game_encode(newGame))) {
+                                  updatedGame.contents = Caml_option.some(newGame);
+                                  return ;
+                                }
+                                
+                              }));
                 }
                 
               }));

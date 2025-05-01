@@ -99,3 +99,13 @@ module EastHaven = Make({
     foundation: ByOne,
   }
 })
+
+module GayGordons = Make({
+  let spec = {
+    drop: NoDrop,
+    drag: NoDrop,
+    size: JustOne,
+    depot: AnyDepot,
+    foundation: ByOne,
+  }
+})
