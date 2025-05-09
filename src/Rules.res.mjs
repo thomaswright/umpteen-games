@@ -108,6 +108,94 @@ var DealAll = {
   stockRules: stockRules
 };
 
+function wasteRules(game, card, i) {
+  return {
+          locationAdjustment: {
+            x: Math.imul(20, i),
+            y: 0,
+            z: i + 1 | 0
+          },
+          baseSpace: "Waste",
+          dragPile: (function () {
+              if (i === (game.waste.length - 1 | 0)) {
+                return [card];
+              }
+              
+            }),
+          autoProgress: (function () {
+              return "DoNothing";
+            }),
+          droppedUpon: (function (param, param$1) {
+              
+            }),
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
+            }),
+          onClick: (function (param) {
+              
+            })
+        };
+}
+
+function stockRules$1(_game, card, _i, j) {
+  return {
+          locationAdjustment: {
+            x: 0,
+            y: 0,
+            z: j + 1 | 0
+          },
+          baseSpace: "Stock",
+          dragPile: (function () {
+              
+            }),
+          autoProgress: (function () {
+              return "DoNothing";
+            }),
+          droppedUpon: (function (param, param$1) {
+              
+            }),
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
+            }),
+          onClick: (function (game) {
+              var realStock = game.stock[0];
+              return {
+                      tableau: game.tableau,
+                      foundations: game.foundations,
+                      stock: Common.ArrayAux.update(game.stock, 0, (function (v) {
+                              return v.slice(0, realStock.length - 1 | 0);
+                            })),
+                      waste: game.waste.concat(Card.showAfter(realStock.slice(realStock.length - 1 | 0), 0)),
+                      free: game.free
+                    };
+            })
+        };
+}
+
+function stockBaseRules() {
+  return {
+          droppedUpon: (function (_game, _dragPile) {
+              
+            }),
+          autoProgress: "DoNothing",
+          onClick: (function (game) {
+              return {
+                      tableau: game.tableau,
+                      foundations: game.foundations,
+                      stock: [Card.hideAfter(game.waste.toReversed(), 0)],
+                      waste: [],
+                      free: game.free
+                    };
+            })
+        };
+}
+
+var WasteRotation = {
+  wasteRules: wasteRules,
+  stockRules: stockRules$1,
+  stockBaseRules: stockBaseRules
+};
+
 function foundationBaseRules(param) {
   return {
           droppedUpon: (function (_game, _dragPile) {
@@ -157,6 +245,7 @@ var Neutral = {
 export {
   FreeCell ,
   DealAll ,
+  WasteRotation ,
   Neutral ,
 }
 /* Card Not a pure module */

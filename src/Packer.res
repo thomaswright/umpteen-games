@@ -25,6 +25,7 @@ type stack =
   | CyclicAltColor
   | CyclicSameColor
   | NoDrop
+
 type size = AnySize | FreeSize | JustOne
 type depot = SpecificDepot(Card.rank) | AnyDepot
 type foundation = ByOne | ByAll | ByOneCyclicOneSuit | ByOneCyclicAnySuit | NoFoundation

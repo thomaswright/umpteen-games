@@ -15,6 +15,16 @@ var Klondike = Packer.Make({
       }
     });
 
+var Diplomat = Packer.Make({
+      spec: {
+        drop: "AnySuit",
+        drag: "AnySuit",
+        size: "JustOne",
+        depot: "AnyDepot",
+        foundation: "ByOne"
+      }
+    });
+
 var BakersGame = Packer.Make({
       spec: {
         drop: "OneSuit",
@@ -143,6 +153,7 @@ var GayGordons = Packer.Make({
 
 export {
   Klondike ,
+  Diplomat ,
   BakersGame ,
   FreeCell ,
   SeahavenTowers ,

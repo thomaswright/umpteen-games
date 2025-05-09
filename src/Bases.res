@@ -10,6 +10,16 @@ module Klondike = Make({
   }
 })
 
+module Diplomat = Make({
+  let spec = {
+    drop: AnySuit,
+    drag: AnySuit,
+    size: JustOne,
+    depot: AnyDepot,
+    foundation: ByOne,
+  }
+})
+
 module BakersGame = Make({
   let spec = {
     drop: OneSuit,

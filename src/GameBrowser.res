@@ -20,6 +20,7 @@ type gameType =
   | @as("Gay Gordon's") GayGordons
   | @as("Agnes Sorel") AgnesSorel
   | @as("Agnes Bernauer") AgnesBernauer
+  | @as("Diplomat") Diplomat
 
 let gameString = (a: gameType) => (a :> string)
 
@@ -45,6 +46,7 @@ let allGames = [
   GayGordons,
   AgnesSorel,
   AgnesBernauer,
+  Diplomat,
 ]
 
 @react.component
@@ -100,6 +102,7 @@ let make = () => {
     | GayGordons => <GayGordons.Game id />
     | AgnesSorel => <AgnesSorel.Game id />
     | AgnesBernauer => <AgnesBernauer.Game id />
+    | Diplomat => <Diplomat.Game id />
     }}
   </div>
 }
