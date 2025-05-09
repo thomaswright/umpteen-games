@@ -161,12 +161,12 @@ module Display = {
         ]->Array.join(" ")}>
         <div
           className={[
-            "absolute bg-red-800 border border-red-950 w-full h-full card-back",
+            "absolute bg-[#9d0404] border-4 border-[#ffffff] w-full h-full card-back",
             card.hidden ? "" : "hidden",
           ]->Array.join(" ")}
         />
         <span
-          className="flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-gray-400 rounded"
+          className="flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-[#a4a4a4] rounded"
           style={{
             backgroundColor: multiColor ? multiColorPastel(card) : "white",
           }}>

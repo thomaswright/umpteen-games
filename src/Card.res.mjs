@@ -601,7 +601,7 @@ function Card$Display(props) {
                     children: [
                       JsxRuntime.jsx("div", {
                             className: [
-                                "absolute bg-red-800 border border-red-950 w-full h-full card-back",
+                                "absolute bg-[#9d0404] border-4 border-[#ffffff] w-full h-full card-back",
                                 card.hidden ? "" : "hidden"
                               ].join(" ")
                           }),
@@ -628,7 +628,7 @@ function Card$Display(props) {
                                     className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
                                   })
                             ],
-                            className: "flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-gray-400 rounded",
+                            className: "flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-[#a4a4a4] rounded",
                             style: {
                               backgroundColor: multiColor ? multiColorPastel(card) : "white"
                             }

@@ -58,7 +58,7 @@ let make = () => {
 
   let id = selectGameType->gameString
 
-  <div className={" bg-gradient-to-tl from-green-900 to-green-700 h-dvh"}>
+  <div className={" bg-gradient-to-tl from-[#003c18] to-[#006f2a] h-dvh"}>
     <div className="px-5 pt-3">
       <div className="mb-1 text-white font-medium tracking-widest ">
         {"tom & won's card games"->React.string}

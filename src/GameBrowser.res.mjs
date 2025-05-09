@@ -201,7 +201,7 @@ function GameBrowser(props) {
                     }),
                 tmp
               ],
-              className: " bg-gradient-to-tl from-green-900 to-green-700 h-dvh"
+              className: " bg-gradient-to-tl from-[#003c18] to-[#006f2a] h-dvh"
             });
 }
 
