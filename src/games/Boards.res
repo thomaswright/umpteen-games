@@ -1,7 +1,7 @@
 open Packer
 
-// Stock, Waste, Foundation, Piles
-module Klondike = {
+// Stock, Waste, Foundation, Tableau
+module SWFT = {
   @react.component
   let make = (~setRef, ~initialGame: game) => {
     <React.Fragment>
@@ -47,8 +47,8 @@ module Klondike = {
   }
 }
 
-// Foundation, Frees, Piles
-module FreeCell = {
+// Foundation, Reserve, Tableau
+module FRT = {
   @react.component
   let make = (~setRef, ~initialGame: game) => {
     <React.Fragment>
@@ -98,8 +98,8 @@ module FreeCell = {
   }
 }
 
-// Foundation, Frees, Piles
-module DoubleFreeCell = {
+// Foundation, Reserve, Tableau
+module FRT2 = {
   @react.component
   let make = (~setRef, ~initialGame: game) => {
     <React.Fragment>
@@ -144,8 +144,8 @@ module DoubleFreeCell = {
   }
 }
 
-// Foundation, Frees, Piles
-module EightOff = {
+// Foundation, Reserve, Tableau
+module FRT3 = {
   @react.component
   let make = (~setRef, ~initialGame: game) => {
     <React.Fragment>
@@ -193,8 +193,8 @@ module EightOff = {
   }
 }
 
-// Stock, Foundation, Piles
-module Spider = {
+// Stock, Foundation, Tableau
+module SFT = {
   @react.component
   let make = (~setRef, ~initialGame: game) => {
     <React.Fragment>
@@ -232,8 +232,8 @@ module Spider = {
   }
 }
 
-// Stock, Foundation, Piles
-module AgnesBernauer = {
+// Stock, Foundation, Piles, Free
+module SFTR = {
   @react.component
   let make = (~setRef, ~initialGame: game) => {
     <React.Fragment>
@@ -281,8 +281,8 @@ module AgnesBernauer = {
   }
 }
 
-// Foundation, Piles
-module SimpleSimon = {
+// Foundation, Tableau
+module FT = {
   @react.component
   let make = (~setRef, ~initialGame: game) => {
     <React.Fragment>
@@ -314,8 +314,8 @@ module SimpleSimon = {
   }
 }
 
-// Stock, Piles
-module GermanPatience = {
+// Stock, Tableau
+module ST = {
   @react.component
   let make = (~setRef, ~initialGame: game) => {
     <React.Fragment>

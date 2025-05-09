@@ -91,5 +91,5 @@ module Game = GameBase.Create({
 
   let forEachSpace = Bases.Klondike.makeForEachSpace(~wasteRules, ~stockRules, ~stockBaseRules)
 
-  module Board = Boards.Klondike
+  module Board = Boards.SWFT
 })

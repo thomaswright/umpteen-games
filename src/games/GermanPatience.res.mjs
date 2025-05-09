@@ -111,7 +111,7 @@ var Game = GameBase.Create({
       winCheck: winCheck,
       applyLiftToDragPile: Bases.GermanPatience.applyLiftToDragPile,
       applyMoveToDragPile: Bases.GermanPatience.applyMoveToDragPile,
-      Board: Boards.GermanPatience,
+      Board: Boards.ST,
       AllCards: Bases.GermanPatience.AllCards
     });
 

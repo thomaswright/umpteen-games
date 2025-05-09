@@ -6,7 +6,7 @@ import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
-function Boards$Klondike(props) {
+function Boards$SWFT(props) {
   var initialGame = props.initialGame;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
@@ -68,11 +68,11 @@ function Boards$Klondike(props) {
             });
 }
 
-var Klondike = {
-  make: Boards$Klondike
+var SWFT = {
+  make: Boards$SWFT
 };
 
-function Boards$FreeCell(props) {
+function Boards$FRT(props) {
   var initialGame = props.initialGame;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
@@ -135,11 +135,11 @@ function Boards$FreeCell(props) {
             });
 }
 
-var FreeCell = {
-  make: Boards$FreeCell
+var FRT = {
+  make: Boards$FRT
 };
 
-function Boards$DoubleFreeCell(props) {
+function Boards$FRT2(props) {
   var initialGame = props.initialGame;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
@@ -202,11 +202,11 @@ function Boards$DoubleFreeCell(props) {
             });
 }
 
-var DoubleFreeCell = {
-  make: Boards$DoubleFreeCell
+var FRT2 = {
+  make: Boards$FRT2
 };
 
-function Boards$EightOff(props) {
+function Boards$FRT3(props) {
   var initialGame = props.initialGame;
   var setRef = props.setRef;
   return JsxRuntime.jsx(React.Fragment, {
@@ -271,11 +271,11 @@ function Boards$EightOff(props) {
             });
 }
 
-var EightOff = {
-  make: Boards$EightOff
+var FRT3 = {
+  make: Boards$FRT3
 };
 
-function Boards$Spider(props) {
+function Boards$SFT(props) {
   var initialGame = props.initialGame;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
@@ -324,11 +324,11 @@ function Boards$Spider(props) {
             });
 }
 
-var Spider = {
-  make: Boards$Spider
+var SFT = {
+  make: Boards$SFT
 };
 
-function Boards$AgnesBernauer(props) {
+function Boards$SFTR(props) {
   var initialGame = props.initialGame;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
@@ -391,11 +391,11 @@ function Boards$AgnesBernauer(props) {
             });
 }
 
-var AgnesBernauer = {
-  make: Boards$AgnesBernauer
+var SFTR = {
+  make: Boards$SFTR
 };
 
-function Boards$SimpleSimon(props) {
+function Boards$FT(props) {
   var initialGame = props.initialGame;
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
@@ -442,11 +442,11 @@ function Boards$SimpleSimon(props) {
             });
 }
 
-var SimpleSimon = {
-  make: Boards$SimpleSimon
+var FT = {
+  make: Boards$FT
 };
 
-function Boards$GermanPatience(props) {
+function Boards$ST(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
               children: [
@@ -477,18 +477,18 @@ function Boards$GermanPatience(props) {
             });
 }
 
-var GermanPatience = {
-  make: Boards$GermanPatience
+var ST = {
+  make: Boards$ST
 };
 
 export {
-  Klondike ,
-  FreeCell ,
-  DoubleFreeCell ,
-  EightOff ,
-  Spider ,
-  AgnesBernauer ,
-  SimpleSimon ,
-  GermanPatience ,
+  SWFT ,
+  FRT ,
+  FRT2 ,
+  FRT3 ,
+  SFT ,
+  SFTR ,
+  FT ,
+  ST ,
 }
 /* react Not a pure module */

@@ -109,7 +109,7 @@ var OneSuit = GameBase.Create({
       winCheck: Bases.Spider.winCheck,
       applyLiftToDragPile: Bases.Spider.applyLiftToDragPile,
       applyMoveToDragPile: Bases.Spider.applyMoveToDragPile,
-      Board: Boards.Spider,
+      Board: Boards.SFT,
       AllCards: Bases.Spider.AllCards
     });
 
@@ -171,7 +171,7 @@ var TwoSuit = GameBase.Create({
       winCheck: Bases.Spider.winCheck,
       applyLiftToDragPile: Bases.Spider.applyLiftToDragPile,
       applyMoveToDragPile: Bases.Spider.applyMoveToDragPile,
-      Board: Boards.Spider,
+      Board: Boards.SFT,
       AllCards: Bases.Spider.AllCards
     });
 
@@ -233,7 +233,7 @@ var FourSuit = GameBase.Create({
       winCheck: Bases.Spider.winCheck,
       applyLiftToDragPile: Bases.Spider.applyLiftToDragPile,
       applyMoveToDragPile: Bases.Spider.applyMoveToDragPile,
-      Board: Boards.Spider,
+      Board: Boards.SFT,
       AllCards: Bases.Spider.AllCards
     });
 
@@ -285,7 +285,7 @@ var SimpleSimon = GameBase.Create({
       winCheck: Bases.Spider.winCheck,
       applyLiftToDragPile: Bases.Spider.applyLiftToDragPile,
       applyMoveToDragPile: Bases.Spider.applyMoveToDragPile,
-      Board: Boards.SimpleSimon,
+      Board: Boards.FT,
       AllCards: Bases.Spider.AllCards
     });
 
@@ -344,7 +344,7 @@ var MrsMop = GameBase.Create({
       winCheck: Bases.Spider.winCheck,
       applyLiftToDragPile: Bases.Spider.applyLiftToDragPile,
       applyMoveToDragPile: Bases.Spider.applyMoveToDragPile,
-      Board: Boards.SimpleSimon,
+      Board: Boards.FT,
       AllCards: Bases.Spider.AllCards
     });
 
@@ -393,7 +393,7 @@ var Scorpion = GameBase.Create({
       winCheck: Bases.Scorpion.winCheck,
       applyLiftToDragPile: Bases.Scorpion.applyLiftToDragPile,
       applyMoveToDragPile: Bases.Scorpion.applyMoveToDragPile,
-      Board: Boards.Spider,
+      Board: Boards.SFT,
       AllCards: Bases.Scorpion.AllCards
     });
 

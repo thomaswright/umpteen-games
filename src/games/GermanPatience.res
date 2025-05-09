@@ -88,5 +88,5 @@ module Game = GameBase.Create({
 
   let forEachSpace = Bases.GermanPatience.makeForEachSpace(~stockRules)
 
-  module Board = Boards.GermanPatience
+  module Board = Boards.ST
 })

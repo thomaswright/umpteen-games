@@ -69,7 +69,7 @@ module OneDeck = GameBase.Create({
       },
     )
   }
-  module Board = Boards.FreeCell
+  module Board = Boards.FRT
 })
 
 module TwoDeck = GameBase.Create({
@@ -109,7 +109,7 @@ module TwoDeck = GameBase.Create({
     )
   }
 
-  module Board = Boards.DoubleFreeCell
+  module Board = Boards.FRT2
 })
 
 module SeahavenTowers = GameBase.Create({
@@ -153,7 +153,7 @@ module SeahavenTowers = GameBase.Create({
     ~freeRules=FreeCellRules.freeRules,
   )
 
-  module Board = Boards.FreeCell
+  module Board = Boards.FRT
 })
 
 module Penguin = GameBase.Create({
@@ -255,7 +255,7 @@ module Penguin = GameBase.Create({
     ~foundationBaseRules,
   )
 
-  module Board = Boards.EightOff
+  module Board = Boards.FRT3
 })
 
 module Stalactite = GameBase.Create({
@@ -297,5 +297,5 @@ module Stalactite = GameBase.Create({
     ~freeRules=FreeCellRules.freeRules,
   )
 
-  module Board = Boards.FreeCell
+  module Board = Boards.FRT
 })

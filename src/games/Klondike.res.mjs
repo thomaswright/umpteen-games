@@ -134,7 +134,7 @@ var Game = GameBase.Create({
       winCheck: Bases.Klondike.winCheck,
       applyLiftToDragPile: Bases.Klondike.applyLiftToDragPile,
       applyMoveToDragPile: Bases.Klondike.applyMoveToDragPile,
-      Board: Boards.Klondike,
+      Board: Boards.SWFT,
       AllCards: Bases.Klondike.AllCards
     });
 

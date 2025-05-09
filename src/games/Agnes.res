@@ -68,7 +68,7 @@ module Sorel = GameBase.Create({
     ~foundationBaseRules,
   )
 
-  module Board = Boards.Spider
+  module Board = Boards.SFT
 })
 
 module Bernauer = GameBase.Create({
@@ -168,5 +168,5 @@ module Bernauer = GameBase.Create({
     ~freeRules=FreeCell.FreeCellRules.freeRules,
   )
 
-  module Board = Boards.AgnesBernauer
+  module Board = Boards.SFTR
 })

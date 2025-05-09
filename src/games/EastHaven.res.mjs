@@ -60,7 +60,7 @@ var Game = GameBase.Create({
       winCheck: Bases.EastHaven.winCheck,
       applyLiftToDragPile: Bases.EastHaven.applyLiftToDragPile,
       applyMoveToDragPile: Bases.EastHaven.applyMoveToDragPile,
-      Board: Boards.Spider,
+      Board: Boards.SFT,
       AllCards: Bases.EastHaven.AllCards
     });
 

@@ -169,5 +169,5 @@ module Game = GameBase.Create({
     ~foundationRules,
   )
 
-  module Board = Boards.FreeCell
+  module Board = Boards.FRT
 })

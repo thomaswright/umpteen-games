@@ -98,7 +98,7 @@ var Sorel = GameBase.Create({
       winCheck: Bases.AgnesSorel.winCheck,
       applyLiftToDragPile: Bases.AgnesSorel.applyLiftToDragPile,
       applyMoveToDragPile: Bases.AgnesSorel.applyMoveToDragPile,
-      Board: Boards.Spider,
+      Board: Boards.SFT,
       AllCards: Bases.AgnesSorel.AllCards
     });
 
@@ -227,7 +227,7 @@ var Bernauer = GameBase.Create({
       winCheck: Bases.AgnesBernauer.winCheck,
       applyLiftToDragPile: Bases.AgnesBernauer.applyLiftToDragPile,
       applyMoveToDragPile: Bases.AgnesBernauer.applyMoveToDragPile,
-      Board: Boards.AgnesBernauer,
+      Board: Boards.SFTR,
       AllCards: Bases.AgnesBernauer.AllCards
     });
 

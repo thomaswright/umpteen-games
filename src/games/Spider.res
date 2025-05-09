@@ -87,7 +87,7 @@ module OneSuit = GameBase.Create({
     )
   }
 
-  module Board = Boards.Spider
+  module Board = Boards.SFT
 })
 
 module TwoSuit = GameBase.Create({
@@ -140,7 +140,7 @@ module TwoSuit = GameBase.Create({
       },
     )
   }
-  module Board = Boards.Spider
+  module Board = Boards.SFT
 })
 
 module FourSuit = GameBase.Create({
@@ -181,7 +181,7 @@ module FourSuit = GameBase.Create({
       },
     )
   }
-  module Board = Boards.Spider
+  module Board = Boards.SFT
 })
 
 module SimpleSimon = GameBase.Create({
@@ -215,7 +215,7 @@ module SimpleSimon = GameBase.Create({
     )
   }
 
-  module Board = Boards.SimpleSimon
+  module Board = Boards.FT
 })
 
 module MrsMop = GameBase.Create({
@@ -253,7 +253,7 @@ module MrsMop = GameBase.Create({
       },
     )
   }
-  module Board = Boards.SimpleSimon
+  module Board = Boards.FT
 })
 
 module Scorpion = GameBase.Create({
@@ -286,5 +286,5 @@ module Scorpion = GameBase.Create({
     )
   }
 
-  module Board = Boards.Spider
+  module Board = Boards.SFT
 })

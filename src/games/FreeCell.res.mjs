@@ -122,7 +122,7 @@ var OneDeck = GameBase.Create({
       winCheck: Bases.FreeCell.winCheck,
       applyLiftToDragPile: Bases.FreeCell.applyLiftToDragPile,
       applyMoveToDragPile: Bases.FreeCell.applyMoveToDragPile,
-      Board: Boards.FreeCell,
+      Board: Boards.FRT,
       AllCards: Bases.FreeCell.AllCards
     });
 
@@ -187,7 +187,7 @@ var TwoDeck = GameBase.Create({
       winCheck: Bases.FreeCell.winCheck,
       applyLiftToDragPile: Bases.FreeCell.applyLiftToDragPile,
       applyMoveToDragPile: Bases.FreeCell.applyMoveToDragPile,
-      Board: Boards.DoubleFreeCell,
+      Board: Boards.FRT2,
       AllCards: Bases.FreeCell.AllCards
     });
 
@@ -244,7 +244,7 @@ var SeahavenTowers = GameBase.Create({
       winCheck: Bases.SeahavenTowers.winCheck,
       applyLiftToDragPile: Bases.SeahavenTowers.applyLiftToDragPile,
       applyMoveToDragPile: Bases.SeahavenTowers.applyMoveToDragPile,
-      Board: Boards.FreeCell,
+      Board: Boards.FRT,
       AllCards: Bases.SeahavenTowers.AllCards
     });
 
@@ -364,7 +364,7 @@ var Penguin = GameBase.Create({
       winCheck: Bases.Penguin.winCheck,
       applyLiftToDragPile: Bases.Penguin.applyLiftToDragPile,
       applyMoveToDragPile: Bases.Penguin.applyMoveToDragPile,
-      Board: Boards.EightOff,
+      Board: Boards.FRT3,
       AllCards: Bases.Penguin.AllCards
     });
 
@@ -417,7 +417,7 @@ var Stalactite = GameBase.Create({
       winCheck: Bases.Stalactite.winCheck,
       applyLiftToDragPile: Bases.Stalactite.applyLiftToDragPile,
       applyMoveToDragPile: Bases.Stalactite.applyMoveToDragPile,
-      Board: Boards.FreeCell,
+      Board: Boards.FRT,
       AllCards: Bases.Stalactite.AllCards
     });
 

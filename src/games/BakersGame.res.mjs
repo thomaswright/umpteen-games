@@ -59,7 +59,7 @@ var BakersGame = GameBase.Create({
       winCheck: Bases.BakersGame.winCheck,
       applyLiftToDragPile: Bases.BakersGame.applyLiftToDragPile,
       applyMoveToDragPile: Bases.BakersGame.applyMoveToDragPile,
-      Board: Boards.FreeCell,
+      Board: Boards.FRT,
       AllCards: Bases.BakersGame.AllCards
     });
 
@@ -118,7 +118,7 @@ var EightOff = GameBase.Create({
       winCheck: Bases.BakersGame.winCheck,
       applyLiftToDragPile: Bases.BakersGame.applyLiftToDragPile,
       applyMoveToDragPile: Bases.BakersGame.applyMoveToDragPile,
-      Board: Boards.EightOff,
+      Board: Boards.FRT3,
       AllCards: Bases.BakersGame.AllCards
     });
 

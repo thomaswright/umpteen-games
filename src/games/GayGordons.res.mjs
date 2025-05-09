@@ -244,7 +244,7 @@ var Game = GameBase.Create({
       winCheck: Bases.GayGordons.winCheck,
       applyLiftToDragPile: Bases.GayGordons.applyLiftToDragPile,
       applyMoveToDragPile: Bases.GayGordons.applyMoveToDragPile,
-      Board: Boards.FreeCell,
+      Board: Boards.FRT,
       AllCards: Bases.GayGordons.AllCards
     });
 

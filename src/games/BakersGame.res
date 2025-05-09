@@ -33,7 +33,7 @@ module BakersGame = GameBase.Create({
       },
     )
   }
-  module Board = Boards.FreeCell
+  module Board = Boards.FRT
 })
 
 module EightOff = GameBase.Create({
@@ -79,5 +79,5 @@ module EightOff = GameBase.Create({
     )
   }
 
-  module Board = Boards.EightOff
+  module Board = Boards.FRT3
 })

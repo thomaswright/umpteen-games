@@ -37,5 +37,5 @@ module Game = GameBase.Create({
     )
   }
 
-  module Board = Boards.Spider
+  module Board = Boards.SFT
 })
