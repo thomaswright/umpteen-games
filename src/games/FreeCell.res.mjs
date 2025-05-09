@@ -57,8 +57,8 @@ function freeRules(card, i) {
           droppedUpon: (function (_game, _dragPile) {
               
             }),
-          onStateChange: (function (param) {
-              
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
             }),
           onClick: (function (param) {
               
@@ -329,7 +329,7 @@ function pileBaseRules(game, i) {
               var dragPileBase = dragPile[0];
               var noChildren = game.piles[i].length === 0;
               var second = game.foundations[1][0];
-              if (noChildren && Card.rankIsAbove(second, dragPileBase)) {
+              if (noChildren && Card.rankIsAboveCyclic(second, dragPileBase)) {
                 return {
                         piles: GameCommons.flipLastUp(Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
                                     return dragPile;

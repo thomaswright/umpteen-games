@@ -348,40 +348,41 @@ function Make(PackerRules) {
   };
   var dropCheck = function (isLast, dragPile, card) {
     var dragPileBase = dragPile[0];
+    if (!isLast) {
+      return false;
+    }
     var match = PackerRules.spec.drop;
     switch (match) {
-      case "AltSuit" :
-          if (isLast && Card.rankIsAbove(card, dragPileBase)) {
+      case "AltColor" :
+          if (Card.rankIsAbove(card, dragPileBase)) {
             return Card.color(dragPileBase) !== Card.color(card);
           } else {
             return false;
           }
       case "AnySuit" :
-          if (isLast) {
-            return Card.rankIsAbove(card, dragPileBase);
-          } else {
-            return false;
-          }
+          return Card.rankIsAbove(card, dragPileBase);
       case "OneSuit" :
-          if (isLast && Card.rankIsAbove(card, dragPileBase)) {
+          if (Card.rankIsAbove(card, dragPileBase)) {
             return dragPileBase.card.suit === card.card.suit;
           } else {
             return false;
           }
       case "CyclicOneSuit" :
-          if (isLast && Card.rankIsAboveCyclic(card, dragPileBase)) {
+          if (Card.rankIsAboveCyclic(card, dragPileBase)) {
             return dragPileBase.card.suit === card.card.suit;
           } else {
             return false;
           }
       case "CyclicAnySuit" :
-          if (isLast) {
-            return Card.rankIsAboveCyclic(card, dragPileBase);
+          return Card.rankIsAboveCyclic(card, dragPileBase);
+      case "CyclicAltColor" :
+          if (Card.rankIsAboveCyclic(card, dragPileBase)) {
+            return Card.color(dragPileBase) !== Card.color(card);
           } else {
             return false;
           }
       case "CyclicSameColor" :
-          if (isLast && Card.rankIsAboveCyclic(card, dragPileBase)) {
+          if (Card.rankIsAboveCyclic(card, dragPileBase)) {
             return Card.color(dragPileBase) === Card.color(card);
           } else {
             return false;
@@ -394,7 +395,7 @@ function Make(PackerRules) {
   var dragCheck = function (dragPile) {
     var match = PackerRules.spec.drag;
     switch (match) {
-      case "AltSuit" :
+      case "AltColor" :
           return GameCommons.decAltColorValidation(dragPile);
       case "AnySuit" :
           return true;
@@ -404,6 +405,8 @@ function Make(PackerRules) {
           return GameCommons.decCyclicOneSuitValidation(dragPile);
       case "CyclicAnySuit" :
           return GameCommons.decCyclicAnySuitValidation(dragPile);
+      case "CyclicAltColor" :
+          return GameCommons.decCyclicAltColorValidation(dragPile);
       case "CyclicSameColor" :
           return GameCommons.decCyclicSameColorValidation(dragPile);
       case "NoDrop" :

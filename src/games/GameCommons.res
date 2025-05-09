@@ -43,5 +43,11 @@ let decCyclicSameColorValidation = (dragPile: array<Card.sides>) => {
   })
 }
 
+let decCyclicAltColorValidation = (dragPile: array<Card.sides>) => {
+  dragPile->pileValidation((onBottom, onTop) => {
+    Card.rankIsAboveCyclic(onBottom, onTop) && onBottom->Card.color != onTop->Card.color
+  })
+}
+
 let flipLastUp = (piles: array<array<Card.sides>>) =>
   piles->Array.map(pile => pile->Common.ArrayAux.updateLast(v => {...v, hidden: false}))

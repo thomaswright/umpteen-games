@@ -2,8 +2,8 @@ open Packer
 
 module Klondike = Make({
   let spec = {
-    drop: AltSuit,
-    drag: AltSuit,
+    drop: AltColor,
+    drag: AltColor,
     size: AnySize,
     depot: SpecificDepot(RK),
     foundation: ByOne,
@@ -22,8 +22,8 @@ module BakersGame = Make({
 
 module FreeCell = Make({
   let spec = {
-    drop: AltSuit,
-    drag: AltSuit,
+    drop: AltColor,
+    drag: AltColor,
     size: FreeSize,
     depot: AnyDepot,
     foundation: ByOne,
@@ -56,6 +56,16 @@ module AgnesSorel = Make({
     drag: CyclicOneSuit,
     size: AnySize,
     depot: AnyDepot,
+    foundation: ByOneCyclicOneSuit,
+  }
+})
+
+module AgnesBernauer = Make({
+  let spec = {
+    drop: CyclicAltColor,
+    drag: CyclicAltColor,
+    size: AnySize,
+    depot: AnyDepot, // will override
     foundation: ByOneCyclicOneSuit,
   }
 })
@@ -102,8 +112,8 @@ module GermanPatience = Make({
 
 module EastHaven = Make({
   let spec = {
-    drop: AltSuit,
-    drag: AltSuit,
+    drop: AltColor,
+    drag: AltColor,
     size: AnySize,
     depot: AnyDepot,
     foundation: ByOne,

@@ -330,6 +330,7 @@ function Create(GameRules) {
     var setGame = function (f) {
       setState(function (state) {
             var newGame = f(getGame());
+            console.log(newGame);
             listeners.contents.forEach(function (listener) {
                   listener(function (param) {
                         return newGame;

@@ -209,6 +209,7 @@ module Create = (GameRules: GameRules) => {
       let setGame = f => {
         setState(state => {
           let newGame = f(getGame())
+          Console.log(newGame)
           listeners.contents->Set.forEach(listener => listener(_ => newGame))
 
           {

@@ -76,6 +76,16 @@ function decCyclicSameColorValidation(dragPile) {
               }));
 }
 
+function decCyclicAltColorValidation(dragPile) {
+  return pileValidation(dragPile, (function (onBottom, onTop) {
+                if (Card.rankIsAboveCyclic(onBottom, onTop)) {
+                  return Card.color(onBottom) !== Card.color(onTop);
+                } else {
+                  return false;
+                }
+              }));
+}
+
 function flipLastUp(piles) {
   return piles.map(function (pile) {
               return Common.ArrayAux.updateLast(pile, (function (v) {
@@ -94,6 +104,7 @@ export {
   decCyclicOneSuitValidation ,
   decCyclicAnySuitValidation ,
   decCyclicSameColorValidation ,
+  decCyclicAltColorValidation ,
   flipLastUp ,
 }
 /* Card Not a pure module */

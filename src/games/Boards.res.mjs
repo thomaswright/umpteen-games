@@ -328,6 +328,73 @@ var Spider = {
   make: Boards$Spider
 };
 
+function Boards$AgnesBernauer(props) {
+  var initialGame = props.initialGame;
+  var setRef = props.setRef;
+  return JsxRuntime.jsxs(React.Fragment, {
+              children: [
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("div", {
+                              ref: Caml_option.some(setRef("Stock")),
+                              className: " bg-white opacity-10  rounded w-14 h-20 mr-20"
+                            }, Packer.spaceToString("Stock")),
+                        JsxRuntime.jsx("div", {
+                              children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
+                                    return JsxRuntime.jsx("div", {
+                                                ref: Caml_option.some(setRef({
+                                                          TAG: "Foundation",
+                                                          _0: i
+                                                        })),
+                                                className: " bg-white opacity-10  rounded w-14 h-20"
+                                              }, Packer.spaceToString({
+                                                    TAG: "Foundation",
+                                                    _0: i
+                                                  }));
+                                  }),
+                              className: "flex flex-row gap-3 ml-10"
+                            })
+                      ],
+                      className: "flex flex-row"
+                    }),
+                JsxRuntime.jsx("div", {
+                      children: Core__Array.make(initialGame.free.length, []).map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Free",
+                                                  _0: i
+                                                })),
+                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                      }, Packer.spaceToString({
+                                            TAG: "Free",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    }),
+                JsxRuntime.jsx("div", {
+                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Pile",
+                                                  _0: i
+                                                })),
+                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                      }, Packer.spaceToString({
+                                            TAG: "Pile",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    })
+              ]
+            });
+}
+
+var AgnesBernauer = {
+  make: Boards$AgnesBernauer
+};
+
 function Boards$SimpleSimon(props) {
   var initialGame = props.initialGame;
   var setRef = props.setRef;
@@ -420,6 +487,7 @@ export {
   DoubleFreeCell ,
   EightOff ,
   Spider ,
+  AgnesBernauer ,
   SimpleSimon ,
   GermanPatience ,
 }

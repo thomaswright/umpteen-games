@@ -4,8 +4,8 @@ import * as Packer from "./Packer.res.mjs";
 
 var Klondike = Packer.Make({
       spec: {
-        drop: "AltSuit",
-        drag: "AltSuit",
+        drop: "AltColor",
+        drag: "AltColor",
         size: "AnySize",
         depot: {
           TAG: "SpecificDepot",
@@ -27,8 +27,8 @@ var BakersGame = Packer.Make({
 
 var FreeCell = Packer.Make({
       spec: {
-        drop: "AltSuit",
-        drag: "AltSuit",
+        drop: "AltColor",
+        drag: "AltColor",
         size: "FreeSize",
         depot: "AnyDepot",
         foundation: "ByOne"
@@ -62,6 +62,16 @@ var AgnesSorel = Packer.Make({
       spec: {
         drop: "CyclicSameColor",
         drag: "CyclicOneSuit",
+        size: "AnySize",
+        depot: "AnyDepot",
+        foundation: "ByOneCyclicOneSuit"
+      }
+    });
+
+var AgnesBernauer = Packer.Make({
+      spec: {
+        drop: "CyclicAltColor",
+        drag: "CyclicAltColor",
         size: "AnySize",
         depot: "AnyDepot",
         foundation: "ByOneCyclicOneSuit"
@@ -113,8 +123,8 @@ var GermanPatience = Packer.Make({
 
 var EastHaven = Packer.Make({
       spec: {
-        drop: "AltSuit",
-        drag: "AltSuit",
+        drop: "AltColor",
+        drag: "AltColor",
         size: "AnySize",
         depot: "AnyDepot",
         foundation: "ByOne"
@@ -138,6 +148,7 @@ export {
   SeahavenTowers ,
   Penguin ,
   AgnesSorel ,
+  AgnesBernauer ,
   Stalactite ,
   Spider ,
   Scorpion ,

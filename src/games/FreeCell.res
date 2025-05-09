@@ -31,7 +31,7 @@ module FreeCellRules = {
       dragPile: () => Some([card]),
       droppedUpon: (_game, _dragPile) => None,
       onClick: _ => None,
-      onStateChange: _ => (),
+      onStateChange: element => Card.showOrHide(card, element),
     }
   }
 }
@@ -234,7 +234,7 @@ module Penguin = GameBase.Create({
         let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
         let second = game.foundations->Array.getUnsafe(1)->Array.getUnsafe(0)
 
-        if noChildren && Card.rankIsAbove(second, dragPileBase) {
+        if noChildren && Card.rankIsAboveCyclic(second, dragPileBase) {
           Some({
             ...gameRemoved,
             piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->GameCommons.flipLastUp,

@@ -16,7 +16,15 @@ type dragPile = array<Card.sides>
 type movableSpace = GameBase.movableSpace<game, space, dragPile>
 type staticSpace = GameBase.staticSpace<game, dragPile>
 
-type stack = AltSuit | AnySuit | OneSuit | CyclicOneSuit | CyclicAnySuit | CyclicSameColor | NoDrop
+type stack =
+  | AltColor
+  | AnySuit
+  | OneSuit
+  | CyclicOneSuit
+  | CyclicAnySuit
+  | CyclicAltColor
+  | CyclicSameColor
+  | NoDrop
 type size = AnySize | FreeSize | JustOne
 type depot = SpecificDepot(Card.rank) | AnyDepot
 type foundation = ByOne | ByAll | ByOneCyclicOneSuit | ByOneCyclicAnySuit | NoFoundation
@@ -60,34 +68,32 @@ module Make = (PackerRules: PackerRules) => {
 
   let dropCheck = (isLast, dragPile, card) => {
     let dragPileBase = dragPile->Array.getUnsafe(0)
+    isLast &&
     switch PackerRules.spec.drop {
-    | AltSuit =>
-      isLast && Card.rankIsAbove(card, dragPileBase) && dragPileBase->Card.color != card->Card.color
-    | AnySuit => isLast && Card.rankIsAbove(card, dragPileBase)
-    | OneSuit =>
-      isLast && Card.rankIsAbove(card, dragPileBase) && dragPileBase.card.suit == card.card.suit
+    | AltColor =>
+      Card.rankIsAbove(card, dragPileBase) && dragPileBase->Card.color != card->Card.color
+    | AnySuit => Card.rankIsAbove(card, dragPileBase)
+    | OneSuit => Card.rankIsAbove(card, dragPileBase) && dragPileBase.card.suit == card.card.suit
     | CyclicOneSuit =>
-      isLast &&
-      Card.rankIsAboveCyclic(card, dragPileBase) &&
-      dragPileBase.card.suit == card.card.suit
+      Card.rankIsAboveCyclic(card, dragPileBase) && dragPileBase.card.suit == card.card.suit
     | CyclicSameColor =>
-      isLast &&
-      Card.rankIsAboveCyclic(card, dragPileBase) &&
-      dragPileBase->Card.color == card->Card.color
-
-    | CyclicAnySuit => isLast && Card.rankIsAboveCyclic(card, dragPileBase)
+      Card.rankIsAboveCyclic(card, dragPileBase) && dragPileBase->Card.color == card->Card.color
+    | CyclicAltColor =>
+      Card.rankIsAboveCyclic(card, dragPileBase) && dragPileBase->Card.color != card->Card.color
+    | CyclicAnySuit => Card.rankIsAboveCyclic(card, dragPileBase)
     | NoDrop => false
     }
   }
 
   let dragCheck = dragPile =>
     switch PackerRules.spec.drag {
-    | AltSuit => dragPile->GameCommons.decAltColorValidation
+    | AltColor => dragPile->GameCommons.decAltColorValidation
     | OneSuit => dragPile->GameCommons.decOneSuitValidation
     | AnySuit => true
     | CyclicOneSuit => dragPile->GameCommons.decCyclicOneSuitValidation
     | CyclicAnySuit => dragPile->GameCommons.decCyclicAnySuitValidation
     | CyclicSameColor => dragPile->GameCommons.decCyclicSameColorValidation
+    | CyclicAltColor => dragPile->GameCommons.decCyclicAltColorValidation
     | NoDrop => false
     }
 
