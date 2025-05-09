@@ -2,15 +2,22 @@
 
 import * as Agnes from "./games/Agnes.res.mjs";
 import * as Common from "./Common.res.mjs";
+import * as MrsMop from "./games/MrsMop.res.mjs";
 import * as Spider from "./games/Spider.res.mjs";
+import * as Penguin from "./games/Penguin.res.mjs";
 import * as Pyramid from "./games/Pyramid.res.mjs";
-import * as FreeCell from "./games/FreeCell.res.mjs";
 import * as Klondike from "./games/Klondike.res.mjs";
+import * as Scorpion from "./games/Scorpion.res.mjs";
 import * as EastHaven from "./games/EastHaven.res.mjs";
 import * as UpAndDown from "./games/UpAndDown.res.mjs";
 import * as BakersGame from "./games/BakersGame.res.mjs";
 import * as GayGordons from "./games/GayGordons.res.mjs";
+import * as Stalactite from "./games/Stalactite.res.mjs";
+import * as SimpleSimon from "./games/SimpleSimon.res.mjs";
 import * as GermanPatience from "./games/GermanPatience.res.mjs";
+import * as SeahavenTowers from "./games/SeahavenTowers.res.mjs";
+import * as FreeCellOneDeck from "./games/FreeCellOneDeck.res.mjs";
+import * as FreeCellTwoDeck from "./games/FreeCellTwoDeck.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function gameString(a) {
@@ -53,12 +60,12 @@ function GameBrowser(props) {
             });
         break;
     case "Free Cell" :
-        tmp = JsxRuntime.jsx(FreeCell.OneDeck.make, {
+        tmp = JsxRuntime.jsx(FreeCellOneDeck.Game.make, {
               id: selectGameType
             });
         break;
     case "Free Cell: 2 Deck" :
-        tmp = JsxRuntime.jsx(FreeCell.TwoDeck.make, {
+        tmp = JsxRuntime.jsx(FreeCellTwoDeck.Game.make, {
               id: selectGameType
             });
         break;
@@ -73,12 +80,12 @@ function GameBrowser(props) {
             });
         break;
     case "Seahaven Towers" :
-        tmp = JsxRuntime.jsx(FreeCell.SeahavenTowers.make, {
+        tmp = JsxRuntime.jsx(SeahavenTowers.Game.make, {
               id: selectGameType
             });
         break;
     case "Penguin" :
-        tmp = JsxRuntime.jsx(FreeCell.Penguin.make, {
+        tmp = JsxRuntime.jsx(Penguin.Game.make, {
               id: selectGameType
             });
         break;
@@ -103,7 +110,7 @@ function GameBrowser(props) {
             });
         break;
     case "Scorpion" :
-        tmp = JsxRuntime.jsx(Spider.Scorpion.make, {
+        tmp = JsxRuntime.jsx(Scorpion.Game.make, {
               id: selectGameType
             });
         break;
@@ -113,12 +120,12 @@ function GameBrowser(props) {
             });
         break;
     case "Simple Simon" :
-        tmp = JsxRuntime.jsx(Spider.SimpleSimon.make, {
+        tmp = JsxRuntime.jsx(SimpleSimon.Game.make, {
               id: selectGameType
             });
         break;
     case "Mrs Mop" :
-        tmp = JsxRuntime.jsx(Spider.MrsMop.make, {
+        tmp = JsxRuntime.jsx(MrsMop.Game.make, {
               id: selectGameType
             });
         break;
@@ -128,7 +135,7 @@ function GameBrowser(props) {
             });
         break;
     case "Stalactite" :
-        tmp = JsxRuntime.jsx(FreeCell.Stalactite.make, {
+        tmp = JsxRuntime.jsx(Stalactite.Game.make, {
               id: selectGameType
             });
         break;

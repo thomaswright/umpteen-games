@@ -64,7 +64,7 @@ module Sorel = GameBase.Create({
   }
 
   let forEachSpace = Bases.AgnesSorel.makeForEachSpace(
-    ~stockRules=Spider.SpiderRules.stockRules,
+    ~stockRules=Rules.DealAll.stockRules,
     ~foundationBaseRules,
   )
 
@@ -161,11 +161,11 @@ module Bernauer = GameBase.Create({
   }
 
   let forEachSpace = Bases.AgnesBernauer.makeForEachSpace(
-    ~stockRules=Spider.SpiderRules.stockRules,
+    ~stockRules=Rules.DealAll.stockRules,
     ~foundationBaseRules,
     ~tableauBaseRules,
-    ~freeBaseRules=FreeCell.FreeCellRules.freeBaseRules,
-    ~freeRules=FreeCell.FreeCellRules.freeRules,
+    ~freeBaseRules=Rules.FreeCell.freeBaseRules,
+    ~freeRules=Rules.FreeCell.freeRules,
   )
 
   module Board = Boards.SFTR

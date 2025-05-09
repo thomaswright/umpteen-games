@@ -80,22 +80,22 @@ let make = () => {
     </div>
     {switch selectGameType {
     | Klondike => <Klondike.Game id />
-    | FreeCellOneDeck => <FreeCell.OneDeck id />
-    | FreeCellTwoDeck => <FreeCell.TwoDeck id />
+    | FreeCellOneDeck => <FreeCellOneDeck.Game id />
+    | FreeCellTwoDeck => <FreeCellTwoDeck.Game id />
     | BakersGame => <BakersGame.BakersGame id />
     | EightOff => <BakersGame.EightOff id />
-    | SeahavenTowers => <FreeCell.SeahavenTowers id />
-    | Penguin => <FreeCell.Penguin id />
+    | SeahavenTowers => <SeahavenTowers.Game id />
+    | Penguin => <Penguin.Game id />
     | UpAndDown => <UpAndDown.Game id />
     | SpiderOneSuit => <Spider.OneSuit id />
     | SpiderTwoSuit => <Spider.TwoSuit id />
     | SpiderFourSuit => <Spider.FourSuit id />
-    | Scorpion => <Spider.Scorpion id />
-    | SimpleSimon => <Spider.SimpleSimon id />
-    | MrsMop => <Spider.MrsMop id />
+    | Scorpion => <Scorpion.Game id />
+    | SimpleSimon => <SimpleSimon.Game id />
+    | MrsMop => <MrsMop.Game id />
     | Pyramid => <Pyramid.Game id />
     | EastHaven => <EastHaven.Game id />
-    | Stalactite => <FreeCell.Stalactite id />
+    | Stalactite => <Stalactite.Game id />
     | GermanPatience => <GermanPatience.Game id />
     | GayGordons => <GayGordons.Game id />
     | AgnesSorel => <Agnes.Sorel id />

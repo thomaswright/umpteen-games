@@ -4,8 +4,8 @@ module BakersGame = GameBase.Create({
   include Bases.BakersGame
 
   let forEachSpace = Bases.BakersGame.makeForEachSpace(
-    ~freeBaseRules=FreeCell.FreeCellRules.freeBaseRules,
-    ~freeRules=FreeCell.FreeCellRules.freeRules,
+    ~freeBaseRules=Rules.FreeCell.freeBaseRules,
+    ~freeRules=Rules.FreeCell.freeRules,
   )
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
@@ -40,8 +40,8 @@ module EightOff = GameBase.Create({
   include Bases.BakersGame
 
   let forEachSpace = Bases.BakersGame.makeForEachSpace(
-    ~freeBaseRules=FreeCell.FreeCellRules.freeBaseRules,
-    ~freeRules=FreeCell.FreeCellRules.freeRules,
+    ~freeBaseRules=Rules.FreeCell.freeBaseRules,
+    ~freeRules=Rules.FreeCell.freeRules,
   )
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {

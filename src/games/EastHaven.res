@@ -4,7 +4,7 @@ open Packer
 module Game = GameBase.Create({
   include Bases.EastHaven
 
-  let forEachSpace = Bases.EastHaven.makeForEachSpace(~stockRules=Spider.SpiderRules.stockRules)
+  let forEachSpace = Bases.EastHaven.makeForEachSpace(~stockRules=Rules.DealAll.stockRules)
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, true)->Array.toShuffled

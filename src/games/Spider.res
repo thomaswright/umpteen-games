@@ -1,44 +1,10 @@
 open Common
 open Packer
 
-module SpiderRules = {
-  let stockRules = (_game, _card, i, j): movableSpace => {
-    {
-      locationAdjustment: {
-        x: i * 20,
-        y: 0,
-        z: i * 10 + j + 1,
-      },
-      baseSpace: Stock,
-      dragPile: () => None,
-      autoProgress: () => DoNothing,
-      droppedUpon: (_game, _dragPile) => None,
-      onClick: game => {
-        game.stock
-        ->Common.ArrayAux.getLast
-        ->Option.map(stockGroup => {
-          {
-            ...game,
-            tableau: game.tableau
-            ->Array.mapWithIndex((pile, i) => {
-              stockGroup->Array.get(i)->Option.mapOr(pile, v => Array.concat(pile, [v]))
-            })
-            ->GameCommons.flipLastUp,
-            stock: game.stock->Array.slice(~start=0, ~end=game.stock->Array.length - 1),
-          }
-        })
-      },
-      onStateChange: element => {
-        Card.hide(element)
-      },
-    }
-  }
-}
-
 module OneSuit = GameBase.Create({
   include Bases.Spider
 
-  let forEachSpace = makeForEachSpace(~stockRules=SpiderRules.stockRules)
+  let forEachSpace = makeForEachSpace(~stockRules=Rules.DealAll.stockRules)
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck =
@@ -92,7 +58,7 @@ module OneSuit = GameBase.Create({
 
 module TwoSuit = GameBase.Create({
   include Bases.Spider
-  let forEachSpace = makeForEachSpace(~stockRules=SpiderRules.stockRules)
+  let forEachSpace = makeForEachSpace(~stockRules=Rules.DealAll.stockRules)
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck =
@@ -145,7 +111,7 @@ module TwoSuit = GameBase.Create({
 
 module FourSuit = GameBase.Create({
   include Bases.Spider
-  let forEachSpace = makeForEachSpace(~stockRules=SpiderRules.stockRules)
+  let forEachSpace = makeForEachSpace(~stockRules=Rules.DealAll.stockRules)
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck =
@@ -181,110 +147,5 @@ module FourSuit = GameBase.Create({
       },
     )
   }
-  module Board = Boards.SFT
-})
-
-module SimpleSimon = GameBase.Create({
-  include Bases.Spider
-  let forEachSpace = makeForEachSpace(~stockRules=SpiderRules.stockRules)
-
-  let initiateGame = (): (array<Card.sides>, Packer.game) => {
-    let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
-    let deckToDeal = ref(shuffledDeck)
-
-    (
-      shuffledDeck,
-      {
-        tableau: [
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(5),
-          deckToDeal->ArrayAux.popN(4),
-          deckToDeal->ArrayAux.popN(3),
-          deckToDeal->ArrayAux.popN(2),
-          deckToDeal->ArrayAux.popN(1),
-        ],
-        foundations: [[], [], [], []],
-        free: [],
-        waste: [],
-        stock: [],
-      },
-    )
-  }
-
-  module Board = Boards.FT
-})
-
-module MrsMop = GameBase.Create({
-  include Bases.Spider
-  let forEachSpace = makeForEachSpace(~stockRules=SpiderRules.stockRules)
-
-  let initiateGame = (): (array<Card.sides>, Packer.game) => {
-    let shuffledDeck =
-      Array.concatMany([], [Card.getDeck(0, false), Card.getDeck(1, false)])->Array.toShuffled
-
-    let deckToDeal = ref(shuffledDeck)
-
-    (
-      shuffledDeck,
-      {
-        tableau: [
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(8),
-          deckToDeal->ArrayAux.popN(8),
-        ]->GameCommons.flipLastUp,
-        foundations: [[], [], [], [], [], [], [], []],
-        stock: [],
-        waste: [],
-        free: [],
-      },
-    )
-  }
-  module Board = Boards.FT
-})
-
-module Scorpion = GameBase.Create({
-  include Bases.Scorpion
-
-  let forEachSpace = makeForEachSpace(~stockRules=SpiderRules.stockRules)
-
-  let initiateGame = (): (array<Card.sides>, Packer.game) => {
-    let shuffledDeck = Card.getDeck(0, true)->Array.toShuffled
-
-    let deckToDeal = ref(shuffledDeck)
-
-    (
-      shuffledDeck,
-      {
-        tableau: [
-          deckToDeal->ArrayAux.popN(7)->Card.showAfter(3),
-          deckToDeal->ArrayAux.popN(7)->Card.showAfter(3),
-          deckToDeal->ArrayAux.popN(7)->Card.showAfter(3),
-          deckToDeal->ArrayAux.popN(7)->Card.showAfter(0),
-          deckToDeal->ArrayAux.popN(7)->Card.showAfter(0),
-          deckToDeal->ArrayAux.popN(7)->Card.showAfter(0),
-          deckToDeal->ArrayAux.popN(7)->Card.showAfter(0),
-        ]->GameCommons.flipLastUp,
-        foundations: [[], [], [], []],
-        stock: [deckToDeal->ArrayAux.popN(3)],
-        waste: [],
-        free: [],
-      },
-    )
-  }
-
   module Board = Boards.SFT
 })
