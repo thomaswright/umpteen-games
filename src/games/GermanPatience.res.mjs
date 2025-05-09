@@ -10,7 +10,7 @@ import * as GameCommons from "./GameCommons.res.mjs";
 import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 
 function winCheck(game) {
-  return game.piles.every(function (pile) {
+  return game.tableau.every(function (pile) {
               if (pile.length === 13) {
                 return GameCommons.decCyclicAnySuitValidation(pile);
               } else {
@@ -27,7 +27,7 @@ function initiateGame() {
   return [
           shuffledDeck,
           {
-            piles: GameCommons.flipLastUp([
+            tableau: GameCommons.flipLastUp([
                   Common.ArrayAux.popN(deckToDeal, 1),
                   Common.ArrayAux.popN(deckToDeal, 1),
                   Common.ArrayAux.popN(deckToDeal, 1),
@@ -81,7 +81,7 @@ function stockRules(_game, _card, i, j) {
           onClick: (function (game) {
               return Core__Option.map(Common.ArrayAux.getLast(game.stock), (function (stockGroup) {
                             return {
-                                    piles: GameCommons.flipLastUp(game.piles.map(function (pile, i) {
+                                    tableau: GameCommons.flipLastUp(game.tableau.map(function (pile, i) {
                                               return Core__Option.mapOr(stockGroup[i], pile, (function (v) {
                                                             return pile.concat([v]);
                                                           }));

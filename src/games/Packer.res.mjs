@@ -183,12 +183,12 @@ function space_decode(value) {
 function game_encode(value) {
   return Js_dict.fromArray([
               [
-                "piles",
+                "tableau",
                 (function (extra) {
                       return Decco.arrayToJson((function (extra) {
                                     return Decco.arrayToJson(Card.sides_encode, extra);
                                   }), extra);
-                    })(value.piles)
+                    })(value.tableau)
               ],
               [
                 "foundations",
@@ -232,11 +232,11 @@ function game_decode(value) {
     return Decco.error(undefined, "Not an object", value);
   }
   var dict$1 = dict._0;
-  var extra = Belt_Option.getWithDefault(Js_dict.get(dict$1, "piles"), null);
-  var piles = Decco.arrayFromJson((function (extra) {
+  var extra = Belt_Option.getWithDefault(Js_dict.get(dict$1, "tableau"), null);
+  var tableau = Decco.arrayFromJson((function (extra) {
           return Decco.arrayFromJson(Card.sides_decode, extra);
         }), extra);
-  if (piles.TAG === "Ok") {
+  if (tableau.TAG === "Ok") {
     var extra$1 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "foundations"), null);
     var foundations = Decco.arrayFromJson((function (extra) {
             return Decco.arrayFromJson(Card.sides_decode, extra);
@@ -257,7 +257,7 @@ function game_decode(value) {
           if (free.TAG === "Ok") {
             return {
                     TAG: "Ok",
-                    _0: Decco.unsafeAddFieldToObject("piles", piles._0, Decco.unsafeAddFieldToObject("foundations", foundations._0, Decco.unsafeAddFieldToObject("stock", stock._0, Decco.unsafeAddFieldToObject("waste", waste._0, Decco.unsafeAddFieldToObject("free", free._0, {})))))
+                    _0: Decco.unsafeAddFieldToObject("tableau", tableau._0, Decco.unsafeAddFieldToObject("foundations", foundations._0, Decco.unsafeAddFieldToObject("stock", stock._0, Decco.unsafeAddFieldToObject("waste", waste._0, Decco.unsafeAddFieldToObject("free", free._0, {})))))
                   };
           }
           var e = free._0;
@@ -300,11 +300,11 @@ function game_decode(value) {
             }
           };
   }
-  var e$4 = piles._0;
+  var e$4 = tableau._0;
   return {
           TAG: "Error",
           _0: {
-            path: ".piles" + e$4.path,
+            path: ".tableau" + e$4.path,
             message: e$4.message,
             value: e$4.value
           }
@@ -312,7 +312,7 @@ function game_decode(value) {
 }
 
 function onlyFoundationWinCheck(game) {
-  if (game.piles.every(function (pile) {
+  if (game.tableau.every(function (pile) {
           return pile.length === 0;
         }) && game.free.every(Core__Option.isNone) && game.stock.length === 0) {
     return game.waste.length === 0;
@@ -415,7 +415,7 @@ function Make(PackerRules) {
     }
   };
   var dragSizeCheck = function (game, dragPile) {
-    var freeCellCount = game.piles.filter(function (pile) {
+    var freeCellCount = game.tableau.filter(function (pile) {
           return pile.length === 0;
         }).length + game.free.filter(Core__Option.isNone).length | 0;
     var match = PackerRules.spec.size;
@@ -431,7 +431,7 @@ function Make(PackerRules) {
   };
   var pileBaseCheck = function (game, dragPile, i) {
     var dragPileBase = dragPile[0];
-    var noChildren = game.piles[i].length === 0;
+    var noChildren = game.tableau[i].length === 0;
     var rank = PackerRules.spec.depot;
     if (typeof rank !== "object") {
       return noChildren;
@@ -511,14 +511,14 @@ function Make(PackerRules) {
         });
   };
   var removeDragFromGame = function (game, dragPile) {
-    var dragPileSet = new Set(dragPile);
+    var dragtableauet = new Set(dragPile);
     var removeDragPile = function (x) {
       return x.filter(function (sCard) {
-                  return !dragPileSet.has(sCard);
+                  return !dragtableauet.has(sCard);
                 });
     };
     return {
-            piles: game.piles.map(removeDragPile),
+            tableau: game.tableau.map(removeDragPile),
             foundations: game.foundations.map(removeDragPile),
             stock: game.stock.map(removeDragPile),
             waste: removeDragPile(game.waste),
@@ -540,7 +540,7 @@ function Make(PackerRules) {
             droppedUpon: (function (gameRemoved, dragPile) {
                 if (pileBaseCheck(game, dragPile, i)) {
                   return {
-                          piles: GameCommons.flipLastUp(Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
+                          tableau: GameCommons.flipLastUp(Common.ArrayAux.update(gameRemoved.tableau, i, (function (param) {
                                       return dragPile;
                                     }))),
                           foundations: gameRemoved.foundations,
@@ -589,7 +589,7 @@ function Make(PackerRules) {
             droppedUpon: (function (game, dragPile) {
                 if (dropCheck(isLast, dragPile, card)) {
                   return {
-                          piles: GameCommons.flipLastUp(game.piles.map(function (stack) {
+                          tableau: GameCommons.flipLastUp(game.tableau.map(function (stack) {
                                     return Common.ArrayAux.insertAfter(stack, card, dragPile);
                                   })),
                           foundations: game.foundations,
@@ -613,7 +613,7 @@ function Make(PackerRules) {
             droppedUpon: (function (game, dragPile) {
                 if (foundationBaseCheck(game, dragPile, i)) {
                   return {
-                          piles: GameCommons.flipLastUp(game.piles),
+                          tableau: GameCommons.flipLastUp(game.tableau),
                           foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                   return dragPile;
                                 })),
@@ -654,7 +654,7 @@ function Make(PackerRules) {
             droppedUpon: (function (game, dragPile) {
                 if (isLast && foundationCheck(dragPile, card)) {
                   return {
-                          piles: GameCommons.flipLastUp(game.piles),
+                          tableau: GameCommons.flipLastUp(game.tableau),
                           foundations: game.foundations.map(function (stack) {
                                 return Common.ArrayAux.insertAfter(stack, card, dragPile);
                               }),
@@ -781,7 +781,7 @@ function Make(PackerRules) {
     var freeBaseRules$1 = freeBaseRulesOpt !== undefined ? freeBaseRulesOpt : freeBaseRules;
     var freeRules$1 = freeRulesOpt !== undefined ? freeRulesOpt : freeRules;
     return function (game, f) {
-      game.piles.forEach(function (pile, i) {
+      game.tableau.forEach(function (pile, i) {
             f({
                   TAG: "Pile",
                   _0: i

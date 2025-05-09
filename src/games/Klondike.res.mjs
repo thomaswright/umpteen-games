@@ -15,7 +15,7 @@ function initiateGame() {
   return [
           shuffledDeck,
           {
-            piles: [
+            tableau: [
               Common.ArrayAux.popN(deckToDeal, 1),
               Common.ArrayAux.popN(deckToDeal, 2),
               Common.ArrayAux.popN(deckToDeal, 3),
@@ -89,7 +89,7 @@ function stockRules(_game, card, _i, j) {
           onClick: (function (game) {
               var realStock = game.stock[0];
               return {
-                      piles: game.piles,
+                      tableau: game.tableau,
                       foundations: game.foundations,
                       stock: Common.ArrayAux.update(game.stock, 0, (function (v) {
                               return v.slice(0, realStock.length - 1 | 0);
@@ -109,7 +109,7 @@ function stockBaseRules() {
           autoProgress: "DoNothing",
           onClick: (function (game) {
               return {
-                      piles: game.piles,
+                      tableau: game.tableau,
                       foundations: game.foundations,
                       stock: [Card.hideAfter(game.waste.toReversed(), 0)],
                       waste: [],

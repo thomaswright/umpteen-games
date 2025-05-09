@@ -49,7 +49,7 @@ function initiateGame() {
   return [
           shuffledDeck,
           {
-            piles: [
+            tableau: [
               Common.ArrayAux.popN(deckToDeal, 5),
               Common.ArrayAux.popN(deckToDeal, 5),
               Common.ArrayAux.popN(deckToDeal, 5),
@@ -78,7 +78,7 @@ function freeBaseRules(i) {
               var noChildren = Core__Option.isNone(game.free[i]);
               if (noChildren && dragPile.length === 1) {
                 return {
-                        piles: game.piles,
+                        tableau: game.tableau,
                         foundations: game.foundations,
                         stock: game.stock,
                         waste: game.waste,
@@ -163,7 +163,7 @@ function pileRules(_game, pile, card, i, j) {
               var dragPileBase = dragPile[0];
               if (isLast && arePair(dragPileBase, card)) {
                 return {
-                        piles: Common.ArrayAux.update(game.piles, i, (function (stack) {
+                        tableau: Common.ArrayAux.update(game.tableau, i, (function (stack) {
                                 return stack.slice(0, stack.length - 1 | 0);
                               })),
                         foundations: Common.ArrayAux.update(game.foundations, 0, (function (a) {

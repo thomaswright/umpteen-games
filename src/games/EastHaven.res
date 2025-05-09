@@ -14,7 +14,7 @@ module Game = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(3),
           deckToDeal->ArrayAux.popN(3),
           deckToDeal->ArrayAux.popN(3),

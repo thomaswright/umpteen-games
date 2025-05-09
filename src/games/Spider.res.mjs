@@ -32,7 +32,7 @@ function stockRules(_game, _card, i, j) {
           onClick: (function (game) {
               return Core__Option.map(Common.ArrayAux.getLast(game.stock), (function (stockGroup) {
                             return {
-                                    piles: GameCommons.flipLastUp(game.piles.map(function (pile, i) {
+                                    tableau: GameCommons.flipLastUp(game.tableau.map(function (pile, i) {
                                               return Core__Option.mapOr(stockGroup[i], pile, (function (v) {
                                                             return pile.concat([v]);
                                                           }));
@@ -61,7 +61,7 @@ function initiateGame() {
   return [
           shuffledDeck,
           {
-            piles: GameCommons.flipLastUp([
+            tableau: GameCommons.flipLastUp([
                   Common.ArrayAux.popN(deckToDeal, 6),
                   Common.ArrayAux.popN(deckToDeal, 6),
                   Common.ArrayAux.popN(deckToDeal, 6),
@@ -123,7 +123,7 @@ function initiateGame$1() {
   return [
           shuffledDeck,
           {
-            piles: GameCommons.flipLastUp([
+            tableau: GameCommons.flipLastUp([
                   Common.ArrayAux.popN(deckToDeal, 6),
                   Common.ArrayAux.popN(deckToDeal, 6),
                   Common.ArrayAux.popN(deckToDeal, 6),
@@ -185,7 +185,7 @@ function initiateGame$2() {
   return [
           shuffledDeck,
           {
-            piles: GameCommons.flipLastUp([
+            tableau: GameCommons.flipLastUp([
                   Common.ArrayAux.popN(deckToDeal, 6),
                   Common.ArrayAux.popN(deckToDeal, 6),
                   Common.ArrayAux.popN(deckToDeal, 6),
@@ -247,7 +247,7 @@ function initiateGame$3() {
   return [
           shuffledDeck,
           {
-            piles: [
+            tableau: [
               Common.ArrayAux.popN(deckToDeal, 8),
               Common.ArrayAux.popN(deckToDeal, 8),
               Common.ArrayAux.popN(deckToDeal, 8),
@@ -299,7 +299,7 @@ function initiateGame$4() {
   return [
           shuffledDeck,
           {
-            piles: GameCommons.flipLastUp([
+            tableau: GameCommons.flipLastUp([
                   Common.ArrayAux.popN(deckToDeal, 8),
                   Common.ArrayAux.popN(deckToDeal, 8),
                   Common.ArrayAux.popN(deckToDeal, 8),
@@ -358,7 +358,7 @@ function initiateGame$5() {
   return [
           shuffledDeck,
           {
-            piles: GameCommons.flipLastUp([
+            tableau: GameCommons.flipLastUp([
                   Card.showAfter(Common.ArrayAux.popN(deckToDeal, 7), 3),
                   Card.showAfter(Common.ArrayAux.popN(deckToDeal, 7), 3),
                   Card.showAfter(Common.ArrayAux.popN(deckToDeal, 7), 3),

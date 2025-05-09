@@ -52,7 +52,7 @@ module OneDeck = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(7),
           deckToDeal->ArrayAux.popN(7),
           deckToDeal->ArrayAux.popN(7),
@@ -89,7 +89,7 @@ module TwoDeck = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(11),
           deckToDeal->ArrayAux.popN(11),
           deckToDeal->ArrayAux.popN(11),
@@ -123,7 +123,7 @@ module SeahavenTowers = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(5),
           deckToDeal->ArrayAux.popN(5),
           deckToDeal->ArrayAux.popN(5),
@@ -181,7 +181,7 @@ module Penguin = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(7),
           deckToDeal->ArrayAux.popN(7),
           deckToDeal->ArrayAux.popN(7),
@@ -210,13 +210,13 @@ module Penguin = GameBase.Create({
         let justOne = dragPile->Array.length == 1
 
         let dragPileBase = dragPile->Array.getUnsafe(0)
-        let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
+        let noChildren = game.tableau->Array.getUnsafe(i)->Array.length == 0
         let second = game.foundations->Array.getUnsafe(1)->Array.getUnsafe(0)
 
         if noChildren && justOne && dragPileBase.card.rank == second.card.rank {
           Some({
             ...game,
-            piles: game.piles->GameCommons.flipLastUp,
+            tableau: game.tableau->GameCommons.flipLastUp,
             foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
           })
         } else {
@@ -231,13 +231,13 @@ module Penguin = GameBase.Create({
     {
       droppedUpon: (gameRemoved, dragPile) => {
         let dragPileBase = dragPile->Array.getUnsafe(0)
-        let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
+        let noChildren = game.tableau->Array.getUnsafe(i)->Array.length == 0
         let second = game.foundations->Array.getUnsafe(1)->Array.getUnsafe(0)
 
         if noChildren && Card.rankIsAboveCyclic(second, dragPileBase) {
           Some({
             ...gameRemoved,
-            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->GameCommons.flipLastUp,
+            tableau: gameRemoved.tableau->ArrayAux.update(i, _ => dragPile)->GameCommons.flipLastUp,
           })
         } else {
           None
@@ -269,7 +269,7 @@ module Stalactite = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(6),
           deckToDeal->ArrayAux.popN(6),
           deckToDeal->ArrayAux.popN(6),

@@ -18,7 +18,7 @@ function initiateGame() {
   return [
           shuffledDeck,
           {
-            piles: [
+            tableau: [
               Common.ArrayAux.popN(deckToDeal, 7),
               Common.ArrayAux.popN(deckToDeal, 7),
               Common.ArrayAux.popN(deckToDeal, 7),
@@ -73,7 +73,7 @@ function initiateGame$1() {
   return [
           shuffledDeck,
           {
-            piles: [
+            tableau: [
               Common.ArrayAux.popN(deckToDeal, 6),
               Common.ArrayAux.popN(deckToDeal, 6),
               Common.ArrayAux.popN(deckToDeal, 6),

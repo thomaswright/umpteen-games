@@ -5,7 +5,7 @@ module Game = GameBase.Create({
   include Bases.GermanPatience
 
   let winCheck = (game: Packer.game) => {
-    game.piles->Array.every(pile =>
+    game.tableau->Array.every(pile =>
       pile->Array.length == 13 && pile->GameCommons.decCyclicAnySuitValidation
     )
   }
@@ -19,7 +19,7 @@ module Game = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(1),
           deckToDeal->ArrayAux.popN(1),
           deckToDeal->ArrayAux.popN(1),
@@ -71,7 +71,7 @@ module Game = GameBase.Create({
         ->Option.map(stockGroup => {
           {
             ...game,
-            piles: game.piles
+            tableau: game.tableau
             ->Array.mapWithIndex((pile, i) => {
               stockGroup->Array.get(i)->Option.mapOr(pile, v => Array.concat(pile, [v]))
             })

@@ -19,7 +19,7 @@ function initiateGame() {
   return [
           shuffledDeck,
           {
-            piles: GameCommons.flipLastUp([
+            tableau: GameCommons.flipLastUp([
                   Common.ArrayAux.popN(deckToDeal, 3),
                   Common.ArrayAux.popN(deckToDeal, 3),
                   Common.ArrayAux.popN(deckToDeal, 3),

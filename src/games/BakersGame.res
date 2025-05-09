@@ -16,7 +16,7 @@ module BakersGame = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(7),
           deckToDeal->ArrayAux.popN(7),
           deckToDeal->ArrayAux.popN(7),
@@ -52,7 +52,7 @@ module EightOff = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(6),
           deckToDeal->ArrayAux.popN(6),
           deckToDeal->ArrayAux.popN(6),

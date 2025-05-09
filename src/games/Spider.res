@@ -19,7 +19,7 @@ module SpiderRules = {
         ->Option.map(stockGroup => {
           {
             ...game,
-            piles: game.piles
+            tableau: game.tableau
             ->Array.mapWithIndex((pile, i) => {
               stockGroup->Array.get(i)->Option.mapOr(pile, v => Array.concat(pile, [v]))
             })
@@ -61,7 +61,7 @@ module OneSuit = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(6),
           deckToDeal->ArrayAux.popN(6),
           deckToDeal->ArrayAux.popN(6),
@@ -115,7 +115,7 @@ module TwoSuit = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(6),
           deckToDeal->ArrayAux.popN(6),
           deckToDeal->ArrayAux.popN(6),
@@ -156,7 +156,7 @@ module FourSuit = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(6),
           deckToDeal->ArrayAux.popN(6),
           deckToDeal->ArrayAux.popN(6),
@@ -195,7 +195,7 @@ module SimpleSimon = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(8),
           deckToDeal->ArrayAux.popN(8),
           deckToDeal->ArrayAux.popN(8),
@@ -231,7 +231,7 @@ module MrsMop = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(8),
           deckToDeal->ArrayAux.popN(8),
           deckToDeal->ArrayAux.popN(8),
@@ -269,7 +269,7 @@ module Scorpion = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(7)->Card.showAfter(3),
           deckToDeal->ArrayAux.popN(7)->Card.showAfter(3),
           deckToDeal->ArrayAux.popN(7)->Card.showAfter(3),

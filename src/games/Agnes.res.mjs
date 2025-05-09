@@ -16,7 +16,7 @@ function initiateGame() {
     contents: shuffledDeck
   };
   var beak = Common.ArrayAux.popN(deckToDeal, 1);
-  var piles = [
+  var tableau = [
     Common.ArrayAux.popN(deckToDeal, 1),
     Common.ArrayAux.popN(deckToDeal, 2),
     Common.ArrayAux.popN(deckToDeal, 3),
@@ -34,7 +34,7 @@ function initiateGame() {
   return [
           shuffledDeck,
           {
-            piles: piles,
+            tableau: tableau,
             foundations: [
               beak,
               [],
@@ -65,7 +65,7 @@ function foundationBaseRules(i) {
           droppedUpon: (function (game, dragPile) {
               if (foundationBaseCheck(game, dragPile, i)) {
                 return {
-                        piles: GameCommons.flipLastUp(game.piles),
+                        tableau: GameCommons.flipLastUp(game.tableau),
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                 return dragPile;
                               })),
@@ -108,7 +108,7 @@ function initiateGame$1() {
     contents: shuffledDeck
   };
   var beak = Common.ArrayAux.popN(deckToDeal, 1);
-  var piles = [
+  var tableau = [
     Common.ArrayAux.popN(deckToDeal, 1),
     Common.ArrayAux.popN(deckToDeal, 2),
     Common.ArrayAux.popN(deckToDeal, 3),
@@ -139,7 +139,7 @@ function initiateGame$1() {
   ];
   var game_waste = [];
   var game = {
-    piles: piles,
+    tableau: tableau,
     foundations: game_foundations,
     stock: stock,
     waste: game_waste,
@@ -168,7 +168,7 @@ function foundationBaseRules$1(i) {
           droppedUpon: (function (game, dragPile) {
               if (foundationBaseCheck$1(game, dragPile, i)) {
                 return {
-                        piles: GameCommons.flipLastUp(game.piles),
+                        tableau: GameCommons.flipLastUp(game.tableau),
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                 return dragPile;
                               })),
@@ -190,11 +190,11 @@ function pileBaseRules(game, i) {
   return {
           droppedUpon: (function (gameRemoved, dragPile) {
               var dragPileBase = dragPile[0];
-              var noChildren = game.piles[i].length === 0;
+              var noChildren = game.tableau[i].length === 0;
               var beak = game.foundations[0][0];
               if (noChildren && Card.rankIsAboveCyclic(beak, dragPileBase)) {
                 return {
-                        piles: GameCommons.flipLastUp(Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
+                        tableau: GameCommons.flipLastUp(Common.ArrayAux.update(gameRemoved.tableau, i, (function (param) {
                                     return dragPile;
                                   }))),
                         foundations: gameRemoved.foundations,

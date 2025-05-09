@@ -6,7 +6,7 @@ type space = Card(Card.card) | Foundation(int) | Pile(int) | Waste | Stock | Fre
 
 @decco
 type game = {
-  piles: array<array<Card.sides>>,
+  tableau: array<array<Card.sides>>,
   foundations: array<array<Card.sides>>,
   stock: array<array<Card.sides>>,
   waste: array<Card.sides>,
@@ -32,7 +32,7 @@ type foundation = ByOne | ByAll | ByOneCyclicOneSuit | ByOneCyclicAnySuit | NoFo
 type spec = {drop: stack, drag: stack, size: size, depot: depot, foundation: foundation}
 
 let onlyFoundationWinCheck = (game: game) => {
-  game.piles->Array.every(pile => pile->Array.length == 0) &&
+  game.tableau->Array.every(pile => pile->Array.length == 0) &&
   game.free->Array.every(Option.isNone) &&
   game.stock->Array.length == 0 &&
   game.waste->Array.length == 0
@@ -99,7 +99,7 @@ module Make = (PackerRules: PackerRules) => {
 
   let dragSizeCheck = (game: game, dragPile: dragPile) => {
     let freeCellCount =
-      game.piles->Array.filter(pile => pile->Array.length == 0)->Array.length +
+      game.tableau->Array.filter(pile => pile->Array.length == 0)->Array.length +
         game.free->Array.filter(Option.isNone)->Array.length
     switch PackerRules.spec.size {
     | AnySize => true
@@ -110,7 +110,7 @@ module Make = (PackerRules: PackerRules) => {
 
   let pileBaseCheck = (game: game, dragPile: dragPile, i) => {
     let dragPileBase = dragPile->Array.getUnsafe(0)
-    let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
+    let noChildren = game.tableau->Array.getUnsafe(i)->Array.length == 0
 
     switch PackerRules.spec.depot {
     | SpecificDepot(rank) => noChildren && dragPileBase.card.rank == rank
@@ -164,15 +164,15 @@ module Make = (PackerRules: PackerRules) => {
   }
 
   let removeDragFromGame = (game: game, dragPile: dragPile) => {
-    let dragPileSet = dragPile->Set.fromArray
+    let dragtableauet = dragPile->Set.fromArray
     let removeDragPile = x =>
       x->Array.filter(sCard => {
-        !(dragPileSet->Set.has(sCard))
+        !(dragtableauet->Set.has(sCard))
       })
 
     {
       foundations: game.foundations->Array.map(removeDragPile),
-      piles: game.piles->Array.map(removeDragPile),
+      tableau: game.tableau->Array.map(removeDragPile),
       stock: game.stock->Array.map(removeDragPile),
       waste: game.waste->removeDragPile,
       free: game.free->Array.map(card => {
@@ -189,7 +189,7 @@ module Make = (PackerRules: PackerRules) => {
         if pileBaseCheck(game, dragPile, i) {
           Some({
             ...gameRemoved,
-            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->GameCommons.flipLastUp,
+            tableau: gameRemoved.tableau->ArrayAux.update(i, _ => dragPile)->GameCommons.flipLastUp,
           })
         } else {
           None
@@ -229,7 +229,7 @@ module Make = (PackerRules: PackerRules) => {
         if dropCheck(isLast, dragPile, card) {
           Some({
             ...game,
-            piles: game.piles
+            tableau: game.tableau
             ->Array.map(stack => {
               stack->ArrayAux.insertAfter(card, dragPile)
             })
@@ -251,7 +251,7 @@ module Make = (PackerRules: PackerRules) => {
         if foundationBaseCheck(game, dragPile, i) {
           Some({
             ...game,
-            piles: game.piles->GameCommons.flipLastUp,
+            tableau: game.tableau->GameCommons.flipLastUp,
             foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
           })
         } else {
@@ -284,7 +284,7 @@ module Make = (PackerRules: PackerRules) => {
         if isLast && foundationCheck(dragPile, card) {
           Some({
             ...game,
-            piles: game.piles->GameCommons.flipLastUp,
+            tableau: game.tableau->GameCommons.flipLastUp,
             foundations: game.foundations->Array.map(stack => {
               stack->ArrayAux.insertAfter(card, dragPile)
             }),
@@ -364,7 +364,7 @@ module Make = (PackerRules: PackerRules) => {
     ~freeRules=freeRules,
   ) => {
     (game: game, f) => {
-      game.piles->Array.forEachWithIndex((pile, i) => {
+      game.tableau->Array.forEachWithIndex((pile, i) => {
         f(Pile(i), pileBaseRules(game, i)->GameBase.Static)
 
         pile->Array.forEachWithIndex((card, j) => {

@@ -31,7 +31,7 @@ module Game = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles: [
+        tableau: [
           deckToDeal->ArrayAux.popN(5),
           deckToDeal->ArrayAux.popN(5),
           deckToDeal->ArrayAux.popN(5),
@@ -123,7 +123,7 @@ module Game = GameBase.Create({
             foundations: game.foundations->ArrayAux.update(0, a =>
               Array.concat(a, [card, dragPileBase])
             ),
-            piles: game.piles->ArrayAux.update(i, stack => {
+            tableau: game.tableau->ArrayAux.update(i, stack => {
               stack->Array.slice(~start=0, ~end=stack->Array.length - 1)
             }),
           })

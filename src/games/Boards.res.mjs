@@ -46,7 +46,7 @@ function Boards$SWFT(props) {
                       className: "flex flex-row gap-3 mt-5"
                     }),
                 JsxRuntime.jsx("div", {
-                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
+                      children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
                                                   TAG: "Pile",
@@ -94,7 +94,7 @@ function Boards$FRT(props) {
                                   }),
                               className: "flex flex-row gap-3"
                             }),
-                        Core__Array.make((initialGame.piles.length - initialGame.free.length | 0) - initialGame.foundations.length | 0, JsxRuntime.jsx("div", {
+                        Core__Array.make((initialGame.tableau.length - initialGame.free.length | 0) - initialGame.foundations.length | 0, JsxRuntime.jsx("div", {
                                   className: "w-14 h-20"
                                 })),
                         JsxRuntime.jsx("div", {
@@ -117,7 +117,7 @@ function Boards$FRT(props) {
                     }),
                 JsxRuntime.jsx("div", {}),
                 JsxRuntime.jsx("div", {
-                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
+                      children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
                                                   TAG: "Pile",
@@ -184,7 +184,7 @@ function Boards$FRT2(props) {
                     }),
                 JsxRuntime.jsx("div", {}),
                 JsxRuntime.jsx("div", {
-                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
+                      children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
                                                   TAG: "Pile",
@@ -249,7 +249,7 @@ function Boards$FRT3(props) {
                                   }),
                               JsxRuntime.jsx("div", {}),
                               JsxRuntime.jsx("div", {
-                                    children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
+                                    children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
                                           return JsxRuntime.jsx("div", {
                                                       ref: Caml_option.some(setRef({
                                                                 TAG: "Pile",
@@ -306,7 +306,7 @@ function Boards$SFT(props) {
                     }),
                 JsxRuntime.jsx("div", {}),
                 JsxRuntime.jsx("div", {
-                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
+                      children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
                                                   TAG: "Pile",
@@ -373,7 +373,7 @@ function Boards$SFTR(props) {
                       className: "flex flex-row gap-3 mt-5"
                     }),
                 JsxRuntime.jsx("div", {
-                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
+                      children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
                                                   TAG: "Pile",
@@ -420,7 +420,7 @@ function Boards$FT(props) {
                       className: "flex flex-row gap-3 mt-5"
                     }),
                 JsxRuntime.jsx("div", {
-                      children: Core__Array.make(initialGame.piles.length, []).map(function (param, i) {
+                      children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
                                                   TAG: "Pile",
@@ -459,7 +459,7 @@ function Boards$ST(props) {
                     }),
                 JsxRuntime.jsx("div", {}),
                 JsxRuntime.jsx("div", {
-                      children: Core__Array.make(props.initialGame.piles.length, []).map(function (param, i) {
+                      children: Core__Array.make(props.initialGame.tableau.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
                                                   TAG: "Pile",

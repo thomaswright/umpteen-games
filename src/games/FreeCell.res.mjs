@@ -16,7 +16,7 @@ function freeBaseRules(i) {
               var noChildren = Core__Option.isNone(game.free[i]);
               if (noChildren && dragPile.length === 1) {
                 return {
-                        piles: game.piles,
+                        tableau: game.tableau,
                         foundations: game.foundations,
                         stock: game.stock,
                         waste: game.waste,
@@ -81,7 +81,7 @@ function initiateGame() {
   return [
           shuffledDeck,
           {
-            piles: [
+            tableau: [
               Common.ArrayAux.popN(deckToDeal, 7),
               Common.ArrayAux.popN(deckToDeal, 7),
               Common.ArrayAux.popN(deckToDeal, 7),
@@ -136,7 +136,7 @@ function initiateGame$1() {
   return [
           shuffledDeck,
           {
-            piles: [
+            tableau: [
               Common.ArrayAux.popN(deckToDeal, 11),
               Common.ArrayAux.popN(deckToDeal, 11),
               Common.ArrayAux.popN(deckToDeal, 11),
@@ -199,7 +199,7 @@ function initiateGame$2() {
   return [
           shuffledDeck,
           {
-            piles: [
+            tableau: [
               Common.ArrayAux.popN(deckToDeal, 5),
               Common.ArrayAux.popN(deckToDeal, 5),
               Common.ArrayAux.popN(deckToDeal, 5),
@@ -266,7 +266,7 @@ function initiateGame$3() {
   return [
           shuffledDeck,
           {
-            piles: [
+            tableau: [
               Common.ArrayAux.popN(deckToDeal, 7),
               Common.ArrayAux.popN(deckToDeal, 7),
               Common.ArrayAux.popN(deckToDeal, 7),
@@ -301,11 +301,11 @@ function foundationBaseRules(i) {
           droppedUpon: (function (game, dragPile) {
               var justOne = dragPile.length === 1;
               var dragPileBase = dragPile[0];
-              var noChildren = game.piles[i].length === 0;
+              var noChildren = game.tableau[i].length === 0;
               var second = game.foundations[1][0];
               if (noChildren && justOne && dragPileBase.card.rank === second.card.rank) {
                 return {
-                        piles: GameCommons.flipLastUp(game.piles),
+                        tableau: GameCommons.flipLastUp(game.tableau),
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                 return dragPile;
                               })),
@@ -327,11 +327,11 @@ function pileBaseRules(game, i) {
   return {
           droppedUpon: (function (gameRemoved, dragPile) {
               var dragPileBase = dragPile[0];
-              var noChildren = game.piles[i].length === 0;
+              var noChildren = game.tableau[i].length === 0;
               var second = game.foundations[1][0];
               if (noChildren && Card.rankIsAboveCyclic(second, dragPileBase)) {
                 return {
-                        piles: GameCommons.flipLastUp(Common.ArrayAux.update(gameRemoved.piles, i, (function (param) {
+                        tableau: GameCommons.flipLastUp(Common.ArrayAux.update(gameRemoved.tableau, i, (function (param) {
                                     return dragPile;
                                   }))),
                         foundations: gameRemoved.foundations,
@@ -376,7 +376,7 @@ function initiateGame$4() {
   return [
           shuffledDeck,
           {
-            piles: [
+            tableau: [
               Common.ArrayAux.popN(deckToDeal, 6),
               Common.ArrayAux.popN(deckToDeal, 6),
               Common.ArrayAux.popN(deckToDeal, 6),

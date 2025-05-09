@@ -32,7 +32,7 @@ module SWFT = {
         ->React.array}
       </div>
       <div className="flex flex-row gap-3 mt-5">
-        {Array.make(~length=initialGame.piles->Array.length, [])
+        {Array.make(~length=initialGame.tableau->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
           <div
             key={Pile(i)->spaceToString}
@@ -65,7 +65,7 @@ module FRT = {
           ->React.array}
         </div>
         {Array.make(
-          ~length=initialGame.piles->Array.length -
+          ~length=initialGame.tableau->Array.length -
           initialGame.free->Array.length -
           initialGame.foundations->Array.length,
           <div className="w-14 h-20" />,
@@ -84,7 +84,7 @@ module FRT = {
       </div>
       <div />
       <div className="flex flex-row gap-3 mt-5">
-        {Array.make(~length=initialGame.piles->Array.length, [])
+        {Array.make(~length=initialGame.tableau->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
           <div
             key={Pile(i)->spaceToString}
@@ -130,7 +130,7 @@ module FRT2 = {
       </div>
       <div />
       <div className="flex flex-row gap-3 mt-5">
-        {Array.make(~length=initialGame.piles->Array.length, [])
+        {Array.make(~length=initialGame.tableau->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
           <div
             key={Pile(i)->spaceToString}
@@ -177,7 +177,7 @@ module FRT3 = {
           </div>
           <div />
           <div className="flex flex-row gap-3 mt-3">
-            {Array.make(~length=initialGame.piles->Array.length, [])
+            {Array.make(~length=initialGame.tableau->Array.length, [])
             ->Array.mapWithIndex((_, i) => {
               <div
                 key={Pile(i)->spaceToString}
@@ -218,7 +218,7 @@ module SFT = {
       </div>
       <div />
       <div className="flex flex-row gap-3 mt-5">
-        {Array.make(~length=initialGame.piles->Array.length, [])
+        {Array.make(~length=initialGame.tableau->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
           <div
             key={Pile(i)->spaceToString}
@@ -232,7 +232,7 @@ module SFT = {
   }
 }
 
-// Stock, Foundation, Piles, Free
+// Stock, Foundation, tableau, Free
 module SFTR = {
   @react.component
   let make = (~setRef, ~initialGame: game) => {
@@ -267,7 +267,7 @@ module SFTR = {
         ->React.array}
       </div>
       <div className="flex flex-row gap-3 mt-5">
-        {Array.make(~length=initialGame.piles->Array.length, [])
+        {Array.make(~length=initialGame.tableau->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
           <div
             key={Pile(i)->spaceToString}
@@ -299,7 +299,7 @@ module FT = {
         ->React.array}
       </div>
       <div className="flex flex-row gap-3 mt-5">
-        {Array.make(~length=initialGame.piles->Array.length, [])
+        {Array.make(~length=initialGame.tableau->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
           <div
             key={Pile(i)->spaceToString}
@@ -328,7 +328,7 @@ module ST = {
       </div>
       <div />
       <div className="flex flex-row gap-3 mt-5">
-        {Array.make(~length=initialGame.piles->Array.length, [])
+        {Array.make(~length=initialGame.tableau->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
           <div
             key={Pile(i)->spaceToString}

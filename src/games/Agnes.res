@@ -8,7 +8,7 @@ module Sorel = GameBase.Create({
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
     let deckToDeal = ref(shuffledDeck)
     let beak = deckToDeal->ArrayAux.popN(1)
-    let piles = [
+    let tableau = [
       deckToDeal->ArrayAux.popN(1),
       deckToDeal->ArrayAux.popN(2),
       deckToDeal->ArrayAux.popN(3),
@@ -28,7 +28,7 @@ module Sorel = GameBase.Create({
     (
       shuffledDeck,
       {
-        piles,
+        tableau,
         foundations: [beak, [], [], []],
         stock,
         waste: [],
@@ -52,7 +52,7 @@ module Sorel = GameBase.Create({
         if foundationBaseCheck(game, dragPile, i) {
           Some({
             ...game,
-            piles: game.piles->GameCommons.flipLastUp,
+            tableau: game.tableau->GameCommons.flipLastUp,
             foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
           })
         } else {
@@ -79,7 +79,7 @@ module Bernauer = GameBase.Create({
     let deckToDeal = ref(shuffledDeck)
 
     let beak = deckToDeal->ArrayAux.popN(1)
-    let piles = [
+    let tableau = [
       deckToDeal->ArrayAux.popN(1),
       deckToDeal->ArrayAux.popN(2),
       deckToDeal->ArrayAux.popN(3),
@@ -104,7 +104,7 @@ module Bernauer = GameBase.Create({
     ]
 
     let game = {
-      piles,
+      tableau,
       foundations: [beak, [], [], []],
       waste: [],
       free,
@@ -128,7 +128,7 @@ module Bernauer = GameBase.Create({
         if foundationBaseCheck(game, dragPile, i) {
           Some({
             ...game,
-            piles: game.piles->GameCommons.flipLastUp,
+            tableau: game.tableau->GameCommons.flipLastUp,
             foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
           })
         } else {
@@ -143,13 +143,13 @@ module Bernauer = GameBase.Create({
     {
       droppedUpon: (gameRemoved, dragPile) => {
         let dragPileBase = dragPile->Array.getUnsafe(0)
-        let noChildren = game.piles->Array.getUnsafe(i)->Array.length == 0
+        let noChildren = game.tableau->Array.getUnsafe(i)->Array.length == 0
         let beak = game.foundations->Array.getUnsafe(0)->Array.getUnsafe(0)
 
         if noChildren && Card.rankIsAboveCyclic(beak, dragPileBase) {
           Some({
             ...gameRemoved,
-            piles: gameRemoved.piles->ArrayAux.update(i, _ => dragPile)->GameCommons.flipLastUp,
+            tableau: gameRemoved.tableau->ArrayAux.update(i, _ => dragPile)->GameCommons.flipLastUp,
           })
         } else {
           None
