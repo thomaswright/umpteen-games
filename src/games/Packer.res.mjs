@@ -33,9 +33,9 @@ function space_encode(value) {
                 "Foundation",
                 Decco.intToJson(value._0)
               ];
-    case "Pile" :
+    case "Tableau" :
         return [
-                "Pile",
+                "Tableau",
                 Decco.intToJson(value._0)
               ];
     case "Free" :
@@ -132,7 +132,16 @@ function space_decode(value) {
                     value: e$2.value
                   }
                 };
-      case "Pile" :
+      case "Stock" :
+          if (tagged.length !== 1) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          } else {
+            return {
+                    TAG: "Ok",
+                    _0: "Stock"
+                  };
+          }
+      case "Tableau" :
           if (tagged.length !== 2) {
             return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
           }
@@ -141,7 +150,7 @@ function space_decode(value) {
             return {
                     TAG: "Ok",
                     _0: {
-                      TAG: "Pile",
+                      TAG: "Tableau",
                       _0: v0$3._0
                     }
                   };
@@ -155,15 +164,6 @@ function space_decode(value) {
                     value: e$3.value
                   }
                 };
-      case "Stock" :
-          if (tagged.length !== 1) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
-          } else {
-            return {
-                    TAG: "Ok",
-                    _0: "Stock"
-                  };
-          }
       case "Waste" :
           if (tagged.length !== 1) {
             return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
@@ -535,7 +535,7 @@ function Make(PackerRules) {
                 })
           };
   };
-  var pileBaseRules = function (game, i) {
+  var tableauBaseRules = function (game, i) {
     return {
             droppedUpon: (function (gameRemoved, dragPile) {
                 if (pileBaseCheck(game, dragPile, i)) {
@@ -557,7 +557,7 @@ function Make(PackerRules) {
               })
           };
   };
-  var pileRules = function (game, pile, card, i, j) {
+  var tableauRules = function (game, pile, card, i, j) {
     var isLast = j === (pile.length - 1 | 0);
     return {
             locationAdjustment: {
@@ -566,7 +566,7 @@ function Make(PackerRules) {
               z: j + 1 | 0
             },
             baseSpace: {
-              TAG: "Pile",
+              TAG: "Tableau",
               _0: i
             },
             dragPile: (function () {
@@ -770,9 +770,9 @@ function Make(PackerRules) {
               })
           };
   };
-  var makeForEachSpace = function (pileBaseRulesOpt, pileRulesOpt, foundationBaseRulesOpt, foundationRulesOpt, wasteRulesOpt, stockBaseRulesOpt, stockRulesOpt, freeBaseRulesOpt, freeRulesOpt) {
-    var pileBaseRules$1 = pileBaseRulesOpt !== undefined ? pileBaseRulesOpt : pileBaseRules;
-    var pileRules$1 = pileRulesOpt !== undefined ? pileRulesOpt : pileRules;
+  var makeForEachSpace = function (tableauBaseRulesOpt, tableauRulesOpt, foundationBaseRulesOpt, foundationRulesOpt, wasteRulesOpt, stockBaseRulesOpt, stockRulesOpt, freeBaseRulesOpt, freeRulesOpt) {
+    var tableauBaseRules$1 = tableauBaseRulesOpt !== undefined ? tableauBaseRulesOpt : tableauBaseRules;
+    var tableauRules$1 = tableauRulesOpt !== undefined ? tableauRulesOpt : tableauRules;
     var foundationBaseRules$1 = foundationBaseRulesOpt !== undefined ? foundationBaseRulesOpt : foundationBaseRules;
     var foundationRules$1 = foundationRulesOpt !== undefined ? foundationRulesOpt : foundationRules;
     var wasteRules$1 = wasteRulesOpt !== undefined ? wasteRulesOpt : wasteRules;
@@ -783,11 +783,11 @@ function Make(PackerRules) {
     return function (game, f) {
       game.tableau.forEach(function (pile, i) {
             f({
-                  TAG: "Pile",
+                  TAG: "Tableau",
                   _0: i
                 }, {
                   TAG: "Static",
-                  _0: pileBaseRules$1(game, i)
+                  _0: tableauBaseRules$1(game, i)
                 });
             pile.forEach(function (card, j) {
                   f({
@@ -795,7 +795,7 @@ function Make(PackerRules) {
                         _0: card.card
                       }, {
                         TAG: "Movable",
-                        _0: pileRules$1(game, pile, card, i, j)
+                        _0: tableauRules$1(game, pile, card, i, j)
                       });
                 });
           });
@@ -904,8 +904,8 @@ function Make(PackerRules) {
           applyLiftToDragPile: applyLiftToDragPile,
           applyMoveToDragPile: applyMoveToDragPile,
           removeDragFromGame: removeDragFromGame,
-          pileBaseRules: pileBaseRules,
-          pileRules: pileRules,
+          tableauBaseRules: tableauBaseRules,
+          tableauRules: tableauRules,
           foundationBaseRules: foundationBaseRules,
           foundationRules: foundationRules,
           wasteRules: wasteRules,

@@ -227,7 +227,7 @@ module Penguin = GameBase.Create({
     }
   }
 
-  let pileBaseRules = (game: Packer.game, i): staticSpace => {
+  let tableauBaseRules = (game: Packer.game, i): staticSpace => {
     {
       droppedUpon: (gameRemoved, dragPile) => {
         let dragPileBase = dragPile->Array.getUnsafe(0)
@@ -249,7 +249,7 @@ module Penguin = GameBase.Create({
   }
 
   let forEachSpace = Bases.Penguin.makeForEachSpace(
-    ~pileBaseRules,
+    ~tableauBaseRules,
     ~freeBaseRules=FreeCellRules.freeBaseRules,
     ~freeRules=FreeCellRules.freeRules,
     ~foundationBaseRules,

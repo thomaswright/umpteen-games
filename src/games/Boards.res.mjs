@@ -49,16 +49,16 @@ function Boards$SWFT(props) {
                       children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
-                                                  TAG: "Pile",
+                                                  TAG: "Tableau",
                                                   _0: i
                                                 })),
                                         className: " bg-black opacity-20  rounded w-14 h-20",
                                         id: Packer.spaceToString({
-                                              TAG: "Pile",
+                                              TAG: "Tableau",
                                               _0: i
                                             })
                                       }, Packer.spaceToString({
-                                            TAG: "Pile",
+                                            TAG: "Tableau",
                                             _0: i
                                           }));
                           }),
@@ -120,12 +120,12 @@ function Boards$FRT(props) {
                       children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
-                                                  TAG: "Pile",
+                                                  TAG: "Tableau",
                                                   _0: i
                                                 })),
                                         className: " bg-black opacity-20   rounded w-14 h-20"
                                       }, Packer.spaceToString({
-                                            TAG: "Pile",
+                                            TAG: "Tableau",
                                             _0: i
                                           }));
                           }),
@@ -187,12 +187,12 @@ function Boards$FRT2(props) {
                       children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
-                                                  TAG: "Pile",
+                                                  TAG: "Tableau",
                                                   _0: i
                                                 })),
                                         className: " bg-black opacity-20  rounded w-14 h-20"
                                       }, Packer.spaceToString({
-                                            TAG: "Pile",
+                                            TAG: "Tableau",
                                             _0: i
                                           }));
                           }),
@@ -252,12 +252,12 @@ function Boards$FRT3(props) {
                                     children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
                                           return JsxRuntime.jsx("div", {
                                                       ref: Caml_option.some(setRef({
-                                                                TAG: "Pile",
+                                                                TAG: "Tableau",
                                                                 _0: i
                                                               })),
                                                       className: " bg-black opacity-20   rounded w-14 h-20"
                                                     }, Packer.spaceToString({
-                                                          TAG: "Pile",
+                                                          TAG: "Tableau",
                                                           _0: i
                                                         }));
                                         }),
@@ -309,12 +309,12 @@ function Boards$SFT(props) {
                       children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
-                                                  TAG: "Pile",
+                                                  TAG: "Tableau",
                                                   _0: i
                                                 })),
                                         className: " bg-black opacity-20   rounded w-14 h-20"
                                       }, Packer.spaceToString({
-                                            TAG: "Pile",
+                                            TAG: "Tableau",
                                             _0: i
                                           }));
                           }),
@@ -376,12 +376,12 @@ function Boards$SFTR(props) {
                       children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
-                                                  TAG: "Pile",
+                                                  TAG: "Tableau",
                                                   _0: i
                                                 })),
                                         className: " bg-black opacity-20   rounded w-14 h-20"
                                       }, Packer.spaceToString({
-                                            TAG: "Pile",
+                                            TAG: "Tableau",
                                             _0: i
                                           }));
                           }),
@@ -423,16 +423,16 @@ function Boards$FT(props) {
                       children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
-                                                  TAG: "Pile",
+                                                  TAG: "Tableau",
                                                   _0: i
                                                 })),
                                         className: " bg-black opacity-20  rounded w-14 h-20",
                                         id: Packer.spaceToString({
-                                              TAG: "Pile",
+                                              TAG: "Tableau",
                                               _0: i
                                             })
                                       }, Packer.spaceToString({
-                                            TAG: "Pile",
+                                            TAG: "Tableau",
                                             _0: i
                                           }));
                           }),
@@ -462,12 +462,12 @@ function Boards$ST(props) {
                       children: Core__Array.make(props.initialGame.tableau.length, []).map(function (param, i) {
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
-                                                  TAG: "Pile",
+                                                  TAG: "Tableau",
                                                   _0: i
                                                 })),
                                         className: " bg-black opacity-20   rounded w-14 h-20"
                                       }, Packer.spaceToString({
-                                            TAG: "Pile",
+                                            TAG: "Tableau",
                                             _0: i
                                           }));
                           }),

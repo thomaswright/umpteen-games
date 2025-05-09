@@ -323,7 +323,7 @@ function foundationBaseRules(i) {
         };
 }
 
-function pileBaseRules(game, i) {
+function tableauBaseRules(game, i) {
   return {
           droppedUpon: (function (gameRemoved, dragPile) {
               var dragPileBase = dragPile[0];
@@ -349,7 +349,7 @@ function pileBaseRules(game, i) {
         };
 }
 
-var forEachSpace$3 = Bases.Penguin.makeForEachSpace(pileBaseRules, undefined, foundationBaseRules, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
+var forEachSpace$3 = Bases.Penguin.makeForEachSpace(tableauBaseRules, undefined, foundationBaseRules, undefined, undefined, undefined, undefined, freeBaseRules, freeRules);
 
 var Penguin = GameBase.Create({
       game_encode: Bases.Penguin.game_encode,

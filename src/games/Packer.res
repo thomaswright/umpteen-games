@@ -2,7 +2,7 @@ open Webapi.Dom
 open Common
 
 @decco
-type space = Card(Card.card) | Foundation(int) | Pile(int) | Waste | Stock | Free(int)
+type space = Card(Card.card) | Foundation(int) | Tableau(int) | Waste | Stock | Free(int)
 
 @decco
 type game = {
@@ -183,7 +183,7 @@ module Make = (PackerRules: PackerRules) => {
     }
   }
 
-  let pileBaseRules = (game, i): staticSpace => {
+  let tableauBaseRules = (game, i): staticSpace => {
     {
       droppedUpon: (gameRemoved, dragPile) => {
         if pileBaseCheck(game, dragPile, i) {
@@ -200,7 +200,7 @@ module Make = (PackerRules: PackerRules) => {
     }
   }
 
-  let pileRules = (game, pile, card, i, j): movableSpace => {
+  let tableauRules = (game, pile, card, i, j): movableSpace => {
     let isLast = j == pile->Array.length - 1
 
     {
@@ -209,7 +209,7 @@ module Make = (PackerRules: PackerRules) => {
         y: j * 20,
         z: j + 1,
       },
-      baseSpace: Pile(i),
+      baseSpace: Tableau(i),
       dragPile: () => {
         let dragPile = pile->Array.sliceToEnd(~start=j)
         if dragCheck(dragPile) && dragSizeCheck(game, dragPile) {
@@ -353,8 +353,8 @@ module Make = (PackerRules: PackerRules) => {
   }
 
   let makeForEachSpace = (
-    ~pileBaseRules=pileBaseRules,
-    ~pileRules=pileRules,
+    ~tableauBaseRules=tableauBaseRules,
+    ~tableauRules=tableauRules,
     ~foundationBaseRules=foundationBaseRules,
     ~foundationRules=foundationRules,
     ~wasteRules=wasteRules,
@@ -365,10 +365,10 @@ module Make = (PackerRules: PackerRules) => {
   ) => {
     (game: game, f) => {
       game.tableau->Array.forEachWithIndex((pile, i) => {
-        f(Pile(i), pileBaseRules(game, i)->GameBase.Static)
+        f(Tableau(i), tableauBaseRules(game, i)->GameBase.Static)
 
         pile->Array.forEachWithIndex((card, j) => {
-          f(Card(card.card), pileRules(game, pile, card, i, j)->Movable)
+          f(Card(card.card), tableauRules(game, pile, card, i, j)->Movable)
         })
       })
 

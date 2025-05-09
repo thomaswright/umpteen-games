@@ -35,9 +35,9 @@ module SWFT = {
         {Array.make(~length=initialGame.tableau->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
           <div
-            key={Pile(i)->spaceToString}
-            id={Pile(i)->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+            key={Tableau(i)->spaceToString}
+            id={Tableau(i)->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
             className=" bg-black opacity-20  rounded w-14 h-20"
           />
         })
@@ -87,8 +87,8 @@ module FRT = {
         {Array.make(~length=initialGame.tableau->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
           <div
-            key={Pile(i)->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+            key={Tableau(i)->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
             className=" bg-black opacity-20   rounded w-14 h-20"
           />
         })
@@ -133,8 +133,8 @@ module FRT2 = {
         {Array.make(~length=initialGame.tableau->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
           <div
-            key={Pile(i)->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+            key={Tableau(i)->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
             className=" bg-black opacity-20  rounded w-14 h-20"
           />
         })
@@ -180,8 +180,8 @@ module FRT3 = {
             {Array.make(~length=initialGame.tableau->Array.length, [])
             ->Array.mapWithIndex((_, i) => {
               <div
-                key={Pile(i)->spaceToString}
-                ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+                key={Tableau(i)->spaceToString}
+                ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
                 className=" bg-black opacity-20   rounded w-14 h-20"
               />
             })
@@ -221,8 +221,8 @@ module SFT = {
         {Array.make(~length=initialGame.tableau->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
           <div
-            key={Pile(i)->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+            key={Tableau(i)->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
             className=" bg-black opacity-20   rounded w-14 h-20"
           />
         })
@@ -270,8 +270,8 @@ module SFTR = {
         {Array.make(~length=initialGame.tableau->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
           <div
-            key={Pile(i)->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+            key={Tableau(i)->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
             className=" bg-black opacity-20   rounded w-14 h-20"
           />
         })
@@ -302,9 +302,9 @@ module FT = {
         {Array.make(~length=initialGame.tableau->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
           <div
-            key={Pile(i)->spaceToString}
-            id={Pile(i)->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+            key={Tableau(i)->spaceToString}
+            id={Tableau(i)->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
             className=" bg-black opacity-20  rounded w-14 h-20"
           />
         })
@@ -331,8 +331,8 @@ module ST = {
         {Array.make(~length=initialGame.tableau->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
           <div
-            key={Pile(i)->spaceToString}
-            ref={ReactDOM.Ref.callbackDomRef(setRef(Pile(i)))}
+            key={Tableau(i)->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
             className=" bg-black opacity-20   rounded w-14 h-20"
           />
         })

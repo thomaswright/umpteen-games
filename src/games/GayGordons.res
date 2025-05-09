@@ -87,7 +87,7 @@ module Game = GameBase.Create({
     }
   }
 
-  let pileBaseRules = (_game, _i): staticSpace => {
+  let tableauBaseRules = (_game, _i): staticSpace => {
     {
       droppedUpon: (_gameRemoved, _dragPile) => None,
       autoProgress: Accept,
@@ -95,7 +95,7 @@ module Game = GameBase.Create({
     }
   }
 
-  let pileRules = (_game, pile, card: Card.sides, i, j): movableSpace => {
+  let tableauRules = (_game, pile, card: Card.sides, i, j): movableSpace => {
     let isLast = j == pile->Array.length - 1
 
     {
@@ -104,7 +104,7 @@ module Game = GameBase.Create({
         y: j * 20,
         z: j + 1,
       },
-      baseSpace: Pile(i),
+      baseSpace: Tableau(i),
       dragPile: () => {
         let dragPile = pile->Array.sliceToEnd(~start=j)
         if dragPile->Array.length == 1 {
@@ -163,8 +163,8 @@ module Game = GameBase.Create({
   let forEachSpace = Bases.GayGordons.makeForEachSpace(
     ~freeBaseRules,
     ~freeRules,
-    ~pileRules,
-    ~pileBaseRules,
+    ~tableauRules,
+    ~tableauBaseRules,
     ~foundationBaseRules,
     ~foundationRules,
   )

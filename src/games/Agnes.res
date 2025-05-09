@@ -139,7 +139,7 @@ module Bernauer = GameBase.Create({
     }
   }
 
-  let pileBaseRules = (game: Packer.game, i): staticSpace => {
+  let tableauBaseRules = (game: Packer.game, i): staticSpace => {
     {
       droppedUpon: (gameRemoved, dragPile) => {
         let dragPileBase = dragPile->Array.getUnsafe(0)
@@ -163,7 +163,7 @@ module Bernauer = GameBase.Create({
   let forEachSpace = Bases.AgnesBernauer.makeForEachSpace(
     ~stockRules=Spider.SpiderRules.stockRules,
     ~foundationBaseRules,
-    ~pileBaseRules,
+    ~tableauBaseRules,
     ~freeBaseRules=FreeCell.FreeCellRules.freeBaseRules,
     ~freeRules=FreeCell.FreeCellRules.freeRules,
   )

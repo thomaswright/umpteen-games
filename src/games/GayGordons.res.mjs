@@ -125,7 +125,7 @@ function freeRules(card, i) {
         };
 }
 
-function pileBaseRules(_game, _i) {
+function tableauBaseRules(_game, _i) {
   return {
           droppedUpon: (function (_gameRemoved, _dragPile) {
               
@@ -137,7 +137,7 @@ function pileBaseRules(_game, _i) {
         };
 }
 
-function pileRules(_game, pile, card, i, j) {
+function tableauRules(_game, pile, card, i, j) {
   var isLast = j === (pile.length - 1 | 0);
   return {
           locationAdjustment: {
@@ -146,7 +146,7 @@ function pileRules(_game, pile, card, i, j) {
             z: j + 1 | 0
           },
           baseSpace: {
-            TAG: "Pile",
+            TAG: "Tableau",
             _0: i
           },
           dragPile: (function () {
@@ -229,7 +229,7 @@ function foundationRules(_game, _pile, card, i, j) {
         };
 }
 
-var forEachSpace = Bases.GayGordons.makeForEachSpace(pileBaseRules, pileRules, foundationBaseRules, foundationRules, undefined, undefined, undefined, freeBaseRules, freeRules);
+var forEachSpace = Bases.GayGordons.makeForEachSpace(tableauBaseRules, tableauRules, foundationBaseRules, foundationRules, undefined, undefined, undefined, freeBaseRules, freeRules);
 
 var Game = GameBase.Create({
       game_encode: Bases.GayGordons.game_encode,

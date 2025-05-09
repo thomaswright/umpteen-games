@@ -186,7 +186,7 @@ function foundationBaseRules$1(i) {
         };
 }
 
-function pileBaseRules(game, i) {
+function tableauBaseRules(game, i) {
   return {
           droppedUpon: (function (gameRemoved, dragPile) {
               var dragPileBase = dragPile[0];
@@ -212,7 +212,7 @@ function pileBaseRules(game, i) {
         };
 }
 
-var forEachSpace$1 = Bases.AgnesBernauer.makeForEachSpace(pileBaseRules, undefined, foundationBaseRules$1, undefined, undefined, undefined, Spider.SpiderRules.stockRules, FreeCell.FreeCellRules.freeBaseRules, FreeCell.FreeCellRules.freeRules);
+var forEachSpace$1 = Bases.AgnesBernauer.makeForEachSpace(tableauBaseRules, undefined, foundationBaseRules$1, undefined, undefined, undefined, Spider.SpiderRules.stockRules, FreeCell.FreeCellRules.freeBaseRules, FreeCell.FreeCellRules.freeRules);
 
 var Bernauer = GameBase.Create({
       game_encode: Bases.AgnesBernauer.game_encode,
