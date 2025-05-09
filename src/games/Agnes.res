@@ -8,21 +8,29 @@ module Sorel = GameBase.Create({
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
     let deckToDeal = ref(shuffledDeck)
     let beak = deckToDeal->ArrayAux.popN(1)
+    let piles = [
+      deckToDeal->ArrayAux.popN(1),
+      deckToDeal->ArrayAux.popN(2),
+      deckToDeal->ArrayAux.popN(3),
+      deckToDeal->ArrayAux.popN(4),
+      deckToDeal->ArrayAux.popN(5),
+      deckToDeal->ArrayAux.popN(6),
+      deckToDeal->ArrayAux.popN(7),
+    ]
+
+    let stock = [
+      deckToDeal->ArrayAux.popN(2)->Card.hideAfter(0),
+      deckToDeal->ArrayAux.popN(7)->Card.hideAfter(0),
+      deckToDeal->ArrayAux.popN(7)->Card.hideAfter(0),
+      deckToDeal->ArrayAux.popN(7)->Card.hideAfter(0),
+    ]
 
     (
       shuffledDeck,
       {
-        piles: [
-          deckToDeal->ArrayAux.popN(1),
-          deckToDeal->ArrayAux.popN(2),
-          deckToDeal->ArrayAux.popN(3),
-          deckToDeal->ArrayAux.popN(4),
-          deckToDeal->ArrayAux.popN(5),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(7),
-        ],
+        piles,
         foundations: [beak, [], [], []],
-        stock: [deckToDeal.contents->Card.hideAfter(0)],
+        stock,
         waste: [],
         free: [],
       },

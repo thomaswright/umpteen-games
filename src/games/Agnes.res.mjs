@@ -16,25 +16,32 @@ function initiateGame() {
     contents: shuffledDeck
   };
   var beak = Common.ArrayAux.popN(deckToDeal, 1);
+  var piles = [
+    Common.ArrayAux.popN(deckToDeal, 1),
+    Common.ArrayAux.popN(deckToDeal, 2),
+    Common.ArrayAux.popN(deckToDeal, 3),
+    Common.ArrayAux.popN(deckToDeal, 4),
+    Common.ArrayAux.popN(deckToDeal, 5),
+    Common.ArrayAux.popN(deckToDeal, 6),
+    Common.ArrayAux.popN(deckToDeal, 7)
+  ];
+  var stock = [
+    Card.hideAfter(Common.ArrayAux.popN(deckToDeal, 2), 0),
+    Card.hideAfter(Common.ArrayAux.popN(deckToDeal, 7), 0),
+    Card.hideAfter(Common.ArrayAux.popN(deckToDeal, 7), 0),
+    Card.hideAfter(Common.ArrayAux.popN(deckToDeal, 7), 0)
+  ];
   return [
           shuffledDeck,
           {
-            piles: [
-              Common.ArrayAux.popN(deckToDeal, 1),
-              Common.ArrayAux.popN(deckToDeal, 2),
-              Common.ArrayAux.popN(deckToDeal, 3),
-              Common.ArrayAux.popN(deckToDeal, 4),
-              Common.ArrayAux.popN(deckToDeal, 5),
-              Common.ArrayAux.popN(deckToDeal, 6),
-              Common.ArrayAux.popN(deckToDeal, 7)
-            ],
+            piles: piles,
             foundations: [
               beak,
               [],
               [],
               []
             ],
-            stock: [Card.hideAfter(deckToDeal.contents, 0)],
+            stock: stock,
             waste: [],
             free: []
           }
