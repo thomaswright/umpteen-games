@@ -17,21 +17,31 @@ module Game = GameBase.Create({
       shuffledDeck,
       {
         tableau: [
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(7),
-          deckToDeal->ArrayAux.popN(7),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
+          deckToDeal->ArrayAux.popN(6),
           deckToDeal->ArrayAux.popN(6),
           deckToDeal->ArrayAux.popN(6),
           deckToDeal->ArrayAux.popN(6),
           deckToDeal->ArrayAux.popN(6),
         ],
         foundations: [[], [], [], []],
-        free: [None, None, None, None],
+        free: [
+          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
+          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
+          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
+          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
+          None,
+          None,
+          None,
+          None,
+        ],
         stock: [],
         waste: [],
       },
     )
   }
-  module Board = Boards.FRT
+
+  module Board = Boards.FRT3
 })

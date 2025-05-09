@@ -82,8 +82,8 @@ let make = () => {
     | Klondike => <Klondike.Game id />
     | FreeCellOneDeck => <FreeCellOneDeck.Game id />
     | FreeCellTwoDeck => <FreeCellTwoDeck.Game id />
-    | BakersGame => <BakersGame.BakersGame id />
-    | EightOff => <BakersGame.EightOff id />
+    | BakersGame => <BakersGame.Game id />
+    | EightOff => <EightOff.Game id />
     | SeahavenTowers => <SeahavenTowers.Game id />
     | Penguin => <Penguin.Game id />
     | UpAndDown => <UpAndDown.Game id />
@@ -98,8 +98,8 @@ let make = () => {
     | Stalactite => <Stalactite.Game id />
     | GermanPatience => <GermanPatience.Game id />
     | GayGordons => <GayGordons.Game id />
-    | AgnesSorel => <Agnes.Sorel id />
-    | AgnesBernauer => <Agnes.Bernauer id />
+    | AgnesSorel => <AgnesSorel.Game id />
+    | AgnesBernauer => <AgnesBernauer.Game id />
     }}
   </div>
 }

@@ -19,10 +19,10 @@ function initiateGame() {
           shuffledDeck,
           {
             tableau: [
-              Common.ArrayAux.popN(deckToDeal, 7),
-              Common.ArrayAux.popN(deckToDeal, 7),
-              Common.ArrayAux.popN(deckToDeal, 7),
-              Common.ArrayAux.popN(deckToDeal, 7),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
+              Common.ArrayAux.popN(deckToDeal, 6),
               Common.ArrayAux.popN(deckToDeal, 6),
               Common.ArrayAux.popN(deckToDeal, 6),
               Common.ArrayAux.popN(deckToDeal, 6),
@@ -37,6 +37,10 @@ function initiateGame() {
             stock: [],
             waste: [],
             free: [
+              Common.ArrayAux.popN(deckToDeal, 1)[0],
+              Common.ArrayAux.popN(deckToDeal, 1)[0],
+              Common.ArrayAux.popN(deckToDeal, 1)[0],
+              Common.ArrayAux.popN(deckToDeal, 1)[0],
               undefined,
               undefined,
               undefined,
@@ -59,7 +63,7 @@ var Game = GameBase.Create({
       winCheck: Bases.BakersGame.winCheck,
       applyLiftToDragPile: Bases.BakersGame.applyLiftToDragPile,
       applyMoveToDragPile: Bases.BakersGame.applyMoveToDragPile,
-      Board: Boards.FRT,
+      Board: Boards.FRT3,
       AllCards: Bases.BakersGame.AllCards
     });
 

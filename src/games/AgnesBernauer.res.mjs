@@ -24,98 +24,6 @@ function initiateGame() {
     Common.ArrayAux.popN(deckToDeal, 6),
     Common.ArrayAux.popN(deckToDeal, 7)
   ];
-  var stock = [
-    Card.hideAfter(Common.ArrayAux.popN(deckToDeal, 2), 0),
-    Card.hideAfter(Common.ArrayAux.popN(deckToDeal, 7), 0),
-    Card.hideAfter(Common.ArrayAux.popN(deckToDeal, 7), 0),
-    Card.hideAfter(Common.ArrayAux.popN(deckToDeal, 7), 0)
-  ];
-  return [
-          shuffledDeck,
-          {
-            tableau: tableau,
-            foundations: [
-              beak,
-              [],
-              [],
-              []
-            ],
-            stock: stock,
-            waste: [],
-            free: []
-          }
-        ];
-}
-
-function foundationBaseCheck(game, dragPile, i) {
-  var justOne = dragPile.length === 1;
-  var noChildren = game.foundations[i].length === 0;
-  var dragPileBase = dragPile[0];
-  var beak = game.foundations[0][0];
-  if (noChildren && justOne) {
-    return dragPileBase.card.rank === beak.card.rank;
-  } else {
-    return false;
-  }
-}
-
-function foundationBaseRules(i) {
-  return {
-          droppedUpon: (function (game, dragPile) {
-              if (foundationBaseCheck(game, dragPile, i)) {
-                return {
-                        tableau: GameCommons.flipLastUp(game.tableau),
-                        foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
-                                return dragPile;
-                              })),
-                        stock: game.stock,
-                        waste: game.waste,
-                        free: game.free
-                      };
-              }
-              
-            }),
-          autoProgress: "Seek",
-          onClick: (function (param) {
-              
-            })
-        };
-}
-
-var forEachSpace = Bases.AgnesSorel.makeForEachSpace(undefined, undefined, foundationBaseRules, undefined, undefined, undefined, Rules.DealAll.stockRules, undefined, undefined);
-
-var Sorel = GameBase.Create({
-      game_encode: Bases.AgnesSorel.game_encode,
-      game_decode: Bases.AgnesSorel.game_decode,
-      deck_encode: Bases.AgnesSorel.deck_encode,
-      deck_decode: Bases.AgnesSorel.deck_decode,
-      getSpace: Bases.AgnesSorel.getSpace,
-      spaceToString: Bases.AgnesSorel.spaceToString,
-      initiateGame: initiateGame,
-      forEachSpace: forEachSpace,
-      removeDragFromGame: Bases.AgnesSorel.removeDragFromGame,
-      winCheck: Bases.AgnesSorel.winCheck,
-      applyLiftToDragPile: Bases.AgnesSorel.applyLiftToDragPile,
-      applyMoveToDragPile: Bases.AgnesSorel.applyMoveToDragPile,
-      Board: Boards.SFT,
-      AllCards: Bases.AgnesSorel.AllCards
-    });
-
-function initiateGame$1() {
-  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
-  var deckToDeal = {
-    contents: shuffledDeck
-  };
-  var beak = Common.ArrayAux.popN(deckToDeal, 1);
-  var tableau = [
-    Common.ArrayAux.popN(deckToDeal, 1),
-    Common.ArrayAux.popN(deckToDeal, 2),
-    Common.ArrayAux.popN(deckToDeal, 3),
-    Common.ArrayAux.popN(deckToDeal, 4),
-    Common.ArrayAux.popN(deckToDeal, 5),
-    Common.ArrayAux.popN(deckToDeal, 6),
-    Common.ArrayAux.popN(deckToDeal, 7)
-  ];
   var free = [
     Common.ArrayAux.popN(deckToDeal, 1)[0],
     Common.ArrayAux.popN(deckToDeal, 1)[0],
@@ -150,7 +58,7 @@ function initiateGame$1() {
         ];
 }
 
-function foundationBaseCheck$1(game, dragPile, i) {
+function foundationBaseCheck(game, dragPile, i) {
   var justOne = dragPile.length === 1;
   var noChildren = game.foundations[i].length === 0;
   var dragPileBase = dragPile[0];
@@ -162,10 +70,10 @@ function foundationBaseCheck$1(game, dragPile, i) {
   }
 }
 
-function foundationBaseRules$1(i) {
+function foundationBaseRules(i) {
   return {
           droppedUpon: (function (game, dragPile) {
-              if (foundationBaseCheck$1(game, dragPile, i)) {
+              if (foundationBaseCheck(game, dragPile, i)) {
                 return {
                         tableau: GameCommons.flipLastUp(game.tableau),
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
@@ -211,17 +119,17 @@ function tableauBaseRules(game, i) {
         };
 }
 
-var forEachSpace$1 = Bases.AgnesBernauer.makeForEachSpace(tableauBaseRules, undefined, foundationBaseRules$1, undefined, undefined, undefined, Rules.DealAll.stockRules, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
+var forEachSpace = Bases.AgnesBernauer.makeForEachSpace(tableauBaseRules, undefined, foundationBaseRules, undefined, undefined, undefined, Rules.DealAll.stockRules, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
 
-var Bernauer = GameBase.Create({
+var Game = GameBase.Create({
       game_encode: Bases.AgnesBernauer.game_encode,
       game_decode: Bases.AgnesBernauer.game_decode,
       deck_encode: Bases.AgnesBernauer.deck_encode,
       deck_decode: Bases.AgnesBernauer.deck_decode,
       getSpace: Bases.AgnesBernauer.getSpace,
       spaceToString: Bases.AgnesBernauer.spaceToString,
-      initiateGame: initiateGame$1,
-      forEachSpace: forEachSpace$1,
+      initiateGame: initiateGame,
+      forEachSpace: forEachSpace,
       removeDragFromGame: Bases.AgnesBernauer.removeDragFromGame,
       winCheck: Bases.AgnesBernauer.winCheck,
       applyLiftToDragPile: Bases.AgnesBernauer.applyLiftToDragPile,
@@ -231,7 +139,6 @@ var Bernauer = GameBase.Create({
     });
 
 export {
-  Sorel ,
-  Bernauer ,
+  Game ,
 }
-/* Sorel Not a pure module */
+/* Game Not a pure module */
