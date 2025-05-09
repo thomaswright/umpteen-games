@@ -9,7 +9,7 @@ import * as GameBase from "../GameBase.res.mjs";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 
 function initiateGame() {
-  var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
+  var shuffledDeck = Core__Array.toShuffled([].concat(Card.getDeck(0, false), Card.getDeck(1, false)));
   var deckToDeal = {
     contents: shuffledDeck
   };

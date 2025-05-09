@@ -4,7 +4,8 @@ module Game = GameBase.Create({
   include Bases.Diplomat
 
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
-    let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
+    let shuffledDeck =
+      Array.concatMany([], [Card.getDeck(0, false), Card.getDeck(1, false)])->Array.toShuffled
 
     let deckToDeal = ref(shuffledDeck)
 
