@@ -69,3 +69,29 @@ module DealAll = {
     }
   }
 }
+
+module Neutral = {
+  let foundationBaseRules = (_): staticSpace => {
+    {
+      autoProgress: DoNothing,
+      droppedUpon: (_game, _dragPile) => None,
+      onClick: _ => None,
+    }
+  }
+
+  let foundationRules = (_game, _pile, card, i, j): movableSpace => {
+    {
+      locationAdjustment: {
+        x: 0,
+        y: 0,
+        z: j + 1,
+      },
+      baseSpace: Foundation(i),
+      dragPile: () => None,
+      autoProgress: () => DoNothing,
+      droppedUpon: (_game, _dragPile) => None,
+      onClick: _ => None,
+      onStateChange: element => Card.showOrHide(card, element),
+    }
+  }
+}

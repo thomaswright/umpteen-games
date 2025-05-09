@@ -2,11 +2,11 @@
 
 import * as Card from "../Card.res.mjs";
 import * as Bases from "../Bases.res.mjs";
+import * as Rules from "../Rules.res.mjs";
 import * as Boards from "../Boards.res.mjs";
 import * as Common from "../Common.res.mjs";
 import * as GameBase from "../GameBase.res.mjs";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
-import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 
 function arePair(a, b) {
   var match = a.card.rank;
@@ -72,59 +72,6 @@ function initiateGame() {
         ];
 }
 
-function freeBaseRules(i) {
-  return {
-          droppedUpon: (function (game, dragPile) {
-              var noChildren = Core__Option.isNone(game.free[i]);
-              if (noChildren && dragPile.length === 1) {
-                return {
-                        tableau: game.tableau,
-                        foundations: game.foundations,
-                        stock: game.stock,
-                        waste: game.waste,
-                        free: Common.ArrayAux.update(game.free, i, (function (param) {
-                                return dragPile[0];
-                              }))
-                      };
-              }
-              
-            }),
-          autoProgress: "DoNothing",
-          onClick: (function (param) {
-              
-            })
-        };
-}
-
-function freeRules(card, i) {
-  return {
-          locationAdjustment: {
-            x: 0,
-            y: 0,
-            z: 1
-          },
-          baseSpace: {
-            TAG: "Free",
-            _0: i
-          },
-          dragPile: (function () {
-              return [card];
-            }),
-          autoProgress: (function () {
-              return "DoNothing";
-            }),
-          droppedUpon: (function (_game, _dragPile) {
-              
-            }),
-          onStateChange: (function (param) {
-              
-            }),
-          onClick: (function (param) {
-              
-            })
-        };
-}
-
 function tableauBaseRules(_game, _i) {
   return {
           droppedUpon: (function (_gameRemoved, _dragPile) {
@@ -188,48 +135,7 @@ function tableauRules(_game, pile, card, i, j) {
         };
 }
 
-function foundationBaseRules(param) {
-  return {
-          droppedUpon: (function (_game, _dragPile) {
-              
-            }),
-          autoProgress: "DoNothing",
-          onClick: (function (param) {
-              
-            })
-        };
-}
-
-function foundationRules(_game, _pile, card, i, j) {
-  return {
-          locationAdjustment: {
-            x: 0,
-            y: 0,
-            z: j + 1 | 0
-          },
-          baseSpace: {
-            TAG: "Foundation",
-            _0: i
-          },
-          dragPile: (function () {
-              
-            }),
-          autoProgress: (function () {
-              return "DoNothing";
-            }),
-          droppedUpon: (function (_game, _dragPile) {
-              
-            }),
-          onStateChange: (function (element) {
-              Card.showOrHide(card, element);
-            }),
-          onClick: (function (param) {
-              
-            })
-        };
-}
-
-var forEachSpace = Bases.GayGordons.makeForEachSpace(tableauBaseRules, tableauRules, foundationBaseRules, foundationRules, undefined, undefined, undefined, freeBaseRules, freeRules);
+var forEachSpace = Bases.GayGordons.makeForEachSpace(tableauBaseRules, tableauRules, Rules.Neutral.foundationBaseRules, Rules.Neutral.foundationRules, undefined, undefined, undefined, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
 
 var Game = GameBase.Create({
       game_encode: Bases.GayGordons.game_encode,

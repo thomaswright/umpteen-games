@@ -741,7 +741,10 @@ function Make(PackerRules) {
               y: 0,
               z: i + 1 | 0
             },
-            baseSpace: "Stock",
+            baseSpace: {
+              TAG: "Free",
+              _0: i
+            },
             dragPile: (function () {
                 
               }),

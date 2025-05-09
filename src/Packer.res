@@ -333,7 +333,7 @@ module Make = (PackerRules: PackerRules) => {
   }
 
   let freeRules = (_card, i): movableSpace => {
-    baseSpace: Stock,
+    baseSpace: Free(i),
     locationAdjustment: {
       x: 0,
       y: 0,

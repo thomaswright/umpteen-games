@@ -108,8 +108,55 @@ var DealAll = {
   stockRules: stockRules
 };
 
+function foundationBaseRules(param) {
+  return {
+          droppedUpon: (function (_game, _dragPile) {
+              
+            }),
+          autoProgress: "DoNothing",
+          onClick: (function (param) {
+              
+            })
+        };
+}
+
+function foundationRules(_game, _pile, card, i, j) {
+  return {
+          locationAdjustment: {
+            x: 0,
+            y: 0,
+            z: j + 1 | 0
+          },
+          baseSpace: {
+            TAG: "Foundation",
+            _0: i
+          },
+          dragPile: (function () {
+              
+            }),
+          autoProgress: (function () {
+              return "DoNothing";
+            }),
+          droppedUpon: (function (_game, _dragPile) {
+              
+            }),
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
+            }),
+          onClick: (function (param) {
+              
+            })
+        };
+}
+
+var Neutral = {
+  foundationBaseRules: foundationBaseRules,
+  foundationRules: foundationRules
+};
+
 export {
   FreeCell ,
   DealAll ,
+  Neutral ,
 }
 /* Card Not a pure module */

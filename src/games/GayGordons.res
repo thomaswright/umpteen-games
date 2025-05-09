@@ -54,39 +54,6 @@ module Game = GameBase.Create({
     )
   }
 
-  let freeBaseRules = (i): staticSpace => {
-    autoProgress: DoNothing,
-    droppedUpon: (game, dragPile) => {
-      let noChildren = game.free->Array.getUnsafe(i)->Option.isNone
-
-      if noChildren && dragPile->Array.length == 1 {
-        Some({
-          ...game,
-          free: game.free->ArrayAux.update(i, _ => dragPile->Array.get(0)),
-        })
-      } else {
-        None
-      }
-    },
-    onClick: _ => None,
-  }
-
-  let freeRules = (card, i): movableSpace => {
-    {
-      locationAdjustment: {
-        x: 0,
-        y: 0,
-        z: 1,
-      },
-      baseSpace: Free(i),
-      autoProgress: () => DoNothing,
-      dragPile: () => Some([card]),
-      droppedUpon: (_game, _dragPile) => None,
-      onClick: _ => None,
-      onStateChange: _ => (),
-    }
-  }
-
   let tableauBaseRules = (_game, _i): staticSpace => {
     {
       droppedUpon: (_gameRemoved, _dragPile) => None,
@@ -136,37 +103,13 @@ module Game = GameBase.Create({
     }
   }
 
-  let foundationBaseRules = (_): staticSpace => {
-    {
-      autoProgress: DoNothing,
-      droppedUpon: (_game, _dragPile) => None,
-      onClick: _ => None,
-    }
-  }
-
-  let foundationRules = (_game, _pile, card, i, j): movableSpace => {
-    {
-      locationAdjustment: {
-        x: 0,
-        y: 0,
-        z: j + 1,
-      },
-      baseSpace: Foundation(i),
-      dragPile: () => None,
-      autoProgress: () => DoNothing,
-      droppedUpon: (_game, _dragPile) => None,
-      onClick: _ => None,
-      onStateChange: element => Card.showOrHide(card, element),
-    }
-  }
-
   let forEachSpace = Bases.GayGordons.makeForEachSpace(
-    ~freeBaseRules,
-    ~freeRules,
+    ~freeBaseRules=Rules.FreeCell.freeBaseRules,
+    ~freeRules=Rules.FreeCell.freeRules,
     ~tableauRules,
     ~tableauBaseRules,
-    ~foundationBaseRules,
-    ~foundationRules,
+    ~foundationBaseRules=Rules.Neutral.foundationBaseRules,
+    ~foundationRules=Rules.Neutral.foundationRules,
   )
 
   module Board = Boards.FRT
