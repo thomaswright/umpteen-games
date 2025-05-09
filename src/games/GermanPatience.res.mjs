@@ -2,12 +2,12 @@
 
 import * as Card from "../Card.res.mjs";
 import * as Bases from "../Bases.res.mjs";
+import * as Rules from "../Rules.res.mjs";
 import * as Boards from "../Boards.res.mjs";
 import * as Common from "../Common.res.mjs";
 import * as GameBase from "../GameBase.res.mjs";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as GameCommons from "../GameCommons.res.mjs";
-import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 
 function winCheck(game) {
   return game.tableau.every(function (pile) {
@@ -58,45 +58,7 @@ function initiateGame() {
         ];
 }
 
-function stockRules(_game, _card, i, j) {
-  return {
-          locationAdjustment: {
-            x: Math.imul(i, 20),
-            y: 0,
-            z: (Math.imul(i, 10) + j | 0) + 1 | 0
-          },
-          baseSpace: "Stock",
-          dragPile: (function () {
-              
-            }),
-          autoProgress: (function () {
-              return "DoNothing";
-            }),
-          droppedUpon: (function (_game, _dragPile) {
-              
-            }),
-          onStateChange: (function (element) {
-              Card.hide(element);
-            }),
-          onClick: (function (game) {
-              return Core__Option.map(Common.ArrayAux.getLast(game.stock), (function (stockGroup) {
-                            return {
-                                    tableau: GameCommons.flipLastUp(game.tableau.map(function (pile, i) {
-                                              return Core__Option.mapOr(stockGroup[i], pile, (function (v) {
-                                                            return pile.concat([v]);
-                                                          }));
-                                            })),
-                                    foundations: game.foundations,
-                                    stock: game.stock.slice(0, game.stock.length - 1 | 0),
-                                    waste: game.waste,
-                                    free: game.free
-                                  };
-                          }));
-            })
-        };
-}
-
-var forEachSpace = Bases.GermanPatience.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, stockRules, undefined, undefined);
+var forEachSpace = Bases.GermanPatience.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, Rules.DealAll.stockRules, undefined, undefined);
 
 var Game = GameBase.Create({
       game_encode: Bases.GermanPatience.game_encode,

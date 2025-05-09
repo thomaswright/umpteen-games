@@ -50,43 +50,7 @@ module Game = GameBase.Create({
     )
   }
 
-  let stockRules = (_game, _card, i, j): movableSpace => {
-    {
-      locationAdjustment: {
-        x: i * 20,
-        y: 0,
-        z: i * 10 + j + 1,
-      },
-      baseSpace: Stock,
-      dragPile: () => {
-        None
-      },
-      autoProgress: () => DoNothing,
-      droppedUpon: (_game, _dragPile) => {
-        None
-      },
-      onClick: game => {
-        game.stock
-        ->Common.ArrayAux.getLast
-        ->Option.map(stockGroup => {
-          {
-            ...game,
-            tableau: game.tableau
-            ->Array.mapWithIndex((pile, i) => {
-              stockGroup->Array.get(i)->Option.mapOr(pile, v => Array.concat(pile, [v]))
-            })
-            ->GameCommons.flipLastUp,
-            stock: game.stock->Array.slice(~start=0, ~end=game.stock->Array.length - 1),
-          }
-        })
-      },
-      onStateChange: element => {
-        Card.hide(element)
-      },
-    }
-  }
-
-  let forEachSpace = Bases.GermanPatience.makeForEachSpace(~stockRules)
+  let forEachSpace = Bases.GermanPatience.makeForEachSpace(~stockRules=Rules.DealAll.stockRules)
 
   module Board = Boards.ST
 })
