@@ -45,8 +45,9 @@ function foundationBaseCheck(game, dragPile, i) {
   var justOne = dragPile.length === 1;
   var noChildren = game.foundations[i].length === 0;
   var dragPileBase = dragPile[0];
+  var beak = game.foundations[0][0];
   if (noChildren && justOne) {
-    return dragPileBase.card.rank === game.foundations[0][0].card.rank;
+    return dragPileBase.card.rank === beak.card.rank;
   } else {
     return false;
   }
@@ -100,36 +101,46 @@ function initiateGame$1() {
     contents: shuffledDeck
   };
   var beak = Common.ArrayAux.popN(deckToDeal, 1);
+  var piles = [
+    Common.ArrayAux.popN(deckToDeal, 1),
+    Common.ArrayAux.popN(deckToDeal, 2),
+    Common.ArrayAux.popN(deckToDeal, 3),
+    Common.ArrayAux.popN(deckToDeal, 4),
+    Common.ArrayAux.popN(deckToDeal, 5),
+    Common.ArrayAux.popN(deckToDeal, 6),
+    Common.ArrayAux.popN(deckToDeal, 7)
+  ];
+  var free = [
+    Common.ArrayAux.popN(deckToDeal, 1)[0],
+    Common.ArrayAux.popN(deckToDeal, 1)[0],
+    Common.ArrayAux.popN(deckToDeal, 1)[0],
+    Common.ArrayAux.popN(deckToDeal, 1)[0],
+    Common.ArrayAux.popN(deckToDeal, 1)[0],
+    Common.ArrayAux.popN(deckToDeal, 1)[0],
+    Common.ArrayAux.popN(deckToDeal, 1)[0]
+  ];
+  var stock = [
+    Card.hideAfter(Common.ArrayAux.popN(deckToDeal, 2), 0),
+    Card.hideAfter(Common.ArrayAux.popN(deckToDeal, 7), 0),
+    Card.hideAfter(Common.ArrayAux.popN(deckToDeal, 7), 0)
+  ];
+  var game_foundations = [
+    beak,
+    [],
+    [],
+    []
+  ];
+  var game_waste = [];
+  var game = {
+    piles: piles,
+    foundations: game_foundations,
+    stock: stock,
+    waste: game_waste,
+    free: free
+  };
   return [
           shuffledDeck,
-          {
-            piles: [
-              Common.ArrayAux.popN(deckToDeal, 1),
-              Common.ArrayAux.popN(deckToDeal, 2),
-              Common.ArrayAux.popN(deckToDeal, 3),
-              Common.ArrayAux.popN(deckToDeal, 4),
-              Common.ArrayAux.popN(deckToDeal, 5),
-              Common.ArrayAux.popN(deckToDeal, 6),
-              Common.ArrayAux.popN(deckToDeal, 7)
-            ],
-            foundations: [
-              beak,
-              [],
-              [],
-              []
-            ],
-            stock: [Card.hideAfter(deckToDeal.contents, 0)],
-            waste: [],
-            free: [
-              Common.ArrayAux.popN(deckToDeal, 1)[0],
-              Common.ArrayAux.popN(deckToDeal, 1)[0],
-              Common.ArrayAux.popN(deckToDeal, 1)[0],
-              Common.ArrayAux.popN(deckToDeal, 1)[0],
-              Common.ArrayAux.popN(deckToDeal, 1)[0],
-              Common.ArrayAux.popN(deckToDeal, 1)[0],
-              Common.ArrayAux.popN(deckToDeal, 1)[0]
-            ]
-          }
+          game
         ];
 }
 

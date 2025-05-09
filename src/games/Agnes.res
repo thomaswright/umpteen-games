@@ -33,10 +33,8 @@ module Sorel = GameBase.Create({
     let justOne = dragPile->Array.length == 1
     let noChildren = game.foundations->Array.getUnsafe(i)->Array.length == 0
     let dragPileBase = dragPile->Array.getUnsafe(0)
-
-    noChildren &&
-    justOne &&
-    dragPileBase.card.rank == (game.foundations->Array.getUnsafe(0)->Array.getUnsafe(0)).card.rank
+    let beak = game.foundations->Array.getUnsafe(0)->Array.getUnsafe(0)
+    noChildren && justOne && dragPileBase.card.rank == beak.card.rank
   }
 
   let foundationBaseRules = (i): staticSpace => {
@@ -71,34 +69,40 @@ module Bernauer = GameBase.Create({
   let initiateGame = (): (array<Card.sides>, Packer.game) => {
     let shuffledDeck = Card.getDeck(0, false)->Array.toShuffled
     let deckToDeal = ref(shuffledDeck)
-    let beak = deckToDeal->ArrayAux.popN(1)
 
-    (
-      shuffledDeck,
-      {
-        piles: [
-          deckToDeal->ArrayAux.popN(1),
-          deckToDeal->ArrayAux.popN(2),
-          deckToDeal->ArrayAux.popN(3),
-          deckToDeal->ArrayAux.popN(4),
-          deckToDeal->ArrayAux.popN(5),
-          deckToDeal->ArrayAux.popN(6),
-          deckToDeal->ArrayAux.popN(7),
-        ],
-        foundations: [beak, [], [], []],
-        waste: [],
-        free: [
-          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
-          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
-          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
-          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
-          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
-          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
-          deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
-        ],
-        stock: [deckToDeal.contents->Card.hideAfter(0)],
-      },
-    )
+    let beak = deckToDeal->ArrayAux.popN(1)
+    let piles = [
+      deckToDeal->ArrayAux.popN(1),
+      deckToDeal->ArrayAux.popN(2),
+      deckToDeal->ArrayAux.popN(3),
+      deckToDeal->ArrayAux.popN(4),
+      deckToDeal->ArrayAux.popN(5),
+      deckToDeal->ArrayAux.popN(6),
+      deckToDeal->ArrayAux.popN(7),
+    ]
+    let free = [
+      deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
+      deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
+      deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
+      deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
+      deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
+      deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
+      deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
+    ]
+    let stock = [
+      deckToDeal->ArrayAux.popN(2)->Card.hideAfter(0),
+      deckToDeal->ArrayAux.popN(7)->Card.hideAfter(0),
+      deckToDeal->ArrayAux.popN(7)->Card.hideAfter(0),
+    ]
+
+    let game = {
+      piles,
+      foundations: [beak, [], [], []],
+      waste: [],
+      free,
+      stock,
+    }
+    (shuffledDeck, game)
   }
 
   let foundationBaseCheck = (game: game, dragPile: dragPile, i) => {

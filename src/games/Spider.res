@@ -10,13 +10,9 @@ module SpiderRules = {
         z: i * 10 + j + 1,
       },
       baseSpace: Stock,
-      dragPile: () => {
-        None
-      },
+      dragPile: () => None,
       autoProgress: () => DoNothing,
-      droppedUpon: (_game, _dragPile) => {
-        None
-      },
+      droppedUpon: (_game, _dragPile) => None,
       onClick: game => {
         game.stock
         ->Common.ArrayAux.getLast
