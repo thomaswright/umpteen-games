@@ -380,6 +380,12 @@ function Make(PackerRules) {
           } else {
             return false;
           }
+      case "CyclicSameColor" :
+          if (isLast && Card.rankIsAboveCyclic(card, dragPileBase)) {
+            return Card.color(dragPileBase) === Card.color(card);
+          } else {
+            return false;
+          }
       case "NoDrop" :
           return false;
       
@@ -398,6 +404,8 @@ function Make(PackerRules) {
           return GameCommons.decCyclicOneSuitValidation(dragPile);
       case "CyclicAnySuit" :
           return GameCommons.decCyclicAnySuitValidation(dragPile);
+      case "CyclicSameColor" :
+          return GameCommons.decCyclicSameColorValidation(dragPile);
       case "NoDrop" :
           return false;
       

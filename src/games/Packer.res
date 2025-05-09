@@ -16,7 +16,7 @@ type dragPile = array<Card.sides>
 type movableSpace = GameBase.movableSpace<game, space, dragPile>
 type staticSpace = GameBase.staticSpace<game, dragPile>
 
-type stack = AltSuit | AnySuit | OneSuit | CyclicOneSuit | CyclicAnySuit | NoDrop
+type stack = AltSuit | AnySuit | OneSuit | CyclicOneSuit | CyclicAnySuit | CyclicSameColor | NoDrop
 type size = AnySize | FreeSize | JustOne
 type depot = SpecificDepot(Card.rank) | AnyDepot
 type foundation = ByOne | ByAll | ByOneCyclicOneSuit | ByOneCyclicAnySuit | NoFoundation
@@ -70,6 +70,11 @@ module Make = (PackerRules: PackerRules) => {
       isLast &&
       Card.rankIsAboveCyclic(card, dragPileBase) &&
       dragPileBase.card.suit == card.card.suit
+    | CyclicSameColor =>
+      isLast &&
+      Card.rankIsAboveCyclic(card, dragPileBase) &&
+      dragPileBase->Card.color == card->Card.color
+
     | CyclicAnySuit => isLast && Card.rankIsAboveCyclic(card, dragPileBase)
     | NoDrop => false
     }
@@ -82,6 +87,7 @@ module Make = (PackerRules: PackerRules) => {
     | AnySuit => true
     | CyclicOneSuit => dragPile->GameCommons.decCyclicOneSuitValidation
     | CyclicAnySuit => dragPile->GameCommons.decCyclicAnySuitValidation
+    | CyclicSameColor => dragPile->GameCommons.decCyclicSameColorValidation
     | NoDrop => false
     }
 

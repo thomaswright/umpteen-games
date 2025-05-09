@@ -50,6 +50,16 @@ module Penguin = Make({
   }
 })
 
+module AgnesSorel = Make({
+  let spec = {
+    drop: CyclicSameColor,
+    drag: CyclicOneSuit,
+    size: AnySize,
+    depot: AnyDepot,
+    foundation: ByOneCyclicOneSuit,
+  }
+})
+
 module Stalactite = Make({
   let spec = {
     drop: NoDrop,

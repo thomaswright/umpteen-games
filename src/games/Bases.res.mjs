@@ -58,6 +58,16 @@ var Penguin = Packer.Make({
       }
     });
 
+var AgnesSorel = Packer.Make({
+      spec: {
+        drop: "CyclicSameColor",
+        drag: "CyclicOneSuit",
+        size: "AnySize",
+        depot: "AnyDepot",
+        foundation: "ByOneCyclicOneSuit"
+      }
+    });
+
 var Stalactite = Packer.Make({
       spec: {
         drop: "NoDrop",
@@ -127,6 +137,7 @@ export {
   FreeCell ,
   SeahavenTowers ,
   Penguin ,
+  AgnesSorel ,
   Stalactite ,
   Spider ,
   Scorpion ,

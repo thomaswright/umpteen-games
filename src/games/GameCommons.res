@@ -27,15 +27,19 @@ let decOneSuitValidation = (dragPile: array<Card.sides>) => {
 
 let decCyclicOneSuitValidation = (dragPile: array<Card.sides>) => {
   dragPile->pileValidation((onBottom, onTop) => {
-    Console.log(Card.rankIsAboveCyclic(onBottom, onTop))
     Card.rankIsAboveCyclic(onBottom, onTop) && onTop.card.suit == onBottom.card.suit
   })
 }
 
 let decCyclicAnySuitValidation = (dragPile: array<Card.sides>) => {
   dragPile->pileValidation((onBottom, onTop) => {
-    Console.log(Card.rankIsAboveCyclic(onBottom, onTop))
     Card.rankIsAboveCyclic(onBottom, onTop)
+  })
+}
+
+let decCyclicSameColorValidation = (dragPile: array<Card.sides>) => {
+  dragPile->pileValidation((onBottom, onTop) => {
+    Card.rankIsAboveCyclic(onBottom, onTop) && onBottom->Card.color == onTop->Card.color
   })
 }
 

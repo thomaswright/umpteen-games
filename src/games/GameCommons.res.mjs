@@ -52,7 +52,6 @@ function decOneSuitValidation(dragPile) {
 
 function decCyclicOneSuitValidation(dragPile) {
   return pileValidation(dragPile, (function (onBottom, onTop) {
-                console.log(Card.rankIsAboveCyclic(onBottom, onTop));
                 if (Card.rankIsAboveCyclic(onBottom, onTop)) {
                   return onTop.card.suit === onBottom.card.suit;
                 } else {
@@ -63,8 +62,17 @@ function decCyclicOneSuitValidation(dragPile) {
 
 function decCyclicAnySuitValidation(dragPile) {
   return pileValidation(dragPile, (function (onBottom, onTop) {
-                console.log(Card.rankIsAboveCyclic(onBottom, onTop));
                 return Card.rankIsAboveCyclic(onBottom, onTop);
+              }));
+}
+
+function decCyclicSameColorValidation(dragPile) {
+  return pileValidation(dragPile, (function (onBottom, onTop) {
+                if (Card.rankIsAboveCyclic(onBottom, onTop)) {
+                  return Card.color(onBottom) === Card.color(onTop);
+                } else {
+                  return false;
+                }
               }));
 }
 
@@ -85,6 +93,7 @@ export {
   decOneSuitValidation ,
   decCyclicOneSuitValidation ,
   decCyclicAnySuitValidation ,
+  decCyclicSameColorValidation ,
   flipLastUp ,
 }
 /* Card Not a pure module */
