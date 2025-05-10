@@ -38,7 +38,7 @@ function initiateGame() {
         ];
 }
 
-var forEachSpace = Bases.Klondike.makeForEachSpace(undefined, undefined, undefined, undefined, Rules.WasteRotation.wasteRules, Rules.WasteRotation.stockBaseRules, Rules.WasteRotation.stockRules, undefined, undefined);
+var forEachSpace = Bases.Klondike.makeForEachSpace(undefined, undefined, undefined, undefined, Rules.WasteRotation.fannedWasteRules, Rules.WasteRotation.stockBaseRules, Rules.WasteRotation.stockRules, undefined, undefined);
 
 var Game = GameBase.Create({
       game_encode: Bases.Klondike.game_encode,

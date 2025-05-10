@@ -71,7 +71,27 @@ module DealAll = {
 }
 
 module WasteRotation = {
-  let wasteRules = (game: Packer.game, card, i): movableSpace => {
+  let stackedWasteRules = (game: Packer.game, card, i): movableSpace => {
+    baseSpace: Waste,
+    locationAdjustment: {
+      x: 0,
+      y: 0,
+      z: i + 1,
+    },
+    dragPile: () => {
+      if i == game.waste->Array.length - 1 {
+        Some([card])
+      } else {
+        None
+      }
+    },
+    autoProgress: () => DoNothing,
+    droppedUpon: (_, _) => None,
+    onClick: _ => None,
+    onStateChange: element => Card.showOrHide(card, element),
+  }
+
+  let fannedWasteRules = (game: Packer.game, card, i): movableSpace => {
     baseSpace: Waste,
     locationAdjustment: {
       x: 20 * i,

@@ -108,7 +108,36 @@ var DealAll = {
   stockRules: stockRules
 };
 
-function wasteRules(game, card, i) {
+function stackedWasteRules(game, card, i) {
+  return {
+          locationAdjustment: {
+            x: 0,
+            y: 0,
+            z: i + 1 | 0
+          },
+          baseSpace: "Waste",
+          dragPile: (function () {
+              if (i === (game.waste.length - 1 | 0)) {
+                return [card];
+              }
+              
+            }),
+          autoProgress: (function () {
+              return "DoNothing";
+            }),
+          droppedUpon: (function (param, param$1) {
+              
+            }),
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
+            }),
+          onClick: (function (param) {
+              
+            })
+        };
+}
+
+function fannedWasteRules(game, card, i) {
   return {
           locationAdjustment: {
             x: Math.imul(20, i),
@@ -191,7 +220,8 @@ function stockBaseRules() {
 }
 
 var WasteRotation = {
-  wasteRules: wasteRules,
+  stackedWasteRules: stackedWasteRules,
+  fannedWasteRules: fannedWasteRules,
   stockRules: stockRules$1,
   stockBaseRules: stockBaseRules
 };

@@ -29,7 +29,7 @@ module Game = GameBase.Create({
   }
 
   let forEachSpace = Bases.Klondike.makeForEachSpace(
-    ~wasteRules=Rules.WasteRotation.wasteRules,
+    ~wasteRules=Rules.WasteRotation.fannedWasteRules,
     ~stockRules=Rules.WasteRotation.stockRules,
     ~stockBaseRules=Rules.WasteRotation.stockBaseRules,
   )

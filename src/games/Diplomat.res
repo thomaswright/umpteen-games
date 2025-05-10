@@ -31,7 +31,7 @@ module Game = GameBase.Create({
   }
 
   let forEachSpace = Bases.Diplomat.makeForEachSpace(
-    ~wasteRules=Rules.WasteRotation.wasteRules,
+    ~wasteRules=Rules.WasteRotation.stackedWasteRules,
     ~stockRules=Rules.WasteRotation.stockRules,
     ~stockBaseRules=Rules.WasteRotation.stockBaseRules,
   )

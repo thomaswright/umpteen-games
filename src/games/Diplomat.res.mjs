@@ -43,7 +43,7 @@ function initiateGame() {
         ];
 }
 
-var forEachSpace = Bases.Diplomat.makeForEachSpace(undefined, undefined, undefined, undefined, Rules.WasteRotation.wasteRules, Rules.WasteRotation.stockBaseRules, Rules.WasteRotation.stockRules, undefined, undefined);
+var forEachSpace = Bases.Diplomat.makeForEachSpace(undefined, undefined, undefined, undefined, Rules.WasteRotation.stackedWasteRules, Rules.WasteRotation.stockBaseRules, Rules.WasteRotation.stockRules, undefined, undefined);
 
 var Game = GameBase.Create({
       game_encode: Bases.Diplomat.game_encode,
