@@ -44,10 +44,12 @@ function initiateGame() {
     [],
     []
   ];
+  var game_foundations2 = [];
   var game_waste = [];
   var game = {
     tableau: tableau,
     foundations: game_foundations,
+    foundations2: game_foundations2,
     stock: stock,
     waste: game_waste,
     free: free
@@ -79,6 +81,7 @@ function foundationBaseRules(i) {
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                 return dragPile;
                               })),
+                        foundations2: game.foundations2,
                         stock: game.stock,
                         waste: game.waste,
                         free: game.free
@@ -105,6 +108,7 @@ function tableauBaseRules(game, i) {
                                     return dragPile;
                                   }))),
                         foundations: gameRemoved.foundations,
+                        foundations2: gameRemoved.foundations2,
                         stock: gameRemoved.stock,
                         waste: gameRemoved.waste,
                         free: gameRemoved.free
@@ -119,7 +123,7 @@ function tableauBaseRules(game, i) {
         };
 }
 
-var forEachSpace = Bases.AgnesBernauer.makeForEachSpace(tableauBaseRules, undefined, foundationBaseRules, undefined, undefined, undefined, Rules.DealAll.stockRules, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
+var forEachSpace = Bases.AgnesBernauer.makeForEachSpace(tableauBaseRules, undefined, foundationBaseRules, undefined, undefined, undefined, undefined, undefined, Rules.DealAll.stockRules, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
 
 var Game = GameBase.Create({
       game_encode: Bases.AgnesBernauer.game_encode,

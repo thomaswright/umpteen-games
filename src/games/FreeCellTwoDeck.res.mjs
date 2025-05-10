@@ -8,7 +8,7 @@ import * as Common from "../Common.res.mjs";
 import * as GameBase from "../GameBase.res.mjs";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 
-var forEachSpace = Bases.FreeCell.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
+var forEachSpace = Bases.FreeCell.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
 
 function initiateGame() {
   var shuffledDeck = Core__Array.toShuffled([].concat(Card.getDeck(0, false), Card.getDeck(1, false)));
@@ -40,6 +40,7 @@ function initiateGame() {
               [],
               []
             ],
+            foundations2: [],
             stock: [],
             waste: [],
             free: [

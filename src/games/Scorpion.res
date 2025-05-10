@@ -24,6 +24,7 @@ module Game = GameBase.Create({
           deckToDeal->ArrayAux.popN(7)->Card.showAfter(0),
         ]->GameCommons.flipLastUp,
         foundations: [[], [], [], []],
+        foundations2: [],
         stock: [deckToDeal->ArrayAux.popN(3)],
         waste: [],
         free: [],

@@ -27,6 +27,7 @@ module Game = GameBase.Create({
           deckToDeal->ArrayAux.popN(6),
         ],
         foundations: [[], [], [], []],
+        foundations2: [],
         free: [
           deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,
           deckToDeal->ArrayAux.popN(1)->Array.getUnsafe(0)->Some,

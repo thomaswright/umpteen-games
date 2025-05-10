@@ -23,6 +23,7 @@ module Game = GameBase.Create({
           deckToDeal->ArrayAux.popN(4),
         ],
         foundations: [[], [], [], [], [], [], [], []],
+        foundations2: [],
         free: [],
         stock: [deckToDeal.contents->Card.hideAfter(0)],
         waste: [],

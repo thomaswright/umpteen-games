@@ -38,6 +38,7 @@ function initiateGame() {
                   Common.ArrayAux.popN(deckToDeal, 1)
                 ]),
             foundations: [],
+            foundations2: [],
             stock: [
               Common.ArrayAux.popN(deckToDeal, 8),
               Common.ArrayAux.popN(deckToDeal, 8),
@@ -58,7 +59,7 @@ function initiateGame() {
         ];
 }
 
-var forEachSpace = Bases.GermanPatience.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, Rules.DealAll.stockRules, undefined, undefined);
+var forEachSpace = Bases.GermanPatience.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, Rules.DealAll.stockRules, undefined, undefined);
 
 var Game = GameBase.Create({
       game_encode: Bases.GermanPatience.game_encode,

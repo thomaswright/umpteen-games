@@ -31,6 +31,7 @@ function initiateGame() {
               [],
               []
             ],
+            foundations2: [],
             stock: [Card.hideAfter(deckToDeal.contents, 0)],
             waste: [],
             free: []
@@ -38,7 +39,7 @@ function initiateGame() {
         ];
 }
 
-var forEachSpace = Bases.Klondike.makeForEachSpace(undefined, undefined, undefined, undefined, Rules.WasteRotation.fannedWasteRules, Rules.WasteRotation.stockBaseRules, Rules.WasteRotation.stockRules, undefined, undefined);
+var forEachSpace = Bases.Klondike.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, Rules.WasteRotation.fannedWasteRules, Rules.WasteRotation.stockBaseRules, Rules.WasteRotation.stockRules, undefined, undefined);
 
 var Game = GameBase.Create({
       game_encode: Bases.Klondike.game_encode,

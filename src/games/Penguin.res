@@ -41,6 +41,7 @@ module Game = GameBase.Create({
           [otherBeaks->Array.getUnsafe(1)],
           [otherBeaks->Array.getUnsafe(2)],
         ],
+        foundations2: [],
         free: [None, None, None, None, None, None, None],
         stock: [],
         waste: [],

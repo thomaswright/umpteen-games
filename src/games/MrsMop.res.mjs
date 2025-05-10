@@ -9,7 +9,7 @@ import * as GameBase from "../GameBase.res.mjs";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as GameCommons from "../GameCommons.res.mjs";
 
-var forEachSpace = Bases.Spider.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, Rules.DealAll.stockRules, undefined, undefined);
+var forEachSpace = Bases.Spider.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, Rules.DealAll.stockRules, undefined, undefined);
 
 function initiateGame() {
   var shuffledDeck = Core__Array.toShuffled([].concat(Card.getDeck(0, false), Card.getDeck(1, false)));
@@ -44,6 +44,7 @@ function initiateGame() {
               [],
               []
             ],
+            foundations2: [],
             stock: [],
             waste: [],
             free: []

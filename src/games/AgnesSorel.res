@@ -30,6 +30,7 @@ module Game = GameBase.Create({
       {
         tableau,
         foundations: [beak, [], [], []],
+        foundations2: [],
         stock,
         waste: [],
         free: [],

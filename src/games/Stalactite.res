@@ -28,6 +28,7 @@ module Game = GameBase.Create({
           deckToDeal->ArrayAux.popN(1),
           deckToDeal->ArrayAux.popN(1),
         ],
+        foundations2: [],
         free: [None, None],
         stock: [],
         waste: [],

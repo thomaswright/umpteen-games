@@ -33,6 +33,11 @@ function space_encode(value) {
                 "Foundation",
                 Decco.intToJson(value._0)
               ];
+    case "Foundation2" :
+        return [
+                "Foundation2",
+                Decco.intToJson(value._0)
+              ];
     case "Tableau" :
         return [
                 "Tableau",
@@ -109,7 +114,7 @@ function space_decode(value) {
                     value: e$1.value
                   }
                 };
-      case "Free" :
+      case "Foundation2" :
           if (tagged.length !== 2) {
             return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
           }
@@ -118,7 +123,7 @@ function space_decode(value) {
             return {
                     TAG: "Ok",
                     _0: {
-                      TAG: "Free",
+                      TAG: "Foundation2",
                       _0: v0$2._0
                     }
                   };
@@ -130,6 +135,29 @@ function space_decode(value) {
                     path: "[0]" + e$2.path,
                     message: e$2.message,
                     value: e$2.value
+                  }
+                };
+      case "Free" :
+          if (tagged.length !== 2) {
+            return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
+          }
+          var v0$3 = Decco.intFromJson(Belt_Array.getExn(jsonArr$1, 1));
+          if (v0$3.TAG === "Ok") {
+            return {
+                    TAG: "Ok",
+                    _0: {
+                      TAG: "Free",
+                      _0: v0$3._0
+                    }
+                  };
+          }
+          var e$3 = v0$3._0;
+          return {
+                  TAG: "Error",
+                  _0: {
+                    path: "[0]" + e$3.path,
+                    message: e$3.message,
+                    value: e$3.value
                   }
                 };
       case "Stock" :
@@ -145,23 +173,23 @@ function space_decode(value) {
           if (tagged.length !== 2) {
             return Decco.error(undefined, "Invalid number of arguments to variant constructor", value);
           }
-          var v0$3 = Decco.intFromJson(Belt_Array.getExn(jsonArr$1, 1));
-          if (v0$3.TAG === "Ok") {
+          var v0$4 = Decco.intFromJson(Belt_Array.getExn(jsonArr$1, 1));
+          if (v0$4.TAG === "Ok") {
             return {
                     TAG: "Ok",
                     _0: {
                       TAG: "Tableau",
-                      _0: v0$3._0
+                      _0: v0$4._0
                     }
                   };
           }
-          var e$3 = v0$3._0;
+          var e$4 = v0$4._0;
           return {
                   TAG: "Error",
                   _0: {
-                    path: "[0]" + e$3.path,
-                    message: e$3.message,
-                    value: e$3.value
+                    path: "[0]" + e$4.path,
+                    message: e$4.message,
+                    value: e$4.value
                   }
                 };
       case "Waste" :
@@ -197,6 +225,14 @@ function game_encode(value) {
                                     return Decco.arrayToJson(Card.sides_encode, extra);
                                   }), extra);
                     })(value.foundations)
+              ],
+              [
+                "foundations2",
+                (function (extra) {
+                      return Decco.arrayToJson((function (extra) {
+                                    return Decco.arrayToJson(Card.sides_encode, extra);
+                                  }), extra);
+                    })(value.foundations2)
               ],
               [
                 "stock",
@@ -242,71 +278,86 @@ function game_decode(value) {
             return Decco.arrayFromJson(Card.sides_decode, extra);
           }), extra$1);
     if (foundations.TAG === "Ok") {
-      var extra$2 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "stock"), null);
-      var stock = Decco.arrayFromJson((function (extra) {
+      var extra$2 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "foundations2"), null);
+      var foundations2 = Decco.arrayFromJson((function (extra) {
               return Decco.arrayFromJson(Card.sides_decode, extra);
             }), extra$2);
-      if (stock.TAG === "Ok") {
-        var extra$3 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "waste"), null);
-        var waste = Decco.arrayFromJson(Card.sides_decode, extra$3);
-        if (waste.TAG === "Ok") {
-          var extra$4 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "free"), null);
-          var free = Decco.arrayFromJson((function (extra) {
-                  return Decco.optionFromJson(Card.sides_decode, extra);
-                }), extra$4);
-          if (free.TAG === "Ok") {
+      if (foundations2.TAG === "Ok") {
+        var extra$3 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "stock"), null);
+        var stock = Decco.arrayFromJson((function (extra) {
+                return Decco.arrayFromJson(Card.sides_decode, extra);
+              }), extra$3);
+        if (stock.TAG === "Ok") {
+          var extra$4 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "waste"), null);
+          var waste = Decco.arrayFromJson(Card.sides_decode, extra$4);
+          if (waste.TAG === "Ok") {
+            var extra$5 = Belt_Option.getWithDefault(Js_dict.get(dict$1, "free"), null);
+            var free = Decco.arrayFromJson((function (extra) {
+                    return Decco.optionFromJson(Card.sides_decode, extra);
+                  }), extra$5);
+            if (free.TAG === "Ok") {
+              return {
+                      TAG: "Ok",
+                      _0: Decco.unsafeAddFieldToObject("tableau", tableau._0, Decco.unsafeAddFieldToObject("foundations", foundations._0, Decco.unsafeAddFieldToObject("foundations2", foundations2._0, Decco.unsafeAddFieldToObject("stock", stock._0, Decco.unsafeAddFieldToObject("waste", waste._0, Decco.unsafeAddFieldToObject("free", free._0, {}))))))
+                    };
+            }
+            var e = free._0;
             return {
-                    TAG: "Ok",
-                    _0: Decco.unsafeAddFieldToObject("tableau", tableau._0, Decco.unsafeAddFieldToObject("foundations", foundations._0, Decco.unsafeAddFieldToObject("stock", stock._0, Decco.unsafeAddFieldToObject("waste", waste._0, Decco.unsafeAddFieldToObject("free", free._0, {})))))
+                    TAG: "Error",
+                    _0: {
+                      path: ".free" + e.path,
+                      message: e.message,
+                      value: e.value
+                    }
                   };
           }
-          var e = free._0;
+          var e$1 = waste._0;
           return {
                   TAG: "Error",
                   _0: {
-                    path: ".free" + e.path,
-                    message: e.message,
-                    value: e.value
+                    path: ".waste" + e$1.path,
+                    message: e$1.message,
+                    value: e$1.value
                   }
                 };
         }
-        var e$1 = waste._0;
+        var e$2 = stock._0;
         return {
                 TAG: "Error",
                 _0: {
-                  path: ".waste" + e$1.path,
-                  message: e$1.message,
-                  value: e$1.value
+                  path: ".stock" + e$2.path,
+                  message: e$2.message,
+                  value: e$2.value
                 }
               };
       }
-      var e$2 = stock._0;
+      var e$3 = foundations2._0;
       return {
               TAG: "Error",
               _0: {
-                path: ".stock" + e$2.path,
-                message: e$2.message,
-                value: e$2.value
+                path: ".foundations2" + e$3.path,
+                message: e$3.message,
+                value: e$3.value
               }
             };
     }
-    var e$3 = foundations._0;
+    var e$4 = foundations._0;
     return {
             TAG: "Error",
             _0: {
-              path: ".foundations" + e$3.path,
-              message: e$3.message,
-              value: e$3.value
+              path: ".foundations" + e$4.path,
+              message: e$4.message,
+              value: e$4.value
             }
           };
   }
-  var e$4 = tableau._0;
+  var e$5 = tableau._0;
   return {
           TAG: "Error",
           _0: {
-            path: ".tableau" + e$4.path,
-            message: e$4.message,
-            value: e$4.value
+            path: ".tableau" + e$5.path,
+            message: e$5.message,
+            value: e$5.value
           }
         };
 }
@@ -520,6 +571,7 @@ function Make(PackerRules) {
     return {
             tableau: game.tableau.map(removeDragPile),
             foundations: game.foundations.map(removeDragPile),
+            foundations2: game.foundations2.map(removeDragPile),
             stock: game.stock.map(removeDragPile),
             waste: removeDragPile(game.waste),
             free: game.free.map(function (card) {
@@ -544,6 +596,7 @@ function Make(PackerRules) {
                                       return dragPile;
                                     }))),
                           foundations: gameRemoved.foundations,
+                          foundations2: gameRemoved.foundations2,
                           stock: gameRemoved.stock,
                           waste: gameRemoved.waste,
                           free: gameRemoved.free
@@ -593,6 +646,7 @@ function Make(PackerRules) {
                                     return Common.ArrayAux.insertAfter(stack, card, dragPile);
                                   })),
                           foundations: game.foundations,
+                          foundations2: game.foundations2,
                           stock: game.stock,
                           waste: game.waste,
                           free: game.free
@@ -617,6 +671,7 @@ function Make(PackerRules) {
                           foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                   return dragPile;
                                 })),
+                          foundations2: game.foundations2,
                           stock: game.stock,
                           waste: game.waste,
                           free: game.free
@@ -658,6 +713,74 @@ function Make(PackerRules) {
                           foundations: game.foundations.map(function (stack) {
                                 return Common.ArrayAux.insertAfter(stack, card, dragPile);
                               }),
+                          foundations2: game.foundations2,
+                          stock: game.stock,
+                          waste: game.waste,
+                          free: game.free
+                        };
+                }
+                
+              }),
+            onStateChange: (function (element) {
+                Card.showOrHide(card, element);
+              }),
+            onClick: (function (param) {
+                
+              })
+          };
+  };
+  var foundation2BaseRules = function (i) {
+    return {
+            droppedUpon: (function (game, dragPile) {
+                if (foundationBaseCheck(game, dragPile, i)) {
+                  return {
+                          tableau: GameCommons.flipLastUp(game.tableau),
+                          foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
+                                  return dragPile;
+                                })),
+                          foundations2: game.foundations2,
+                          stock: game.stock,
+                          waste: game.waste,
+                          free: game.free
+                        };
+                }
+                
+              }),
+            autoProgress: "Seek",
+            onClick: (function (param) {
+                
+              })
+          };
+  };
+  var foundation2Rules = function (game, pile, card, i, j) {
+    var isLast = j === (pile.length - 1 | 0);
+    return {
+            locationAdjustment: {
+              x: 0,
+              y: 0,
+              z: j + 1 | 0
+            },
+            baseSpace: {
+              TAG: "Foundation",
+              _0: i
+            },
+            dragPile: (function () {
+                if (j === (game.foundations.length - 1 | 0)) {
+                  return [card];
+                }
+                
+              }),
+            autoProgress: (function () {
+                return "Seek";
+              }),
+            droppedUpon: (function (game, dragPile) {
+                if (isLast && foundationCheck(dragPile, card)) {
+                  return {
+                          tableau: GameCommons.flipLastUp(game.tableau),
+                          foundations: game.foundations.map(function (stack) {
+                                return Common.ArrayAux.insertAfter(stack, card, dragPile);
+                              }),
+                          foundations2: game.foundations2,
                           stock: game.stock,
                           waste: game.waste,
                           free: game.free
@@ -773,11 +896,13 @@ function Make(PackerRules) {
               })
           };
   };
-  var makeForEachSpace = function (tableauBaseRulesOpt, tableauRulesOpt, foundationBaseRulesOpt, foundationRulesOpt, wasteRulesOpt, stockBaseRulesOpt, stockRulesOpt, freeBaseRulesOpt, freeRulesOpt) {
+  var makeForEachSpace = function (tableauBaseRulesOpt, tableauRulesOpt, foundationBaseRulesOpt, foundationRulesOpt, foundation2BaseRulesOpt, foundation2RulesOpt, wasteRulesOpt, stockBaseRulesOpt, stockRulesOpt, freeBaseRulesOpt, freeRulesOpt) {
     var tableauBaseRules$1 = tableauBaseRulesOpt !== undefined ? tableauBaseRulesOpt : tableauBaseRules;
     var tableauRules$1 = tableauRulesOpt !== undefined ? tableauRulesOpt : tableauRules;
     var foundationBaseRules$1 = foundationBaseRulesOpt !== undefined ? foundationBaseRulesOpt : foundationBaseRules;
     var foundationRules$1 = foundationRulesOpt !== undefined ? foundationRulesOpt : foundationRules;
+    var foundation2BaseRules$1 = foundation2BaseRulesOpt !== undefined ? foundation2BaseRulesOpt : foundation2BaseRules;
+    var foundation2Rules$1 = foundation2RulesOpt !== undefined ? foundation2RulesOpt : foundation2Rules;
     var wasteRules$1 = wasteRulesOpt !== undefined ? wasteRulesOpt : wasteRules;
     var stockBaseRules$1 = stockBaseRulesOpt !== undefined ? stockBaseRulesOpt : stockBaseRules;
     var stockRules$1 = stockRulesOpt !== undefined ? stockRulesOpt : stockRules;
@@ -817,6 +942,24 @@ function Make(PackerRules) {
                       }, {
                         TAG: "Movable",
                         _0: foundationRules$1(game, foundation, card, i, j)
+                      });
+                });
+          });
+      game.foundations2.forEach(function (foundation, i) {
+            f({
+                  TAG: "Foundation2",
+                  _0: i
+                }, {
+                  TAG: "Static",
+                  _0: foundation2BaseRules$1(i)
+                });
+            foundation.forEach(function (card, j) {
+                  f({
+                        TAG: "Card",
+                        _0: card.card
+                      }, {
+                        TAG: "Movable",
+                        _0: foundation2Rules$1(game, foundation, card, i, j)
                       });
                 });
           });
@@ -911,6 +1054,8 @@ function Make(PackerRules) {
           tableauRules: tableauRules,
           foundationBaseRules: foundationBaseRules,
           foundationRules: foundationRules,
+          foundation2BaseRules: foundation2BaseRules,
+          foundation2Rules: foundation2Rules,
           wasteRules: wasteRules,
           stockRules: stockRules,
           stockBaseRules: stockBaseRules,

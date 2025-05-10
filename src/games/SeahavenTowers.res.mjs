@@ -34,6 +34,7 @@ function initiateGame() {
               [],
               []
             ],
+            foundations2: [],
             stock: [],
             waste: [],
             free: [
@@ -46,7 +47,7 @@ function initiateGame() {
         ];
 }
 
-var forEachSpace = Bases.SeahavenTowers.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
+var forEachSpace = Bases.SeahavenTowers.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
 
 var Game = GameBase.Create({
       game_encode: Bases.SeahavenTowers.game_encode,

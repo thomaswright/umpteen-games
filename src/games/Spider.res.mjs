@@ -9,7 +9,7 @@ import * as GameBase from "../GameBase.res.mjs";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as GameCommons from "../GameCommons.res.mjs";
 
-var forEachSpace = Bases.Spider.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, Rules.DealAll.stockRules, undefined, undefined);
+var forEachSpace = Bases.Spider.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, Rules.DealAll.stockRules, undefined, undefined);
 
 function initiateGame() {
   var shuffledDeck = Core__Array.toShuffled([].concat(Card.getOneSuitDeck(0, "Spades", true), Card.getOneSuitDeck(1, "Spades", true), Card.getOneSuitDeck(2, "Spades", true), Card.getOneSuitDeck(3, "Spades", true), Card.getOneSuitDeck(4, "Spades", true), Card.getOneSuitDeck(5, "Spades", true), Card.getOneSuitDeck(6, "Spades", true), Card.getOneSuitDeck(7, "Spades", true)));
@@ -41,6 +41,7 @@ function initiateGame() {
               [],
               []
             ],
+            foundations2: [],
             stock: [
               Common.ArrayAux.popN(deckToDeal, 10),
               Common.ArrayAux.popN(deckToDeal, 10),
@@ -71,7 +72,7 @@ var OneSuit = GameBase.Create({
       AllCards: Bases.Spider.AllCards
     });
 
-var forEachSpace$1 = Bases.Spider.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, Rules.DealAll.stockRules, undefined, undefined);
+var forEachSpace$1 = Bases.Spider.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, Rules.DealAll.stockRules, undefined, undefined);
 
 function initiateGame$1() {
   var shuffledDeck = Core__Array.toShuffled([].concat(Card.getOneSuitDeck(0, "Spades", true), Card.getOneSuitDeck(1, "Spades", true), Card.getOneSuitDeck(2, "Spades", true), Card.getOneSuitDeck(3, "Spades", true), Card.getOneSuitDeck(4, "Hearts", true), Card.getOneSuitDeck(5, "Hearts", true), Card.getOneSuitDeck(6, "Hearts", true), Card.getOneSuitDeck(7, "Hearts", true)));
@@ -103,6 +104,7 @@ function initiateGame$1() {
               [],
               []
             ],
+            foundations2: [],
             stock: [
               Common.ArrayAux.popN(deckToDeal, 10),
               Common.ArrayAux.popN(deckToDeal, 10),
@@ -133,7 +135,7 @@ var TwoSuit = GameBase.Create({
       AllCards: Bases.Spider.AllCards
     });
 
-var forEachSpace$2 = Bases.Spider.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, Rules.DealAll.stockRules, undefined, undefined);
+var forEachSpace$2 = Bases.Spider.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, Rules.DealAll.stockRules, undefined, undefined);
 
 function initiateGame$2() {
   var shuffledDeck = Core__Array.toShuffled([].concat(Card.getDeck(0, true), Card.getDeck(1, true)));
@@ -165,6 +167,7 @@ function initiateGame$2() {
               [],
               []
             ],
+            foundations2: [],
             stock: [
               Common.ArrayAux.popN(deckToDeal, 10),
               Common.ArrayAux.popN(deckToDeal, 10),

@@ -40,6 +40,7 @@ function initiateGame() {
               [],
               []
             ],
+            foundations2: [],
             stock: stock,
             waste: [],
             free: []
@@ -68,6 +69,7 @@ function foundationBaseRules(i) {
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                 return dragPile;
                               })),
+                        foundations2: game.foundations2,
                         stock: game.stock,
                         waste: game.waste,
                         free: game.free
@@ -82,7 +84,7 @@ function foundationBaseRules(i) {
         };
 }
 
-var forEachSpace = Bases.AgnesSorel.makeForEachSpace(undefined, undefined, foundationBaseRules, undefined, undefined, undefined, Rules.DealAll.stockRules, undefined, undefined);
+var forEachSpace = Bases.AgnesSorel.makeForEachSpace(undefined, undefined, foundationBaseRules, undefined, undefined, undefined, undefined, undefined, Rules.DealAll.stockRules, undefined, undefined);
 
 var Game = GameBase.Create({
       game_encode: Bases.AgnesSorel.game_encode,

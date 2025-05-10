@@ -43,6 +43,7 @@ function initiateGame() {
               [otherBeaks[1]],
               [otherBeaks[2]]
             ],
+            foundations2: [],
             stock: [],
             waste: [],
             free: [
@@ -71,6 +72,7 @@ function foundationBaseRules(i) {
                         foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
                                 return dragPile;
                               })),
+                        foundations2: game.foundations2,
                         stock: game.stock,
                         waste: game.waste,
                         free: game.free
@@ -97,6 +99,7 @@ function tableauBaseRules(game, i) {
                                     return dragPile;
                                   }))),
                         foundations: gameRemoved.foundations,
+                        foundations2: gameRemoved.foundations2,
                         stock: gameRemoved.stock,
                         waste: gameRemoved.waste,
                         free: gameRemoved.free
@@ -111,7 +114,7 @@ function tableauBaseRules(game, i) {
         };
 }
 
-var forEachSpace = Bases.Penguin.makeForEachSpace(tableauBaseRules, undefined, foundationBaseRules, undefined, undefined, undefined, undefined, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
+var forEachSpace = Bases.Penguin.makeForEachSpace(tableauBaseRules, undefined, foundationBaseRules, undefined, undefined, undefined, undefined, undefined, undefined, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
 
 var Game = GameBase.Create({
       game_encode: Bases.Penguin.game_encode,

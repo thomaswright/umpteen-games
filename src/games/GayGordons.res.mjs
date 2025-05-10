@@ -62,6 +62,7 @@ function initiateGame() {
               Common.ArrayAux.popN(deckToDeal, 5)
             ],
             foundations: [[]],
+            foundations2: [],
             stock: [],
             waste: [],
             free: [
@@ -119,6 +120,7 @@ function tableauRules(_game, pile, card, i, j) {
                                             dragPileBase
                                           ]);
                               })),
+                        foundations2: game.foundations2,
                         stock: game.stock,
                         waste: game.waste,
                         free: game.free
@@ -135,7 +137,7 @@ function tableauRules(_game, pile, card, i, j) {
         };
 }
 
-var forEachSpace = Bases.GayGordons.makeForEachSpace(tableauBaseRules, tableauRules, Rules.Neutral.foundationBaseRules, Rules.Neutral.foundationRules, undefined, undefined, undefined, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
+var forEachSpace = Bases.GayGordons.makeForEachSpace(tableauBaseRules, tableauRules, Rules.Neutral.foundationBaseRules, Rules.Neutral.foundationRules, undefined, undefined, undefined, undefined, undefined, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
 
 var Game = GameBase.Create({
       game_encode: Bases.GayGordons.game_encode,

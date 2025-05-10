@@ -32,6 +32,7 @@ function initiateGame() {
               Common.ArrayAux.popN(deckToDeal, 1),
               Common.ArrayAux.popN(deckToDeal, 1)
             ],
+            foundations2: [],
             stock: [],
             waste: [],
             free: [
@@ -42,7 +43,7 @@ function initiateGame() {
         ];
 }
 
-var forEachSpace = Bases.Stalactite.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
+var forEachSpace = Bases.Stalactite.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, Rules.FreeCell.freeBaseRules, Rules.FreeCell.freeRules);
 
 var Game = GameBase.Create({
       game_encode: Bases.Stalactite.game_encode,

@@ -2,12 +2,14 @@ open Webapi.Dom
 open Common
 
 @decco
-type space = Card(Card.card) | Foundation(int) | Tableau(int) | Waste | Stock | Free(int)
+type space =
+  Card(Card.card) | Foundation(int) | Foundation2(int) | Tableau(int) | Waste | Stock | Free(int)
 
 @decco
 type game = {
   tableau: array<array<Card.sides>>,
   foundations: array<array<Card.sides>>,
+  foundations2: array<array<Card.sides>>,
   stock: array<array<Card.sides>>,
   waste: array<Card.sides>,
   free: array<option<Card.sides>>,
@@ -173,6 +175,7 @@ module Make = (PackerRules: PackerRules) => {
 
     {
       foundations: game.foundations->Array.map(removeDragPile),
+      foundations2: game.foundations2->Array.map(removeDragPile),
       tableau: game.tableau->Array.map(removeDragPile),
       stock: game.stock->Array.map(removeDragPile),
       waste: game.waste->removeDragPile,
@@ -299,6 +302,60 @@ module Make = (PackerRules: PackerRules) => {
     }
   }
 
+  let foundation2BaseRules = (i): staticSpace => {
+    {
+      autoProgress: Seek,
+      droppedUpon: (game, dragPile) => {
+        if foundationBaseCheck(game, dragPile, i) {
+          Some({
+            ...game,
+            tableau: game.tableau->GameCommons.flipLastUp,
+            foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
+          })
+        } else {
+          None
+        }
+      },
+      onClick: _ => None,
+    }
+  }
+
+  let foundation2Rules = (game, pile, card, i, j): movableSpace => {
+    let isLast = j == pile->Array.length - 1
+
+    {
+      locationAdjustment: {
+        x: 0,
+        y: 0,
+        z: j + 1,
+      },
+      baseSpace: Foundation(i),
+      dragPile: () => {
+        if j == game.foundations->Array.length - 1 {
+          Some([card])
+        } else {
+          None
+        }
+      },
+      autoProgress: () => Seek,
+      droppedUpon: (game, dragPile) => {
+        if isLast && foundationCheck(dragPile, card) {
+          Some({
+            ...game,
+            tableau: game.tableau->GameCommons.flipLastUp,
+            foundations: game.foundations->Array.map(stack => {
+              stack->ArrayAux.insertAfter(card, dragPile)
+            }),
+          })
+        } else {
+          None
+        }
+      },
+      onClick: _ => None,
+      onStateChange: element => Card.showOrHide(card, element),
+    }
+  }
+
   let wasteRules = (_game, _card, i): movableSpace => {
     baseSpace: Waste,
     locationAdjustment: {
@@ -358,6 +415,8 @@ module Make = (PackerRules: PackerRules) => {
     ~tableauRules=tableauRules,
     ~foundationBaseRules=foundationBaseRules,
     ~foundationRules=foundationRules,
+    ~foundation2BaseRules=foundation2BaseRules,
+    ~foundation2Rules=foundation2Rules,
     ~wasteRules=wasteRules,
     ~stockBaseRules=stockBaseRules,
     ~stockRules=stockRules,
@@ -378,6 +437,14 @@ module Make = (PackerRules: PackerRules) => {
 
         foundation->Array.forEachWithIndex((card, j) => {
           f(Card(card.card), foundationRules(game, foundation, card, i, j)->Movable)
+        })
+      })
+
+      game.foundations2->Array.forEachWithIndex((foundation, i) => {
+        f(Foundation2(i), foundation2BaseRules(i)->Static)
+
+        foundation->Array.forEachWithIndex((card, j) => {
+          f(Card(card.card), foundation2Rules(game, foundation, card, i, j)->Movable)
         })
       })
 

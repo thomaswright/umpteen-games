@@ -13,6 +13,7 @@ function freeBaseRules(i) {
                 return {
                         tableau: game.tableau,
                         foundations: game.foundations,
+                        foundations2: game.foundations2,
                         stock: game.stock,
                         waste: game.waste,
                         free: Common.ArrayAux.update(game.free, i, (function (param) {
@@ -95,6 +96,7 @@ function stockRules(_game, _card, i, j) {
                                                           }));
                                             })),
                                     foundations: game.foundations,
+                                    foundations2: game.foundations2,
                                     stock: game.stock.slice(0, game.stock.length - 1 | 0),
                                     waste: game.waste,
                                     free: game.free
@@ -191,6 +193,7 @@ function stockRules$1(_game, card, _i, j) {
               return {
                       tableau: game.tableau,
                       foundations: game.foundations,
+                      foundations2: game.foundations2,
                       stock: Common.ArrayAux.update(game.stock, 0, (function (v) {
                               return v.slice(0, realStock.length - 1 | 0);
                             })),
@@ -211,6 +214,7 @@ function stockBaseRules() {
               return {
                       tableau: game.tableau,
                       foundations: game.foundations,
+                      foundations2: game.foundations2,
                       stock: [Card.hideAfter(game.waste.toReversed(), 0)],
                       waste: [],
                       free: game.free

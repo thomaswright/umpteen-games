@@ -40,6 +40,7 @@ module OneSuit = GameBase.Create({
           deckToDeal->ArrayAux.popN(5),
         ]->GameCommons.flipLastUp,
         foundations: [[], [], [], [], [], [], [], []],
+        foundations2: [],
         stock: [
           deckToDeal->ArrayAux.popN(10),
           deckToDeal->ArrayAux.popN(10),
@@ -94,6 +95,7 @@ module TwoSuit = GameBase.Create({
           deckToDeal->ArrayAux.popN(5),
         ]->GameCommons.flipLastUp,
         foundations: [[], [], [], [], [], [], [], []],
+        foundations2: [],
         stock: [
           deckToDeal->ArrayAux.popN(10),
           deckToDeal->ArrayAux.popN(10),
@@ -135,6 +137,7 @@ module FourSuit = GameBase.Create({
           deckToDeal->ArrayAux.popN(5),
         ]->GameCommons.flipLastUp,
         foundations: [[], [], [], [], [], [], [], []],
+        foundations2: [],
         stock: [
           deckToDeal->ArrayAux.popN(10),
           deckToDeal->ArrayAux.popN(10),

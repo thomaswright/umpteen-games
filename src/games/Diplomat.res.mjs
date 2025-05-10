@@ -36,6 +36,7 @@ function initiateGame() {
               [],
               []
             ],
+            foundations2: [],
             stock: [Card.hideAfter(deckToDeal.contents, 0)],
             waste: [],
             free: []
@@ -43,7 +44,7 @@ function initiateGame() {
         ];
 }
 
-var forEachSpace = Bases.Diplomat.makeForEachSpace(undefined, undefined, undefined, undefined, Rules.WasteRotation.stackedWasteRules, Rules.WasteRotation.stockBaseRules, Rules.WasteRotation.stockRules, undefined, undefined);
+var forEachSpace = Bases.Diplomat.makeForEachSpace(undefined, undefined, undefined, undefined, undefined, undefined, Rules.WasteRotation.stackedWasteRules, Rules.WasteRotation.stockBaseRules, Rules.WasteRotation.stockRules, undefined, undefined);
 
 var Game = GameBase.Create({
       game_encode: Bases.Diplomat.game_encode,
