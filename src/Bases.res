@@ -1,5 +1,15 @@
 open Packer
 
+module Alhambra = Make({
+  let spec = {
+    drop: NoDrop,
+    drag: NoDrop,
+    size: JustOne,
+    depot: AnyDepot,
+    foundation: ByOne,
+  }
+})
+
 module Klondike = Make({
   let spec = {
     drop: AltColor,

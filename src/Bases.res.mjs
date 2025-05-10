@@ -2,6 +2,16 @@
 
 import * as Packer from "./Packer.res.mjs";
 
+var Alhambra = Packer.Make({
+      spec: {
+        drop: "NoDrop",
+        drag: "NoDrop",
+        size: "JustOne",
+        depot: "AnyDepot",
+        foundation: "ByOne"
+      }
+    });
+
 var Klondike = Packer.Make({
       spec: {
         drop: "AltColor",
@@ -152,6 +162,7 @@ var GayGordons = Packer.Make({
     });
 
 export {
+  Alhambra ,
   Klondike ,
   Diplomat ,
   BakersGame ,
@@ -167,4 +178,4 @@ export {
   EastHaven ,
   GayGordons ,
 }
-/* Klondike Not a pure module */
+/* Alhambra Not a pure module */

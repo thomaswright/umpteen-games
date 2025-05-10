@@ -1,5 +1,61 @@
 open Packer
 
+// Stock, Waste, Foundation, Foundation2, Reserve
+module SWFFR = {
+  @react.component
+  let make = (~setRef, ~initialGame: game) => {
+    <React.Fragment>
+      <div className="flex flex-row gap-3">
+        <div
+          key={Stock->spaceToString}
+          id={Stock->spaceToString}
+          ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
+          className=" bg-black opacity-20 rounded w-14 h-20"
+        />
+        <div
+          key={Waste->spaceToString}
+          id={Waste->spaceToString}
+          ref={ReactDOM.Ref.callbackDomRef(setRef(Waste))}
+          className=" w-14 h-20"
+        />
+      </div>
+      <div className="flex flex-row gap-3 mt-5">
+        {Array.make(~length=initialGame.foundations->Array.length, [])
+        ->Array.mapWithIndex((_, i) => {
+          <div
+            key={Foundation(i)->spaceToString}
+            id={Foundation(i)->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
+            className=" bg-white opacity-10 rounded w-14 h-20"
+          />
+        })
+        ->React.array}
+        {Array.make(~length=initialGame.foundations2->Array.length, [])
+        ->Array.mapWithIndex((_, i) => {
+          <div
+            key={Foundation2(i)->spaceToString}
+            id={Foundation2(i)->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation2(i)))}
+            className=" bg-white opacity-10 rounded w-14 h-20"
+          />
+        })
+        ->React.array}
+      </div>
+      <div className="flex flex-row gap-3 mt-5">
+        {Array.make(~length=initialGame.free->Array.length, [])
+        ->Array.mapWithIndex((_, i) => {
+          <div
+            key={Free(i)->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
+            className=" bg-black opacity-20   rounded w-14 h-20"
+          />
+        })
+        ->React.array}
+      </div>
+    </React.Fragment>
+  }
+}
+
 // Stock, Waste, Foundation, Tableau
 module SWFT = {
   @react.component

@@ -5,6 +5,7 @@ import * as MrsMop from "./games/MrsMop.res.mjs";
 import * as Spider from "./games/Spider.res.mjs";
 import * as Penguin from "./games/Penguin.res.mjs";
 import * as Pyramid from "./games/Pyramid.res.mjs";
+import * as Alhambra from "./Alhambra.res.mjs";
 import * as Diplomat from "./games/Diplomat.res.mjs";
 import * as EightOff from "./games/EightOff.res.mjs";
 import * as Klondike from "./games/Klondike.res.mjs";
@@ -49,7 +50,8 @@ var allGames = [
   "Gay Gordon's",
   "Agnes Sorel",
   "Agnes Bernauer",
-  "Diplomat"
+  "Diplomat",
+  "Alhambra"
 ];
 
 function GameBrowser(props) {
@@ -165,6 +167,11 @@ function GameBrowser(props) {
         break;
     case "Diplomat" :
         tmp = JsxRuntime.jsx(Diplomat.Game.make, {
+              id: selectGameType
+            });
+        break;
+    case "Alhambra" :
+        tmp = JsxRuntime.jsx(Alhambra.Game.make, {
               id: selectGameType
             });
         break;

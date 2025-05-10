@@ -110,6 +110,48 @@ var DealAll = {
   stockRules: stockRules
 };
 
+function stackedBuildWasteRules(game, card, i) {
+  return {
+          locationAdjustment: {
+            x: 0,
+            y: 0,
+            z: i + 1 | 0
+          },
+          baseSpace: "Waste",
+          dragPile: (function () {
+              if (i === (game.waste.length - 1 | 0)) {
+                return [card];
+              }
+              
+            }),
+          autoProgress: (function () {
+              return "DoNothing";
+            }),
+          droppedUpon: (function (game, dragPile) {
+              var dragPileBase = dragPile[0];
+              return Core__Option.mapOr(Common.ArrayAux.getLast(game.waste), undefined, (function (wasteTop) {
+                            if (dragPileBase.card.suit === wasteTop.card.suit && Card.rankIsAboveCyclic(wasteTop, dragPileBase) && Card.rankIsAboveCyclic(dragPileBase, wasteTop)) {
+                              return {
+                                      tableau: game.tableau,
+                                      foundations: game.foundations,
+                                      foundations2: game.foundations2,
+                                      stock: game.stock,
+                                      waste: game.waste.concat(dragPile),
+                                      free: game.free
+                                    };
+                            }
+                            
+                          }));
+            }),
+          onStateChange: (function (element) {
+              Card.showOrHide(card, element);
+            }),
+          onClick: (function (param) {
+              
+            })
+        };
+}
+
 function stackedWasteRules(game, card, i) {
   return {
           locationAdjustment: {
@@ -224,6 +266,7 @@ function stockBaseRules() {
 }
 
 var WasteRotation = {
+  stackedBuildWasteRules: stackedBuildWasteRules,
   stackedWasteRules: stackedWasteRules,
   fannedWasteRules: fannedWasteRules,
   stockRules: stockRules$1,

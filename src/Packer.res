@@ -121,22 +121,6 @@ module Make = (PackerRules: PackerRules) => {
     }
   }
 
-  let foundationBaseCheck = (game: game, dragPile: dragPile, i) => {
-    let justOne = dragPile->Array.length == 1
-    let fullStack = dragPile->Array.length == 13
-    let noChildren = game.foundations->Array.getUnsafe(i)->Array.length == 0
-    let valid = dragPile->GameCommons.decOneSuitValidation
-    let dragPileBase = dragPile->Array.getUnsafe(0)
-
-    switch PackerRules.spec.foundation {
-    | ByOne => noChildren && justOne && dragPileBase.card.rank == RA
-    | ByAll => noChildren && fullStack && valid
-    | ByOneCyclicOneSuit => noChildren && justOne && dragPileBase.card.rank == RA
-    | ByOneCyclicAnySuit => noChildren && justOne && dragPileBase.card.rank == RA
-    | NoFoundation => false
-    }
-  }
-
   let foundationCheck = (dragPile: dragPile, card: Card.sides) => {
     let justOne = dragPile->Array.length == 1
     let dragPileBase = dragPile->Array.getUnsafe(0)
@@ -154,6 +138,55 @@ module Make = (PackerRules: PackerRules) => {
     }
   }
 
+  let foundationBaseCheck = (game: game, dragPile: dragPile, i) => {
+    let justOne = dragPile->Array.length == 1
+    let fullStack = dragPile->Array.length == 13
+    let noChildren = game.foundations->Array.getUnsafe(i)->Array.length == 0
+    let valid = dragPile->GameCommons.decOneSuitValidation
+    let dragPileBase = dragPile->Array.getUnsafe(0)
+
+    switch PackerRules.spec.foundation {
+    | ByOne => noChildren && justOne && dragPileBase.card.rank == RA
+    | ByAll => noChildren && fullStack && valid
+    | ByOneCyclicOneSuit => noChildren && justOne && dragPileBase.card.rank == RA
+    | ByOneCyclicAnySuit => noChildren && justOne && dragPileBase.card.rank == RA
+    | NoFoundation => false
+    }
+  }
+
+  let foundation2Check = (dragPile: dragPile, card: Card.sides) => {
+    let justOne = dragPile->Array.length == 1
+    let dragPileBase = dragPile->Array.getUnsafe(0)
+
+    switch PackerRules.spec.foundation {
+    | ByOneCyclicAnySuit => justOne && Card.rankIsAboveCyclic(card, dragPileBase)
+    | ByOneCyclicOneSuit =>
+      justOne &&
+      dragPileBase.card.suit == card.card.suit &&
+      Card.rankIsAboveCyclic(card, dragPileBase)
+    | ByOne =>
+      justOne && dragPileBase.card.suit == card.card.suit && Card.rankIsAbove(card, dragPileBase)
+    | ByAll => false
+    | NoFoundation => false
+    }
+  }
+
+  let foundation2BaseCheck = (game: game, dragPile: dragPile, i) => {
+    let justOne = dragPile->Array.length == 1
+    let fullStack = dragPile->Array.length == 13
+    let noChildren = game.foundations2->Array.getUnsafe(i)->Array.length == 0
+    let valid = dragPile->GameCommons.decOneSuitValidation
+    let dragPileBase = dragPile->Array.getUnsafe(0)
+
+    switch PackerRules.spec.foundation {
+    | ByOne => noChildren && justOne && dragPileBase.card.rank == RK
+    | ByAll => noChildren && fullStack && valid
+    | ByOneCyclicOneSuit => noChildren && justOne && dragPileBase.card.rank == RK
+    | ByOneCyclicAnySuit => noChildren && justOne && dragPileBase.card.rank == RK
+    | NoFoundation => false
+    }
+  }
+
   let applyLiftToDragPile = (dragPile: dragPile, lift) => {
     dragPile->Array.forEachWithIndex((v, j) => {
       lift(Card(v.card), j)
@@ -167,10 +200,10 @@ module Make = (PackerRules: PackerRules) => {
   }
 
   let removeDragFromGame = (game: game, dragPile: dragPile) => {
-    let dragtableauet = dragPile->Set.fromArray
+    let dragPileSet = dragPile->Set.fromArray
     let removeDragPile = x =>
       x->Array.filter(sCard => {
-        !(dragtableauet->Set.has(sCard))
+        !(dragPileSet->Set.has(sCard))
       })
 
     {
@@ -306,11 +339,11 @@ module Make = (PackerRules: PackerRules) => {
     {
       autoProgress: Seek,
       droppedUpon: (game, dragPile) => {
-        if foundationBaseCheck(game, dragPile, i) {
+        if foundation2BaseCheck(game, dragPile, i) {
           Some({
             ...game,
             tableau: game.tableau->GameCommons.flipLastUp,
-            foundations: game.foundations->ArrayAux.update(i, _ => dragPile),
+            foundations2: game.foundations2->ArrayAux.update(i, _ => dragPile),
           })
         } else {
           None
@@ -329,21 +362,21 @@ module Make = (PackerRules: PackerRules) => {
         y: 0,
         z: j + 1,
       },
-      baseSpace: Foundation(i),
+      baseSpace: Foundation2(i),
       dragPile: () => {
-        if j == game.foundations->Array.length - 1 {
+        if j == game.foundations2->Array.length - 1 {
           Some([card])
         } else {
           None
         }
       },
       autoProgress: () => Seek,
-      droppedUpon: (game, dragPile) => {
-        if isLast && foundationCheck(dragPile, card) {
+      droppedUpon: (gameRemoved, dragPile) => {
+        if isLast && foundation2Check(dragPile, card) {
           Some({
-            ...game,
-            tableau: game.tableau->GameCommons.flipLastUp,
-            foundations: game.foundations->Array.map(stack => {
+            ...gameRemoved,
+            tableau: gameRemoved.tableau->GameCommons.flipLastUp,
+            foundations2: gameRemoved.foundations2->Array.map(stack => {
               stack->ArrayAux.insertAfter(card, dragPile)
             }),
           })
@@ -440,11 +473,11 @@ module Make = (PackerRules: PackerRules) => {
         })
       })
 
-      game.foundations2->Array.forEachWithIndex((foundation, i) => {
+      game.foundations2->Array.forEachWithIndex((foundation2, i) => {
         f(Foundation2(i), foundation2BaseRules(i)->Static)
 
-        foundation->Array.forEachWithIndex((card, j) => {
-          f(Card(card.card), foundation2Rules(game, foundation, card, i, j)->Movable)
+        foundation2->Array.forEachWithIndex((card, j) => {
+          f(Card(card.card), foundation2Rules(game, foundation2, card, i, j)->Movable)
         })
       })
 

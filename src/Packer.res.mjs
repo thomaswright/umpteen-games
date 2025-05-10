@@ -492,30 +492,6 @@ function Make(PackerRules) {
       return false;
     }
   };
-  var foundationBaseCheck = function (game, dragPile, i) {
-    var justOne = dragPile.length === 1;
-    var fullStack = dragPile.length === 13;
-    var noChildren = game.foundations[i].length === 0;
-    var valid = GameCommons.decOneSuitValidation(dragPile);
-    var dragPileBase = dragPile[0];
-    var match = PackerRules.spec.foundation;
-    switch (match) {
-      case "ByAll" :
-          if (noChildren && fullStack) {
-            return valid;
-          } else {
-            return false;
-          }
-      case "NoFoundation" :
-          return false;
-      default:
-        if (noChildren && justOne) {
-          return dragPileBase.card.rank === "RA";
-        } else {
-          return false;
-        }
-    }
-  };
   var foundationCheck = function (dragPile, card) {
     var justOne = dragPile.length === 1;
     var dragPileBase = dragPile[0];
@@ -545,6 +521,83 @@ function Make(PackerRules) {
       
     }
   };
+  var foundationBaseCheck = function (game, dragPile, i) {
+    var justOne = dragPile.length === 1;
+    var fullStack = dragPile.length === 13;
+    var noChildren = game.foundations[i].length === 0;
+    var valid = GameCommons.decOneSuitValidation(dragPile);
+    var dragPileBase = dragPile[0];
+    var match = PackerRules.spec.foundation;
+    switch (match) {
+      case "ByAll" :
+          if (noChildren && fullStack) {
+            return valid;
+          } else {
+            return false;
+          }
+      case "NoFoundation" :
+          return false;
+      default:
+        if (noChildren && justOne) {
+          return dragPileBase.card.rank === "RA";
+        } else {
+          return false;
+        }
+    }
+  };
+  var foundation2Check = function (dragPile, card) {
+    var justOne = dragPile.length === 1;
+    var dragPileBase = dragPile[0];
+    var match = PackerRules.spec.foundation;
+    switch (match) {
+      case "ByOne" :
+          if (justOne && dragPileBase.card.suit === card.card.suit) {
+            return Card.rankIsAbove(card, dragPileBase);
+          } else {
+            return false;
+          }
+      case "ByOneCyclicOneSuit" :
+          if (justOne && dragPileBase.card.suit === card.card.suit) {
+            return Card.rankIsAboveCyclic(card, dragPileBase);
+          } else {
+            return false;
+          }
+      case "ByOneCyclicAnySuit" :
+          if (justOne) {
+            return Card.rankIsAboveCyclic(card, dragPileBase);
+          } else {
+            return false;
+          }
+      case "ByAll" :
+      case "NoFoundation" :
+          return false;
+      
+    }
+  };
+  var foundation2BaseCheck = function (game, dragPile, i) {
+    var justOne = dragPile.length === 1;
+    var fullStack = dragPile.length === 13;
+    var noChildren = game.foundations2[i].length === 0;
+    var valid = GameCommons.decOneSuitValidation(dragPile);
+    var dragPileBase = dragPile[0];
+    var match = PackerRules.spec.foundation;
+    switch (match) {
+      case "ByAll" :
+          if (noChildren && fullStack) {
+            return valid;
+          } else {
+            return false;
+          }
+      case "NoFoundation" :
+          return false;
+      default:
+        if (noChildren && justOne) {
+          return dragPileBase.card.rank === "RK";
+        } else {
+          return false;
+        }
+    }
+  };
   var applyLiftToDragPile = function (dragPile, lift) {
     dragPile.forEach(function (v, j) {
           lift({
@@ -562,10 +615,10 @@ function Make(PackerRules) {
         });
   };
   var removeDragFromGame = function (game, dragPile) {
-    var dragtableauet = new Set(dragPile);
+    var dragPileSet = new Set(dragPile);
     var removeDragPile = function (x) {
       return x.filter(function (sCard) {
-                  return !dragtableauet.has(sCard);
+                  return !dragPileSet.has(sCard);
                 });
     };
     return {
@@ -732,13 +785,13 @@ function Make(PackerRules) {
   var foundation2BaseRules = function (i) {
     return {
             droppedUpon: (function (game, dragPile) {
-                if (foundationBaseCheck(game, dragPile, i)) {
+                if (foundation2BaseCheck(game, dragPile, i)) {
                   return {
                           tableau: GameCommons.flipLastUp(game.tableau),
-                          foundations: Common.ArrayAux.update(game.foundations, i, (function (param) {
+                          foundations: game.foundations,
+                          foundations2: Common.ArrayAux.update(game.foundations2, i, (function (param) {
                                   return dragPile;
                                 })),
-                          foundations2: game.foundations2,
                           stock: game.stock,
                           waste: game.waste,
                           free: game.free
@@ -761,11 +814,11 @@ function Make(PackerRules) {
               z: j + 1 | 0
             },
             baseSpace: {
-              TAG: "Foundation",
+              TAG: "Foundation2",
               _0: i
             },
             dragPile: (function () {
-                if (j === (game.foundations.length - 1 | 0)) {
+                if (j === (game.foundations2.length - 1 | 0)) {
                   return [card];
                 }
                 
@@ -773,17 +826,17 @@ function Make(PackerRules) {
             autoProgress: (function () {
                 return "Seek";
               }),
-            droppedUpon: (function (game, dragPile) {
-                if (isLast && foundationCheck(dragPile, card)) {
+            droppedUpon: (function (gameRemoved, dragPile) {
+                if (isLast && foundation2Check(dragPile, card)) {
                   return {
-                          tableau: GameCommons.flipLastUp(game.tableau),
-                          foundations: game.foundations.map(function (stack) {
+                          tableau: GameCommons.flipLastUp(gameRemoved.tableau),
+                          foundations: gameRemoved.foundations,
+                          foundations2: gameRemoved.foundations2.map(function (stack) {
                                 return Common.ArrayAux.insertAfter(stack, card, dragPile);
                               }),
-                          foundations2: game.foundations2,
-                          stock: game.stock,
-                          waste: game.waste,
-                          free: game.free
+                          stock: gameRemoved.stock,
+                          waste: gameRemoved.waste,
+                          free: gameRemoved.free
                         };
                 }
                 
@@ -945,7 +998,7 @@ function Make(PackerRules) {
                       });
                 });
           });
-      game.foundations2.forEach(function (foundation, i) {
+      game.foundations2.forEach(function (foundation2, i) {
             f({
                   TAG: "Foundation2",
                   _0: i
@@ -953,13 +1006,13 @@ function Make(PackerRules) {
                   TAG: "Static",
                   _0: foundation2BaseRules$1(i)
                 });
-            foundation.forEach(function (card, j) {
+            foundation2.forEach(function (card, j) {
                   f({
                         TAG: "Card",
                         _0: card.card
                       }, {
                         TAG: "Movable",
-                        _0: foundation2Rules$1(game, foundation, card, i, j)
+                        _0: foundation2Rules$1(game, foundation2, card, i, j)
                       });
                 });
           });
@@ -1045,8 +1098,10 @@ function Make(PackerRules) {
           dragCheck: dragCheck,
           dragSizeCheck: dragSizeCheck,
           pileBaseCheck: pileBaseCheck,
-          foundationBaseCheck: foundationBaseCheck,
           foundationCheck: foundationCheck,
+          foundationBaseCheck: foundationBaseCheck,
+          foundation2Check: foundation2Check,
+          foundation2BaseCheck: foundation2BaseCheck,
           applyLiftToDragPile: applyLiftToDragPile,
           applyMoveToDragPile: applyMoveToDragPile,
           removeDragFromGame: removeDragFromGame,

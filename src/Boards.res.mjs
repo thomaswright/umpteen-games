@@ -6,6 +6,86 @@ import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
+function Boards$SWFFR(props) {
+  var initialGame = props.initialGame;
+  var setRef = props.setRef;
+  return JsxRuntime.jsxs(React.Fragment, {
+              children: [
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        JsxRuntime.jsx("div", {
+                              ref: Caml_option.some(setRef("Stock")),
+                              className: " bg-black opacity-20 rounded w-14 h-20",
+                              id: Packer.spaceToString("Stock")
+                            }, Packer.spaceToString("Stock")),
+                        JsxRuntime.jsx("div", {
+                              ref: Caml_option.some(setRef("Waste")),
+                              className: " w-14 h-20",
+                              id: Packer.spaceToString("Waste")
+                            }, Packer.spaceToString("Waste"))
+                      ],
+                      className: "flex flex-row gap-3"
+                    }),
+                JsxRuntime.jsxs("div", {
+                      children: [
+                        Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
+                              return JsxRuntime.jsx("div", {
+                                          ref: Caml_option.some(setRef({
+                                                    TAG: "Foundation",
+                                                    _0: i
+                                                  })),
+                                          className: " bg-white opacity-10 rounded w-14 h-20",
+                                          id: Packer.spaceToString({
+                                                TAG: "Foundation",
+                                                _0: i
+                                              })
+                                        }, Packer.spaceToString({
+                                              TAG: "Foundation",
+                                              _0: i
+                                            }));
+                            }),
+                        Core__Array.make(initialGame.foundations2.length, []).map(function (param, i) {
+                              return JsxRuntime.jsx("div", {
+                                          ref: Caml_option.some(setRef({
+                                                    TAG: "Foundation2",
+                                                    _0: i
+                                                  })),
+                                          className: " bg-white opacity-10 rounded w-14 h-20",
+                                          id: Packer.spaceToString({
+                                                TAG: "Foundation2",
+                                                _0: i
+                                              })
+                                        }, Packer.spaceToString({
+                                              TAG: "Foundation2",
+                                              _0: i
+                                            }));
+                            })
+                      ],
+                      className: "flex flex-row gap-3 mt-5"
+                    }),
+                JsxRuntime.jsx("div", {
+                      children: Core__Array.make(initialGame.free.length, []).map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Free",
+                                                  _0: i
+                                                })),
+                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                      }, Packer.spaceToString({
+                                            TAG: "Free",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    })
+              ]
+            });
+}
+
+var SWFFR = {
+  make: Boards$SWFFR
+};
+
 function Boards$SWFT(props) {
   var initialGame = props.initialGame;
   var setRef = props.setRef;
@@ -482,6 +562,7 @@ var ST = {
 };
 
 export {
+  SWFFR ,
   SWFT ,
   FRT ,
   FRT2 ,
