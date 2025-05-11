@@ -7,6 +7,7 @@ import * as Penguin from "./games/Penguin.res.mjs";
 import * as Pyramid from "./games/Pyramid.res.mjs";
 import * as Diplomat from "./games/Diplomat.res.mjs";
 import * as EightOff from "./games/EightOff.res.mjs";
+import * as Fortress from "./games/Fortress.res.mjs";
 import * as Klondike from "./games/Klondike.res.mjs";
 import * as Scorpion from "./games/Scorpion.res.mjs";
 import * as EastHaven from "./games/EastHaven.res.mjs";
@@ -21,6 +22,7 @@ import * as GermanPatience from "./games/GermanPatience.res.mjs";
 import * as SeahavenTowers from "./games/SeahavenTowers.res.mjs";
 import * as FreeCellOneDeck from "./games/FreeCellOneDeck.res.mjs";
 import * as FreeCellTwoDeck from "./games/FreeCellTwoDeck.res.mjs";
+import * as BeleagueredCastle from "./games/BeleagueredCastle.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function gameString(a) {
@@ -49,7 +51,9 @@ var allGames = [
   "Gay Gordon's",
   "Agnes Sorel",
   "Agnes Bernauer",
-  "Diplomat"
+  "Diplomat",
+  "Beleaguered Castle",
+  "Fortress"
 ];
 
 function GameBrowser(props) {
@@ -165,6 +169,16 @@ function GameBrowser(props) {
         break;
     case "Diplomat" :
         tmp = JsxRuntime.jsx(Diplomat.Game.make, {
+              id: selectGameType
+            });
+        break;
+    case "Beleaguered Castle" :
+        tmp = JsxRuntime.jsx(BeleagueredCastle.Game.make, {
+              id: selectGameType
+            });
+        break;
+    case "Fortress" :
+        tmp = JsxRuntime.jsx(Fortress.Game.make, {
               id: selectGameType
             });
         break;

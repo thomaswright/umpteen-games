@@ -418,6 +418,12 @@ function Make(PackerRules) {
           } else {
             return false;
           }
+      case "EitherWayOneSuit" :
+          if (Card.rankIsAbove(card, dragPileBase) || Card.rankIsAbove(dragPileBase, card)) {
+            return dragPileBase.card.suit === card.card.suit;
+          } else {
+            return false;
+          }
       case "CyclicOneSuit" :
           if (Card.rankIsAboveCyclic(card, dragPileBase)) {
             return dragPileBase.card.suit === card.card.suit;
@@ -452,6 +458,8 @@ function Make(PackerRules) {
           return true;
       case "OneSuit" :
           return GameCommons.decOneSuitValidation(dragPile);
+      case "EitherWayOneSuit" :
+          return GameCommons.eitherWayOneSuitValidation(dragPile);
       case "CyclicOneSuit" :
           return GameCommons.decCyclicOneSuitValidation(dragPile);
       case "CyclicAnySuit" :

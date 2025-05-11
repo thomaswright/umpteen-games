@@ -25,6 +25,16 @@ var Klondike = Packer.Make({
       }
     });
 
+var Fortress = Packer.Make({
+      spec: {
+        drop: "EitherWayOneSuit",
+        drag: "EitherWayOneSuit",
+        size: "JustOne",
+        depot: "AnyDepot",
+        foundation: "ByOne"
+      }
+    });
+
 var Diplomat = Packer.Make({
       spec: {
         drop: "AnySuit",
@@ -164,6 +174,7 @@ var GayGordons = Packer.Make({
 export {
   Alhambra ,
   Klondike ,
+  Fortress ,
   Diplomat ,
   BakersGame ,
   FreeCell ,

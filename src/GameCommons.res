@@ -25,6 +25,13 @@ let decOneSuitValidation = (dragPile: array<Card.sides>) => {
   )
 }
 
+let eitherWayOneSuitValidation = (dragPile: array<Card.sides>) => {
+  dragPile->pileValidation((onBottom, onTop) =>
+    (Card.rankIsAbove(onBottom, onTop) || Card.rankIsAbove(onTop, onBottom)) &&
+      onTop.card.suit == onBottom.card.suit
+  )
+}
+
 let decCyclicOneSuitValidation = (dragPile: array<Card.sides>) => {
   dragPile->pileValidation((onBottom, onTop) => {
     Card.rankIsAboveCyclic(onBottom, onTop) && onTop.card.suit == onBottom.card.suit

@@ -22,6 +22,7 @@ type stack =
   | AltColor
   | AnySuit
   | OneSuit
+  | EitherWayOneSuit
   | CyclicOneSuit
   | CyclicAnySuit
   | CyclicAltColor
@@ -84,6 +85,9 @@ module Make = (PackerRules: PackerRules) => {
     | CyclicAltColor =>
       Card.rankIsAboveCyclic(card, dragPileBase) && dragPileBase->Card.color != card->Card.color
     | CyclicAnySuit => Card.rankIsAboveCyclic(card, dragPileBase)
+    | EitherWayOneSuit =>
+      (Card.rankIsAbove(card, dragPileBase) || Card.rankIsAbove(dragPileBase, card)) &&
+        dragPileBase.card.suit == card.card.suit
     | NoDrop => false
     }
   }
@@ -97,6 +101,7 @@ module Make = (PackerRules: PackerRules) => {
     | CyclicAnySuit => dragPile->GameCommons.decCyclicAnySuitValidation
     | CyclicSameColor => dragPile->GameCommons.decCyclicSameColorValidation
     | CyclicAltColor => dragPile->GameCommons.decCyclicAltColorValidation
+    | EitherWayOneSuit => dragPile->GameCommons.eitherWayOneSuitValidation
     | NoDrop => false
     }
 

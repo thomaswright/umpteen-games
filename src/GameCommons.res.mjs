@@ -50,6 +50,16 @@ function decOneSuitValidation(dragPile) {
               }));
 }
 
+function eitherWayOneSuitValidation(dragPile) {
+  return pileValidation(dragPile, (function (onBottom, onTop) {
+                if (Card.rankIsAbove(onBottom, onTop) || Card.rankIsAbove(onTop, onBottom)) {
+                  return onTop.card.suit === onBottom.card.suit;
+                } else {
+                  return false;
+                }
+              }));
+}
+
 function decCyclicOneSuitValidation(dragPile) {
   return pileValidation(dragPile, (function (onBottom, onTop) {
                 if (Card.rankIsAboveCyclic(onBottom, onTop)) {
@@ -101,6 +111,7 @@ export {
   pileValidation ,
   decAltColorValidation ,
   decOneSuitValidation ,
+  eitherWayOneSuitValidation ,
   decCyclicOneSuitValidation ,
   decCyclicAnySuitValidation ,
   decCyclicSameColorValidation ,

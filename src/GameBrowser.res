@@ -21,6 +21,9 @@ type gameType =
   | @as("Agnes Sorel") AgnesSorel
   | @as("Agnes Bernauer") AgnesBernauer
   | @as("Diplomat") Diplomat
+  | @as("Beleaguered Castle") BeleagueredCastle
+  | @as("Fortress") Fortress
+
 // | @as("Alhambra") Alhambra
 
 let gameString = (a: gameType) => (a :> string)
@@ -48,6 +51,8 @@ let allGames = [
   AgnesSorel,
   AgnesBernauer,
   Diplomat,
+  BeleagueredCastle,
+  Fortress,
   // Alhambra,
 ]
 
@@ -105,6 +110,8 @@ let make = () => {
     | AgnesSorel => <AgnesSorel.Game id />
     | AgnesBernauer => <AgnesBernauer.Game id />
     | Diplomat => <Diplomat.Game id />
+    | BeleagueredCastle => <BeleagueredCastle.Game id />
+    | Fortress => <Fortress.Game id />
     // | Alhambra => <Alhambra.Game id />
     }}
   </div>
