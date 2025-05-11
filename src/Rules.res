@@ -93,8 +93,8 @@ module WasteRotation = {
       ->Option.mapOr(None, wasteTop => {
         if (
           dragPileBase.card.suit == wasteTop.card.suit &&
-          Card.rankIsAboveCyclic(wasteTop, dragPileBase) &&
-          Card.rankIsAboveCyclic(dragPileBase, wasteTop)
+            (Card.rankIsAboveCyclic(wasteTop, dragPileBase) ||
+            Card.rankIsAboveCyclic(dragPileBase, wasteTop))
         ) {
           Some({
             ...game,

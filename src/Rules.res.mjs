@@ -130,7 +130,7 @@ function stackedBuildWasteRules(game, card, i) {
           droppedUpon: (function (game, dragPile) {
               var dragPileBase = dragPile[0];
               return Core__Option.mapOr(Common.ArrayAux.getLast(game.waste), undefined, (function (wasteTop) {
-                            if (dragPileBase.card.suit === wasteTop.card.suit && Card.rankIsAboveCyclic(wasteTop, dragPileBase) && Card.rankIsAboveCyclic(dragPileBase, wasteTop)) {
+                            if (dragPileBase.card.suit === wasteTop.card.suit && (Card.rankIsAboveCyclic(wasteTop, dragPileBase) || Card.rankIsAboveCyclic(dragPileBase, wasteTop))) {
                               return {
                                       tableau: game.tableau,
                                       foundations: game.foundations,
