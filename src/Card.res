@@ -170,7 +170,7 @@ module Display = {
           ]->Array.join(" ")}
         />
         <span
-          className="flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-[#a4a4a4] rounded"
+          className="flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-[#939cae] rounded"
           style={{
             backgroundColor: multiColor ? multiColorPastel(card) : "white",
           }}>

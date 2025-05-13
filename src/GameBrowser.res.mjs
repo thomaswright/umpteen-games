@@ -210,8 +210,8 @@ function GameBrowser(props) {
                 JsxRuntime.jsxs("div", {
                       children: [
                         JsxRuntime.jsx("div", {
-                              children: "tom & won's card games",
-                              className: "mb-1 text-white font-medium tracking-widest "
+                              children: "Umpteen Games",
+                              className: " font-black  text-4xl text-[#edffe1] tracking-tight"
                             }),
                         JsxRuntime.jsx("div", {
                               children: JsxRuntime.jsx("select", {
@@ -221,7 +221,7 @@ function GameBrowser(props) {
                                                       value: v
                                                     }, v);
                                         }),
-                                    className: "px-2 py-1 rounded text-sm",
+                                    className: "px-2 py-1 rounded text-sm bg-[#edffe1]",
                                     value: selectGameType,
                                     onChange: (function ($$event) {
                                         setSelectGameType(function (param) {
@@ -232,11 +232,11 @@ function GameBrowser(props) {
                               className: "flex flex-row gap-5 text-xl"
                             })
                       ],
-                      className: "px-5 pt-3"
+                      className: "flex flex-row items-center gap-10 py-1 px-5 bg-[#09230c] "
                     }),
                 tmp
               ],
-              className: " bg-gradient-to-tl from-[#003c18] to-[#006f2a] h-dvh"
+              className: " bg-gradient-to-tl from-[#133420] to-[#0e560a] h-dvh font-sans"
             });
 }
 

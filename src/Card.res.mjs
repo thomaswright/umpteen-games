@@ -632,7 +632,7 @@ function Card$Display(props) {
                                     className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
                                   })
                             ],
-                            className: "flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-[#a4a4a4] rounded",
+                            className: "flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-[#939cae] rounded",
                             style: {
                               backgroundColor: multiColor ? multiColorPastel(card) : "white"
                             }

@@ -98,23 +98,26 @@ function Common$UtilBoard(props) {
               children: [
                 JsxRuntime.jsx("button", {
                       children: "Undo",
-                      className: "bg-gray-200 rounded px-4 ",
+                      className: "bg-[#edffe1] rounded-lg px-4 ",
                       onClick: (function (param) {
                           undo();
                         })
                     }),
                 JsxRuntime.jsx("button", {
-                      children: "New Game",
-                      className: "bg-gray-200 rounded px-4 ",
-                      onClick: (function (param) {
-                          createNewGame();
-                        })
-                    }),
-                JsxRuntime.jsx("button", {
-                      children: "Restart Game",
-                      className: "bg-gray-200 rounded px-4 ",
+                      children: "Restart",
+                      className: "bg-[#edffe1] rounded-lg px-4 ",
                       onClick: (function (param) {
                           restartGame();
+                        })
+                    }),
+                JsxRuntime.jsx("div", {
+                      className: "w-36"
+                    }),
+                JsxRuntime.jsx("button", {
+                      children: "New Game",
+                      className: "bg-[#edffe1] rounded-lg px-4 ",
+                      onClick: (function (param) {
+                          createNewGame();
                         })
                     }),
                 JsxRuntime.jsx("div", {
@@ -122,7 +125,7 @@ function Common$UtilBoard(props) {
                       className: "px-4 font-black text-amber-400"
                     })
               ],
-              className: "flex flex-row mb-5 mt-4 gap-2"
+              className: "flex flex-row mb-5 mt-2 gap-2"
             });
 }
 
