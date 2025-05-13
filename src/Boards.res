@@ -370,6 +370,49 @@ module FT = {
   }
 }
 
+// Todo: align clock with tableau
+// Foundation, Tableau
+module FT_Clock = {
+  @react.component
+  let make = (~setRef, ~initialGame: game) => {
+    <React.Fragment>
+      <div
+        style={{
+          height: "450px",
+          width: "360px",
+        }}
+        className="relative">
+        {Array.make(~length=initialGame.foundations->Array.length, [])
+        ->Array.mapWithIndex((_, i) => {
+          <div
+            key={Foundation(i)->spaceToString}
+            id={Foundation(i)->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
+            style={{
+              transform: `translate(180px, 180px) rotate(${(30 * (i + 2))
+                  ->Int.toString}deg) translate(180px) rotate(${(-30 * (i + 2))->Int.toString}deg)`,
+            }}
+            className=" bg-white opacity-10 rounded w-14 h-20 absolute"
+          />
+        })
+        ->React.array}
+      </div>
+      <div className="flex flex-row gap-3 mt-5">
+        {Array.make(~length=initialGame.tableau->Array.length, [])
+        ->Array.mapWithIndex((_, i) => {
+          <div
+            key={Tableau(i)->spaceToString}
+            id={Tableau(i)->spaceToString}
+            ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
+            className=" bg-black opacity-20  rounded w-14 h-20"
+          />
+        })
+        ->React.array}
+      </div>
+    </React.Fragment>
+  }
+}
+
 // Stock, Tableau
 module ST = {
   @react.component

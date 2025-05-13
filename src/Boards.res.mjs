@@ -526,6 +526,64 @@ var FT = {
   make: Boards$FT
 };
 
+function Boards$FT_Clock(props) {
+  var initialGame = props.initialGame;
+  var setRef = props.setRef;
+  return JsxRuntime.jsxs(React.Fragment, {
+              children: [
+                JsxRuntime.jsx("div", {
+                      children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Foundation",
+                                                  _0: i
+                                                })),
+                                        className: " bg-white opacity-10 rounded w-14 h-20 absolute",
+                                        id: Packer.spaceToString({
+                                              TAG: "Foundation",
+                                              _0: i
+                                            }),
+                                        style: {
+                                          transform: "translate(180px, 180px) rotate(" + Math.imul(30, i + 2 | 0).toString() + "deg) translate(180px) rotate(" + Math.imul(-30, i + 2 | 0).toString() + "deg)"
+                                        }
+                                      }, Packer.spaceToString({
+                                            TAG: "Foundation",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "relative",
+                      style: {
+                        height: "450px",
+                        width: "360px"
+                      }
+                    }),
+                JsxRuntime.jsx("div", {
+                      children: Core__Array.make(initialGame.tableau.length, []).map(function (param, i) {
+                            return JsxRuntime.jsx("div", {
+                                        ref: Caml_option.some(setRef({
+                                                  TAG: "Tableau",
+                                                  _0: i
+                                                })),
+                                        className: " bg-black opacity-20  rounded w-14 h-20",
+                                        id: Packer.spaceToString({
+                                              TAG: "Tableau",
+                                              _0: i
+                                            })
+                                      }, Packer.spaceToString({
+                                            TAG: "Tableau",
+                                            _0: i
+                                          }));
+                          }),
+                      className: "flex flex-row gap-3 mt-5"
+                    })
+              ]
+            });
+}
+
+var FT_Clock = {
+  make: Boards$FT_Clock
+};
+
 function Boards$ST(props) {
   var setRef = props.setRef;
   return JsxRuntime.jsxs(React.Fragment, {
@@ -570,6 +628,7 @@ export {
   SFT ,
   SFTR ,
   FT ,
+  FT_Clock ,
   ST ,
 }
 /* react Not a pure module */

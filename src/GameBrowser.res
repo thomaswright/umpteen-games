@@ -25,6 +25,7 @@ type gameType =
   | @as("Fortress") Fortress
   | @as("StreetsAndAlleys") StreetsAndAlleys
   | @as("Alhambra") Alhambra
+  | @as("Grandfathers Clock") GrandfathersClock
 
 let gameString = (a: gameType) => (a :> string)
 
@@ -55,6 +56,7 @@ let allGames = [
   Fortress,
   StreetsAndAlleys,
   Alhambra,
+  GrandfathersClock,
 ]
 
 @react.component
@@ -115,6 +117,7 @@ let make = () => {
     | Fortress => <Fortress.Game id />
     | StreetsAndAlleys => <StreetsAndAlleys.Game id />
     | Alhambra => <Alhambra.Game id />
+    | GrandfathersClock => <GrandfathersClock.Game id />
     }}
   </div>
 }

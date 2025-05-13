@@ -78,6 +78,16 @@ var SeahavenTowers = Packer.Make({
       }
     });
 
+var GrandfathersClock = Packer.Make({
+      spec: {
+        drop: "AnySuit",
+        drag: "AnySuit",
+        size: "JustOne",
+        depot: "AnyDepot",
+        foundation: "ByOneCyclicOneSuit"
+      }
+    });
+
 var Penguin = Packer.Make({
       spec: {
         drop: "CyclicOneSuit",
@@ -179,6 +189,7 @@ export {
   BakersGame ,
   FreeCell ,
   SeahavenTowers ,
+  GrandfathersClock ,
   Penguin ,
   AgnesSorel ,
   AgnesBernauer ,

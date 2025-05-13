@@ -70,6 +70,16 @@ module SeahavenTowers = Make({
   }
 })
 
+module GrandfathersClock = Make({
+  let spec = {
+    drop: AnySuit,
+    drag: AnySuit,
+    size: JustOne,
+    depot: AnyDepot,
+    foundation: ByOneCyclicOneSuit,
+  }
+})
+
 module Penguin = Make({
   let spec = {
     drop: CyclicOneSuit,

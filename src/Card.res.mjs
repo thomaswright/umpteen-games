@@ -392,6 +392,10 @@ var allRanks = [
   "RK"
 ];
 
+function getNumberedRank(i) {
+  return allRanks[i];
+}
+
 var allSuits = [
   "Spades",
   "Hearts",
@@ -735,6 +739,7 @@ export {
   sides_encode ,
   sides_decode ,
   allRanks ,
+  getNumberedRank ,
   allSuits ,
   equals ,
   isRed ,

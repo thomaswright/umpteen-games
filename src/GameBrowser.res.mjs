@@ -25,6 +25,7 @@ import * as FreeCellOneDeck from "./games/FreeCellOneDeck.res.mjs";
 import * as FreeCellTwoDeck from "./games/FreeCellTwoDeck.res.mjs";
 import * as StreetsAndAlleys from "./games/StreetsAndAlleys.res.mjs";
 import * as BeleagueredCastle from "./games/BeleagueredCastle.res.mjs";
+import * as GrandfathersClock from "./GrandfathersClock.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
 function gameString(a) {
@@ -57,7 +58,8 @@ var allGames = [
   "Beleaguered Castle",
   "Fortress",
   "StreetsAndAlleys",
-  "Alhambra"
+  "Alhambra",
+  "Grandfathers Clock"
 ];
 
 function GameBrowser(props) {
@@ -193,6 +195,11 @@ function GameBrowser(props) {
         break;
     case "Alhambra" :
         tmp = JsxRuntime.jsx(Alhambra.Game.make, {
+              id: selectGameType
+            });
+        break;
+    case "Grandfathers Clock" :
+        tmp = JsxRuntime.jsx(GrandfathersClock.Game.make, {
               id: selectGameType
             });
         break;
