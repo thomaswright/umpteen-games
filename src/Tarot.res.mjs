@@ -520,7 +520,7 @@ function Tarot$Display(props) {
                               }),
                           className: "flex flex-col"
                         }),
-                    className: [" border rounded w-14 h-20  shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
+                    className: [" border rounded card-dims  shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
                     style: {
                       backgroundColor: "hsl(250 67% 17%)",
                       borderColor: "hsl(250 20% 43%)",
@@ -528,7 +528,7 @@ function Tarot$Display(props) {
                     }
                   }),
               ref: Caml_option.some(props.cardRef),
-              className: "absolute w-14 h-20 select-none",
+              className: "absolute card-dims select-none",
               id: props.id,
               onMouseDown: props.onMouseDown
             });

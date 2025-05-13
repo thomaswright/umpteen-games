@@ -674,17 +674,17 @@ function Pyramid$GameRules$Board(props) {
                       children: [
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Stock")),
-                              className: " bg-black opacity-20 rounded w-14 h-20",
+                              className: " bg-black opacity-20 rounded card-dims",
                               id: JSON.stringify(space_encode("Stock"))
                             }, JSON.stringify(space_encode("Stock"))),
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Waste")),
-                              className: "bg-black opacity-20 w-14 h-20 ml-3",
+                              className: "bg-black opacity-20 card-dims ml-3",
                               id: JSON.stringify(space_encode("Waste"))
                             }, JSON.stringify(space_encode("Waste"))),
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Foundation")),
-                              className: " border rounded w-14 h-20",
+                              className: " border rounded card-dims",
                               id: JSON.stringify(space_encode("Foundation")),
                               style: {
                                 marginLeft: "280px"

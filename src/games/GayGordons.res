@@ -69,7 +69,7 @@ module Game = GameBase.Create({
     {
       locationAdjustment: {
         x: 0,
-        y: j * 20,
+        y: j * Common.space,
         z: j + 1,
       },
       baseSpace: Tableau(i),

@@ -200,7 +200,7 @@ module Make = (PackerRules: PackerRules) => {
 
   let applyMoveToDragPile = (dragPile: dragPile, move) => {
     dragPile->Array.forEachWithIndex((v, j) => {
-      move(Card(v.card), 0, j * 20)
+      move(Card(v.card), 0, j * Common.space)
     })
   }
 
@@ -248,7 +248,7 @@ module Make = (PackerRules: PackerRules) => {
     {
       locationAdjustment: {
         x: 0,
-        y: j * 20,
+        y: j * Common.space,
         z: j + 1,
       },
       baseSpace: Tableau(i),

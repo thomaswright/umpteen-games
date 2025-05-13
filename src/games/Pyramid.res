@@ -336,20 +336,20 @@ module GameRules: GameBase.GameRules = {
             key={Stock->spaceToString}
             id={Stock->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
-            className=" bg-black opacity-20 rounded w-14 h-20"
+            className=" bg-black opacity-20 rounded card-dims"
           />
           <div
             key={Waste->spaceToString}
             id={Waste->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Waste))}
-            className="bg-black opacity-20 w-14 h-20 ml-3"
+            className="bg-black opacity-20 card-dims ml-3"
           />
           <div
             key={Foundation->spaceToString}
             id={Foundation->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation))}
             style={{marginLeft: "280px"}}
-            className=" border rounded w-14 h-20"
+            className=" border rounded card-dims"
           />
         </div>
         <div className="flex flex-col gap-3 mt-5">

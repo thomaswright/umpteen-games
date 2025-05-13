@@ -599,7 +599,7 @@ function Card$Display(props) {
   var multiColor = __multiColor !== undefined ? __multiColor : false;
   var match = card.card.rank;
   var tmp;
-  tmp = match === "R10" ? "tracking-[-0.1rem] w-4" : "w-3.5";
+  tmp = match === "R10" ? "-ml-0.5 w-6" : "w-4";
   return JsxRuntime.jsx("div", {
               children: JsxRuntime.jsxs("div", {
                     children: [
@@ -632,20 +632,20 @@ function Card$Display(props) {
                                     className: "w-3.5 flex flex-row mt-0.5 -ml-0.5"
                                   })
                             ],
-                            className: "flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-[#939cae] rounded",
+                            className: "flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-[#939cae] rounded text-xl leading-none",
                             style: {
                               backgroundColor: multiColor ? multiColorPastel(card) : "white"
                             }
                           })
                     ],
-                    className: ["relative rounded w-14 h-20  shadow-sm leading-none  cursor-default overflow-hidden"].join(" "),
+                    className: ["relative rounded shadow-sm leading-none  cursor-default overflow-hidden card-dims"].join(" "),
                     style: {
                       color: multiColor ? multiColorHex(card) : colorHex(card),
                       transform: rotation(card.card)
                     }
                   }),
               ref: Caml_option.some(props.cardRef),
-              className: "absolute w-14 h-20 select-none",
+              className: "absolute card-dims select-none",
               id: props.id,
               onMouseDown: props.onMouseDown
             });

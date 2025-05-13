@@ -40,7 +40,7 @@ module DealAll = {
   let stockRules = (_game, _card, i, j): movableSpace => {
     {
       locationAdjustment: {
-        x: i * 20,
+        x: i * Common.space,
         y: 0,
         z: i * 10 + j + 1,
       },

@@ -137,9 +137,12 @@ function useLocalStorage(prim0, prim1) {
   return UseLocalStorageJs(prim0, prim1);
 }
 
+var space = 24;
+
 export {
   numInterval ,
   triggerConfetti ,
+  space ,
   ArrayAux ,
   UtilBoard ,
   useLocalStorage ,

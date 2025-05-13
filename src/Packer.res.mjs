@@ -619,7 +619,7 @@ function Make(PackerRules) {
           move({
                 TAG: "Card",
                 _0: v.card
-              }, 0, Math.imul(j, 20));
+              }, 0, Math.imul(j, Common.space));
         });
   };
   var removeDragFromGame = function (game, dragPile) {
@@ -676,7 +676,7 @@ function Make(PackerRules) {
     return {
             locationAdjustment: {
               x: 0,
-              y: Math.imul(j, 20),
+              y: Math.imul(j, Common.space),
               z: j + 1 | 0
             },
             baseSpace: {

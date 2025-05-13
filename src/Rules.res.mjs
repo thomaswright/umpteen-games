@@ -70,7 +70,7 @@ var FreeCell = {
 function stockRules(_game, _card, i, j) {
   return {
           locationAdjustment: {
-            x: Math.imul(i, 20),
+            x: Math.imul(i, Common.space),
             y: 0,
             z: (Math.imul(i, 10) + j | 0) + 1 | 0
           },

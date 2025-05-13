@@ -90,7 +90,7 @@ function tableauRules(_game, pile, card, i, j) {
   return {
           locationAdjustment: {
             x: 0,
-            y: Math.imul(j, 20),
+            y: Math.imul(j, Common.space),
             z: j + 1 | 0
           },
           baseSpace: {

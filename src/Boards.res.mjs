@@ -15,12 +15,12 @@ function Boards$SWFFR(props) {
                       children: [
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Stock")),
-                              className: " bg-black opacity-20 rounded w-14 h-20",
+                              className: " bg-black opacity-20 rounded card-dims",
                               id: Packer.spaceToString("Stock")
                             }, Packer.spaceToString("Stock")),
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Waste")),
-                              className: " w-14 h-20",
+                              className: " card-dims",
                               id: Packer.spaceToString("Waste")
                             }, Packer.spaceToString("Waste"))
                       ],
@@ -34,7 +34,7 @@ function Boards$SWFFR(props) {
                                                     TAG: "Foundation",
                                                     _0: i
                                                   })),
-                                          className: " bg-white opacity-10 rounded w-14 h-20",
+                                          className: " bg-white opacity-10 rounded card-dims",
                                           id: Packer.spaceToString({
                                                 TAG: "Foundation",
                                                 _0: i
@@ -50,7 +50,7 @@ function Boards$SWFFR(props) {
                                                     TAG: "Foundation2",
                                                     _0: i
                                                   })),
-                                          className: " bg-white opacity-10 rounded w-14 h-20",
+                                          className: " bg-white opacity-10 rounded card-dims",
                                           id: Packer.spaceToString({
                                                 TAG: "Foundation2",
                                                 _0: i
@@ -70,7 +70,7 @@ function Boards$SWFFR(props) {
                                                   TAG: "Free",
                                                   _0: i
                                                 })),
-                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                        className: " bg-black opacity-20   rounded card-dims"
                                       }, Packer.spaceToString({
                                             TAG: "Free",
                                             _0: i
@@ -95,12 +95,12 @@ function Boards$SWFT(props) {
                       children: [
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Stock")),
-                              className: " bg-black opacity-20 rounded w-14 h-20",
+                              className: " bg-black opacity-20 rounded card-dims",
                               id: Packer.spaceToString("Stock")
                             }, Packer.spaceToString("Stock")),
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Waste")),
-                              className: " w-14 h-20",
+                              className: " card-dims",
                               id: Packer.spaceToString("Waste")
                             }, Packer.spaceToString("Waste"))
                       ],
@@ -113,7 +113,7 @@ function Boards$SWFT(props) {
                                                   TAG: "Foundation",
                                                   _0: i
                                                 })),
-                                        className: " bg-white opacity-10 rounded w-14 h-20",
+                                        className: " bg-white opacity-10 rounded card-dims",
                                         id: Packer.spaceToString({
                                               TAG: "Foundation",
                                               _0: i
@@ -132,7 +132,7 @@ function Boards$SWFT(props) {
                                                   TAG: "Tableau",
                                                   _0: i
                                                 })),
-                                        className: " bg-black opacity-20  rounded w-14 h-20",
+                                        className: " bg-black opacity-20  rounded card-dims",
                                         id: Packer.spaceToString({
                                               TAG: "Tableau",
                                               _0: i
@@ -166,7 +166,7 @@ function Boards$FRT(props) {
                                                           TAG: "Free",
                                                           _0: i
                                                         })),
-                                                className: " bg-black opacity-20   rounded w-14 h-20"
+                                                className: " bg-black opacity-20   rounded card-dims"
                                               }, Packer.spaceToString({
                                                     TAG: "Free",
                                                     _0: i
@@ -175,7 +175,7 @@ function Boards$FRT(props) {
                               className: "flex flex-row gap-3"
                             }),
                         Core__Array.make((initialGame.tableau.length - initialGame.free.length | 0) - initialGame.foundations.length | 0, JsxRuntime.jsx("div", {
-                                  className: "w-14 h-20"
+                                  className: "card-dims"
                                 })),
                         JsxRuntime.jsx("div", {
                               children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
@@ -184,7 +184,7 @@ function Boards$FRT(props) {
                                                           TAG: "Foundation",
                                                           _0: i
                                                         })),
-                                                className: " bg-white opacity-10  rounded w-14 h-20"
+                                                className: " bg-white opacity-10  rounded card-dims"
                                               }, Packer.spaceToString({
                                                     TAG: "Foundation",
                                                     _0: i
@@ -203,7 +203,7 @@ function Boards$FRT(props) {
                                                   TAG: "Tableau",
                                                   _0: i
                                                 })),
-                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                        className: " bg-black opacity-20   rounded card-dims"
                                       }, Packer.spaceToString({
                                             TAG: "Tableau",
                                             _0: i
@@ -233,7 +233,7 @@ function Boards$FRT2(props) {
                                                           TAG: "Free",
                                                           _0: i
                                                         })),
-                                                className: "   bg-black opacity-20  rounded w-14 h-20"
+                                                className: "   bg-black opacity-20  rounded card-dims"
                                               }, Packer.spaceToString({
                                                     TAG: "Free",
                                                     _0: i
@@ -242,7 +242,7 @@ function Boards$FRT2(props) {
                               className: "grid grid-cols-4 gap-3"
                             }),
                         Core__Array.make(2, JsxRuntime.jsx("div", {
-                                  className: "w-14 h-20"
+                                  className: "card-dims"
                                 })),
                         JsxRuntime.jsx("div", {
                               children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
@@ -251,7 +251,7 @@ function Boards$FRT2(props) {
                                                           TAG: "Foundation",
                                                           _0: i
                                                         })),
-                                                className: "   bg-white opacity-10  rounded w-14 h-20"
+                                                className: "   bg-white opacity-10  rounded card-dims"
                                               }, Packer.spaceToString({
                                                     TAG: "Foundation",
                                                     _0: i
@@ -270,7 +270,7 @@ function Boards$FRT2(props) {
                                                   TAG: "Tableau",
                                                   _0: i
                                                 })),
-                                        className: " bg-black opacity-20  rounded w-14 h-20"
+                                        className: " bg-black opacity-20  rounded card-dims"
                                       }, Packer.spaceToString({
                                             TAG: "Tableau",
                                             _0: i
@@ -299,7 +299,7 @@ function Boards$FRT3(props) {
                                                         TAG: "Foundation",
                                                         _0: i
                                                       })),
-                                              className: " bg-white opacity-10  rounded w-14 h-20"
+                                              className: " bg-white opacity-10  rounded card-dims"
                                             }, Packer.spaceToString({
                                                   TAG: "Foundation",
                                                   _0: i
@@ -317,7 +317,7 @@ function Boards$FRT3(props) {
                                                                       TAG: "Free",
                                                                       _0: i
                                                                     })),
-                                                            className: " bg-black opacity-20   rounded w-14 h-20"
+                                                            className: " bg-black opacity-20   rounded card-dims"
                                                           }, Packer.spaceToString({
                                                                 TAG: "Free",
                                                                 _0: i
@@ -335,7 +335,7 @@ function Boards$FRT3(props) {
                                                                 TAG: "Tableau",
                                                                 _0: i
                                                               })),
-                                                      className: " bg-black opacity-20   rounded w-14 h-20"
+                                                      className: " bg-black opacity-20   rounded card-dims"
                                                     }, Packer.spaceToString({
                                                           TAG: "Tableau",
                                                           _0: i
@@ -364,7 +364,7 @@ function Boards$SFT(props) {
                       children: [
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Stock")),
-                              className: " bg-white opacity-10  rounded w-14 h-20 mr-20"
+                              className: " bg-white opacity-10  rounded card-dims mr-20"
                             }, Packer.spaceToString("Stock")),
                         JsxRuntime.jsx("div", {
                               children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
@@ -373,7 +373,7 @@ function Boards$SFT(props) {
                                                           TAG: "Foundation",
                                                           _0: i
                                                         })),
-                                                className: " bg-white opacity-10  rounded w-14 h-20"
+                                                className: " bg-white opacity-10  rounded card-dims"
                                               }, Packer.spaceToString({
                                                     TAG: "Foundation",
                                                     _0: i
@@ -392,7 +392,7 @@ function Boards$SFT(props) {
                                                   TAG: "Tableau",
                                                   _0: i
                                                 })),
-                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                        className: " bg-black opacity-20   rounded card-dims"
                                       }, Packer.spaceToString({
                                             TAG: "Tableau",
                                             _0: i
@@ -417,7 +417,7 @@ function Boards$SFTR(props) {
                       children: [
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Stock")),
-                              className: " bg-white opacity-10  rounded w-14 h-20 mr-20"
+                              className: " bg-white opacity-10  rounded card-dims mr-20"
                             }, Packer.spaceToString("Stock")),
                         JsxRuntime.jsx("div", {
                               children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
@@ -426,7 +426,7 @@ function Boards$SFTR(props) {
                                                           TAG: "Foundation",
                                                           _0: i
                                                         })),
-                                                className: " bg-white opacity-10  rounded w-14 h-20"
+                                                className: " bg-white opacity-10  rounded card-dims"
                                               }, Packer.spaceToString({
                                                     TAG: "Foundation",
                                                     _0: i
@@ -444,7 +444,7 @@ function Boards$SFTR(props) {
                                                   TAG: "Free",
                                                   _0: i
                                                 })),
-                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                        className: " bg-black opacity-20   rounded card-dims"
                                       }, Packer.spaceToString({
                                             TAG: "Free",
                                             _0: i
@@ -459,7 +459,7 @@ function Boards$SFTR(props) {
                                                   TAG: "Tableau",
                                                   _0: i
                                                 })),
-                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                        className: " bg-black opacity-20   rounded card-dims"
                                       }, Packer.spaceToString({
                                             TAG: "Tableau",
                                             _0: i
@@ -487,7 +487,7 @@ function Boards$FT(props) {
                                                   TAG: "Foundation",
                                                   _0: i
                                                 })),
-                                        className: " bg-white opacity-10 rounded w-14 h-20",
+                                        className: " bg-white opacity-10 rounded card-dims",
                                         id: Packer.spaceToString({
                                               TAG: "Foundation",
                                               _0: i
@@ -506,7 +506,7 @@ function Boards$FT(props) {
                                                   TAG: "Tableau",
                                                   _0: i
                                                 })),
-                                        className: " bg-black opacity-20  rounded w-14 h-20",
+                                        className: " bg-black opacity-20  rounded card-dims",
                                         id: Packer.spaceToString({
                                               TAG: "Tableau",
                                               _0: i
@@ -541,7 +541,7 @@ function Boards$FT_Clock(props) {
                                                   TAG: "Foundation",
                                                   _0: i
                                                 })),
-                                        className: " bg-white opacity-10 rounded w-14 h-20 absolute",
+                                        className: " bg-white opacity-10 rounded card-dims absolute",
                                         id: Packer.spaceToString({
                                               TAG: "Foundation",
                                               _0: i
@@ -568,7 +568,7 @@ function Boards$FT_Clock(props) {
                                                   TAG: "Tableau",
                                                   _0: i
                                                 })),
-                                        className: " bg-black opacity-20  rounded w-14 h-20",
+                                        className: " bg-black opacity-20  rounded card-dims",
                                         id: Packer.spaceToString({
                                               TAG: "Tableau",
                                               _0: i
@@ -595,7 +595,7 @@ function Boards$ST(props) {
                 JsxRuntime.jsx("div", {
                       children: JsxRuntime.jsx("div", {
                             ref: Caml_option.some(setRef("Stock")),
-                            className: " bg-white opacity-10  rounded w-14 h-20 mr-20"
+                            className: " bg-white opacity-10  rounded card-dims mr-20"
                           }, Packer.spaceToString("Stock")),
                       className: "flex flex-row"
                     }),
@@ -607,7 +607,7 @@ function Boards$ST(props) {
                                                   TAG: "Tableau",
                                                   _0: i
                                                 })),
-                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                        className: " bg-black opacity-20   rounded card-dims"
                                       }, Packer.spaceToString({
                                             TAG: "Tableau",
                                             _0: i

@@ -649,7 +649,7 @@ function pileRules(pile, item, i, j) {
   return {
           locationAdjustment: {
             x: 0,
-            y: Math.imul(j, 20),
+            y: Math.imul(j, Common.space),
             z: j + 1 | 0
           },
           baseSpace: {
@@ -1070,12 +1070,12 @@ function UpAndDown$GameRules$Board(props) {
                                 JsxRuntime.jsx("div", {
                                       children: "0",
                                       ref: Caml_option.some(setRef("TarotUp")),
-                                      className: " bg-white opacity-10 rounded w-14 h-20 flex \n              flex-row items-center justify-center text-xl font-bold text-black"
+                                      className: " bg-white opacity-10 rounded card-dims flex \n              flex-row items-center justify-center text-xl font-bold text-black"
                                     }, JSON.stringify(space_encode("TarotUp"))),
                                 JsxRuntime.jsx("div", {
                                       children: "21",
                                       ref: Caml_option.some(setRef("TarotDown")),
-                                      className: " bg-white opacity-10  rounded w-14 h-20 flex \n              flex-row items-center justify-center text-xl font-bold text-black"
+                                      className: " bg-white opacity-10  rounded card-dims flex \n              flex-row items-center justify-center text-xl font-bold text-black"
                                     }, JSON.stringify(space_encode("TarotDown")))
                               ],
                               className: "flex flex-row justify-between",
@@ -1085,7 +1085,7 @@ function UpAndDown$GameRules$Board(props) {
                             }),
                         JsxRuntime.jsx("div", {
                               ref: Caml_option.some(setRef("Free")),
-                              className: "outline outline-4 outline-black bg-black bg-opacity-20 rounded w-14 h-20 mx-10"
+                              className: "outline outline-4 outline-black bg-black bg-opacity-20 rounded card-dims mx-10"
                             }, JSON.stringify(space_encode("Free"))),
                         JsxRuntime.jsx("div", {
                               children: [
@@ -1099,7 +1099,7 @@ function UpAndDown$GameRules$Board(props) {
                                                           TAG: "Foundation",
                                                           _0: i
                                                         })),
-                                                className: "  bg-white opacity-10 rounded w-14 h-20"
+                                                className: "  bg-white opacity-10 rounded card-dims"
                                               }, JSON.stringify(space_encode({
                                                         TAG: "Foundation",
                                                         _0: i
@@ -1129,7 +1129,7 @@ function UpAndDown$GameRules$Board(props) {
                                                   TAG: "Pile",
                                                   _0: i
                                                 })),
-                                        className: " bg-black opacity-20   rounded w-14 h-20"
+                                        className: " bg-black opacity-20   rounded card-dims"
                                       }, JSON.stringify(space_encode({
                                                 TAG: "Pile",
                                                 _0: i

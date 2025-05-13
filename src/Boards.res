@@ -10,13 +10,13 @@ module SWFFR = {
           key={Stock->spaceToString}
           id={Stock->spaceToString}
           ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
-          className=" bg-black opacity-20 rounded w-14 h-20"
+          className=" bg-black opacity-20 rounded card-dims"
         />
         <div
           key={Waste->spaceToString}
           id={Waste->spaceToString}
           ref={ReactDOM.Ref.callbackDomRef(setRef(Waste))}
-          className=" w-14 h-20"
+          className=" card-dims"
         />
       </div>
       <div className="flex flex-row gap-3 mt-5">
@@ -26,7 +26,7 @@ module SWFFR = {
             key={Foundation(i)->spaceToString}
             id={Foundation(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-            className=" bg-white opacity-10 rounded w-14 h-20"
+            className=" bg-white opacity-10 rounded card-dims"
           />
         })
         ->React.array}
@@ -36,7 +36,7 @@ module SWFFR = {
             key={Foundation2(i)->spaceToString}
             id={Foundation2(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation2(i)))}
-            className=" bg-white opacity-10 rounded w-14 h-20"
+            className=" bg-white opacity-10 rounded card-dims"
           />
         })
         ->React.array}
@@ -47,7 +47,7 @@ module SWFFR = {
           <div
             key={Free(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
-            className=" bg-black opacity-20   rounded w-14 h-20"
+            className=" bg-black opacity-20   rounded card-dims"
           />
         })
         ->React.array}
@@ -66,13 +66,13 @@ module SWFT = {
           key={Stock->spaceToString}
           id={Stock->spaceToString}
           ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
-          className=" bg-black opacity-20 rounded w-14 h-20"
+          className=" bg-black opacity-20 rounded card-dims"
         />
         <div
           key={Waste->spaceToString}
           id={Waste->spaceToString}
           ref={ReactDOM.Ref.callbackDomRef(setRef(Waste))}
-          className=" w-14 h-20"
+          className=" card-dims"
         />
       </div>
       <div className="flex flex-row gap-3 mt-5">
@@ -82,7 +82,7 @@ module SWFT = {
             key={Foundation(i)->spaceToString}
             id={Foundation(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-            className=" bg-white opacity-10 rounded w-14 h-20"
+            className=" bg-white opacity-10 rounded card-dims"
           />
         })
         ->React.array}
@@ -94,7 +94,7 @@ module SWFT = {
             key={Tableau(i)->spaceToString}
             id={Tableau(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
-            className=" bg-black opacity-20  rounded w-14 h-20"
+            className=" bg-black opacity-20  rounded card-dims"
           />
         })
         ->React.array}
@@ -115,7 +115,7 @@ module FRT = {
             <div
               key={Free(i)->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
-              className=" bg-black opacity-20   rounded w-14 h-20"
+              className=" bg-black opacity-20   rounded card-dims"
             />
           })
           ->React.array}
@@ -124,7 +124,7 @@ module FRT = {
           ~length=initialGame.tableau->Array.length -
           initialGame.free->Array.length -
           initialGame.foundations->Array.length,
-          <div className="w-14 h-20" />,
+          <div className="card-dims" />,
         )->React.array}
         <div className="flex flex-row gap-3">
           {Array.make(~length=initialGame.foundations->Array.length, [])
@@ -132,7 +132,7 @@ module FRT = {
             <div
               key={Foundation(i)->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-              className=" bg-white opacity-10  rounded w-14 h-20"
+              className=" bg-white opacity-10  rounded card-dims"
             />
           })
           ->React.array}
@@ -145,7 +145,7 @@ module FRT = {
           <div
             key={Tableau(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
-            className=" bg-black opacity-20   rounded w-14 h-20"
+            className=" bg-black opacity-20   rounded card-dims"
           />
         })
         ->React.array}
@@ -166,19 +166,19 @@ module FRT2 = {
             <div
               key={Free(i)->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
-              className="   bg-black opacity-20  rounded w-14 h-20"
+              className="   bg-black opacity-20  rounded card-dims"
             />
           })
           ->React.array}
         </div>
-        {Array.make(~length=2, <div className="w-14 h-20" />)->React.array}
+        {Array.make(~length=2, <div className="card-dims" />)->React.array}
         <div className="grid grid-cols-4 gap-3 ">
           {Array.make(~length=initialGame.foundations->Array.length, [])
           ->Array.mapWithIndex((_, i) => {
             <div
               key={Foundation(i)->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-              className="   bg-white opacity-10  rounded w-14 h-20"
+              className="   bg-white opacity-10  rounded card-dims"
             />
           })
           ->React.array}
@@ -191,7 +191,7 @@ module FRT2 = {
           <div
             key={Tableau(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
-            className=" bg-black opacity-20  rounded w-14 h-20"
+            className=" bg-black opacity-20  rounded card-dims"
           />
         })
         ->React.array}
@@ -212,7 +212,7 @@ module FRT3 = {
             <div
               key={Foundation(i)->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-              className=" bg-white opacity-10  rounded w-14 h-20"
+              className=" bg-white opacity-10  rounded card-dims"
             />
           })
           ->React.array}
@@ -225,7 +225,7 @@ module FRT3 = {
                 <div
                   key={Free(i)->spaceToString}
                   ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
-                  className=" bg-black opacity-20   rounded w-14 h-20"
+                  className=" bg-black opacity-20   rounded card-dims"
                 />
               })
               ->React.array}
@@ -238,7 +238,7 @@ module FRT3 = {
               <div
                 key={Tableau(i)->spaceToString}
                 ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
-                className=" bg-black opacity-20   rounded w-14 h-20"
+                className=" bg-black opacity-20   rounded card-dims"
               />
             })
             ->React.array}
@@ -258,7 +258,7 @@ module SFT = {
         <div
           key={Stock->spaceToString}
           ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
-          className=" bg-white opacity-10  rounded w-14 h-20 mr-20"
+          className=" bg-white opacity-10  rounded card-dims mr-20"
         />
         <div className="flex flex-row gap-3 ml-10">
           {Array.make(~length=initialGame.foundations->Array.length, [])
@@ -266,7 +266,7 @@ module SFT = {
             <div
               key={Foundation(i)->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-              className=" bg-white opacity-10  rounded w-14 h-20"
+              className=" bg-white opacity-10  rounded card-dims"
             />
           })
           ->React.array}
@@ -279,7 +279,7 @@ module SFT = {
           <div
             key={Tableau(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
-            className=" bg-black opacity-20   rounded w-14 h-20"
+            className=" bg-black opacity-20   rounded card-dims"
           />
         })
         ->React.array}
@@ -297,7 +297,7 @@ module SFTR = {
         <div
           key={Stock->spaceToString}
           ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
-          className=" bg-white opacity-10  rounded w-14 h-20 mr-20"
+          className=" bg-white opacity-10  rounded card-dims mr-20"
         />
         <div className="flex flex-row gap-3 ml-10">
           {Array.make(~length=initialGame.foundations->Array.length, [])
@@ -305,7 +305,7 @@ module SFTR = {
             <div
               key={Foundation(i)->spaceToString}
               ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-              className=" bg-white opacity-10  rounded w-14 h-20"
+              className=" bg-white opacity-10  rounded card-dims"
             />
           })
           ->React.array}
@@ -317,7 +317,7 @@ module SFTR = {
           <div
             key={Free(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Free(i)))}
-            className=" bg-black opacity-20   rounded w-14 h-20"
+            className=" bg-black opacity-20   rounded card-dims"
           />
         })
         ->React.array}
@@ -328,7 +328,7 @@ module SFTR = {
           <div
             key={Tableau(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
-            className=" bg-black opacity-20   rounded w-14 h-20"
+            className=" bg-black opacity-20   rounded card-dims"
           />
         })
         ->React.array}
@@ -349,7 +349,7 @@ module FT = {
             key={Foundation(i)->spaceToString}
             id={Foundation(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
-            className=" bg-white opacity-10 rounded w-14 h-20"
+            className=" bg-white opacity-10 rounded card-dims"
           />
         })
         ->React.array}
@@ -361,7 +361,7 @@ module FT = {
             key={Tableau(i)->spaceToString}
             id={Tableau(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
-            className=" bg-black opacity-20  rounded w-14 h-20"
+            className=" bg-black opacity-20  rounded card-dims"
           />
         })
         ->React.array}
@@ -396,7 +396,7 @@ module FT_Clock = {
               left: x->Float.toInt->Int.toString ++ "px",
               top: y->Float.toInt->Int.toString ++ "px",
             }}
-            className=" bg-white opacity-10 rounded w-14 h-20 absolute"
+            className=" bg-white opacity-10 rounded card-dims absolute"
           />
         })
         ->React.array}
@@ -408,7 +408,7 @@ module FT_Clock = {
             key={Tableau(i)->spaceToString}
             id={Tableau(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
-            className=" bg-black opacity-20  rounded w-14 h-20"
+            className=" bg-black opacity-20  rounded card-dims"
           />
         })
         ->React.array}
@@ -426,7 +426,7 @@ module ST = {
         <div
           key={Stock->spaceToString}
           ref={ReactDOM.Ref.callbackDomRef(setRef(Stock))}
-          className=" bg-white opacity-10  rounded w-14 h-20 mr-20"
+          className=" bg-white opacity-10  rounded card-dims mr-20"
         />
       </div>
       <div />
@@ -436,7 +436,7 @@ module ST = {
           <div
             key={Tableau(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Tableau(i)))}
-            className=" bg-black opacity-20   rounded w-14 h-20"
+            className=" bg-black opacity-20   rounded card-dims"
           />
         })
         ->React.array}

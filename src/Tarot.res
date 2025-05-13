@@ -113,7 +113,7 @@ let rotation = (card: sides) => {
 module Display = {
   @react.component
   let make = (~card, ~id, ~cardRef, ~onMouseDown) => {
-    <div id={id} ref={cardRef} onMouseDown={onMouseDown} className="absolute w-14 h-20 select-none">
+    <div id={id} ref={cardRef} onMouseDown={onMouseDown} className="absolute card-dims select-none">
       <div
         style={{
           // transform: rotation(card),
@@ -123,7 +123,7 @@ module Display = {
           color: "white",
         }}
         className={[
-          " border rounded w-14 h-20  shadow-sm px-1 leading-none py-0.5 cursor-default",
+          " border rounded card-dims  shadow-sm px-1 leading-none py-0.5 cursor-default",
         ]->Array.join(" ")}>
         <span className="flex flex-col">
           <span className="flex flex-row">

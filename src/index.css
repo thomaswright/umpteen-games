@@ -9,6 +9,11 @@ html {
   --green3: #06201a;
 }
 
+.card-dims {
+  width: 4rem;
+  height: 6rem;
+}
+
 #confetti canvas {
   position: fixed !important;
   width: 100% !important;

@@ -153,7 +153,7 @@ let toString = card => {
 module Display = {
   @react.component
   let make = (~card, ~id, ~cardRef, ~onMouseDown, ~multiColor=false) => {
-    <div id={id} ref={cardRef} onMouseDown={onMouseDown} className="absolute w-14 h-20 select-none">
+    <div id={id} ref={cardRef} onMouseDown={onMouseDown} className="absolute card-dims select-none">
       <div
         style={{
           transform: rotation(card.card),
@@ -161,7 +161,7 @@ module Display = {
           color: multiColor ? card->multiColorHex : card->colorHex,
         }}
         className={[
-          "relative rounded w-14 h-20  shadow-sm leading-none  cursor-default overflow-hidden",
+          "relative rounded shadow-sm leading-none  cursor-default overflow-hidden card-dims",
         ]->Array.join(" ")}>
         <div
           className={[
@@ -170,7 +170,7 @@ module Display = {
           ]->Array.join(" ")}
         />
         <span
-          className="flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-[#939cae] rounded"
+          className="flex flex-col py-0.5 px-1 bg-white w-full  h-full border border-[#939cae] rounded text-xl leading-none"
           style={{
             backgroundColor: multiColor ? multiColorPastel(card) : "white",
           }}>
@@ -179,8 +179,8 @@ module Display = {
               className={[
                 "font-medium ",
                 switch card.card.rank {
-                | R10 => "tracking-[-0.1rem] w-4"
-                | _ => "w-3.5"
+                | R10 => "-ml-0.5 w-6"
+                | _ => "w-4"
                 },
               ]->Array.join(" ")}>
               {card->displayRank->React.string}
