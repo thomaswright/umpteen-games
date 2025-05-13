@@ -392,8 +392,8 @@ var allRanks = [
   "RK"
 ];
 
-function getNumberedRank(i) {
-  return allRanks[i];
+function getNumberedRankCyclic(i) {
+  return allRanks[i % 13];
 }
 
 var allSuits = [
@@ -739,7 +739,7 @@ export {
   sides_encode ,
   sides_decode ,
   allRanks ,
-  getNumberedRank ,
+  getNumberedRankCyclic ,
   allSuits ,
   equals ,
   isRed ,

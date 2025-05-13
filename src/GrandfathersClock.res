@@ -85,7 +85,7 @@ module Game = GameBase.Create({
           None
         }
       },
-      autoProgress: () => Seek,
+      autoProgress: () => DoNothing,
       droppedUpon: (game, dragPile) => {
         let justOne = dragPile->Array.length == 1
         let dragPileBase = dragPile->Array.getUnsafe(0)
@@ -94,10 +94,7 @@ module Game = GameBase.Create({
           justOne &&
           dragPileBase.card.suit == card.card.suit &&
           Card.rankIsAboveCyclic(dragPileBase, card) &&
-          Card.getNumberedRank(i)->Option.mapOr(false, v => {
-            Console.log(v)
-            dragPileBase.card.rank != v
-          })
+          dragPileBase.card.rank != Card.getNumberedRankCyclic(i + 1)
         ) {
           Some({
             ...game,

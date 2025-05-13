@@ -533,6 +533,9 @@ function Boards$FT_Clock(props) {
               children: [
                 JsxRuntime.jsx("div", {
                       children: Core__Array.make(initialGame.foundations.length, []).map(function (param, i) {
+                            var angle = Math.imul(30, i - 2 | 0);
+                            var x = 180 + 180 * Math.cos(2 * 3.1415 * angle / 360);
+                            var y = 180 + 180 * Math.sin(2 * 3.1415 * angle / 360);
                             return JsxRuntime.jsx("div", {
                                         ref: Caml_option.some(setRef({
                                                   TAG: "Foundation",
@@ -544,7 +547,8 @@ function Boards$FT_Clock(props) {
                                               _0: i
                                             }),
                                         style: {
-                                          transform: "translate(180px, 180px) rotate(" + Math.imul(30, i + 2 | 0).toString() + "deg) translate(180px) rotate(" + Math.imul(-30, i + 2 | 0).toString() + "deg)"
+                                          left: (x | 0).toString() + "px",
+                                          top: (y | 0).toString() + "px"
                                         }
                                       }, Packer.spaceToString({
                                             TAG: "Foundation",

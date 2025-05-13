@@ -384,13 +384,17 @@ module FT_Clock = {
         className="relative">
         {Array.make(~length=initialGame.foundations->Array.length, [])
         ->Array.mapWithIndex((_, i) => {
+          let angle = (30 * (i - 2))->Int.toFloat
+          let x = 180. +. 180. *. Math.cos(2. *. 3.1415 *. angle /. 360.)
+          let y = 180. +. 180. *. Math.sin(2. *. 3.1415 *. angle /. 360.)
+
           <div
             key={Foundation(i)->spaceToString}
             id={Foundation(i)->spaceToString}
             ref={ReactDOM.Ref.callbackDomRef(setRef(Foundation(i)))}
             style={{
-              transform: `translate(180px, 180px) rotate(${(30 * (i + 2))
-                  ->Int.toString}deg) translate(180px) rotate(${(-30 * (i + 2))->Int.toString}deg)`,
+              left: x->Float.toInt->Int.toString ++ "px",
+              top: y->Float.toInt->Int.toString ++ "px",
             }}
             className=" bg-white opacity-10 rounded w-14 h-20 absolute"
           />

@@ -7,7 +7,6 @@ import * as Common from "./Common.res.mjs";
 import * as GameBase from "./GameBase.res.mjs";
 import * as Core__Array from "@rescript/core/src/Core__Array.res.mjs";
 import * as GameCommons from "./GameCommons.res.mjs";
-import * as Core__Option from "@rescript/core/src/Core__Option.res.mjs";
 
 function initiateGame() {
   var shuffledDeck = Core__Array.toShuffled(Card.getDeck(0, false));
@@ -161,15 +160,12 @@ function foundationRules(game, pile, card, i, j) {
               
             }),
           autoProgress: (function () {
-              return "Seek";
+              return "DoNothing";
             }),
           droppedUpon: (function (game, dragPile) {
               var justOne = dragPile.length === 1;
               var dragPileBase = dragPile[0];
-              if (isLast && justOne && dragPileBase.card.suit === card.card.suit && Card.rankIsAboveCyclic(dragPileBase, card) && Core__Option.mapOr(Card.getNumberedRank(i), false, (function (v) {
-                        console.log(v);
-                        return dragPileBase.card.rank !== v;
-                      }))) {
+              if (isLast && justOne && dragPileBase.card.suit === card.card.suit && Card.rankIsAboveCyclic(dragPileBase, card) && dragPileBase.card.rank !== Card.getNumberedRankCyclic(i + 1 | 0)) {
                 return {
                         tableau: GameCommons.flipLastUp(game.tableau),
                         foundations: game.foundations.map(function (stack) {
