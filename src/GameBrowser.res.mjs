@@ -5,6 +5,7 @@ import * as MrsMop from "./games/MrsMop.res.mjs";
 import * as Spider from "./games/Spider.res.mjs";
 import * as Penguin from "./games/Penguin.res.mjs";
 import * as Pyramid from "./games/Pyramid.res.mjs";
+import * as Alhambra from "./Alhambra.res.mjs";
 import * as Diplomat from "./games/Diplomat.res.mjs";
 import * as EightOff from "./games/EightOff.res.mjs";
 import * as Fortress from "./games/Fortress.res.mjs";
@@ -22,6 +23,7 @@ import * as GermanPatience from "./games/GermanPatience.res.mjs";
 import * as SeahavenTowers from "./games/SeahavenTowers.res.mjs";
 import * as FreeCellOneDeck from "./games/FreeCellOneDeck.res.mjs";
 import * as FreeCellTwoDeck from "./games/FreeCellTwoDeck.res.mjs";
+import * as StreetsAndAlleys from "./games/StreetsAndAlleys.res.mjs";
 import * as BeleagueredCastle from "./games/BeleagueredCastle.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 
@@ -53,7 +55,9 @@ var allGames = [
   "Agnes Bernauer",
   "Diplomat",
   "Beleaguered Castle",
-  "Fortress"
+  "Fortress",
+  "StreetsAndAlleys",
+  "Alhambra"
 ];
 
 function GameBrowser(props) {
@@ -179,6 +183,16 @@ function GameBrowser(props) {
         break;
     case "Fortress" :
         tmp = JsxRuntime.jsx(Fortress.Game.make, {
+              id: selectGameType
+            });
+        break;
+    case "StreetsAndAlleys" :
+        tmp = JsxRuntime.jsx(StreetsAndAlleys.Game.make, {
+              id: selectGameType
+            });
+        break;
+    case "Alhambra" :
+        tmp = JsxRuntime.jsx(Alhambra.Game.make, {
               id: selectGameType
             });
         break;

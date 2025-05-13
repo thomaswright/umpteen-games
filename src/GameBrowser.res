@@ -23,8 +23,8 @@ type gameType =
   | @as("Diplomat") Diplomat
   | @as("Beleaguered Castle") BeleagueredCastle
   | @as("Fortress") Fortress
-
-// | @as("Alhambra") Alhambra
+  | @as("StreetsAndAlleys") StreetsAndAlleys
+  | @as("Alhambra") Alhambra
 
 let gameString = (a: gameType) => (a :> string)
 
@@ -53,7 +53,8 @@ let allGames = [
   Diplomat,
   BeleagueredCastle,
   Fortress,
-  // Alhambra,
+  StreetsAndAlleys,
+  Alhambra,
 ]
 
 @react.component
@@ -112,7 +113,8 @@ let make = () => {
     | Diplomat => <Diplomat.Game id />
     | BeleagueredCastle => <BeleagueredCastle.Game id />
     | Fortress => <Fortress.Game id />
-    // | Alhambra => <Alhambra.Game id />
+    | StreetsAndAlleys => <StreetsAndAlleys.Game id />
+    | Alhambra => <Alhambra.Game id />
     }}
   </div>
 }
