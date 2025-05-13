@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  --light: #fdffe4;
+  --green1: #044d00;
+  --green2: #005d38;
+  --green3: #06201a;
+}
+
 #confetti canvas {
   position: fixed !important;
   width: 100% !important;

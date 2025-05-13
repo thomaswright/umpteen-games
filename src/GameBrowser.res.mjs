@@ -211,7 +211,7 @@ function GameBrowser(props) {
                       children: [
                         JsxRuntime.jsx("div", {
                               children: "Umpteen Games",
-                              className: " font-black  text-4xl text-[#edffe1] tracking-tight"
+                              className: " font-black  text-4xl text-[var(--light)] tracking-tight"
                             }),
                         JsxRuntime.jsx("div", {
                               children: JsxRuntime.jsx("select", {
@@ -221,7 +221,7 @@ function GameBrowser(props) {
                                                       value: v
                                                     }, v);
                                         }),
-                                    className: "px-2 py-1 rounded text-sm bg-[#edffe1]",
+                                    className: "px-2 py-1 rounded text-sm bg-[var(--light)] text-[var(--green3)]",
                                     value: selectGameType,
                                     onChange: (function ($$event) {
                                         setSelectGameType(function (param) {
@@ -232,11 +232,11 @@ function GameBrowser(props) {
                               className: "flex flex-row gap-5 text-xl"
                             })
                       ],
-                      className: "flex flex-row items-center gap-10 py-1 px-5 bg-[#09230c] "
+                      className: "flex flex-row items-center gap-10 py-1 px-5 bg-[var(--green3)] "
                     }),
                 tmp
               ],
-              className: " bg-gradient-to-tl from-[#133420] to-[#0e560a] h-dvh font-sans"
+              className: " bg-gradient-to-tl from-[var(--green1)] to-[var(--green2)] h-dvh font-sans"
             });
 }
 

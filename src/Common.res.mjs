@@ -98,14 +98,14 @@ function Common$UtilBoard(props) {
               children: [
                 JsxRuntime.jsx("button", {
                       children: "Undo",
-                      className: "bg-[#edffe1] rounded-lg px-4 ",
+                      className: "bg-[var(--light)] text-[var(--green3)] rounded-lg px-4  tracking-wide",
                       onClick: (function (param) {
                           undo();
                         })
                     }),
                 JsxRuntime.jsx("button", {
                       children: "Restart",
-                      className: "bg-[#edffe1] rounded-lg px-4 ",
+                      className: "bg-[var(--light)] text-[var(--green3)] rounded-lg px-4  tracking-wide",
                       onClick: (function (param) {
                           restartGame();
                         })
@@ -115,7 +115,7 @@ function Common$UtilBoard(props) {
                     }),
                 JsxRuntime.jsx("button", {
                       children: "New Game",
-                      className: "bg-[#edffe1] rounded-lg px-4 ",
+                      className: "bg-[var(--light)] text-[var(--green3)] rounded-lg px-4  tracking-wide",
                       onClick: (function (param) {
                           createNewGame();
                         })

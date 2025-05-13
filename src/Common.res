@@ -48,14 +48,20 @@ module UtilBoard = {
       None
     }, [isWin])
     <div className="flex flex-row mb-5 mt-2 gap-2">
-      <button className={"bg-[#edffe1] rounded-lg px-4 "} onClick={_ => undo()}>
+      <button
+        className={"bg-[var(--light)] text-[var(--green3)] rounded-lg px-4  tracking-wide"}
+        onClick={_ => undo()}>
         {"Undo"->React.string}
       </button>
-      <button className={"bg-[#edffe1] rounded-lg px-4 "} onClick={_ => restartGame()}>
+      <button
+        className={"bg-[var(--light)] text-[var(--green3)] rounded-lg px-4  tracking-wide"}
+        onClick={_ => restartGame()}>
         {"Restart"->React.string}
       </button>
       <div className={"w-36"} />
-      <button className={"bg-[#edffe1] rounded-lg px-4 "} onClick={_ => createNewGame()}>
+      <button
+        className={"bg-[var(--light)] text-[var(--green3)] rounded-lg px-4  tracking-wide"}
+        onClick={_ => createNewGame()}>
         {"New Game"->React.string}
       </button>
       // <button className={"bg-gray-200 rounded px-4 "} onClick={_ => triggerConfetti()}>
