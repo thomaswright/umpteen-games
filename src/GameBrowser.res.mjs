@@ -27,6 +27,13 @@ import * as StreetsAndAlleys from "./games/StreetsAndAlleys.res.mjs";
 import * as BeleagueredCastle from "./games/BeleagueredCastle.res.mjs";
 import * as GrandfathersClock from "./GrandfathersClock.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
+import LogoSvgreact from "./assets/logo.svg?react";
+
+var make = LogoSvgreact;
+
+var Logo = {
+  make: make
+};
 
 function gameString(a) {
   return a;
@@ -205,46 +212,53 @@ function GameBrowser(props) {
         break;
     
   }
-  return JsxRuntime.jsxs("div", {
-              children: [
-                JsxRuntime.jsxs("div", {
-                      children: [
-                        JsxRuntime.jsx("div", {
-                              children: "Umpteen Games",
-                              className: " font-black  text-4xl text-[var(--light)] tracking-tight"
-                            }),
-                        JsxRuntime.jsx("div", {
-                              children: JsxRuntime.jsx("select", {
-                                    children: allGames.map(function (v) {
-                                          return JsxRuntime.jsx("option", {
-                                                      children: v,
-                                                      value: v
-                                                    }, v);
-                                        }),
-                                    className: "px-2 py-1 rounded text-sm bg-[var(--light)] text-[var(--green3)]",
-                                    value: selectGameType,
-                                    onChange: (function ($$event) {
-                                        setSelectGameType(function (param) {
-                                              return $$event.target.value;
-                                            });
-                                      })
+  return JsxRuntime.jsx("div", {
+              children: JsxRuntime.jsxs("div", {
+                    children: [
+                      JsxRuntime.jsxs("div", {
+                            children: [
+                              JsxRuntime.jsx("div", {
+                                    children: JsxRuntime.jsx(make, {}),
+                                    className: "h-10 w-10 mr-1"
                                   }),
-                              className: "flex flex-row gap-5 text-xl"
-                            })
-                      ],
-                      className: "flex flex-row items-center gap-10 py-1 px-5 bg-[var(--green3)] "
-                    }),
-                tmp
-              ],
-              className: " bg-gradient-to-tl from-[var(--green1)] to-[var(--green2)] h-dvh font-sans"
+                              JsxRuntime.jsx("div", {
+                                    children: "Umpteen Games",
+                                    className: " font-black  text-4xl text-[var(--light)] tracking-tight"
+                                  }),
+                              JsxRuntime.jsx("div", {
+                                    children: JsxRuntime.jsx("select", {
+                                          children: allGames.map(function (v) {
+                                                return JsxRuntime.jsx("option", {
+                                                            children: v,
+                                                            value: v
+                                                          }, v);
+                                              }),
+                                          className: "px-2 py-1 rounded text-sm bg-[var(--light)] text-[var(--green3)]",
+                                          value: selectGameType,
+                                          onChange: (function ($$event) {
+                                              setSelectGameType(function (param) {
+                                                    return $$event.target.value;
+                                                  });
+                                            })
+                                        }),
+                                    className: "flex flex-row gap-5 text-xl ml-10"
+                                  })
+                            ],
+                            className: "flex flex-row items-center  py-1 px-5 bg-[var(--green3)] "
+                          }),
+                      tmp
+                    ]
+                  }),
+              className: " bg-[var(--green1)] h-dvh font-sans overflow-scroll"
             });
 }
 
-var make = GameBrowser;
+var make$1 = GameBrowser;
 
 export {
+  Logo ,
   gameString ,
   allGames ,
-  make ,
+  make$1 as make,
 }
-/* Common Not a pure module */
+/* make Not a pure module */

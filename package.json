@@ -23,7 +23,8 @@
     "react-dom": "^18.2.0",
     "rescript": "^11.1.4",
     "rescript-webapi": "^0.10.0",
-    "three": "^0.173.0"
+    "three": "^0.173.0",
+    "vite-plugin-svgr": "^4.3.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
