@@ -4,7 +4,7 @@ external numInterval: (int => unit, int, int) => promise<unit> = "numInterval"
 @val @module("./other.js")
 external triggerConfetti: unit => unit = "triggerConfetti"
 
-let space = 24
+let space = 26
 
 module ArrayAux = {
   let removeLast = a => a->Array.toReversed->Array.sliceToEnd(~start=1)->Array.toReversed

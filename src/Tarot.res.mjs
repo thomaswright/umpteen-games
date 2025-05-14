@@ -518,7 +518,7 @@ function Tarot$Display(props) {
                                     }),
                                 className: "flex flex-row"
                               }),
-                          className: "flex flex-col"
+                          className: "flex flex-col text-xl leading-none"
                         }),
                     className: [" border rounded card-dims  shadow-sm px-1 leading-none py-0.5 cursor-default"].join(" "),
                     style: {

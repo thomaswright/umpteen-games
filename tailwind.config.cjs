@@ -5,7 +5,7 @@ module.exports = {
     extend: {
       fontFamily: {
         display: ["Grenze Gotisch", "system-ui"],
-        sans: ["Inter", "system-ui"],
+        sans: ["Rubik", "system-ui"],
       },
     },
   },

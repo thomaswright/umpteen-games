@@ -125,7 +125,7 @@ module Display = {
         className={[
           " border rounded card-dims  shadow-sm px-1 leading-none py-0.5 cursor-default",
         ]->Array.join(" ")}>
-        <span className="flex flex-col">
+        <span className="flex flex-col text-xl leading-none">
           <span className="flex flex-row">
             <span
               className={[

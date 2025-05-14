@@ -137,7 +137,7 @@ function useLocalStorage(prim0, prim1) {
   return UseLocalStorageJs(prim0, prim1);
 }
 
-var space = 24;
+var space = 26;
 
 export {
   numInterval ,
