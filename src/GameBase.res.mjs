@@ -765,87 +765,69 @@ function Create(GameRules) {
     make: GameBase$Create$Main
   };
   var account_encode = function (value) {
-    return Decco.arrayToJson(state_encode, value);
+    return state_encode(value);
   };
   var account_decode = function (value) {
-    return Decco.arrayFromJson(state_decode, value);
+    return state_decode(value);
+  };
+  var createNewGame = function () {
+    var match = GameRules.initiateGame();
+    return {
+            deck: match[0],
+            history: [{
+                game: match[1],
+                actor: "User"
+              }],
+            undoStats: {
+              currentUndoDepth: 0,
+              undos: []
+            }
+          };
   };
   var account = {
-    contents: []
+    contents: createNewGame()
   };
   var GameBase$Create = function (props) {
     var id = props.id;
     var match = React.useState(function () {
-          return -1;
+          return 0;
         });
-    var setGameIndex = match[1];
-    var gameIndex = match[0];
+    var setReload = match[1];
     var setAccount = function (f) {
       var newAccount = f(account.contents);
       account.contents = newAccount;
-      localStorage.setItem(id, JSON.stringify(account_encode(newAccount)));
-    };
-    var getState = function () {
-      return account.contents[gameIndex];
-    };
-    var setState = function (f) {
-      setAccount(function (a) {
-            return Common.ArrayAux.update(a, gameIndex, f);
-          });
-    };
-    var createNewGame = function () {
-      var match = GameRules.initiateGame();
-      var newGame_deck = match[0];
-      var newGame_history = [{
-          game: match[1],
-          actor: "User"
-        }];
-      var newGame_undoStats = {
-        currentUndoDepth: 0,
-        undos: []
-      };
-      var newGame = {
-        deck: newGame_deck,
-        history: newGame_history,
-        undoStats: newGame_undoStats
-      };
-      setAccount(function (a) {
-            return a.concat([newGame]);
-          });
-      setGameIndex(function (param) {
-            return account.contents.length - 1 | 0;
-          });
+      localStorage.setItem(id, JSON.stringify(state_encode(newAccount)));
     };
     React.useEffect((function () {
             var s = localStorage.getItem(id);
             if (s !== null) {
-              var d = account_decode(JSON.parse(s));
+              var d = state_decode(JSON.parse(s));
               if (d.TAG === "Ok") {
-                account.contents = d._0;
+                var d$1 = d._0;
+                setAccount(function (param) {
+                      return d$1;
+                    });
               }
               
-            } else {
-              setAccount(function (x) {
-                    return x;
-                  });
             }
-            if (account.contents.length === 0) {
-              createNewGame();
-            } else {
-              setGameIndex(function (param) {
-                    return account.contents.length - 1 | 0;
-                  });
-            }
+            setReload(function (x) {
+                  return x + 1 | 0;
+                });
           }), []);
-    if (gameIndex === -1) {
-      return null;
-    } else {
-      return JsxRuntime.jsx(GameBase$Create$Main, {
-                  getState: getState,
-                  setState: setState,
-                  createNewGame: createNewGame
-                }, gameIndex.toString());
-    }
+    return JsxRuntime.jsx(GameBase$Create$Main, {
+                getState: (function () {
+                    return account.contents;
+                  }),
+                setState: setAccount,
+                createNewGame: (function () {
+                    setAccount(function (param) {
+                          return createNewGame();
+                        });
+                    setReload(function (x) {
+                          return x + 1 | 0;
+                        });
+                  })
+              }, id + match[0].toString());
   };
   return {
           appendReactElement: appendReactElement,
@@ -863,6 +845,7 @@ function Create(GameRules) {
           Main: Main,
           account_encode: account_encode,
           account_decode: account_decode,
+          createNewGame: createNewGame,
           account: account,
           make: GameBase$Create
         };

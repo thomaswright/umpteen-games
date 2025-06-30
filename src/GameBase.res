@@ -676,68 +676,63 @@ module Create = (GameRules: GameRules) => {
   }
 
   @decco
-  type account = array<state>
+  type account = state //array<state>
 
-  let account = ref([])
+  let createNewGame = () => {
+    let (deck, game) = GameRules.initiateGame()
+    let newGame = {
+      deck,
+      history: [
+        {
+          actor: User,
+          game,
+        },
+      ],
+      undoStats: {
+        currentUndoDepth: 0,
+        undos: [],
+      },
+    }
+    newGame
+  }
+
+  let account = ref(createNewGame())
 
   @react.component
   let make = (~id: string) => {
-    let (gameIndex, setGameIndex) = React.useState(() => -1)
+    let (reload, setReload) = React.useState(() => 0)
     let setAccount = f => {
       let newAccount = f(account.contents)
       account := newAccount
-
       Dom.Storage2.localStorage->Dom.Storage2.setItem(
         id,
         newAccount->account_encode->Js.Json.stringify,
       )
     }
 
-    let getState = () => account.contents->Array.getUnsafe(gameIndex)
-
-    let setState = f => setAccount(a => a->Common.ArrayAux.update(gameIndex, f))
-
-    let createNewGame = () => {
-      let (deck, game) = GameRules.initiateGame()
-      let newGame = {
-        deck,
-        history: [
-          {
-            actor: User,
-            game,
-          },
-        ],
-        undoStats: {
-          currentUndoDepth: 0,
-          undos: [],
-        },
-      }
-
-      setAccount(a => Array.concat(a, [newGame]))
-      setGameIndex(_ => account.contents->Array.length - 1)
-    }
-
     React.useEffect0(() => {
       switch Dom.Storage2.localStorage->Dom.Storage2.getItem(id) {
       | Some(s) =>
         switch s->Js.Json.parseExn->account_decode {
-        | Ok(d) => account := d
+        | Ok(d) => setAccount(_ => d)
         | _ => ()
         }
-      | None => setAccount(x => x)
+      | None => ()
       }
-      if account.contents->Array.length == 0 {
-        createNewGame()
-      } else {
-        setGameIndex(_ => account.contents->Array.length - 1)
-      }
+
+      setReload(x => x + 1)
+
       None
     })
 
-    if gameIndex == -1 {
-      React.null
-    } else {
-      <Main key={gameIndex->Int.toString} getState setState createNewGame />
-    }
+    <Main
+      key={id ++ reload->Int.toString}
+      getState={() => account.contents}
+      setState={setAccount}
+      createNewGame={() => {
+        setAccount(_ => createNewGame())
+        setReload(x => x + 1)
+      }}
+    />
   }
 }
