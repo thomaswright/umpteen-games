@@ -5,7 +5,7 @@ import * as MrsMop from "./games/MrsMop.res.mjs";
 import * as Spider from "./games/Spider.res.mjs";
 import * as Penguin from "./games/Penguin.res.mjs";
 import * as Pyramid from "./games/Pyramid.res.mjs";
-import * as Alhambra from "./Alhambra.res.mjs";
+import * as Alhambra from "./games/Alhambra.res.mjs";
 import * as Diplomat from "./games/Diplomat.res.mjs";
 import * as EightOff from "./games/EightOff.res.mjs";
 import * as Fortress from "./games/Fortress.res.mjs";
@@ -25,7 +25,7 @@ import * as FreeCellOneDeck from "./games/FreeCellOneDeck.res.mjs";
 import * as FreeCellTwoDeck from "./games/FreeCellTwoDeck.res.mjs";
 import * as StreetsAndAlleys from "./games/StreetsAndAlleys.res.mjs";
 import * as BeleagueredCastle from "./games/BeleagueredCastle.res.mjs";
-import * as GrandfathersClock from "./GrandfathersClock.res.mjs";
+import * as GrandfathersClock from "./games/GrandfathersClock.res.mjs";
 import * as JsxRuntime from "react/jsx-runtime";
 import LogoSvgreact from "./assets/logo.svg?react";
 
