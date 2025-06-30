@@ -82,7 +82,7 @@ function GameBrowser$Attribution(props) {
                       href: "https://github.com/thomaswright/umpteen-games"
                     })
               ],
-              className: "text-xs pl-2 flex-1 text-right"
+              className: "text-xs flex-1 text-right"
             });
 }
 
@@ -238,13 +238,24 @@ function GameBrowser(props) {
                     children: [
                       JsxRuntime.jsxs("div", {
                             children: [
-                              JsxRuntime.jsx("div", {
-                                    children: JsxRuntime.jsx(make, {}),
-                                    className: "h-10 w-10 mr-1"
-                                  }),
-                              JsxRuntime.jsx("div", {
-                                    children: "Umpteen Games",
-                                    className: " font-black  text-4xl text-[var(--light)] tracking-tight"
+                              JsxRuntime.jsxs("div", {
+                                    children: [
+                                      JsxRuntime.jsxs("div", {
+                                            children: [
+                                              JsxRuntime.jsx("div", {
+                                                    children: JsxRuntime.jsx(make, {}),
+                                                    className: "h-10 w-10 mr-1"
+                                                  }),
+                                              JsxRuntime.jsx("div", {
+                                                    children: "Umpteen Games",
+                                                    className: " font-black  text-4xl text-[var(--light)] tracking-tight"
+                                                  })
+                                            ],
+                                            className: "flex flex-row"
+                                          }),
+                                      JsxRuntime.jsx(GameBrowser$Attribution, {})
+                                    ],
+                                    className: "flex flex-col pb-1"
                                   }),
                               JsxRuntime.jsx("div", {
                                     children: JsxRuntime.jsx("select", {
@@ -263,8 +274,7 @@ function GameBrowser(props) {
                                             })
                                         }),
                                     className: "flex flex-row gap-5 text-xl ml-10"
-                                  }),
-                              JsxRuntime.jsx(GameBrowser$Attribution, {})
+                                  })
                             ],
                             className: "flex flex-row items-center  py-1 px-5 bg-[var(--green3)] "
                           }),

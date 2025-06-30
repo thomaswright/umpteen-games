@@ -67,7 +67,7 @@ let allGames = [
 module Attribution = {
   @react.component
   let make = () => {
-    <div className="text-xs pl-2 flex-1 text-right">
+    <div className="text-xs flex-1 text-right">
       <span className={"font-normal text-gray-600"}> {"By "->React.string} </span>
       <a className="font-bold text-teal-700" href={"https://github.com/thomaswright/umpteen-games"}>
         {"Thomas Wright"->React.string}
@@ -88,11 +88,16 @@ let make = () => {
   <div className={" bg-[var(--green1)] h-dvh font-sans overflow-scroll"}>
     <div>
       <div className="flex flex-row items-center  py-1 px-5 bg-[var(--green3)] ">
-        <div className="h-10 w-10 mr-1">
-          <Logo />
-        </div>
-        <div className=" font-black  text-4xl text-[var(--light)] tracking-tight">
-          {"Umpteen Games"->React.string}
+        <div className="flex flex-col pb-1">
+          <div className="flex flex-row">
+            <div className="h-10 w-10 mr-1">
+              <Logo />
+            </div>
+            <div className=" font-black  text-4xl text-[var(--light)] tracking-tight">
+              {"Umpteen Games"->React.string}
+            </div>
+          </div>
+          <Attribution />
         </div>
         <div className="flex flex-row gap-5 text-xl ml-10">
           <select
@@ -110,7 +115,6 @@ let make = () => {
             ->React.array}
           </select>
         </div>
-        <Attribution />
       </div>
       {switch selectGameType {
       | Klondike => <Klondike.Game id />
