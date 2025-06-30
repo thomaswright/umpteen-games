@@ -64,6 +64,18 @@ let allGames = [
   GrandfathersClock,
 ]
 
+module Attribution = {
+  @react.component
+  let make = () => {
+    <div className="text-xs pl-2 flex-1 text-right">
+      <span className={"font-normal text-gray-600"}> {"By "->React.string} </span>
+      <a className="font-bold text-teal-700" href={"https://github.com/thomaswright/umpteen-games"}>
+        {"Thomas Wright"->React.string}
+      </a>
+    </div>
+  }
+}
+
 @react.component
 let make = () => {
   let (selectGameType: gameType, setSelectGameType, _) = Common.useLocalStorage(
@@ -98,6 +110,7 @@ let make = () => {
             ->React.array}
           </select>
         </div>
+        <Attribution />
       </div>
       {switch selectGameType {
       | Klondike => <Klondike.Game id />

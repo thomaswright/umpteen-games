@@ -69,6 +69,27 @@ var allGames = [
   "Grandfathers Clock"
 ];
 
+function GameBrowser$Attribution(props) {
+  return JsxRuntime.jsxs("div", {
+              children: [
+                JsxRuntime.jsx("span", {
+                      children: "By ",
+                      className: "font-normal text-gray-600"
+                    }),
+                JsxRuntime.jsx("a", {
+                      children: "Thomas Wright",
+                      className: "font-bold text-teal-700",
+                      href: "https://github.com/thomaswright/umpteen-games"
+                    })
+              ],
+              className: "text-xs pl-2 flex-1 text-right"
+            });
+}
+
+var Attribution = {
+  make: GameBrowser$Attribution
+};
+
 function GameBrowser(props) {
   var match = Common.useLocalStorage("gametype", "Klondike");
   var setSelectGameType = match[1];
@@ -242,7 +263,8 @@ function GameBrowser(props) {
                                             })
                                         }),
                                     className: "flex flex-row gap-5 text-xl ml-10"
-                                  })
+                                  }),
+                              JsxRuntime.jsx(GameBrowser$Attribution, {})
                             ],
                             className: "flex flex-row items-center  py-1 px-5 bg-[var(--green3)] "
                           }),
@@ -259,6 +281,7 @@ export {
   Logo ,
   gameString ,
   allGames ,
+  Attribution ,
   make$1 as make,
 }
 /* make Not a pure module */
